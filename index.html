@@ -1,4 +1,4 @@
-<!-- v 20260904-1310  index.html — invest 허브(문 하나). 첫 화면 7칸, 노션식(값 있을 때만)↔일반식, 칸 접기 기억, 자가 점검 -->
+<!-- v 20260904-1420  index.html — invest 허브(문 하나). 첫 화면 7칸, 노션식(값 있을 때만)↔일반식, 칸 접기 기억, 자가 점검 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -35,6 +35,7 @@
 <body>
 <header>
   <h1>투자 시스템 허브 <small id="ver"></small></h1>
+  <a class="btn" href="axes.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">축·전략</a>
   <button class="btn" id="modeBtn" type="button">노션식</button>
   <button class="btn" id="checkBtn" type="button">자가 점검</button>
 </header>
@@ -46,10 +47,10 @@
   </section>
 </main>
 <div id="tip"></div>
-<script src="js/status.js" data-app="hub" data-version="v 20260904-1310"></script>
+<script src="js/status.js" data-app="hub" data-version="v 20260904-1420"></script>
 <script>
 (function(){
-  var VER='v 20260904-1310'; document.getElementById('ver').textContent=VER;
+  var VER='v 20260904-1420'; document.getElementById('ver').textContent=VER;
   var CELLS=[['market','c1'],['kr-us','c2'],['sector','c3'],['signals','c4'],['failed','c5'],['review','c6'],['alerts','c7']];
   var LS='hub_ui'; var ui={}; try{ui=JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){}
   function save(){ try{localStorage.setItem(LS,JSON.stringify(ui))}catch(e){} }
@@ -68,6 +69,15 @@
       grid.appendChild(el);
     });
   }
+  // 시장 상태 칸: axes.json 의 레짐 요약. 값이 있으면 요약, 없으면 '미확인'과 축 보기 링크만
+  function fillMarket(){
+    fetch('data/axes.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+      var rg=d.regime||{}, el=grid.querySelector('[data-id=market]'); if(!el) return;
+      var known=[rg.growth,rg.inflation,rg.liquidity].some(function(v){return v&&v!=='미확인'});
+      el.classList.remove('empty');
+      el.querySelector('.body').innerHTML=(known?'성장 '+rg.growth+' · 물가 '+rg.inflation+' · 유동성 '+rg.liquidity+' · '+(rg.quadrant||'')+'<br>':'현재값 미확인 · ')+'<a href="axes.html">축 8개 · 전략 카드 5개 보기 →</a>';
+    }).catch(function(){});
+  }
   function showTip(t){ var d=document.getElementById('tip'); d.textContent=t; d.style.display='block'; clearTimeout(d._t); d._t=setTimeout(function(){d.style.display='none'},4000); }
 
   // 노션식(값 있는 칸만) ↔ 일반식(전부)
@@ -76,8 +86,8 @@
   modeBtn.onclick=function(){ ui.notion=!ui.notion; save(); applyMode(); };
 
   // features.json 한 곳에서 제목·툴팁을 읽는다(원칙 17)
-  fetch('data/features.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){ feats=d.features||{}; render(); applyMode(); })
-    .catch(function(e){ console.error('features.json 읽기 실패: '+e.message); render(); applyMode(); });
+  fetch('data/features.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){ feats=d.features||{}; render(); applyMode(); fillMarket(); })
+    .catch(function(e){ console.error('features.json 읽기 실패: '+e.message); render(); applyMode(); fillMarket(); });
 
   // 자가 점검(원칙 21): 파일 4개 읽힘 + 경고 띠 + 🐞 [복사] 가 실제로 뜨는지
   document.getElementById('checkBtn').onclick=function(){
