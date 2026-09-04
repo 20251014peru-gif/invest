@@ -1,0 +1,241 @@
+{
+  "schema": "indicators/1",
+  "version": "v 20260904-1700",
+  "_설명": "CYGNUS 매크로 지표 설정(원칙 8: 출처·규칙은 설정 파일). source: fred(공식, 키 불필요 CSV) | yahoo(보조, 근거 아님) | manual(수동 입력). 임계값은 market-check.html 의 달님 규칙(확인). axis 는 axes.json id.",
+  "history_days": 400,
+  "items": [
+    {
+      "id": "sp500",
+      "name": "S&P500",
+      "source": "yahoo",
+      "symbol": "^GSPC",
+      "unit": "pt",
+      "axis": "earnings",
+      "official": false,
+      "rule": "전일 대비 +1% 이상=강 / −1% 이하=약",
+      "thresholds": {
+        "strong_pct": 1,
+        "weak_pct": -1
+      },
+      "note": ""
+    },
+    {
+      "id": "nasdaq",
+      "name": "나스닥",
+      "source": "yahoo",
+      "symbol": "^IXIC",
+      "unit": "pt",
+      "axis": "earnings",
+      "official": false,
+      "rule": "+1.5%=강 / AI·기술주 방향",
+      "thresholds": {
+        "strong_pct": 1.5,
+        "weak_pct": -1.5
+      },
+      "note": ""
+    },
+    {
+      "id": "sox",
+      "name": "SOX 반도체",
+      "source": "yahoo",
+      "symbol": "^SOX",
+      "unit": "pt",
+      "axis": "earnings",
+      "official": false,
+      "rule": "+2%=강 / 삼성·하이닉스 직결",
+      "thresholds": {
+        "strong_pct": 2,
+        "weak_pct": -2
+      },
+      "note": ""
+    },
+    {
+      "id": "vix",
+      "name": "VIX",
+      "source": "fred",
+      "symbol": "VIXCLS",
+      "unit": "pt",
+      "axis": "credit_vol",
+      "official": true,
+      "rule": "17 이하=안정 / 20~30=주의 / 30 이상=위험",
+      "thresholds": {
+        "good_max": 17,
+        "warn_min": 20,
+        "bad_min": 30
+      },
+      "note": ""
+    },
+    {
+      "id": "usdkrw",
+      "name": "원달러 환율",
+      "source": "fred",
+      "symbol": "DEXKOUS",
+      "unit": "원",
+      "axis": "fx_liquidity",
+      "official": true,
+      "rule": "1430 이하=우호 / 1480 이상=부담",
+      "thresholds": {
+        "good_max": 1430,
+        "bad_min": 1480
+      },
+      "note": "FRED 는 1~2일 지연. 당일값은 영웅문 붙여넣기"
+    },
+    {
+      "id": "dxy",
+      "name": "달러지수 DXY",
+      "source": "yahoo",
+      "symbol": "DX-Y.NYB",
+      "unit": "pt",
+      "axis": "fx_liquidity",
+      "official": false,
+      "rule": "98 이하=약달러 우호 / 104 이상=부담",
+      "thresholds": {
+        "good_max": 98,
+        "bad_min": 104
+      },
+      "note": ""
+    },
+    {
+      "id": "us10y",
+      "name": "미 10년물",
+      "source": "fred",
+      "symbol": "DGS10",
+      "unit": "%",
+      "axis": "bond_curve",
+      "official": true,
+      "rule": "4.2% 이하=우호 / 4.5% 이상=부담",
+      "thresholds": {
+        "good_max": 4.2,
+        "bad_min": 4.5
+      },
+      "note": ""
+    },
+    {
+      "id": "us2y",
+      "name": "미 2년물",
+      "source": "fred",
+      "symbol": "DGS2",
+      "unit": "%",
+      "axis": "policy_rate",
+      "official": true,
+      "rule": "",
+      "thresholds": {},
+      "note": ""
+    },
+    {
+      "id": "hsi",
+      "name": "항셍지수",
+      "source": "yahoo",
+      "symbol": "^HSI",
+      "unit": "pt",
+      "axis": "policy_geo",
+      "official": false,
+      "rule": "+1%=강 / 중국 리스크",
+      "thresholds": {
+        "strong_pct": 1,
+        "weak_pct": -1
+      },
+      "note": ""
+    },
+    {
+      "id": "wti",
+      "name": "유가 WTI",
+      "source": "fred",
+      "symbol": "DCOILWTICO",
+      "unit": "$",
+      "axis": "commodity",
+      "official": true,
+      "rule": "4주 15% 이상 변동 시 축 7 변화 조건",
+      "thresholds": {},
+      "note": ""
+    },
+    {
+      "id": "copper",
+      "name": "구리",
+      "source": "yahoo",
+      "symbol": "HG=F",
+      "unit": "$/lb",
+      "axis": "commodity",
+      "official": false,
+      "rule": "",
+      "thresholds": {},
+      "note": ""
+    },
+    {
+      "id": "gold",
+      "name": "금",
+      "source": "yahoo",
+      "symbol": "GC=F",
+      "unit": "$/oz",
+      "axis": "credit_vol",
+      "official": false,
+      "rule": "",
+      "thresholds": {},
+      "note": ""
+    },
+    {
+      "id": "bdry",
+      "name": "해운 BDRY",
+      "source": "yahoo",
+      "symbol": "BDRY",
+      "unit": "$",
+      "axis": "inflation_growth",
+      "official": false,
+      "rule": "",
+      "thresholds": {},
+      "note": ""
+    },
+    {
+      "id": "m2",
+      "name": "미 M2",
+      "source": "fred",
+      "symbol": "M2SL",
+      "unit": "십억$",
+      "axis": "fx_liquidity",
+      "official": true,
+      "rule": "",
+      "thresholds": {},
+      "note": "월간"
+    },
+    {
+      "id": "fed_bs",
+      "name": "연준 자산",
+      "source": "fred",
+      "symbol": "WALCL",
+      "unit": "백만$",
+      "axis": "fx_liquidity",
+      "official": true,
+      "rule": "",
+      "thresholds": {},
+      "note": "주간"
+    },
+    {
+      "id": "ism_pmi",
+      "name": "ISM 제조업 PMI",
+      "source": "manual",
+      "symbol": "",
+      "unit": "pt",
+      "axis": "inflation_growth",
+      "official": true,
+      "rule": "50 위=확장 / 아래=수축",
+      "thresholds": {
+        "good_min": 50
+      },
+      "note": "FRED 에 없음(NAPM 중단). ismworld.org 발표 후 수동 입력"
+    },
+    {
+      "id": "china_pmi",
+      "name": "중국 PMI",
+      "source": "manual",
+      "symbol": "",
+      "unit": "pt",
+      "axis": "policy_geo",
+      "official": true,
+      "rule": "50 기준",
+      "thresholds": {
+        "good_min": 50
+      },
+      "note": "국가통계국 발표 후 수동 입력"
+    }
+  ]
+}

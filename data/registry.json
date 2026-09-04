@@ -133,11 +133,11 @@
       "name": "CYGNUS v2(Flask 7070)",
       "file": "(로컬) CYGNUS/",
       "axis": "판단",
-      "status": "absorbing",
+      "status": "stopped",
       "since": "",
       "reads": [],
       "writes": [],
-      "note": "정적판(invest 안)으로 새로 짓고 나서 중단"
+      "note": "정적판(cygnus.html + scripts/macro.py)으로 대체(2026-09-04). 키움 브리지 의존 없음. 8테마 33종목·6조건 진입필터는 원본 폴더가 없어 옮기지 못함 → 전략 카드(sector_theme·supply)로 대체"
     },
     {
       "id": "industry-map",
@@ -190,6 +190,38 @@
         "facts/source_trust.json"
       ],
       "writes": []
+    },
+    {
+      "id": "macro",
+      "name": "매크로 수집",
+      "file": "scripts/macro.py + .github/workflows/macro.yml",
+      "axis": "판단",
+      "status": "active",
+      "since": "2026-09-04",
+      "reads": [
+        "data/indicators.json",
+        "raw/manual_macro.json"
+      ],
+      "writes": [
+        "facts/macro.json",
+        "facts/macro_history.json",
+        "data/status.json"
+      ]
+    },
+    {
+      "id": "cygnus",
+      "name": "CYGNUS 시장 상태(정적)",
+      "file": "cygnus.html",
+      "axis": "판단",
+      "status": "active",
+      "since": "2026-09-04",
+      "reads": [
+        "facts/macro.json",
+        "data/axes.json"
+      ],
+      "writes": [
+        "raw/supply.json(복사·붙여넣기)"
+      ]
     }
   ]
 }

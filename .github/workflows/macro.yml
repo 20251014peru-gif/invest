@@ -1,0 +1,45 @@
+# v 20260904-1700  macro.yml — CYGNUS 매크로 수집(scripts/macro.py) 하루 2회. 정각 회피 + concurrency + 실패 시 status.json fail + ntfy
+name: Macro Collector
+on:
+  schedule:
+    - cron: '17 22 * * 1-5'    # 07:17 KST 평일 — 미국 마감 반영
+    - cron: '41 7 * * 1-5'     # 16:41 KST 평일 — 국내 마감 후
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: macro
+  cancel-in-progress: false
+jobs:
+  macro:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 패키지 설치
+        run: pip install yfinance==0.2.54
+      - name: 수집 실행
+        run: python scripts/macro.py
+      - name: 변경분 커밋
+        if: always()
+        run: |
+          git config user.name "macro-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add facts/macro.json facts/macro_history.json data/status.json 2>/dev/null || true
+          if git diff --cached --quiet; then echo "::notice::변경 없음"; exit 0; fi
+          git commit -m "auto: macro $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3; do
+            git pull --rebase --autostash || true
+            git push && exit 0
+            sleep $((i*5))
+          done
+          echo "::error::push 3회 실패"; exit 1
+      - name: 실패하면 폰으로 알림
+        if: failure()
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          [ -z "$NTFY_TOPIC" ] && { echo "NTFY_TOPIC 없음 — 알림 생략"; exit 0; }
+          curl -s -H "Title: [실패] 매크로 수집" -H "Priority: 4" -d "invest macro.yml 실패 — 허브 상단 띠와 Actions 로그 확인" "https://ntfy.sh/$NTFY_TOPIC" || true

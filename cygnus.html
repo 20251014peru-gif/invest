@@ -1,0 +1,115 @@
+<!-- v 20260904-1700  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CYGNUS 시장 상태</title>
+<style>
+  :root{--bg:#f6f7fb;--card:#fff;--line:#e3e6ee;--ink:#1f2430;--sub:#6b7280;--p1:#dbeafe;--p2:#dcfce7;--p3:#fef3c7;--p5:#fee2e2;--p6:#ede9fe}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+  header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;flex:1}header small{color:var(--sub);font-size:12px}
+  .btn{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);font:inherit;font-size:14px;cursor:pointer;text-decoration:none;color:inherit;display:inline-flex;align-items:center}
+  .btn.pri{background:var(--p1);border-color:#93c5fd}
+  main{padding:14px 16px 80px;max-width:1440px;margin:0 auto}
+  h2{font-size:16px;margin:18px 0 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .tag{font-size:12px;padding:1px 8px;border-radius:8px;border:1px solid var(--line);color:var(--sub)}
+  .grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+  .k{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;min-height:92px}
+  .k .n{font-size:13px;color:var(--sub);display:flex;justify-content:space-between;gap:6px}
+  .k .v{font-size:22px;font-weight:700;margin:2px 0;font-variant-numeric:tabular-nums}
+  .k .v small{font-size:12px;font-weight:400;color:var(--sub);margin-left:4px}
+  .k .c{font-size:13px}.up{color:#15803d}.down{color:#b91c1c}
+  .k .j{display:inline-block;font-size:12px;padding:1px 8px;border-radius:8px;margin-top:4px}
+  .j.good{background:var(--p2)}.j.warn{background:var(--p3)}.j.bad{background:var(--p5)}.j.mid{background:#eef}
+  .k.err{border-color:#f5b7b1;background:#fff7f6}.k.err .v{font-size:14px;color:#b91c1c}
+  .k .src{font-size:11px;color:var(--sub);margin-top:2px}
+  .regime{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  textarea{width:100%;min-height:120px;font:13px/1.5 Consolas,monospace;border:1px solid var(--line);border-radius:10px;padding:8px}
+  table{border-collapse:collapse;width:100%;font-size:14px;margin-top:8px}
+  td,th{padding:6px 8px;border-top:1px solid var(--line);text-align:left}th{background:var(--p1);border:0}
+  pre{background:#f7f7f9;border-radius:10px;padding:10px;font:12.5px/1.5 Consolas,monospace;white-space:pre-wrap;word-break:break-all}
+  .muted{color:var(--sub);font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🦢 CYGNUS 시장 상태 <small id="ver"></small></h1>
+  <a class="btn" href="axes.html">축·전략</a><a class="btn" href="predict.html">예측·채점</a><a class="btn" href="index.html">허브</a>
+</header>
+<main>
+  <h2>레짐 요약 <span class="tag">성장×물가 4분면 + 유동성 · 공식 근거 있을 때만</span></h2>
+  <div class="regime" id="regime"></div>
+
+  <h2>매크로 지표 <span class="tag" id="macroTag"></span><span class="tag">FRED=공식 · Yahoo=보조(근거 아님)</span></h2>
+  <div class="grid" id="macro"></div>
+  <p class="muted" id="macroEmpty" hidden>아직 수집된 값이 없습니다 — GitHub Actions 「Macro Collector」를 한 번 실행하면 채워집니다.</p>
+
+  <h2>영웅문 붙여넣기 — 수급 <span class="tag">투자자별 매매동향 화면을 복사해서 붙여넣기</span></h2>
+  <div class="card">
+    <textarea id="paste" placeholder="영웅문 [0257] 투자자별 매매동향 등에서 복사한 텍스트를 붙여넣으세요. 외국인·기관·개인 순매수와 코스피·코스닥 등락을 찾아냅니다."></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="parseBtn" type="button">읽어내기</button><button class="btn" id="copyBtn" type="button" hidden>JSON 복사</button><span class="muted" style="align-self:center">복사한 JSON 을 raw/supply.json 의 items 에 붙여넣으면 전략 카드 '수급'의 재료가 됩니다</span></div>
+    <div id="parsed"></div>
+  </div>
+</main>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-1700"></script>
+<script>
+(function(){
+  document.getElementById('ver').textContent='v 20260904-1700';
+  var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
+  var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
+  var JC={'우호':'good','안정':'good','강':'good','확장':'good','정상':'good','주의':'warn','중립':'mid','부담':'bad','위험':'bad','약':'bad','수축':'bad','역전':'bad'};
+
+  get('data/axes.json').then(function(d){
+    var rg=d.regime||{}, el=document.getElementById('regime');
+    [['성장',rg.growth],['물가',rg.inflation],['유동성',rg.liquidity],['4분면',rg.quadrant],['근거',rg.basis||'없음']].forEach(function(p){
+      el.innerHTML+='<div class="k" style="min-height:0"><div class="n">'+p[0]+'</div><div class="v" style="font-size:16px">'+esc(p[1]||'미확인')+'</div></div>';
+    });
+  }).catch(function(e){console.error(e.message)});
+
+  get('facts/macro.json').then(function(d){
+    var el=document.getElementById('macro'), items=d.items||[];
+    document.getElementById('macroTag').textContent='수집 '+window.Status.kstStr(d.collected_at)+' · '+d.ok+'/'+d.total;
+    document.getElementById('macroEmpty').hidden=items.length>0;
+    items.forEach(function(r){
+      if(r.value==null){ el.innerHTML+='<div class="k err"><div class="n"><span>'+esc(r.name)+'</span></div><div class="v">'+esc(r.error||'값 없음')+'</div><div class="src">'+esc(r.source)+' '+esc(r.symbol)+'</div></div>'; return; }
+      var ch=r.change_pct==null?'':'<span class="'+(r.change_pct>0?'up':r.change_pct<0?'down':'')+'">'+(r.change_pct>0?'▲':r.change_pct<0?'▼':'')+' '+Math.abs(r.change_pct).toFixed(2)+'%</span>';
+      var j=r.judge?'<span class="j '+(JC[r.judge]||'mid')+'" title="'+esc(r.rule)+'">'+esc(r.judge)+'</span>':'';
+      el.innerHTML+='<div class="k"><div class="n"><span>'+esc(r.name)+'</span><span>'+(r.official?'공식':'보조')+'</span></div><div class="v">'+fmt(r.value)+'<small>'+esc(r.unit)+'</small></div><div class="c">'+ch+' '+j+'</div><div class="src">기준 '+esc(r.as_of)+' · '+esc(r.source)+'</div></div>';
+    });
+  }).catch(function(){ document.getElementById('macroEmpty').hidden=false; });
+
+  // 영웅문 붙여넣기 v1 — 줄 단위로 '외국인/기관/개인' 뒤 첫 숫자, '코스피/코스닥' 뒤 첫 숫자와 등락
+  var last=null;
+  function num(s){ var m=String(s).replace(/,/g,'').match(/[-+]?\d+(?:\.\d+)?/); return m?parseFloat(m[0]):null; }
+  function parse(t){
+    var out={schema:'supply/1',as_of:window.Status.kstNow().toISOString().slice(0,10),collected_at:window.Status.kstStr(new Date()),source:'영웅문 붙여넣기',kospi:null,kosdaq:null,foreign:null,inst:null,indiv:null,raw_lines:0};
+    t.split(/\r?\n/).forEach(function(l){ out.raw_lines++;
+      var s=l.trim(); if(!s)return;
+      if(/코스피|KOSPI/i.test(s)&&out.kospi==null) out.kospi=num(s.replace(/코스피|KOSPI/i,''));
+      if(/코스닥|KOSDAQ/i.test(s)&&out.kosdaq==null) out.kosdaq=num(s.replace(/코스닥|KOSDAQ/i,''));
+      if(/외국인|외인/.test(s)&&out.foreign==null) out.foreign=num(s.replace(/외국인|외인/,''));
+      if(/기관/.test(s)&&out.inst==null) out.inst=num(s.replace(/기관(합계|계)?/,''));
+      if(/개인/.test(s)&&out.indiv==null) out.indiv=num(s.replace(/개인/,''));
+    });
+    return out;
+  }
+  document.getElementById('parseBtn').onclick=function(){
+    var t=document.getElementById('paste').value; if(!t.trim())return;
+    last=parse(t); var p=document.getElementById('parsed');
+    var rows=[['코스피',last.kospi],['코스닥',last.kosdaq],['외국인 순매수',last.foreign],['기관 순매수',last.inst],['개인 순매수',last.indiv]];
+    var miss=rows.filter(function(r){return r[1]==null}).map(function(r){return r[0]});
+    p.innerHTML='<table><tr><th>항목</th><th>읽은 값</th></tr>'+rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+(r[1]==null?'<span class="down">못 읽음</span>':fmt(r[1]))+'</td></tr>'}).join('')+'</table>'+
+      (miss.length?'<p class="muted">못 읽은 항목: '+miss.join(', ')+' — 붙여넣은 글에 그 단어가 있는 줄이 없거나 숫자가 뒤에 없습니다. 원문 형식을 Claude 에게 붙여 주면 읽기 규칙을 맞춥니다.</p>':'')+
+      '<pre>'+esc(JSON.stringify(last))+'</pre>';
+    document.getElementById('copyBtn').hidden=false;
+  };
+  document.getElementById('copyBtn').onclick=function(){ var b=this; if(!last)return; (navigator.clipboard?navigator.clipboard.writeText(JSON.stringify(last)+','):Promise.reject()).then(function(){b.textContent='복사됨 ✓';setTimeout(function(){b.textContent='JSON 복사'},1500)},function(){}); };
+})();
+</script>
+</body>
+</html>

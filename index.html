@@ -1,4 +1,4 @@
-<!-- v 20260904-1530  index.html — invest 허브(문 하나). 첫 화면 7칸, 노션식(값 있을 때만)↔일반식, 칸 접기 기억, 자가 점검 -->
+<!-- v 20260904-1700  index.html — invest 허브(문 하나). 첫 화면 7칸, 노션식(값 있을 때만)↔일반식, 칸 접기 기억, 자가 점검 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -36,6 +36,7 @@
 <header>
   <h1>투자 시스템 허브 <small id="ver"></small></h1>
   <a class="btn" href="axes.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">축·전략</a>
+  <a class="btn" href="cygnus.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">시장</a>
   <a class="btn" href="predict.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">예측·채점</a>
   <button class="btn" id="modeBtn" type="button">노션식</button>
   <button class="btn" id="checkBtn" type="button">자가 점검</button>
@@ -48,10 +49,10 @@
   </section>
 </main>
 <div id="tip"></div>
-<script src="js/status.js" data-app="hub" data-version="v 20260904-1530"></script>
+<script src="js/status.js" data-app="hub" data-version="v 20260904-1700"></script>
 <script>
 (function(){
-  var VER='v 20260904-1530'; document.getElementById('ver').textContent=VER;
+  var VER='v 20260904-1700'; document.getElementById('ver').textContent=VER;
   var CELLS=[['market','c1'],['kr-us','c2'],['sector','c3'],['signals','c4'],['failed','c5'],['review','c6'],['alerts','c7']];
   var LS='hub_ui'; var ui={}; try{ui=JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){}
   function save(){ try{localStorage.setItem(LS,JSON.stringify(ui))}catch(e){} }
@@ -79,6 +80,17 @@
       el.querySelector('.body').innerHTML=(known?'성장 '+rg.growth+' · 물가 '+rg.inflation+' · 유동성 '+rg.liquidity+' · '+(rg.quadrant||'')+'<br>':'현재값 미확인 · ')+'<a href="axes.html">축 8개 · 전략 카드 5개 보기 →</a>';
     }).catch(function(){});
   }
+  // 국내/미국 칸: facts/macro.json 요약(값 있을 때만)
+  function fillMarkets(){
+    fetch('facts/macro.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+      var el=grid.querySelector('[data-id=kr-us]'); if(!el) return;
+      var want=['sp500','nasdaq','sox','vix','usdkrw','us10y'], by={}; (d.items||[]).forEach(function(r){by[r.id]=r});
+      var parts=want.map(function(id){var r=by[id]; if(!r||r.value==null) return null; return r.name+' '+(r.change_pct!=null?(r.change_pct>0?'▲':r.change_pct<0?'▼':'')+Math.abs(r.change_pct).toFixed(1)+'%':r.value)+(r.judge?' <b>'+r.judge+'</b>':'')}).filter(Boolean);
+      if(!parts.length) return;
+      el.classList.remove('empty');
+      el.querySelector('.body').innerHTML=parts.join(' · ')+'<br><a href="cygnus.html">전체 지표 →</a> <small>수집 '+window.Status.kstStr(d.collected_at)+'</small>';
+    }).catch(function(){});
+  }
   function showTip(t){ var d=document.getElementById('tip'); d.textContent=t; d.style.display='block'; clearTimeout(d._t); d._t=setTimeout(function(){d.style.display='none'},4000); }
 
   // 노션식(값 있는 칸만) ↔ 일반식(전부)
@@ -87,8 +99,8 @@
   modeBtn.onclick=function(){ ui.notion=!ui.notion; save(); applyMode(); };
 
   // features.json 한 곳에서 제목·툴팁을 읽는다(원칙 17)
-  fetch('data/features.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){ feats=d.features||{}; render(); applyMode(); fillMarket(); })
-    .catch(function(e){ console.error('features.json 읽기 실패: '+e.message); render(); applyMode(); fillMarket(); });
+  fetch('data/features.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){ feats=d.features||{}; render(); applyMode(); fillMarket(); fillMarkets(); })
+    .catch(function(e){ console.error('features.json 읽기 실패: '+e.message); render(); applyMode(); fillMarket(); fillMarkets(); });
 
   // 자가 점검(원칙 21): 파일 4개 읽힘 + 경고 띠 + 🐞 [복사] 가 실제로 뜨는지
   document.getElementById('checkBtn').onclick=function(){
