@@ -1,9 +1,8 @@
-# v 20260904-1830  macro.yml — CYGNUS 매크로 수집(scripts/macro.py) 하루 2회. 정각 회피 + concurrency + 실패 시 status.json fail + ntfy
+# v 20260904-3610  macro.yml — CYGNUS 매크로 수집(scripts/macro.py) 하루 2회. 정각 회피 + concurrency + 실패 시 status.json fail + ntfy
 name: Macro Collector
 on:
   schedule:
-    - cron: '17 22 * * 1-5'    # 07:17 KST 평일 — 미국 마감 반영
-    - cron: '41 7 * * 1-5'     # 16:41 KST 평일 — 국내 마감 후
+    - cron: '5 * * * *'        # 매시 5분 — 컴 없이 자동. GitHub cron 누락 대비 매시간 실행
   workflow_dispatch: {}
 permissions:
   contents: write
