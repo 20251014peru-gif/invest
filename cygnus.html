@@ -1,4 +1,4 @@
-<!-- v 20260904-3010  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260904-3110  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -42,7 +42,16 @@
   <a class="btn" href="axes.html">축·전략</a><a class="btn" href="predict.html">예측·채점</a><a class="btn" href="index.html">허브</a>
 </header>
 <main>
-  <h2>레짐 요약 <span class="tag">성장×물가 4분면 + 유동성 · 공식 근거 있을 때만</span></h2>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px;position:sticky;top:0;background:#fbfbf9;padding:8px 4px;z-index:5;border-bottom:1px solid #e5e7eb">
+    <span class="muted" style="align-self:center;font-size:12px">바로가기</span>
+    <a class="btn" href="#regimeH" style="padding:4px 10px;font-size:13px">레짐</a>
+    <a class="btn" href="#sectors" style="padding:4px 10px;font-size:13px">산업</a>
+    <a class="btn" href="#supply" style="padding:4px 10px;font-size:13px">수급</a>
+    <a class="btn" href="#eps" style="padding:4px 10px;font-size:13px">선행EPS</a>
+    <a class="btn" href="#pos" style="padding:4px 10px;font-size:13px">종목위치</a>
+    <a class="btn" href="#ind" style="padding:4px 10px;font-size:13px">지표</a>
+  </div>
+  <h2 id="regimeH">레짐 요약 <span class="tag">성장×물가 4분면 + 유동성 · 공식 근거 있을 때만</span></h2>
   <div class="regime" id="regime"></div>
 
   <h2 id="sectors">산업 사슬 <span class="tag">공정 순서 · 회사 다섯 칸 · 판단은 달님 칸</span><span class="tag">🔗 축 연결 = 시장→산업→종목</span></h2>
@@ -52,7 +61,7 @@
   <div id="sectorChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
   <div id="sectorBox"></div>
 
-  <h2>영웅문 붙여넣기 — 수급 <span class="tag">투자자별 매매동향 화면을 복사해서 붙여넣기</span></h2>
+  <h2 id="supply">영웅문 붙여넣기 — 수급 <span class="tag">투자자별 매매동향 화면을 복사해서 붙여넣기</span></h2>
   <div class="card">
     <textarea id="paste" placeholder="영웅문 [0257] 투자자별 매매동향 등에서 복사한 텍스트를 붙여넣으세요. 외국인·기관·개인 순매수와 코스피·코스닥 등락을 찾아냅니다."></textarea>
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="parseBtn" type="button">읽어내기</button><button class="btn" id="copyBtn" type="button" hidden>JSON 복사</button><span class="muted" style="align-self:center">복사한 JSON 을 raw/supply.json 의 items 에 붙여넣으면 전략 카드 '수급'의 재료가 됩니다</span></div>
@@ -97,10 +106,10 @@
   <div class="grid" id="indGrid"></div>
   <p class="muted" id="macroEmpty" hidden>아직 수집된 값이 없습니다 — GitHub Actions 「Macro Collector」를 한 번 실행하면 채워집니다.</p>
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-3010"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-3110"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-3010';
+  document.getElementById('ver').textContent='v 20260904-3110';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -138,14 +147,15 @@
     el.innerHTML+='<div class="k" style="border-color:#93c5fd"><div class="n"><span>'+esc(name)+'</span><span style="color:#15803d">실시간</span></div><div class="v">'+(Math.abs(val)>=1000?val.toLocaleString('ko-KR',{maximumFractionDigits:0}):val.toLocaleString('ko-KR',{maximumFractionDigits:2}))+'<small>'+esc(unit)+'</small></div><div class="c">'+c+'</div><div class="src">'+esc(when)+'</div></div>';
   }
   function sma(a,n){ if(!a||a.length<n) return null; var s=0,i; for(i=a.length-n;i<a.length;i++) s+=a[i]; return s/n; }
-  function yahooHist(sym){ return pxJson('https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?range=6mo&interval=1d').then(function(d){ var r=d.chart.result[0]; var cl=(r.indicators.quote[0].close||[]).filter(function(v){return v!=null;}); return {closes:cl, price:cl.length?cl[cl.length-1]:null}; }); }
+  function yahooHist(sym){ return pxJson('https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?range=6mo&interval=1d').then(function(d){ var r=d.chart.result[0], m=r.meta||{}; var cl=(r.indicators.quote[0].close||[]).filter(function(v){return v!=null;}); var pv=m.chartPreviousClose||m.previousClose; var px=(m.regularMarketPrice!=null?m.regularMarketPrice:(cl.length?cl[cl.length-1]:null)); return {closes:cl, price:px, chg:(pv&&px!=null)?(px-pv)/pv*100:null}; }); }
+  function alignEmoji(price,closes){ var m20=sma(closes,20), m50=sma(closes,50); if(m20==null||price==null) return ''; return (m50!=null)?((price>m20&&m20>m50)?'🟢':(price<m20&&m20<m50)?'🔴':'🟡'):'🟡'; }
   function srcLink(it){ if(it.yahoo) return {u:'https://finance.yahoo.com/quote/'+encodeURIComponent(it.yahoo),t:'Yahoo Finance ↗'}; var fid=it.fred||it.fred_fallback||it.symbol; if(it.source==='fred'&&fid) return {u:'https://fred.stlouisfed.org/series/'+encodeURIComponent(fid),t:'FRED ↗'}; return null; }
   var IND=[], MV={};
   function indCardHTML(it,i){
     var m=MV[it.id]||{}; var val=m.value;
     var vstr=(val==null)?'<span style="font-size:14px;color:var(--sub);font-weight:400">'+(it.yahoo?'실시간 대기…':'값 없음')+'</span>':fmt(val)+'<small>'+esc(it.unit||m.unit||'')+'</small>';
     var badge=it.yahoo?'<span style="color:#15803d">실시간</span>':'<span>'+(it.source==='fred'?'FRED':it.source==='manual'?'수동':'')+'</span>';
-    return '<div class="k ind-card" data-i="'+i+'" style="cursor:pointer;border-color:'+(it.yahoo?'#93c5fd':'#e5e7eb')+'" title="누르면 20·50일선 위치·링크"><div class="n"><span>'+esc(it.name)+'</span>'+badge+'</div><div class="v" id="indv'+i+'">'+vstr+'</div><div class="c" id="indc'+i+'"></div><div class="src">누르기 ▸ 20·50일선</div></div>';
+    return '<div class="k ind-card" data-i="'+i+'" style="cursor:pointer;border-color:'+(it.yahoo?'#93c5fd':'#e5e7eb')+'" title="누르면 20·50일선 위치·링크"><div class="n"><span>'+esc(it.name)+' <b id="inddot'+i+'" title="🟢 정배열(상승추세) · 🔴 역배열(하락) · 🟡 혼조"></b></span>'+badge+'</div><div class="v" id="indv'+i+'">'+vstr+'</div><div class="c" id="indc'+i+'"></div><div class="src">누르기 ▸ 20·50일선</div></div>';
   }
   function loadInd(){
     Promise.all([ get('data/indicators.json').catch(function(){return {items:[]};}), get('facts/macro.json').catch(function(){return {items:[]};}) ]).then(function(res){
@@ -154,10 +164,11 @@
       var mt=document.getElementById('macroTag'); if(mt&&res[1].collected_at) mt.textContent='매크로 수집 '+window.Status.kstStr(res[1].collected_at);
       document.getElementById('macroEmpty').hidden=IND.length>0;
       g.innerHTML=IND.map(indCardHTML).join('');
-      IND.forEach(function(it,i){ if(!it.yahoo) return; yahoo(it.yahoo).then(function(r){
-        var v=document.getElementById('indv'+i), c=document.getElementById('indc'+i);
-        if(v&&r.v!=null) v.innerHTML=fmt(r.v)+'<small>'+esc(it.unit||'')+'</small>';
-        if(c&&r.chg!=null) c.innerHTML='<span class="'+(r.chg>0?'up':r.chg<0?'down':'')+'">'+(r.chg>0?'▲':r.chg<0?'▼':'')+' '+Math.abs(r.chg).toFixed(2)+'%</span>';
+      IND.forEach(function(it,i){ if(!it.yahoo) return; yahooHist(it.yahoo).then(function(h){
+        var v=document.getElementById('indv'+i), c=document.getElementById('indc'+i), dt=document.getElementById('inddot'+i);
+        if(v&&h.price!=null) v.innerHTML=fmt(h.price)+'<small>'+esc(it.unit||'')+'</small>';
+        if(c&&h.chg!=null) c.innerHTML='<span class="'+(h.chg>0?'up':h.chg<0?'down':'')+'">'+(h.chg>0?'▲':h.chg<0?'▼':'')+' '+Math.abs(h.chg).toFixed(2)+'%</span>';
+        if(dt) dt.textContent=alignEmoji(h.price,h.closes);
       }).catch(function(){}); });
     });
   }
