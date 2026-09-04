@@ -1,0 +1,98 @@
+<!-- v 20260904-1310  index.html — invest 허브(문 하나). 첫 화면 7칸, 노션식(값 있을 때만)↔일반식, 칸 접기 기억, 자가 점검 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>투자 시스템 허브</title>
+<style>
+  :root{--bg:#f6f7fb;--card:#fff;--line:#e3e6ee;--ink:#1f2430;--sub:#6b7280;--p1:#dbeafe;--p2:#dcfce7;--p3:#fef3c7;--p4:#fce7f3;--p5:#fee2e2;--p6:#ede9fe;--p7:#e0f2fe}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+  header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  header h1{font-size:18px;margin:0;flex:1}
+  header small{color:var(--sub);font-size:12px}
+  .btn{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);font:inherit;font-size:14px;cursor:pointer}
+  .btn.on{background:var(--p1);border-color:#93c5fd}
+  main{padding:14px 16px 90px;max-width:1440px;margin:0 auto}
+  .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .card h2{margin:0;padding:10px 14px;font-size:15px;display:flex;align-items:center;gap:8px;cursor:pointer;min-height:48px;user-select:none}
+  .card h2 .n{margin-left:auto;font-size:12px;color:var(--sub);font-weight:400}
+  .card h2 .q{width:24px;height:24px;border-radius:12px;background:#eef;color:#446;font-size:12px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #cdf}
+  .card .body{padding:0 14px 12px;color:var(--sub);font-size:14px}
+  .card.folded .body{display:none}
+  .card.empty .body::before{content:"아직 값 없음";}
+  body.notion .card.empty{display:none}
+  .c1 h2{background:var(--p1)}.c2 h2{background:var(--p2)}.c3 h2{background:var(--p3)}.c4 h2{background:var(--p4)}.c5 h2{background:var(--p5)}.c6 h2{background:var(--p6)}.c7 h2{background:var(--p7)}
+  #check{margin-top:18px}
+  #check table{border-collapse:collapse;width:100%;font-size:14px;background:var(--card)}
+  #check td,#check th{border:1px solid var(--line);padding:8px 10px;text-align:left}
+  .ok{color:#15803d}.ng{color:#b91c1c}
+  #tip{position:fixed;left:16px;right:16px;bottom:16px;background:#1f2430;color:#fff;padding:12px 14px;border-radius:12px;font-size:14px;display:none;z-index:6}
+</style>
+</head>
+<body>
+<header>
+  <h1>투자 시스템 허브 <small id="ver"></small></h1>
+  <button class="btn" id="modeBtn" type="button">노션식</button>
+  <button class="btn" id="checkBtn" type="button">자가 점검</button>
+</header>
+<main>
+  <div class="grid" id="grid"></div>
+  <section id="check" hidden>
+    <h2 style="font-size:16px">자가 점검 — 이 화면이 제대로 붙었는지</h2>
+    <table><thead><tr><th>항목</th><th>결과</th><th>내용</th></tr></thead><tbody id="checkBody"></tbody></table>
+  </section>
+</main>
+<div id="tip"></div>
+<script src="js/status.js" data-app="hub" data-version="v 20260904-1310"></script>
+<script>
+(function(){
+  var VER='v 20260904-1310'; document.getElementById('ver').textContent=VER;
+  var CELLS=[['market','c1'],['kr-us','c2'],['sector','c3'],['signals','c4'],['failed','c5'],['review','c6'],['alerts','c7']];
+  var LS='hub_ui'; var ui={}; try{ui=JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){}
+  function save(){ try{localStorage.setItem(LS,JSON.stringify(ui))}catch(e){} }
+  var feats={}, grid=document.getElementById('grid');
+
+  function render(){
+    grid.innerHTML='';
+    CELLS.forEach(function(c){
+      var id=c[0], f=feats['hub.'+id]||{title:id,tip:''};
+      var el=document.createElement('section'); el.className='card empty '+c[1]+(ui['fold_'+id]?' folded':''); el.dataset.id=id;
+      el.innerHTML='<h2><span>'+f.title+'</span><span class="q" title="설명">?</span><span class="n">접기</span></h2><div class="body"></div>';
+      el.querySelector('h2').onclick=function(e){
+        if(e.target.classList.contains('q')){ showTip(f.title+' — '+(f.tip||'설명 없음')+(f.source?' (출처: '+f.source+')':'')); return; }
+        el.classList.toggle('folded'); ui['fold_'+id]=el.classList.contains('folded'); save();
+      };
+      grid.appendChild(el);
+    });
+  }
+  function showTip(t){ var d=document.getElementById('tip'); d.textContent=t; d.style.display='block'; clearTimeout(d._t); d._t=setTimeout(function(){d.style.display='none'},4000); }
+
+  // 노션식(값 있는 칸만) ↔ 일반식(전부)
+  var modeBtn=document.getElementById('modeBtn');
+  function applyMode(){ document.body.classList.toggle('notion',!!ui.notion); modeBtn.classList.toggle('on',!!ui.notion); modeBtn.textContent=ui.notion?'노션식 (값 있는 칸만)':'일반식 (전부 보기)'; }
+  modeBtn.onclick=function(){ ui.notion=!ui.notion; save(); applyMode(); };
+
+  // features.json 한 곳에서 제목·툴팁을 읽는다(원칙 17)
+  fetch('data/features.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){ feats=d.features||{}; render(); applyMode(); })
+    .catch(function(e){ console.error('features.json 읽기 실패: '+e.message); render(); applyMode(); });
+
+  // 자가 점검(원칙 21): 파일 4개 읽힘 + 경고 띠 + 🐞 [복사] 가 실제로 뜨는지
+  document.getElementById('checkBtn').onclick=function(){
+    var sec=document.getElementById('check'); sec.hidden=false; var tb=document.getElementById('checkBody'); tb.innerHTML='';
+    function row(name,ok,msg){ var tr=document.createElement('tr'); tr.innerHTML='<td>'+name+'</td><td class="'+(ok?'ok':'ng')+'">'+(ok?'통과':'실패')+'</td><td>'+msg+'</td>'; tb.appendChild(tr); }
+    ['data/status.json','data/registry.json','data/features.json','js/status.js'].forEach(function(p){
+      fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
+        .then(function(t){ var s=p.slice(-5)==='.json'?JSON.parse(t).schema:t.split('\n')[0]; row(p,true,String(s||'').slice(0,60)); })
+        .catch(function(e){ row(p,false,e.message); });
+    });
+    var st=window.Status; row('status.js 붙음',!!st, st?('앱 '+st.app+' · '+st.version+' · 지금 '+st.kstStr(new Date())):'window.Status 없음');
+    if(st){ var r=st.selfTest(); row('경고 띠 + 🐞 표시',r, r?'위에 빨간 띠, 오른쪽 아래 🐞 버튼이 보여야 함. 🐞 → [복사] 눌러 붙여넣기까지 해 보기':'selfTest 실패'); }
+    sec.scrollIntoView({behavior:'smooth'});
+  };
+})();
+</script>
+</body>
+</html>
