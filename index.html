@@ -1,4 +1,4 @@
-<!-- v 20260904-1700  index.html — invest 허브(문 하나). 첫 화면 7칸, 노션식(값 있을 때만)↔일반식, 칸 접기 기억, 자가 점검 -->
+<!-- v 20260904-1740  index.html — invest 허브(문 하나). 첫 화면 7칸, 노션식(값 있을 때만)↔일반식, 칸 접기 기억, 자가 점검 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -49,10 +49,10 @@
   </section>
 </main>
 <div id="tip"></div>
-<script src="js/status.js" data-app="hub" data-version="v 20260904-1700"></script>
+<script src="js/status.js" data-app="hub" data-version="v 20260904-1740"></script>
 <script>
 (function(){
-  var VER='v 20260904-1700'; document.getElementById('ver').textContent=VER;
+  var VER='v 20260904-1740'; document.getElementById('ver').textContent=VER;
   var CELLS=[['market','c1'],['kr-us','c2'],['sector','c3'],['signals','c4'],['failed','c5'],['review','c6'],['alerts','c7']];
   var LS='hub_ui'; var ui={}; try{ui=JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){}
   function save(){ try{localStorage.setItem(LS,JSON.stringify(ui))}catch(e){} }
@@ -91,6 +91,14 @@
       el.querySelector('.body').innerHTML=parts.join(' · ')+'<br><a href="cygnus.html">전체 지표 →</a> <small>수집 '+window.Status.kstStr(d.collected_at)+'</small>';
     }).catch(function(){});
   }
+  // 산업·테마 칸: data/sectors.json 국면 요약(값 있을 때만)
+  function fillSectors(){
+    fetch('data/sectors.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+      var el=grid.querySelector('[data-id=sector]'), rows=(d.sectors||[]).filter(function(x){return x.status==='active'}); if(!el||!rows.length) return;
+      el.classList.remove('empty');
+      el.querySelector('.body').innerHTML=rows.map(function(x){return '<b>'+x.name+'</b> — '+x.phase+' <small>('+(x.as_of||'')+', '+(x.companies||[]).length+'개사)</small>'}).join('<br>')+'<br><a href="cygnus.html#sectors">산업 사슬 →</a>';
+    }).catch(function(){});
+  }
   function showTip(t){ var d=document.getElementById('tip'); d.textContent=t; d.style.display='block'; clearTimeout(d._t); d._t=setTimeout(function(){d.style.display='none'},4000); }
 
   // 노션식(값 있는 칸만) ↔ 일반식(전부)
@@ -99,8 +107,8 @@
   modeBtn.onclick=function(){ ui.notion=!ui.notion; save(); applyMode(); };
 
   // features.json 한 곳에서 제목·툴팁을 읽는다(원칙 17)
-  fetch('data/features.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){ feats=d.features||{}; render(); applyMode(); fillMarket(); fillMarkets(); })
-    .catch(function(e){ console.error('features.json 읽기 실패: '+e.message); render(); applyMode(); fillMarket(); fillMarkets(); });
+  fetch('data/features.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){ feats=d.features||{}; render(); applyMode(); fillMarket(); fillMarkets(); fillSectors(); })
+    .catch(function(e){ console.error('features.json 읽기 실패: '+e.message); render(); applyMode(); fillMarket(); fillMarkets(); fillSectors(); });
 
   // 자가 점검(원칙 21): 파일 4개 읽힘 + 경고 띠 + 🐞 [복사] 가 실제로 뜨는지
   document.getElementById('checkBtn').onclick=function(){

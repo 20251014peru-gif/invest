@@ -1,0 +1,98 @@
+{
+  "schema": "sectors/1",
+  "version": "v 20260904-1740",
+  "_설명": "산업 지도(hbm.html) 흡수분. 산업 하나 = 항목 하나, 고리(links) 순서는 공정 순서(수요→제조→장비→소재), 회사마다 다섯 칸(state·evidence·judgement·check_date·verify). 확인=공시·보고서에서 본 것, 추정=업계 자료. dart-collector 가 companies[].code 를 읽는다(결정 12).",
+  "sectors": [
+    {
+      "id": "hbm",
+      "name": "HBM 밸류체인",
+      "status": "active",
+      "as_of": "2026-08-22",
+      "phase": "장비 발주 단계(파도가 지금 여기 도착)",
+      "phase_tag": "확인(2026-08-22 분석)",
+      "chain": [
+        "수요(AI 가속기)",
+        "제조(메모리 증설)",
+        "장비(TC본더·검사)",
+        "부품·소재(다음 파도)"
+      ],
+      "timing": {
+        "note": "하이닉스+삼성 신규 공장 4곳 → 발주 2026~2027, 장비사 실적 피크 2027~2028",
+        "tag": "추정(시차)"
+      },
+      "risks": [
+        "한미 vs 한화세미텍 특허소송 — 물량 변수",
+        "대형 장비주는 주가 선반영"
+      ],
+      "companies": [
+        {
+          "name": "SK하이닉스",
+          "code": "000660",
+          "link": "제조",
+          "state": "증설 진행(이미 반영)",
+          "evidence": "HBM 증설·TC본더 발주 확인",
+          "judgement": "",
+          "check_date": "",
+          "verify": "분기 CAPEX·HBM 매출 비중",
+          "tag": "확인"
+        },
+        {
+          "name": "삼성전자",
+          "code": "005930",
+          "link": "제조",
+          "state": "증설 계획",
+          "evidence": "공장 신설 계획(하이닉스와 합쳐 4곳)",
+          "judgement": "",
+          "check_date": "",
+          "verify": "HBM4 고객 인증 여부",
+          "tag": "확인"
+        },
+        {
+          "name": "한미반도체",
+          "code": "042700",
+          "link": "장비",
+          "state": "수주 확인(선반영 여부 판단 필요)",
+          "evidence": "2026 상반기 장비 매출 3,021억(2025 연간 5,767억의 절반 초과=가속) · 고객 분산(하이닉스·마이크론·삼성전기·LG이노텍·ASE·앰코) · HBM4 TC본더 수주잔고 442억(공시분) · 매입처 비공개",
+          "judgement": "",
+          "check_date": "",
+          "verify": "분기 매출 가속 지속 여부 · 특허소송 결과",
+          "tag": "확인(반기보고서)"
+        },
+        {
+          "name": "한화세미텍",
+          "code": "",
+          "link": "장비",
+          "state": "후발 진입",
+          "evidence": "TC본더 수주 확인, 한화 지원",
+          "judgement": "",
+          "check_date": "",
+          "verify": "하이닉스 물량 배분 · 특허소송",
+          "tag": "확인"
+        },
+        {
+          "name": "테크윙",
+          "code": "089230",
+          "link": "장비",
+          "state": "하이닉스 첫 진입",
+          "evidence": "검사장비 첫 진입 확인",
+          "judgement": "",
+          "check_date": "",
+          "verify": "후속 수주 공시",
+          "tag": "확인"
+        },
+        {
+          "name": "(부품·소재사 — 미확인)",
+          "code": "",
+          "link": "부품·소재",
+          "state": "아직",
+          "evidence": "한미반도체 매입처가 'Bonder Modules 外'로만 공시 — 사업보고서만으론 못 찾음, 업계 자료 필요",
+          "judgement": "",
+          "check_date": "",
+          "verify": "",
+          "tag": "미확인"
+        }
+      ],
+      "_원본": "hbm.html 은 이 PC 에 없음(2026-09-04). 9개 회사 목록 중 위 5개만 기록으로 확인 — 나머지는 hbm.html 을 찾으면 옮김"
+    }
+  ]
+}
