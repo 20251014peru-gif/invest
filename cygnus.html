@@ -1,4 +1,4 @@
-<!-- v 20260904-2200  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260904-2300  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -53,7 +53,8 @@
   <div class="grid" id="macro"></div>
   <p class="muted" id="macroEmpty" hidden>아직 수집된 값이 없습니다 — GitHub Actions 「Macro Collector」를 한 번 실행하면 채워집니다.</p>
 
-  <h2 id="sectors">산업 사슬 <span class="tag">공정 순서 · 회사 다섯 칸 · 판단은 달님 칸</span></h2>
+  <h2 id="sectors">산업 사슬 <span class="tag">공정 순서 · 회사 다섯 칸 · 판단은 달님 칸</span><span class="tag">🔗 축 연결 = 시장→산업→종목</span></h2>
+  <p class="muted" style="margin:-4px 0 8px">각 산업에 <b>관련 대변화 축</b>이 붙어 있어요. 위 레짐/축이 움직이면 → 그 축에 걸린 산업을 보고 → 그 산업의 회사(종목)로 좁혀갑니다.</p>
   <div id="sectorBox"></div>
 
   <h2>영웅문 붙여넣기 — 수급 <span class="tag">투자자별 매매동향 화면을 복사해서 붙여넣기</span></h2>
@@ -63,10 +64,10 @@
     <div id="parsed"></div>
   </div>
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2200"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2300"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-2200';
+  document.getElementById('ver').textContent='v 20260904-2300';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -156,6 +157,7 @@
     (d.sectors||[]).forEach(function(x){
       var h='<div class="card" style="margin-bottom:10px"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>'+esc(x.name)+'</b><span class="tag">'+esc(x.phase)+'</span><span class="tag">'+esc(x.phase_tag||'')+'</span><span class="muted">기준 '+esc(x.as_of)+'</span></div>';
       h+='<div class="muted" style="margin:6px 0">'+(x.chain||[]).map(esc).join(' → ')+(x.timing?' · '+esc(x.timing.note)+' <span class="tag">'+esc(x.timing.tag)+'</span>':'')+'</div>';
+      if(x.axes&&x.axes.length){ h+='<div style="margin:4px 0 8px">'+x.axes.map(function(a){return '<span class="tag" title="'+esc(a.why)+'" style="background:#ede9fe;border-color:#c4b5fd;cursor:help">🔗 '+esc(a.name)+'</span>'}).join(' ')+' <span class="muted" style="font-size:12px">← 이 축이 움직이면 이 산업을 본다 (탭하면 이유)</span></div>'; }
       h+='<div style="overflow-x:auto"><table><tr><th>고리</th><th>회사</th><th>상태</th><th>근거</th><th>판단(달님)</th><th>검증(뭘 보면 판가름)</th><th>표시</th></tr>'+
         (x.companies||[]).map(function(c){return '<tr><td>'+esc(c.link)+'</td><td><b>'+esc(c.name)+'</b>'+(c.code?' <small>'+esc(c.code)+'</small>':'')+'</td><td>'+esc(c.state)+'</td><td>'+esc(c.evidence)+'</td><td>'+(c.judgement?esc(c.judgement):'<span class="muted">비어 있음</span>')+'</td><td>'+esc(c.verify)+'</td><td><span class="tag">'+esc(c.tag)+'</span></td></tr>'}).join('')+'</table></div>';
       if(x.risks&&x.risks.length) h+='<div class="muted" style="margin-top:6px">변수: '+x.risks.map(esc).join(' · ')+'</div>';
