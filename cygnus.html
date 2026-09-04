@@ -1,4 +1,4 @@
-<!-- v 20260904-1930  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260904-2030  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -41,10 +41,15 @@
   <a class="btn" href="axes.html">축·전략</a><a class="btn" href="predict.html">예측·채점</a><a class="btn" href="index.html">허브</a>
 </header>
 <main>
+  <h2>실시간 <span class="tag" id="liveTag">브라우저로 직접 · 화면 열 때 갱신</span></h2>
+  <div class="grid" id="live"></div>
+  <p class="muted" id="liveNote" style="margin:-4px 0 10px"></p>
+
   <h2>레짐 요약 <span class="tag">성장×물가 4분면 + 유동성 · 공식 근거 있을 때만</span></h2>
   <div class="regime" id="regime"></div>
 
-  <h2>매크로 지표 <span class="tag" id="macroTag"></span><span class="tag">FRED=공식 · Yahoo=보조(근거 아님)</span></h2>
+  <h2>매크로 지표 <span class="tag" id="macroTag"></span><span class="tag">FRED=공식(며칠 늦음)</span></h2>
+  <p class="muted" style="margin:-4px 0 8px">🕐 <b>(오늘/N일 전)</b> = 그 값의 기준일. FRED 는 실시간이 아니라 환율은 약 1주 늦습니다. <b>오늘 숫자가 필요하면 아래 「영웅문 붙여넣기」</b>를 쓰세요.</p>
   <div class="grid" id="macro"></div>
   <p class="muted" id="macroEmpty" hidden>아직 수집된 값이 없습니다 — GitHub Actions 「Macro Collector」를 한 번 실행하면 채워집니다.</p>
 
@@ -58,14 +63,61 @@
     <div id="parsed"></div>
   </div>
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-1930"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2030"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-1930';
+  document.getElementById('ver').textContent='v 20260904-2030';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
   var JC={'우호':'good','안정':'good','강':'good','확장':'good','정상':'good','주의':'warn','중립':'mid','부담':'bad','위험':'bad','약':'bad','수축':'bad','역전':'bad'};
+
+  // 기준일이 며칠 전인지 — 실시간이 아닌 FRED 는 며칠 늦는다(원칙: 확인 vs 추정처럼, 신선도를 눈에 보이게)
+  function freshness(asof){
+    if(!asof) return {days:null,badge:''};
+    var d=new Date(asof+'T00:00:00+09:00'); if(isNaN(d)) return {days:null,badge:''};
+    var today=window.Status.kstNow(); today.setUTCHours(0,0,0,0);
+    var days=Math.round((today-d)/86400000);
+    var color=days<=1?'#15803d':days<=3?'#a86200':'#b91c1c';
+    var label=days<=0?'오늘':days+'일 전';
+    return {days:days,badge:' <b style="color:'+color+'">('+label+')</b>'};
+  }
+  // ── 실시간 (브라우저에서 직접, 한국 IP) — 허브 index.html 과 성공투자 app.py 의 검증된 네이버 호출 이식 ──
+  // 원달러: api.stock.naver.com/marketindex (허브가 쓰는 것, CORS 확인) · 지수: m.stock.naver.com/api/index (app.py, 브라우저에선 막힐 수 있어 실패해도 화면 안 깨짐)
+  function jget(u){ return fetch(u,{cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
+  function nnum(x){ var m=String(x==null?'':x).replace(/,/g,'').match(/-?\d+(\.\d+)?/); return m?parseFloat(m[0]):null; }
+  function liveCard(name, val, chg, unit, when, err){
+    var el=document.getElementById('live');
+    if(val==null){ el.innerHTML+='<div class="k" style="opacity:.7"><div class="n"><span>'+esc(name)+'</span><span>실시간</span></div><div class="v" style="font-size:14px;color:var(--sub);font-weight:400">'+esc(err||'못 받음')+'</div></div>'; return; }
+    var c=chg==null?'':'<span class="'+(chg>0?'up':chg<0?'down':'')+'">'+(chg>0?'▲':chg<0?'▼':'')+' '+Math.abs(chg).toFixed(2)+'%</span>';
+    el.innerHTML+='<div class="k" style="border-color:#93c5fd"><div class="n"><span>'+esc(name)+'</span><span style="color:#15803d">실시간</span></div><div class="v">'+(Math.abs(val)>=1000?val.toLocaleString('ko-KR',{maximumFractionDigits:0}):val.toLocaleString('ko-KR',{maximumFractionDigits:2}))+'<small>'+esc(unit)+'</small></div><div class="c">'+c+'</div><div class="src">'+esc(when)+'</div></div>';
+  }
+  function loadLive(){
+    var now=window.Status.kstStr(new Date()).replace(' KST','');
+    var jobs=[];
+    // 원달러 (검증: 허브)
+    jobs.push(jget('https://api.stock.naver.com/marketindex/exchange/FX_USDKRW').then(function(d){
+      var v=nnum(d.closePrice||d.price); if(!v||v<500) throw new Error('값 이상');
+      liveCard('원달러 환율', v, nnum(d.fluctuationsRatio), '원', '네이버 · '+now);
+    }).catch(function(e){
+      // 예비: 무키 글로벌 환율(허브 fallback 과 동일)
+      return jget('https://open.er-api.com/v6/latest/USD').then(function(d){ liveCard('원달러 환율', d.rates&&d.rates.KRW, null, '원', '시장환율(참고) · '+now); })
+             .catch(function(){ liveCard('원달러 환율', null, null, '원', now, '네이버·예비 둘 다 못 받음'); });
+    }));
+    // 코스피·코스닥·VKOSPI (검증: app.py, 브라우저 CORS 는 열어봐야 앎)
+    [['코스피','KOSPI'],['코스닥','KOSDAQ'],['VKOSPI(변동성)','VKOSPI']].forEach(function(p){
+      jobs.push(jget('https://m.stock.naver.com/api/index/'+p[1]+'/price').then(function(a){
+        var d=Array.isArray(a)?a[0]:a; var v=nnum(d.closePrice); var chg=nnum(d.fluctuationsRatio);
+        var cd=d.compareToPreviousPrice; if(chg!=null&&cd&&(cd.code==='5'||cd.code==='4')) chg=-Math.abs(chg);
+        liveCard(p[0], v, chg, 'pt', '네이버 · '+now);
+      }).catch(function(e){ liveCard(p[0], null, null, 'pt', now, '실시간 못 받음(브라우저 차단일 수 있음)'); }));
+    });
+    Promise.all(jobs).then(function(){
+      var got=document.querySelectorAll('#live .k .v').length - document.querySelectorAll('#live .k[style*="opacity"]').length;
+      document.getElementById('liveNote').innerHTML='이 줄은 이 화면을 <b>지금 여는 순간</b> 브라우저(한국)가 네이버에서 직접 받은 값입니다. 아래 매크로(FRED)는 자동 수집이라 며칠 늦어요. 지수가 "못 받음"이면 네이버가 브라우저 요청을 막은 것 — 원달러는 되니 그건 실시간입니다.';
+    });
+  }
+  loadLive();
 
   get('data/axes.json').then(function(d){
     var rg=d.regime||{}, el=document.getElementById('regime');
@@ -82,7 +134,8 @@
       if(r.value==null){ var pend=r.pending&&!r.error; el.innerHTML+='<div class="k'+(pend?'':' err')+'" style="'+(pend?'opacity:.7':'')+'"><div class="n"><span>'+esc(r.name)+'</span><span>'+(pend?'참고':'')+'</span></div><div class="v" style="'+(pend?'font-size:14px;color:var(--sub);font-weight:400':'')+'">'+(pend?'참고값 없음 (선택 입력)':esc(r.error||'값 없음'))+'</div><div class="src">'+esc(r.source)+'</div></div>'; return; }
       var ch=r.change_pct==null?'':'<span class="'+(r.change_pct>0?'up':r.change_pct<0?'down':'')+'">'+(r.change_pct>0?'▲':r.change_pct<0?'▼':'')+' '+Math.abs(r.change_pct).toFixed(2)+'%</span>';
       var j=r.judge?'<span class="j '+(JC[r.judge]||'mid')+'" title="'+esc(r.rule)+'">'+esc(r.judge)+'</span>':'';
-      el.innerHTML+='<div class="k"><div class="n"><span>'+esc(r.name)+'</span><span>'+(r.official?'공식':'보조')+'</span></div><div class="v">'+fmt(r.value)+'<small>'+esc(r.unit)+'</small></div><div class="c">'+ch+' '+j+'</div><div class="src">기준 '+esc(r.as_of)+' · '+esc(r.source)+'</div></div>';
+      var age=freshness(r.as_of);
+      el.innerHTML+='<div class="k"><div class="n"><span>'+esc(r.name)+'</span><span>'+(r.official?'공식':'보조')+'</span></div><div class="v">'+fmt(r.value)+'<small>'+esc(r.unit)+'</small></div><div class="c">'+ch+' '+j+'</div><div class="src">기준 '+esc(r.as_of)+age.badge+' · '+esc(r.source)+'</div></div>';
     });
   }).catch(function(){ document.getElementById('macroEmpty').hidden=false; });
 
