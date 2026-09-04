@@ -1,4 +1,4 @@
-<!-- v 20260904-2300  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260904-2330  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -55,6 +55,7 @@
 
   <h2 id="sectors">산업 사슬 <span class="tag">공정 순서 · 회사 다섯 칸 · 판단은 달님 칸</span><span class="tag">🔗 축 연결 = 시장→산업→종목</span></h2>
   <p class="muted" style="margin:-4px 0 8px">각 산업에 <b>관련 대변화 축</b>이 붙어 있어요. 위 레짐/축이 움직이면 → 그 축에 걸린 산업을 보고 → 그 산업의 회사(종목)로 좁혀갑니다.</p>
+  <div class="card" id="dartPanel" style="margin-bottom:12px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>📢 최근 공시</b><span class="tag" id="dartTag">DART 자동 수집</span></div><div id="dartBox" class="muted" style="margin-top:6px">불러오는 중…</div></div>
   <div id="sectorBox"></div>
 
   <h2>영웅문 붙여넣기 — 수급 <span class="tag">투자자별 매매동향 화면을 복사해서 붙여넣기</span></h2>
@@ -64,10 +65,10 @@
     <div id="parsed"></div>
   </div>
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2300"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2330"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-2300';
+  document.getElementById('ver').textContent='v 20260904-2330';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -151,6 +152,16 @@
     });
   }).catch(function(){ document.getElementById('macroEmpty').hidden=false; });
 
+
+  get('facts/dart.json').then(function(d){
+    var box=document.getElementById('dartBox'), items=(d.items||[]);
+    document.getElementById('dartTag').textContent = d.updated ? ('DART · 갱신 '+window.Status.kstStr(d.updated)+' · '+items.length+'건') : 'DART 자동 수집 (첫 실행 대기)';
+    if(!items.length){ box.innerHTML='아직 없음 — GitHub Actions 「DART Disclosure」가 돌면 관심 종목의 수주·실적 공시가 여기 뜹니다. (DART_API_KEY Secret 필요)'; return; }
+    var KC={'수주':'#dcfce7','실적':'#dbeafe','증자':'#fee2e2','자사주':'#fef3c7','기타':'#eef'};
+    box.innerHTML='<div style="overflow-x:auto"><table><tr><th>날짜</th><th>회사</th><th>종류</th><th>공시</th></tr>'+
+      items.slice(0,30).map(function(i){var d2=i.rcept_dt&&i.rcept_dt.length===8?i.rcept_dt.slice(4,6)+'/'+i.rcept_dt.slice(6,8):i.rcept_dt;
+        return '<tr><td>'+esc(d2)+'</td><td><b>'+esc(i.company)+'</b> <small>'+esc(i.sector)+'</small></td><td><span class="j" style="background:'+(KC[i.kind]||'#eef')+'">'+esc(i.kind)+'</span></td><td><a href="'+esc(i.url)+'" target="_blank" rel="noopener">'+esc(i.report_nm)+'</a></td></tr>';}).join('')+'</table></div>';
+  }).catch(function(e){ document.getElementById('dartBox').textContent='공시 못 불러옴: '+e.message; });
 
   get('data/sectors.json').then(function(d){
     var box=document.getElementById('sectorBox');

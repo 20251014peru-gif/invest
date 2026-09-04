@@ -222,6 +222,21 @@
       "writes": [
         "raw/supply.json(복사·붙여넣기)"
       ]
+    },
+    {
+      "id": "dart",
+      "name": "공시 수집",
+      "file": "scripts/dart.py + .github/workflows/dart.yml",
+      "axis": "판단",
+      "status": "active",
+      "since": "2026-09-04",
+      "reads": [
+        "data/sectors.json"
+      ],
+      "writes": [
+        "facts/dart.json",
+        "data/status.json"
+      ]
     }
   ]
 }
