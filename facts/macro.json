@@ -1,7 +1,7 @@
 {
   "schema": "macro/1",
   "version": "v 20260904-1810",
-  "collected_at": "2026-09-04T15:12:29+09:00",
+  "collected_at": "2026-09-04T17:12:00+09:00",
   "ok": 11,
   "total": 18,
   "items": [
@@ -46,7 +46,7 @@
       "name": "SOX 반도체",
       "unit": "pt",
       "axis": "earnings",
-      "source": "stooq",
+      "source": "manual",
       "symbol": "^sox",
       "official": false,
       "rule": "+2%=강 / 삼성·하이닉스 직결",
@@ -57,7 +57,8 @@
       "published": "",
       "collected_at": "2026-09-04T15:12:19+09:00",
       "judge": "",
-      "error": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+      "error": "",
+      "pending": true
     },
     {
       "id": "vix",
@@ -154,7 +155,7 @@
       "name": "항셍지수",
       "unit": "pt",
       "axis": "policy_geo",
-      "source": "stooq",
+      "source": "manual",
       "symbol": "^hsi",
       "official": false,
       "rule": "+1%=강 / 중국 리스크",
@@ -165,7 +166,8 @@
       "published": "",
       "collected_at": "2026-09-04T15:12:24+09:00",
       "judge": "",
-      "error": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+      "error": "",
+      "pending": true
     },
     {
       "id": "wti",
@@ -190,7 +192,7 @@
       "name": "구리",
       "unit": "$/lb",
       "axis": "commodity",
-      "source": "stooq",
+      "source": "manual",
       "symbol": "hg.f",
       "official": false,
       "rule": "",
@@ -201,14 +203,15 @@
       "published": "",
       "collected_at": "2026-09-04T15:12:25+09:00",
       "judge": "",
-      "error": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+      "error": "",
+      "pending": true
     },
     {
       "id": "gold",
       "name": "금",
       "unit": "$/oz",
       "axis": "credit_vol",
-      "source": "stooq",
+      "source": "manual",
       "symbol": "gc.f",
       "official": false,
       "rule": "",
@@ -219,14 +222,15 @@
       "published": "",
       "collected_at": "2026-09-04T15:12:26+09:00",
       "judge": "",
-      "error": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+      "error": "",
+      "pending": true
     },
     {
       "id": "bdry",
       "name": "해운 BDRY",
       "unit": "$",
       "axis": "inflation_growth",
-      "source": "stooq",
+      "source": "manual",
       "symbol": "bdry.us",
       "official": false,
       "rule": "",
@@ -237,7 +241,8 @@
       "published": "",
       "collected_at": "2026-09-04T15:12:27+09:00",
       "judge": "",
-      "error": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+      "error": "",
+      "pending": true
     },
     {
       "id": "m2",
@@ -329,5 +334,6 @@
       "judge": "정상",
       "error": ""
     }
-  ]
+  ],
+  "_참고": "FRED 11개는 15:12 수집분. 웹차단 5개(SOX·항셍·구리·금·BDRY)는 참고(회색)로 정리 — 실시간 줄이 담당. GitHub 16:41 예약수집은 건너뜀"
 }
