@@ -1,7 +1,7 @@
 {
   "schema": "indicators/1",
-  "version": "v 20260904-1810",
-  "_설명": "CYGNUS 매크로 지표 설정(원칙 8: 출처·규칙은 설정 파일). source: fred(공식, 키 불필요 CSV) | stooq(보조, 무키 CSV) | yahoo(보조, Actions 에서 429 잦음 → 예비) | manual(수동 입력). 임계값은 market-check.html 의 달님 규칙(확인). axis 는 axes.json id.",
+  "version": "v 20260904-1930",
+  "_설명": "CYGNUS 매크로 지표 설정(원칙 8: 출처·규칙은 설정 파일). source: fred(공식, 키 불필요 CSV) | manual(GitHub 서버가 stooq·yahoo 를 못 뚫어 429/403 → 참고 지표는 영웅문·네이버에서 보고 수동 입력, 선택) | manual(수동 입력). 임계값은 market-check.html 의 달님 규칙(확인). axis 는 axes.json id.",
   "history_days": 400,
   "items": [
     {
@@ -45,8 +45,8 @@
     {
       "id": "sox",
       "name": "SOX 반도체",
-      "source": "stooq",
-      "symbol": "^sox",
+      "source": "manual",
+      "symbol": "",
       "unit": "pt",
       "axis": "earnings",
       "official": false,
@@ -55,11 +55,8 @@
         "strong_pct": 2,
         "weak_pct": -2
       },
-      "note": "stooq 심볼 추정 — 첫 실행으로 확인",
-      "fallback": {
-        "source": "yahoo",
-        "symbol": "^SOX"
-      }
+      "note": "참고 지표(근거 아님). GitHub 서버가 웹 시세를 못 뚫음 → 영웅문·네이버에서 보고 raw/manual_macro.json 에 입력(선택, 안 넣어도 됨)",
+      "optional": true
     },
     {
       "id": "vix",
@@ -138,8 +135,8 @@
     {
       "id": "hsi",
       "name": "항셍지수",
-      "source": "stooq",
-      "symbol": "^hsi",
+      "source": "manual",
+      "symbol": "",
       "unit": "pt",
       "axis": "policy_geo",
       "official": false,
@@ -148,11 +145,8 @@
         "strong_pct": 1,
         "weak_pct": -1
       },
-      "note": "",
-      "fallback": {
-        "source": "yahoo",
-        "symbol": "^HSI"
-      }
+      "note": "참고 지표(근거 아님). GitHub 서버가 웹 시세를 못 뚫음 → 영웅문·네이버에서 보고 raw/manual_macro.json 에 입력(선택, 안 넣어도 됨)",
+      "optional": true
     },
     {
       "id": "wti",
@@ -169,50 +163,41 @@
     {
       "id": "copper",
       "name": "구리",
-      "source": "stooq",
-      "symbol": "hg.f",
+      "source": "manual",
+      "symbol": "",
       "unit": "$/lb",
       "axis": "commodity",
       "official": false,
       "rule": "",
       "thresholds": {},
-      "note": "stooq 선물 심볼 추정",
-      "fallback": {
-        "source": "yahoo",
-        "symbol": "HG=F"
-      }
+      "note": "참고 지표(근거 아님). GitHub 서버가 웹 시세를 못 뚫음 → 영웅문·네이버에서 보고 raw/manual_macro.json 에 입력(선택, 안 넣어도 됨)",
+      "optional": true
     },
     {
       "id": "gold",
       "name": "금",
-      "source": "stooq",
-      "symbol": "gc.f",
+      "source": "manual",
+      "symbol": "",
       "unit": "$/oz",
       "axis": "credit_vol",
       "official": false,
       "rule": "",
       "thresholds": {},
-      "note": "stooq 선물 심볼 추정",
-      "fallback": {
-        "source": "yahoo",
-        "symbol": "GC=F"
-      }
+      "note": "참고 지표(근거 아님). GitHub 서버가 웹 시세를 못 뚫음 → 영웅문·네이버에서 보고 raw/manual_macro.json 에 입력(선택, 안 넣어도 됨)",
+      "optional": true
     },
     {
       "id": "bdry",
       "name": "해운 BDRY",
-      "source": "stooq",
-      "symbol": "bdry.us",
+      "source": "manual",
+      "symbol": "",
       "unit": "$",
       "axis": "inflation_growth",
       "official": false,
       "rule": "",
       "thresholds": {},
-      "note": "",
-      "fallback": {
-        "source": "yahoo",
-        "symbol": "BDRY"
-      }
+      "note": "참고 지표(근거 아님). GitHub 서버가 웹 시세를 못 뚫음 → 영웅문·네이버에서 보고 raw/manual_macro.json 에 입력(선택, 안 넣어도 됨)",
+      "optional": true
     },
     {
       "id": "m2",

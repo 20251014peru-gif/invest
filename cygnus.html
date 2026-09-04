@@ -1,4 +1,4 @@
-<!-- v 20260904-1740  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260904-1930  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -58,10 +58,10 @@
     <div id="parsed"></div>
   </div>
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-1740"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-1930"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-1740';
+  document.getElementById('ver').textContent='v 20260904-1930';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -79,7 +79,7 @@
     document.getElementById('macroTag').textContent='수집 '+window.Status.kstStr(d.collected_at)+' · '+d.ok+'/'+d.total;
     document.getElementById('macroEmpty').hidden=items.length>0;
     items.forEach(function(r){
-      if(r.value==null){ el.innerHTML+='<div class="k err"><div class="n"><span>'+esc(r.name)+'</span></div><div class="v">'+esc(r.error||'값 없음')+'</div><div class="src">'+esc(r.source)+' '+esc(r.symbol)+'</div></div>'; return; }
+      if(r.value==null){ var pend=r.pending&&!r.error; el.innerHTML+='<div class="k'+(pend?'':' err')+'" style="'+(pend?'opacity:.7':'')+'"><div class="n"><span>'+esc(r.name)+'</span><span>'+(pend?'참고':'')+'</span></div><div class="v" style="'+(pend?'font-size:14px;color:var(--sub);font-weight:400':'')+'">'+(pend?'참고값 없음 (선택 입력)':esc(r.error||'값 없음'))+'</div><div class="src">'+esc(r.source)+'</div></div>'; return; }
       var ch=r.change_pct==null?'':'<span class="'+(r.change_pct>0?'up':r.change_pct<0?'down':'')+'">'+(r.change_pct>0?'▲':r.change_pct<0?'▼':'')+' '+Math.abs(r.change_pct).toFixed(2)+'%</span>';
       var j=r.judge?'<span class="j '+(JC[r.judge]||'mid')+'" title="'+esc(r.rule)+'">'+esc(r.judge)+'</span>':'';
       el.innerHTML+='<div class="k"><div class="n"><span>'+esc(r.name)+'</span><span>'+(r.official?'공식':'보조')+'</span></div><div class="v">'+fmt(r.value)+'<small>'+esc(r.unit)+'</small></div><div class="c">'+ch+' '+j+'</div><div class="src">기준 '+esc(r.as_of)+' · '+esc(r.source)+'</div></div>';
