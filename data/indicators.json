@@ -1,51 +1,47 @@
 {
   "schema": "indicators/1",
-  "version": "v 20260904-1930",
-  "_설명": "CYGNUS 매크로 지표 설정(원칙 8: 출처·규칙은 설정 파일). source: fred(공식, 키 불필요 CSV) | manual(GitHub 서버가 stooq·yahoo 를 못 뚫어 429/403 → 참고 지표는 영웅문·네이버에서 보고 수동 입력, 선택) | manual(수동 입력). 임계값은 market-check.html 의 달님 규칙(확인). axis 는 axes.json id.",
+  "version": "v 20260904-2230",
+  "_설명": "대변화 축 지표. 시세류(yahoo 필드 있음)는 중계서버 경유 야후 실시간(GitHub 서버에서), 경제지표는 FRED, 없는 건 manual. relay=Cloudflare Worker.",
   "history_days": 400,
   "items": [
     {
       "id": "sp500",
       "name": "S&P500",
-      "source": "fred",
+      "source": "yahoo_relay",
       "symbol": "SP500",
       "unit": "pt",
       "axis": "earnings",
-      "official": true,
+      "official": false,
       "rule": "전일 대비 +1% 이상=강 / −1% 이하=약",
       "thresholds": {
         "strong_pct": 1,
         "weak_pct": -1
       },
-      "note": "",
-      "fallback": {
-        "source": "yahoo",
-        "symbol": "^GSPC"
-      }
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "^GSPC",
+      "fred_fallback": "SP500"
     },
     {
       "id": "nasdaq",
       "name": "나스닥",
-      "source": "fred",
+      "source": "yahoo_relay",
       "symbol": "NASDAQCOM",
       "unit": "pt",
       "axis": "earnings",
-      "official": true,
+      "official": false,
       "rule": "+1.5%=강 / AI·기술주 방향",
       "thresholds": {
         "strong_pct": 1.5,
         "weak_pct": -1.5
       },
-      "note": "",
-      "fallback": {
-        "source": "yahoo",
-        "symbol": "^IXIC"
-      }
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "^IXIC",
+      "fred_fallback": "NASDAQCOM"
     },
     {
       "id": "sox",
       "name": "SOX 반도체",
-      "source": "manual",
+      "source": "yahoo_relay",
       "symbol": "",
       "unit": "pt",
       "axis": "earnings",
@@ -55,13 +51,13 @@
         "strong_pct": 2,
         "weak_pct": -2
       },
-      "note": "참고 지표(근거 아님). GitHub 서버가 웹 시세를 못 뚫음 → 영웅문·네이버에서 보고 raw/manual_macro.json 에 입력(선택, 안 넣어도 됨)",
-      "optional": true
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "^SOX"
     },
     {
       "id": "vix",
       "name": "VIX",
-      "source": "fred",
+      "source": "yahoo_relay",
       "symbol": "VIXCLS",
       "unit": "pt",
       "axis": "credit_vol",
@@ -72,12 +68,14 @@
         "warn_min": 20,
         "bad_min": 30
       },
-      "note": ""
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "^VIX",
+      "fred_fallback": "VIXCLS"
     },
     {
       "id": "usdkrw",
       "name": "원달러 환율",
-      "source": "fred",
+      "source": "yahoo_relay",
       "symbol": "DEXKOUS",
       "unit": "원",
       "axis": "fx_liquidity",
@@ -87,23 +85,25 @@
         "good_max": 1430,
         "bad_min": 1480
       },
-      "note": "FRED 는 1~2일 지연. 당일값은 영웅문 붙여넣기"
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "KRW=X",
+      "fred_fallback": "DEXKOUS"
     },
     {
       "id": "dxy",
       "name": "달러지수 DXY",
-      "source": "fred",
+      "source": "yahoo_relay",
       "symbol": "DTWEXBGS",
       "unit": "pt",
       "axis": "fx_liquidity",
-      "official": true,
-      "rule": "방향만(광의 달러지수). DXY 98/104 규칙은 영웅문 붙여넣기 값에 적용",
-      "thresholds": {},
-      "note": "FRED 광의 달러지수(DXY 와 척도 다름 → 98/104 규칙 미적용, 방향만)",
-      "fallback": {
-        "source": "yahoo",
-        "symbol": "DX-Y.NYB"
-      }
+      "official": false,
+      "rule": "98 이하=약달러 우호 / 104 이상=부담",
+      "thresholds": {
+        "good_max": 98,
+        "bad_min": 104
+      },
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "DX-Y.NYB"
     },
     {
       "id": "us10y",
@@ -135,7 +135,7 @@
     {
       "id": "hsi",
       "name": "항셍지수",
-      "source": "manual",
+      "source": "yahoo_relay",
       "symbol": "",
       "unit": "pt",
       "axis": "policy_geo",
@@ -145,59 +145,61 @@
         "strong_pct": 1,
         "weak_pct": -1
       },
-      "note": "참고 지표(근거 아님). GitHub 서버가 웹 시세를 못 뚫음 → 영웅문·네이버에서 보고 raw/manual_macro.json 에 입력(선택, 안 넣어도 됨)",
-      "optional": true
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "^HSI"
     },
     {
       "id": "wti",
       "name": "유가 WTI",
-      "source": "fred",
+      "source": "yahoo_relay",
       "symbol": "DCOILWTICO",
       "unit": "$",
       "axis": "commodity",
       "official": true,
       "rule": "4주 15% 이상 변동 시 축 7 변화 조건",
       "thresholds": {},
-      "note": ""
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "CL=F",
+      "fred_fallback": "DCOILWTICO"
     },
     {
       "id": "copper",
       "name": "구리",
-      "source": "manual",
+      "source": "yahoo_relay",
       "symbol": "",
       "unit": "$/lb",
       "axis": "commodity",
       "official": false,
       "rule": "",
       "thresholds": {},
-      "note": "참고 지표(근거 아님). GitHub 서버가 웹 시세를 못 뚫음 → 영웅문·네이버에서 보고 raw/manual_macro.json 에 입력(선택, 안 넣어도 됨)",
-      "optional": true
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "HG=F"
     },
     {
       "id": "gold",
       "name": "금",
-      "source": "manual",
+      "source": "yahoo_relay",
       "symbol": "",
       "unit": "$/oz",
       "axis": "credit_vol",
       "official": false,
       "rule": "",
       "thresholds": {},
-      "note": "참고 지표(근거 아님). GitHub 서버가 웹 시세를 못 뚫음 → 영웅문·네이버에서 보고 raw/manual_macro.json 에 입력(선택, 안 넣어도 됨)",
-      "optional": true
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "GC=F"
     },
     {
       "id": "bdry",
       "name": "해운 BDRY",
-      "source": "manual",
+      "source": "yahoo_relay",
       "symbol": "",
       "unit": "$",
       "axis": "inflation_growth",
       "official": false,
       "rule": "",
       "thresholds": {},
-      "note": "참고 지표(근거 아님). GitHub 서버가 웹 시세를 못 뚫음 → 영웅문·네이버에서 보고 raw/manual_macro.json 에 입력(선택, 안 넣어도 됨)",
-      "optional": true
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "BDRY"
     },
     {
       "id": "m2",
@@ -251,5 +253,6 @@
       },
       "note": "국가통계국 발표 후 수동 입력"
     }
-  ]
+  ],
+  "relay": "https://wild-unit-3884dalnim-relay.20251014peru.workers.dev"
 }
