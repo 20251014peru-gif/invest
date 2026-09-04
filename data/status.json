@@ -1,7 +1,7 @@
 {
   "schema": "status/1",
   "_설명": "워크플로가 쓰는 파일. jobs[] 한 줄 = 작업 하나. status: ok | fail | stale | stopped. due 가 지나면 앱이 '늦음' 경고. 시각은 KST(+09:00) ISO.",
-  "updated": "2026-09-04T14:15:56+09:00",
+  "updated": "2026-09-04T15:12:29+09:00",
   "jobs": [
     {
       "id": "hub",
@@ -28,12 +28,12 @@
       "id": "macro",
       "name": "매크로 수집",
       "status": "ok",
-      "ran": "2026-09-04T14:15:56+09:00",
-      "due": "2026-09-05T20:15:56+09:00",
-      "cause": "sp500: YFRateLimitError: Too Many Requests. Rate limited. Try after a while.; nasdaq: YFRateLimitError: Too Many Requests. Rate limited. Try after a while.; sox: YFRateLimitError: Too Many Requests. Rate limited. Try after a while.; dxy: YFRateLimitError: Too Many Requests. Rate limited. Try after a",
+      "ran": "2026-09-04T15:12:29+09:00",
+      "due": "2026-09-05T21:12:29+09:00",
+      "cause": "sox: YFRateLimitError: Too Many Requests. Rate limited. Try after a while.; hsi: YFRateLimitError: Too Many Requests. Rate limited. Try after a while.; copper: YFRateLimitError: Too Many Requests. Rate limited. Try after a while.; gold: YFRateLimitError: Too Many Requests. Rate limited. Try after a ",
       "fix": "출처 주소·심볼(data/indicators.json) 확인. 전부 실패면 FRED/Yahoo 접속 문제",
       "link": "cygnus.html",
-      "note": "8/18 지표"
+      "note": "11/18 지표"
     }
   ]
 }
