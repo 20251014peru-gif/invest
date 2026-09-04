@@ -1,4 +1,4 @@
-<!-- v 20260904-2500  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260904-2530  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -33,6 +33,7 @@
   td,th{padding:6px 8px;border-top:1px solid var(--line);text-align:left}th{background:var(--p1);border:0}
   pre{background:#f7f7f9;border-radius:10px;padding:10px;font:12.5px/1.5 Consolas,monospace;white-space:pre-wrap;word-break:break-all}
   .muted{color:var(--sub);font-size:13px}
+  .jcell:empty:before{content:attr(data-ph);color:#bbb}
 </style>
 </head>
 <body>
@@ -67,10 +68,10 @@
     <div id="parsed"></div>
   </div>
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2500"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2530"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-2500';
+  document.getElementById('ver').textContent='v 20260904-2530';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -167,13 +168,19 @@
 
   // 산업 사슬 — 노션식 토글: 볼 산업만 켜고 나머지는 끈다(브라우저 기억). 값 있을 때만 카드.
   var SEC_ACTIVE={};
+  // 회사 판단 칸 — 달님이 직접 입력, 브라우저에 저장(키=종목코드 또는 이름)
+  var JKEY='cygnus_judge';
+  function loadJ(){ try{return JSON.parse(localStorage.getItem(JKEY)||'{}')}catch(e){return {}} }
+  function fillJudge(){ var J=loadJ(); Array.prototype.forEach.call(document.querySelectorAll('.jcell'), function(td){ var k=td.dataset.key, v=J[k]||''; td.textContent=v; td.dataset.ph=(v?'':'판단 입력…'); }); }
+  document.addEventListener('input', function(e){ var td=e.target.closest&&e.target.closest('.jcell'); if(!td)return; var J=loadJ(); var v=td.textContent.trim(); if(v)J[td.dataset.key]=v; else delete J[td.dataset.key]; try{localStorage.setItem(JKEY,JSON.stringify(J))}catch(_){} });
+
   var SECLS='cygnus_sectors_on';
   function secCard(x){
     var h='<div class="card" style="margin-bottom:10px"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>'+esc(x.name)+'</b><span class="tag">'+esc(x.phase)+'</span><span class="tag">'+esc(x.phase_tag||'')+'</span><span class="muted">기준 '+esc(x.as_of)+'</span></div>';
     h+='<div class="muted" style="margin:6px 0">'+(x.chain||[]).map(esc).join(' → ')+(x.timing?' · '+esc(x.timing.note)+' <span class="tag">'+esc(x.timing.tag)+'</span>':'')+'</div>';
     if(x.axes&&x.axes.length){ h+='<div style="margin:4px 0 8px">'+x.axes.map(function(a){var hot=SEC_ACTIVE[a.axis];return '<span class="tag" title="'+esc(a.why)+(hot?' — 지금: '+esc(hot.headline):'')+'" style="background:'+(hot?'#fee2e2':'#ede9fe')+';border-color:'+(hot?'#f5b7b1':'#c4b5fd')+';cursor:help">'+(hot?'🔥':'🔗')+' '+esc(a.name)+'</span>'}).join(' ')+' <span class="muted" style="font-size:12px">← 🔥=지금 이 축이 움직임</span></div>'; }
     h+='<div style="overflow-x:auto"><table><tr><th>고리</th><th>회사</th><th>상태</th><th>근거</th><th>판단(달님)</th><th>검증(뭘 보면 판가름)</th><th>표시</th></tr>'+
-      (x.companies||[]).map(function(c){return '<tr><td>'+esc(c.link)+'</td><td><b>'+esc(c.name)+'</b>'+(c.code?' <small>'+esc(c.code)+'</small>':'')+'</td><td>'+esc(c.state)+'</td><td>'+esc(c.evidence)+'</td><td>'+(c.judgement?esc(c.judgement):'<span class="muted">비어 있음</span>')+'</td><td>'+esc(c.verify)+'</td><td><span class="tag">'+esc(c.tag)+'</span></td></tr>'}).join('')+'</table></div>';
+      (x.companies||[]).map(function(c){return '<tr><td>'+esc(c.link)+'</td><td><b>'+esc(c.name)+'</b>'+(c.code?' <small>'+esc(c.code)+'</small>':'')+'</td><td>'+esc(c.state)+'</td><td>'+esc(c.evidence)+'</td><td class="jcell" data-key="'+esc(c.code||c.name)+'" contenteditable="true" style="min-width:110px;background:#fffef5;cursor:text"></td><td>'+esc(c.verify)+'</td><td><span class="tag">'+esc(c.tag)+'</span></td></tr>'}).join('')+'</table></div>';
     if(x.risks&&x.risks.length) h+='<div class="muted" style="margin-top:6px">변수: '+x.risks.map(esc).join(' · ')+'</div>';
     return h+'</div>';
   }
@@ -193,7 +200,7 @@
     function render(){
       box.innerHTML=''; var shown=0;
       secs.forEach(function(x){ if(on[x.id]){ box.innerHTML+=secCard(x); shown++; } });
-      if(!shown) box.innerHTML='<div class="muted" style="padding:10px">위 칩에서 볼 산업을 켜세요.</div>';
+      if(!shown) box.innerHTML='<div class="muted" style="padding:10px">위 칩에서 볼 산업을 켜세요.</div>'; else fillJudge();
       Array.prototype.forEach.call(chips.children, function(ch){ var id=ch.dataset.id; if(id) ch.className='btn'+(on[id]?' pri':''); });
     }
     // 지금 주목 배너
