@@ -1,7 +1,7 @@
-# v 20260904-1930  macro.py — CYGNUS 정적판의 수집기. data/indicators.json 을 읽어 FRED(공식)·Yahoo(보조) 값을 모은다.
+# v 20260904-2230  macro.py — CYGNUS 정적판의 수집기. data/indicators.json 을 읽어 FRED(공식)·Yahoo(보조) 값을 모은다.
 # 쓰기: facts/macro.json(최신), facts/macro_history.json(일별 누적), data/status.json(job macro)
 # 규칙: 시각 3칸(as_of=시장 기준일, published=출처 발표 시각(모르면 빈칸), collected_at=수집 KST). 실패한 지표는 값 대신 error 를 남긴다(조용한 실패 금지).
-import json, os, sys, csv, io, datetime as dt, urllib.request
+import json, os, sys, csv, io, datetime as dt, urllib.request, urllib.parse
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 P = lambda *a: os.path.join(ROOT, *a)
@@ -43,6 +43,25 @@ def fetch_stooq(symbol):
     if not rows: raise RuntimeError("stooq 응답 비어 있음(심볼 확인)")
     return rows[-5:]
 
+def fetch_yahoo_relay(symbol, relay):
+    """중계서버(Cloudflare Worker) 경유 야후 차트 1일 — GitHub 서버가 야후에 직접 막혀도 중계로 우회.
+    반환: [(전일자, 전일종가), (오늘, 현재가)] — run() 의 change_pct 계산에 맞춤."""
+    yurl = "https://query1.finance.yahoo.com/v8/finance/chart/%s?range=1d&interval=1d" % symbol
+    url = relay.rstrip("/") + "/?url=" + urllib.parse.quote(yurl, safe="")
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (macro)"})
+    d = json.loads(urllib.request.urlopen(req, timeout=25).read().decode("utf-8", "replace"))
+    m = d["chart"]["result"][0]["meta"]
+    price = m.get("regularMarketPrice")
+    pv = m.get("chartPreviousClose") or m.get("previousClose")
+    if price is None:
+        raise RuntimeError("야후 응답에 가격 없음")
+    today = kst_now().date().isoformat()
+    rows = []
+    if pv is not None:
+        rows.append(((kst_now().date() - dt.timedelta(days=1)).isoformat(), float(pv)))
+    rows.append((today, float(price)))
+    return rows
+
 FETCH = {"fred": fetch_fred, "yahoo": fetch_yahoo, "stooq": fetch_stooq}
 
 def judge(ind, value, change_pct):
@@ -67,22 +86,29 @@ def run(fetch_map=None, manual=None):
         rec = {"id": ind["id"], "name": ind["name"], "unit": ind["unit"], "axis": ind["axis"], "source": ind["source"],
                "symbol": ind["symbol"], "official": ind["official"], "rule": ind.get("rule", ""),
                "value": None, "prev": None, "change_pct": None, "as_of": "", "published": "", "collected_at": kst_iso(), "judge": "", "error": "", "pending": False}
+        rows = None
         try:
             if ind["source"] == "manual":
                 m = manual.get(ind["id"])
                 if m: rec.update({"value": float(m["value"]), "as_of": m.get("as_of", ""), "published": m.get("published", "")})
                 elif ind.get("optional"): rec["pending"] = True          # 참고 지표 미입력 = 오류 아님
                 else: rec["error"] = "수동 입력 없음(raw/manual_macro.json)"
-            else:
+            elif ind["source"] == "yahoo_relay":
+                relay = cfg.get("relay", "")
                 try:
-                    rows = fetch_map[ind["source"]](ind["symbol"])
+                    if not relay: raise RuntimeError("relay 주소 없음(indicators.json)")
+                    rows = fetch_yahoo_relay(ind["yahoo"], relay)
                     if len(rows) < 1: raise RuntimeError("데이터 없음")
-                except Exception as e1:                                  # 1순위 실패 → 예비 출처(있으면) 한 번 더
-                    fb = ind.get("fallback")
-                    if not fb or fb["source"] not in fetch_map: raise
-                    rows = fetch_map[fb["source"]](fb["symbol"])
-                    if len(rows) < 1: raise RuntimeError(f"1순위 {e1} / 예비도 데이터 없음")
-                    rec["source"] = fb["source"] + "(예비)"; rec["symbol"] = fb["symbol"]
+                except Exception as e1:                                  # 중계 실패 → FRED 예비(있으면)
+                    fbc = ind.get("fred_fallback")
+                    if not fbc: raise
+                    rows = fetch_fred(fbc)
+                    if len(rows) < 1: raise RuntimeError(f"중계 {e1} / FRED 예비도 없음")
+                    rec["source"] = "fred(예비)"; rec["symbol"] = fbc
+            else:
+                rows = fetch_map[ind["source"]](ind["symbol"])
+                if len(rows) < 1: raise RuntimeError("데이터 없음")
+            if rows is not None:                                          # yahoo_relay·else 공통: 받아온 값을 rec 에 넣는다
                 rec["as_of"], rec["value"] = rows[-1]
                 if len(rows) >= 2:
                     rec["prev"] = rows[-2][1]
@@ -99,7 +125,7 @@ def run(fetch_map=None, manual=None):
                     "official": True, "rule": "0 아래=역전", "value": round(v["us10y"]["value"] - v["us2y"]["value"], 3), "prev": None, "change_pct": None,
                     "as_of": v["us10y"]["as_of"], "published": "", "collected_at": kst_iso(), "judge": "역전" if v["us10y"]["value"] < v["us2y"]["value"] else "정상", "error": ""})
     ok = sum(1 for r in out if r["value"] is not None)
-    save(P("facts", "macro.json"), {"schema": "macro/1", "version": "v 20260904-1930", "collected_at": kst_iso(), "ok": ok, "total": len(out), "items": out})
+    save(P("facts", "macro.json"), {"schema": "macro/1", "version": "v 20260904-2230", "collected_at": kst_iso(), "ok": ok, "total": len(out), "items": out})
     # 이력: 날짜(KST) 키로 값만
     hist = load(P("facts", "macro_history.json"), {"schema": "macro_history/1", "days": {}})
     today = kst_now().date().isoformat()
