@@ -1,4 +1,4 @@
-# v 20260904-1700  macro.yml — CYGNUS 매크로 수집(scripts/macro.py) 하루 2회. 정각 회피 + concurrency + 실패 시 status.json fail + ntfy
+# v 20260904-1830  macro.yml — CYGNUS 매크로 수집(scripts/macro.py) 하루 2회. 정각 회피 + concurrency + 실패 시 status.json fail + ntfy
 name: Macro Collector
 on:
   schedule:
@@ -20,22 +20,24 @@ jobs:
           python-version: '3.11'
       - name: 패키지 설치
         run: pip install yfinance==0.2.54
-      - name: 수집 실행
-        run: python scripts/macro.py
-      - name: 변경분 커밋
-        if: always()
+      - name: 실행하고 커밋·push (충돌 나면 최신으로 다시 실행)
         run: |
+          set -e
           git config user.name "macro-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add facts/macro.json facts/macro_history.json data/status.json 2>/dev/null || true
-          if git diff --cached --quiet; then echo "::notice::변경 없음"; exit 0; fi
-          git commit -m "auto: macro $(date -u +%Y-%m-%dT%H:%MZ)"
-          for i in 1 2 3; do
-            git pull --rebase --autostash || true
-            git push && exit 0
-            sleep $((i*5))
+          # 원리: 커밋 전에 최신을 받고 → 실행 → 커밋 → push. push 가 밀리면(그 사이 누가 올림) 최신으로 되돌리고 다시 실행.
+          # 옛 방식(커밋 후 pull --rebase)은 data/status.json 이 양쪽에서 바뀌어 rebase 충돌 → detached HEAD 로 3회 실패했음(2026-09-04).
+          for i in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            python scripts/macro.py
+            git add facts/macro.json facts/macro_history.json data/status.json 2>/dev/null || true
+            if git diff --cached --quiet; then echo "::notice::변경 없음"; exit 0; fi
+            git commit -q -m "auto: macro $(date -u +%Y-%m-%dT%H:%MZ)"
+            if git push origin HEAD:main; then echo "::notice::push 성공 (시도 $i 회)"; exit 0; fi
+            echo "push 밀림 — $((i*5))초 뒤 최신으로 다시 실행"; sleep $((i*5))
           done
-          echo "::error::push 3회 실패"; exit 1
+          echo "::error::push 4회 실패"; exit 1
       - name: 실패하면 폰으로 알림
         if: failure()
         env:
