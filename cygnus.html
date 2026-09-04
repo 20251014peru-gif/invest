@@ -1,4 +1,4 @@
-<!-- v 20260904-2330  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260904-2400  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -56,6 +56,7 @@
   <h2 id="sectors">산업 사슬 <span class="tag">공정 순서 · 회사 다섯 칸 · 판단은 달님 칸</span><span class="tag">🔗 축 연결 = 시장→산업→종목</span></h2>
   <p class="muted" style="margin:-4px 0 8px">각 산업에 <b>관련 대변화 축</b>이 붙어 있어요. 위 레짐/축이 움직이면 → 그 축에 걸린 산업을 보고 → 그 산업의 회사(종목)로 좁혀갑니다.</p>
   <div class="card" id="dartPanel" style="margin-bottom:12px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>📢 최근 공시</b><span class="tag" id="dartTag">DART 자동 수집</span></div><div id="dartBox" class="muted" style="margin-top:6px">불러오는 중…</div></div>
+  <div id="sectorChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
   <div id="sectorBox"></div>
 
   <h2>영웅문 붙여넣기 — 수급 <span class="tag">투자자별 매매동향 화면을 복사해서 붙여넣기</span></h2>
@@ -65,10 +66,10 @@
     <div id="parsed"></div>
   </div>
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2330"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2400"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-2330';
+  document.getElementById('ver').textContent='v 20260904-2400';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -163,17 +164,39 @@
         return '<tr><td>'+esc(d2)+'</td><td><b>'+esc(i.company)+'</b> <small>'+esc(i.sector)+'</small></td><td><span class="j" style="background:'+(KC[i.kind]||'#eef')+'">'+esc(i.kind)+'</span></td><td><a href="'+esc(i.url)+'" target="_blank" rel="noopener">'+esc(i.report_nm)+'</a></td></tr>';}).join('')+'</table></div>';
   }).catch(function(e){ document.getElementById('dartBox').textContent='공시 못 불러옴: '+e.message; });
 
+  // 산업 사슬 — 노션식 토글: 볼 산업만 켜고 나머지는 끈다(브라우저 기억). 값 있을 때만 카드.
+  var SECLS='cygnus_sectors_on';
+  function secCard(x){
+    var h='<div class="card" style="margin-bottom:10px"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>'+esc(x.name)+'</b><span class="tag">'+esc(x.phase)+'</span><span class="tag">'+esc(x.phase_tag||'')+'</span><span class="muted">기준 '+esc(x.as_of)+'</span></div>';
+    h+='<div class="muted" style="margin:6px 0">'+(x.chain||[]).map(esc).join(' → ')+(x.timing?' · '+esc(x.timing.note)+' <span class="tag">'+esc(x.timing.tag)+'</span>':'')+'</div>';
+    if(x.axes&&x.axes.length){ h+='<div style="margin:4px 0 8px">'+x.axes.map(function(a){return '<span class="tag" title="'+esc(a.why)+'" style="background:#ede9fe;border-color:#c4b5fd;cursor:help">🔗 '+esc(a.name)+'</span>'}).join(' ')+' <span class="muted" style="font-size:12px">← 이 축이 움직이면 이 산업을 본다 (탭하면 이유)</span></div>'; }
+    h+='<div style="overflow-x:auto"><table><tr><th>고리</th><th>회사</th><th>상태</th><th>근거</th><th>판단(달님)</th><th>검증(뭘 보면 판가름)</th><th>표시</th></tr>'+
+      (x.companies||[]).map(function(c){return '<tr><td>'+esc(c.link)+'</td><td><b>'+esc(c.name)+'</b>'+(c.code?' <small>'+esc(c.code)+'</small>':'')+'</td><td>'+esc(c.state)+'</td><td>'+esc(c.evidence)+'</td><td>'+(c.judgement?esc(c.judgement):'<span class="muted">비어 있음</span>')+'</td><td>'+esc(c.verify)+'</td><td><span class="tag">'+esc(c.tag)+'</span></td></tr>'}).join('')+'</table></div>';
+    if(x.risks&&x.risks.length) h+='<div class="muted" style="margin-top:6px">변수: '+x.risks.map(esc).join(' · ')+'</div>';
+    return h+'</div>';
+  }
   get('data/sectors.json').then(function(d){
-    var box=document.getElementById('sectorBox');
-    (d.sectors||[]).forEach(function(x){
-      var h='<div class="card" style="margin-bottom:10px"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>'+esc(x.name)+'</b><span class="tag">'+esc(x.phase)+'</span><span class="tag">'+esc(x.phase_tag||'')+'</span><span class="muted">기준 '+esc(x.as_of)+'</span></div>';
-      h+='<div class="muted" style="margin:6px 0">'+(x.chain||[]).map(esc).join(' → ')+(x.timing?' · '+esc(x.timing.note)+' <span class="tag">'+esc(x.timing.tag)+'</span>':'')+'</div>';
-      if(x.axes&&x.axes.length){ h+='<div style="margin:4px 0 8px">'+x.axes.map(function(a){return '<span class="tag" title="'+esc(a.why)+'" style="background:#ede9fe;border-color:#c4b5fd;cursor:help">🔗 '+esc(a.name)+'</span>'}).join(' ')+' <span class="muted" style="font-size:12px">← 이 축이 움직이면 이 산업을 본다 (탭하면 이유)</span></div>'; }
-      h+='<div style="overflow-x:auto"><table><tr><th>고리</th><th>회사</th><th>상태</th><th>근거</th><th>판단(달님)</th><th>검증(뭘 보면 판가름)</th><th>표시</th></tr>'+
-        (x.companies||[]).map(function(c){return '<tr><td>'+esc(c.link)+'</td><td><b>'+esc(c.name)+'</b>'+(c.code?' <small>'+esc(c.code)+'</small>':'')+'</td><td>'+esc(c.state)+'</td><td>'+esc(c.evidence)+'</td><td>'+(c.judgement?esc(c.judgement):'<span class="muted">비어 있음</span>')+'</td><td>'+esc(c.verify)+'</td><td><span class="tag">'+esc(c.tag)+'</span></td></tr>'}).join('')+'</table></div>';
-      if(x.risks&&x.risks.length) h+='<div class="muted" style="margin-top:6px">변수: '+x.risks.map(esc).join(' · ')+'</div>';
-      box.innerHTML+=h+'</div>';
-    });
+    var secs=d.sectors||[], on={};
+    try{ on=JSON.parse(localStorage.getItem(SECLS)||'null')||{}; }catch(e){}
+    var first=secs.length?secs[0].id:null;
+    secs.forEach(function(x,i){ if(on[x.id]===undefined) on[x.id]=(i===0); });  // 첫 방문: 첫 산업만 켬
+    function save(){ try{localStorage.setItem(SECLS,JSON.stringify(on))}catch(e){} }
+    var chips=document.getElementById('sectorChips'), box=document.getElementById('sectorBox');
+    function render(){
+      box.innerHTML=''; var shown=0;
+      secs.forEach(function(x){ if(on[x.id]){ box.innerHTML+=secCard(x); shown++; } });
+      if(!shown) box.innerHTML='<div class="muted" style="padding:10px">위 칩에서 볼 산업을 켜세요.</div>';
+      Array.prototype.forEach.call(chips.children, function(ch){ var id=ch.dataset.id; if(id) ch.className='btn'+(on[id]?' pri':''); });
+    }
+    chips.innerHTML='<button class="btn" type="button" data-all="1">모두</button><button class="btn" type="button" data-none="1">끄기</button>'+
+      secs.map(function(x){return '<button class="btn" type="button" data-id="'+esc(x.id)+'">'+esc(x.name)+'</button>'}).join('');
+    chips.onclick=function(e){ var b=e.target.closest('button'); if(!b)return;
+      if(b.dataset.all){ secs.forEach(function(x){on[x.id]=true}); }
+      else if(b.dataset.none){ secs.forEach(function(x){on[x.id]=false}); }
+      else if(b.dataset.id){ on[b.dataset.id]=!on[b.dataset.id]; }
+      save(); render();
+    };
+    render();
   }).catch(function(e){console.error(e.message)});
   // 영웅문 붙여넣기 v1 — 줄 단위로 '외국인/기관/개인' 뒤 첫 숫자, '코스피/코스닥' 뒤 첫 숫자와 등락
   var last=null;
