@@ -1,0 +1,10 @@
+{
+  "schema": "registry/1",
+  "_설명": "프로그램 추가 = 파일 1개 + 여기 한 줄(원칙 9). status: active | planned | stopped. 지우지 않고 stopped 로(철칙 2).",
+  "programs": [
+    { "id": "hub",    "name": "허브",        "file": "index.html",    "axis": "화면",  "status": "active",  "since": "2026-09-04", "reads": ["data/status.json", "data/registry.json"], "writes": [] },
+    { "id": "status", "name": "경고 띠·🐞", "file": "js/status.js",  "axis": "공통",  "status": "active",  "since": "2026-09-04", "reads": ["data/status.json"], "writes": [] },
+    { "id": "axes",   "name": "대변화 축 8개", "file": "data/axes.json", "axis": "내용", "status": "planned", "since": "", "reads": [], "writes": [] },
+    { "id": "strategies", "name": "전략 카드 5개", "file": "data/strategies.json", "axis": "내용", "status": "planned", "since": "", "reads": [], "writes": [] }
+  ]
+}
