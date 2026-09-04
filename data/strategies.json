@@ -1,0 +1,181 @@
+{
+  "schema": "strategies/1",
+  "version": "v 20260904-1340",
+  "_설명": "전략은 독립 카드, 종합점수 금지(원칙 14). 먼저 5개, 나머지 7개는 reserved 슬롯. 각 카드: 정량 초안·종목 유형·손절가·무효화·출처·보유기간",
+  "risk_rules": {
+    "_설명": "달님 확정 규칙(2026-07, 확인)",
+    "per_trade_loss_pct": 5,
+    "positions": 10,
+    "atr_multiple": 1.5,
+    "account_drawdown_stop_pct": 12.5,
+    "min_shares": 10,
+    "hold": "장세에 따라 다름(무조건 2~3주 아님)",
+    "execution": "전날 저녁 분석 + 아침 확인 후 예약주문. 실시간 매매 없음"
+  },
+  "strategies": [
+    {
+      "id": "supply",
+      "name": "수급",
+      "status": "active",
+      "idea": "외국인·기관이 같은 방향으로 계속 사는 종목은 추세가 이어진다",
+      "quant_draft": {
+        "foreign_net_buy_days": "5일 중 4일 이상 순매수",
+        "inst_net_buy": "같은 기간 기관도 순매수",
+        "turnover": "20일 평균 거래대금 50억 이상"
+      },
+      "stock_types": [
+        "대형·중형주",
+        "외인 지분 변화가 큰 종목"
+      ],
+      "stop_loss": "진입가 −5% 또는 ATR×1.5 중 가까운 것",
+      "invalidation": "외인 순매수가 3일 연속 순매도로 바뀌면 근거 소멸",
+      "sources": [
+        "KRX 투자자별 매매동향",
+        "영웅문 수급 화면(수동 붙여넣기)"
+      ],
+      "holding": "장세별: 상승장 2~3주 / 횡보 1주 / 하락장 진입 안 함",
+      "inputs": [
+        "facts/supply"
+      ],
+      "_tag": "카드 틀·이름=확인(결정 2) · 정량 숫자=추정(오픈북 채점 뒤 조정)"
+    },
+    {
+      "id": "momentum",
+      "name": "가격 모멘텀",
+      "status": "active",
+      "idea": "최근 강했던 종목이 단기간 더 강한 경향. 단, 변동성이 정상일 때만",
+      "quant_draft": {
+        "rel_strength": "20일 수익률 상위 10%",
+        "above_ma": "20·60일선 위",
+        "vol_filter": "ATR/가격 비율이 60일 평균의 1.5배 이하일 때만"
+      },
+      "stock_types": [
+        "중형주·테마 주도주"
+      ],
+      "stop_loss": "ATR×1.5 트레일링",
+      "invalidation": "20일선 종가 이탈 또는 거래대금 급감(평균의 50% 이하)",
+      "sources": [
+        "공공데이터포털 금융위 주식시세",
+        "영웅문 차트(수동)"
+      ],
+      "holding": "1~3주",
+      "inputs": [
+        "facts/prices"
+      ],
+      "_tag": "카드 틀·이름=확인(결정 2) · 정량 숫자=추정(오픈북 채점 뒤 조정)"
+    },
+    {
+      "id": "earnings_revision",
+      "name": "실적·이익추정 변화",
+      "status": "active",
+      "idea": "이익 추정치가 올라가는 종목은 주가가 뒤따른다(perband 흡수: EPS×멀티플·리비전·4주 채점)",
+      "quant_draft": {
+        "eps_revision_4w": "+5% 이상",
+        "surprise": "직전 분기 컨센서스 상회",
+        "per_band": "12개월 선행 PER 이 5년 밴드 중간 이하"
+      },
+      "stock_types": [
+        "실적 발표 직후 상향 종목"
+      ],
+      "stop_loss": "진입가 −5%",
+      "invalidation": "다음 실적·잠정 공시가 하향이면 즉시 종료",
+      "sources": [
+        "OpenDART 잠정실적·분기보고서",
+        "컨센서스(재료)"
+      ],
+      "holding": "4주 후 오픈북 채점",
+      "inputs": [
+        "facts/earnings"
+      ],
+      "_tag": "카드 틀·이름=확인(결정 2) · 정량 숫자=추정(오픈북 채점 뒤 조정)"
+    },
+    {
+      "id": "event",
+      "name": "이벤트·공시",
+      "status": "active",
+      "idea": "수주·자사주·합병·유상증자 같은 공시는 방향이 정해진 재료",
+      "quant_draft": {
+        "positive": "수주(매출 대비 10% 이상)·자사주 매입·배당 확대",
+        "negative": "유상증자·전환사채·대주주 매도",
+        "react_window": "공시 후 2거래일 안에만 진입"
+      },
+      "stock_types": [
+        "공시 종목 전부(규모 무관)"
+      ],
+      "stop_loss": "진입가 −5%",
+      "invalidation": "공시 정정·철회, 또는 공시 후 3일간 방향 반대",
+      "sources": [
+        "OpenDART(dart-collector)",
+        "SEC EDGAR 8-K"
+      ],
+      "holding": "이벤트별 1~4주",
+      "inputs": [
+        "raw/dart"
+      ],
+      "_tag": "카드 틀·이름=확인(결정 2) · 정량 숫자=추정(오픈북 채점 뒤 조정)"
+    },
+    {
+      "id": "sector_theme",
+      "name": "산업·테마",
+      "status": "active",
+      "idea": "산업 국면(밸류체인)과 테마 자금이 몰리는 곳을 먼저 잡는다(산업지도·theme_tracker 흡수)",
+      "quant_draft": {
+        "sector_rs": "업종 지수 20일 상대강도 상위 3",
+        "breadth": "업종 내 20일선 위 종목 60% 이상",
+        "news_count": "뉴스레이더 테마 언급 증가(재료)"
+      },
+      "stock_types": [
+        "업종 대표주·밸류체인 핵심 공급사"
+      ],
+      "stop_loss": "ATR×1.5 또는 −5%",
+      "invalidation": "업종 상대강도가 하위 50% 로 떨어지면 종료",
+      "sources": [
+        "KRX 업종지수",
+        "OpenDART(밸류체인 회사 공시)",
+        "뉴스레이더(재료)"
+      ],
+      "holding": "2~4주",
+      "inputs": [
+        "analysis/sector"
+      ],
+      "_tag": "카드 틀·이름=확인(결정 2) · 정량 숫자=추정(오픈북 채점 뒤 조정)"
+    }
+  ],
+  "reserved": [
+    {
+      "id": "value",
+      "name": "가치",
+      "status": "reserved"
+    },
+    {
+      "id": "growth",
+      "name": "성장",
+      "status": "reserved"
+    },
+    {
+      "id": "contrarian",
+      "name": "역추세(축 6 반대 시나리오로 대체)",
+      "status": "reserved"
+    },
+    {
+      "id": "seasonal",
+      "name": "계절",
+      "status": "reserved"
+    },
+    {
+      "id": "dividend",
+      "name": "배당",
+      "status": "reserved"
+    },
+    {
+      "id": "hedge",
+      "name": "헤지",
+      "status": "reserved"
+    },
+    {
+      "id": "macro",
+      "name": "거시",
+      "status": "reserved"
+    }
+  ]
+}

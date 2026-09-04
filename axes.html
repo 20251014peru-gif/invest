@@ -1,0 +1,97 @@
+<!-- v 20260904-1340  axes.html — 대변화 축 8개×6단계 + 레짐 요약 + 전략 카드 5개 보기. 데이터는 data/axes.json · data/strategies.json (읽기 전용) -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>축·전략 보기</title>
+<style>
+  :root{--bg:#f6f7fb;--card:#fff;--line:#e3e6ee;--ink:#1f2430;--sub:#6b7280;--p1:#dbeafe;--p3:#fef3c7;--p5:#fee2e2;--p2:#dcfce7}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+  header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;flex:1}
+  header small{color:var(--sub);font-size:12px}
+  .btn{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);font:inherit;font-size:14px;cursor:pointer}
+  .btn.on{background:var(--p1);border-color:#93c5fd}
+  main{padding:14px 16px 80px;max-width:1440px;margin:0 auto}
+  h2{font-size:16px;margin:18px 0 8px;display:flex;align-items:center;gap:8px}
+  .tag{font-size:12px;padding:1px 8px;border-radius:8px;border:1px solid var(--line);color:var(--sub)}
+  .tag.est{border-style:dashed}.tag.unk{background:var(--p5)}
+  .wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px}
+  table{border-collapse:collapse;width:100%;min-width:1100px;font-size:13.5px}
+  th{background:var(--p1);padding:8px 10px;text-align:left;position:sticky;top:0;white-space:nowrap}
+  td{padding:8px 10px;border-top:1px solid var(--line);vertical-align:top}
+  td.name{font-weight:700;white-space:nowrap;background:#fafbff}
+  td.name small{display:block;font-weight:400;color:var(--sub);font-size:12px;white-space:normal;max-width:180px}
+  td.cur{background:var(--p3)}
+  .regime{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+  .regime .k{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+  .regime .k b{display:block;font-size:12px;color:var(--sub)}
+  .cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  .card h3{margin:0 0 6px;font-size:15px;display:flex;gap:8px;align-items:center}
+  .card dl{margin:0;display:grid;grid-template-columns:78px 1fr;gap:4px 8px;font-size:13.5px}
+  .card dt{color:var(--sub)}.card dd{margin:0}
+  .card ul{margin:0;padding-left:16px}
+  body.phone table{min-width:0;font-size:13px}
+  body.phone th:nth-child(n+4),body.phone td:nth-child(n+4){display:none}
+  .risk{background:var(--p2);border-radius:12px;padding:10px 14px;font-size:14px;margin-bottom:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>축·전략 보기 <small id="ver"></small></h1>
+  <button class="btn" id="fullBtn" type="button">6단계 전부</button>
+  <a class="btn" href="index.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">허브</a>
+</header>
+<main>
+  <h2>레짐 요약 <span class="tag">성장×물가 4분면 + 유동성</span></h2>
+  <div class="regime" id="regime"></div>
+  <h2>대변화 축 8개 × 6단계 <span class="tag">틀 확인</span><span class="tag est">문장 추정</span><span class="tag unk">현재값 미확인</span></h2>
+  <div class="wrap"><table id="axes"><thead><tr><th>축</th><th>관측 지표 · 출처</th><th>현재(수준·방향)</th><th>변화 조건</th><th>영향 자산</th><th>일반 대응</th><th>반대 시나리오</th><th>무효화 조건</th></tr></thead><tbody></tbody></table></div>
+  <h2>전략 카드 5개 <span class="tag">독립 카드 · 종합점수 없음</span><span class="tag est">정량 추정</span></h2>
+  <div class="risk" id="risk"></div>
+  <div class="cards" id="cards"></div>
+</main>
+<script src="js/status.js" data-app="axes" data-version="v 20260904-1340"></script>
+<script>
+(function(){
+  document.getElementById('ver').textContent='v 20260904-1340';
+  var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var li=function(a){return Array.isArray(a)?'<ul>'+a.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>':esc(a)};
+  var phone=innerWidth<600, full=false, btn=document.getElementById('fullBtn');
+  function applyMode(){ document.body.classList.toggle('phone',phone&&!full); btn.classList.toggle('on',full); btn.textContent=full?'전부 보는 중':'6단계 전부'; }
+  btn.onclick=function(){ full=!full; applyMode(); }; applyMode();
+
+  fetch('data/axes.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+    var rg=d.regime||{}, rgEl=document.getElementById('regime');
+    [['성장',rg.growth],['물가',rg.inflation],['유동성',rg.liquidity],['4분면',rg.quadrant],['기준 시각',rg.as_of||'없음']].forEach(function(p){
+      rgEl.innerHTML+='<div class="k"><b>'+p[0]+'</b>'+esc(p[1]||'미확인')+'</div>';
+    });
+    var tb=document.querySelector('#axes tbody');
+    (d.axes||[]).forEach(function(a){
+      var c=a.current||{};
+      tb.innerHTML+='<tr><td class="name">'+esc(a.name)+'<small>'+esc(a.id)+'</small></td>'+
+        '<td>'+li(a.indicators)+'<div style="color:var(--sub);font-size:12px;margin-top:4px">출처: '+esc((a.sources||[]).join(' · '))+'</div></td>'+
+        '<td class="cur">'+esc(c.level)+' / '+esc(c.direction)+(c.as_of?'<br><small>'+esc(c.as_of)+'</small>':'')+(c.basis?'<br><small>근거: '+esc(c.basis)+'</small>':'')+'</td>'+
+        '<td>'+esc(a.change_condition)+'</td><td>'+li(a.affected_assets)+'</td><td>'+esc(a.general_response)+'</td><td>'+esc(a.reverse_scenario)+'</td><td>'+esc(a.invalidation)+'</td></tr>';
+    });
+  }).catch(function(e){ console.error('axes.json 읽기 실패: '+e.message); });
+
+  fetch('data/strategies.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+    var rk=d.risk_rules||{};
+    document.getElementById('risk').innerHTML='<b>리스크 규칙(달님 확정)</b> — 종목당 손실 '+esc(rk.per_trade_loss_pct)+'% · '+esc(rk.positions)+'종목 분산 · ATR×'+esc(rk.atr_multiple)+' · 계좌 고점 대비 −'+esc(rk.account_drawdown_stop_pct)+'% 서킷브레이커 · 최소 '+esc(rk.min_shares)+'주 · '+esc(rk.execution);
+    var el=document.getElementById('cards');
+    (d.strategies||[]).forEach(function(s){
+      var q=Object.keys(s.quant_draft||{}).map(function(k){return '<li><code>'+esc(k)+'</code> '+esc(s.quant_draft[k])+'</li>'}).join('');
+      el.innerHTML+='<div class="card"><h3>'+esc(s.name)+' <span class="tag">'+esc(s.id)+'</span></h3><dl>'+
+        '<dt>생각</dt><dd>'+esc(s.idea)+'</dd><dt>정량 초안</dt><dd><ul>'+q+'</ul></dd><dt>종목 유형</dt><dd>'+li(s.stock_types)+'</dd>'+
+        '<dt>손절</dt><dd>'+esc(s.stop_loss)+'</dd><dt>무효화</dt><dd>'+esc(s.invalidation)+'</dd><dt>보유</dt><dd>'+esc(s.holding)+'</dd><dt>출처</dt><dd>'+esc((s.sources||[]).join(' · '))+'</dd></dl></div>';
+    });
+    el.innerHTML+='<div class="card" style="border-style:dashed"><h3>보류 슬롯 '+(d.reserved||[]).length+'개</h3>'+esc((d.reserved||[]).map(function(r){return r.name}).join(' · '))+'</div>';
+  }).catch(function(e){ console.error('strategies.json 읽기 실패: '+e.message); });
+})();
+</script>
+</body>
+</html>

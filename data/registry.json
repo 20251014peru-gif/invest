@@ -2,9 +2,164 @@
   "schema": "registry/1",
   "_설명": "프로그램 추가 = 파일 1개 + 여기 한 줄(원칙 9). status: active | planned | stopped. 지우지 않고 stopped 로(철칙 2).",
   "programs": [
-    { "id": "hub",    "name": "허브",        "file": "index.html",    "axis": "화면",  "status": "active",  "since": "2026-09-04", "reads": ["data/status.json", "data/registry.json"], "writes": [] },
-    { "id": "status", "name": "경고 띠·🐞", "file": "js/status.js",  "axis": "공통",  "status": "active",  "since": "2026-09-04", "reads": ["data/status.json"], "writes": [] },
-    { "id": "axes",   "name": "대변화 축 8개", "file": "data/axes.json", "axis": "내용", "status": "planned", "since": "", "reads": [], "writes": [] },
-    { "id": "strategies", "name": "전략 카드 5개", "file": "data/strategies.json", "axis": "내용", "status": "planned", "since": "", "reads": [], "writes": [] }
+    {
+      "id": "hub",
+      "name": "허브",
+      "file": "index.html",
+      "axis": "화면",
+      "status": "active",
+      "since": "2026-09-04",
+      "reads": [
+        "data/status.json",
+        "data/registry.json"
+      ],
+      "writes": []
+    },
+    {
+      "id": "status",
+      "name": "경고 띠·🐞",
+      "file": "js/status.js",
+      "axis": "공통",
+      "status": "active",
+      "since": "2026-09-04",
+      "reads": [
+        "data/status.json"
+      ],
+      "writes": []
+    },
+    {
+      "id": "axes",
+      "name": "대변화 축 8개",
+      "file": "data/axes.json",
+      "axis": "내용",
+      "status": "active",
+      "since": "2026-09-04",
+      "reads": [],
+      "writes": []
+    },
+    {
+      "id": "strategies",
+      "name": "전략 카드 5개",
+      "file": "data/strategies.json",
+      "axis": "내용",
+      "status": "active",
+      "since": "2026-09-04",
+      "reads": [],
+      "writes": []
+    },
+    {
+      "id": "axes-view",
+      "name": "축·전략 보기",
+      "file": "axes.html",
+      "axis": "내용",
+      "status": "active",
+      "since": "2026-09-04",
+      "reads": [
+        "data/axes.json",
+        "data/strategies.json"
+      ],
+      "writes": []
+    },
+    {
+      "id": "telegram-bot",
+      "name": "달님알림봇(텔레그램)",
+      "file": "(로컬) 성공투자_회사/telegram_bot.py",
+      "axis": "알림",
+      "status": "stopped",
+      "since": "2026-09-04",
+      "reads": [],
+      "writes": [],
+      "note": "철칙 1 위반(PC 필요)·결정 1 텔레그램 제외. 기능은 dalnim-alerts 로. 달님이 로컬 실행을 멈춰야 실제 중단"
+    },
+    {
+      "id": "kiwoom-app",
+      "name": "성공투자_회사(Flask 8080·키움 브리지 5001)",
+      "file": "(로컬) 성공투자_회사/",
+      "axis": "판단",
+      "status": "stopped",
+      "since": "2026-09-04",
+      "reads": [],
+      "writes": [],
+      "note": "철칙 1 위반. 스크리너 로직만 CYGNUS 정적판으로 흡수 예정. 끄면 CYGNUS 33종목 시세도 멈춤 → CYGNUS 정적판 전환과 함께 끈다"
+    },
+    {
+      "id": "theme-tracker",
+      "name": "theme_tracker_gemini",
+      "file": "(로컬) theme_tracker_gemini.html",
+      "axis": "판단",
+      "status": "stopped",
+      "since": "2026-09-04",
+      "reads": [],
+      "writes": [],
+      "note": "연결 없음. 축·전략 카드(산업·테마)로 대체. Gemini 사용은 기준 위반"
+    },
+    {
+      "id": "stock-system",
+      "name": "stock-system(설계 원형)",
+      "file": "20251014peru-gif.github.io/_docs/stock-system.html",
+      "axis": "판단",
+      "status": "stopped",
+      "since": "2026-09-04",
+      "reads": [],
+      "writes": [],
+      "note": "정리1.bat 로 _docs 이동. 설계 참조만"
+    },
+    {
+      "id": "youtube-old",
+      "name": "youtube.html(구 요약기)",
+      "file": "(삭제) 20251014peru-gif.github.io/youtube.html",
+      "axis": "유튜브",
+      "status": "stopped",
+      "since": "2026-09-04",
+      "reads": [],
+      "writes": [],
+      "note": "정리1.bat 로 삭제. 기능은 검증엔진 v4.3 → flow 로"
+    },
+    {
+      "id": "verify-engine",
+      "name": "유튜버 검증 엔진 v4.3",
+      "file": "20251014peru-gif.github.io/youtube3.html + (로컬) Flask 5055",
+      "axis": "유튜브",
+      "status": "absorbing",
+      "since": "",
+      "reads": [],
+      "writes": [
+        "Firestore youtube_predictions"
+      ],
+      "note": "채점·신뢰도만 flow 로 흡수 예정(결정 11). 흡수 전엔 dalnim-alerts [유튜브] 입력이 끊기므로 순서 지킬 것"
+    },
+    {
+      "id": "cygnus-flask",
+      "name": "CYGNUS v2(Flask 7070)",
+      "file": "(로컬) CYGNUS/",
+      "axis": "판단",
+      "status": "absorbing",
+      "since": "",
+      "reads": [],
+      "writes": [],
+      "note": "정적판(invest 안)으로 새로 짓고 나서 중단"
+    },
+    {
+      "id": "industry-map",
+      "name": "산업 지도(hbm.html·dart-collector)",
+      "file": "(로컬) hbm.html / dart-collector.py",
+      "axis": "판단",
+      "status": "absorbing",
+      "since": "",
+      "reads": [],
+      "writes": [],
+      "note": "섹터는 CYGNUS 정적판으로 흡수, dart-collector 는 유지(결정 12)"
+    },
+    {
+      "id": "kakao-token",
+      "name": "카카오 토큰 보관",
+      "file": "Firestore system/kakao_token (단일)",
+      "axis": "알림",
+      "status": "planned",
+      "since": "",
+      "reads": [],
+      "writes": [],
+      "note": "로컬 kakao-mcp config.json 보관을 없애고 Firestore 한 곳으로(철칙 2). dalnim-alerts·kakao-mcp 폴더 접근 필요"
+    }
   ]
 }
