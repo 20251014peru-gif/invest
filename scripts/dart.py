@@ -36,7 +36,13 @@ def fetch_list(bgn, end, page):
         return json.loads(r.read().decode("utf-8"))
 
 def run():
-    if not KEY: raise SystemExit("DART_API_KEY 없음(GitHub Secret 에 등록)")
+    if not KEY:
+        stj = load(P("data", "status.json"), {"schema": "status/1", "jobs": []})
+        stj["jobs"] = [j for j in stj.get("jobs", []) if j.get("id") != "dart"] + [{"id": "dart", "name": "공시 수집",
+            "status": "stopped", "ran": kst_iso(), "due": "", "cause": "DART_API_KEY 미설정", "fix": "GitHub Secret 에 DART_API_KEY 등록하면 자동 수집", "link": "cygnus.html#sectors"}]
+        stj["updated"] = kst_iso(); save(P("data", "status.json"), stj)
+        print("DART_API_KEY 없음 — 공시 수집 건너뜀(정상 종료, 알림 없음)")
+        return 0
     sec = load(P("data", "sectors.json"), {"sectors": []})
     codes = {}   # stock_code -> {sector, company}
     for s in sec.get("sectors", []):

@@ -1,8 +1,8 @@
-# v 20260904-2330  dart.yml — 산업 사슬 종목의 DART 공시 수집(scripts/dart.py) 평일 4회. 정각 회피 + 실패 시 status fail + ntfy
+# v 20260904-3610  dart.yml — 산업 사슬 종목의 DART 공시 수집(scripts/dart.py) 평일 4회. 정각 회피 + 실패 시 status fail + ntfy
 name: DART Disclosure
 on:
   schedule:
-    - cron: '13 0,3,6,9 * * 1-5'   # 09:13·12:13·15:13·18:13 KST 평일
+    - cron: '15,45 * * * *'    # 매시 15·45분 — 30분마다, 수주 공시 빨리 잡기(컴 없이 자동)
   workflow_dispatch: {}
 permissions:
   contents: write
