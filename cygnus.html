@@ -1,4 +1,4 @@
-<!-- v 20260904-2140  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260904-2200  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -63,10 +63,10 @@
     <div id="parsed"></div>
   </div>
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2140"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2200"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-2140';
+  document.getElementById('ver').textContent='v 20260904-2200';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -84,11 +84,13 @@
   }
   // ── 실시간 (브라우저에서, 공개 CORS 프록시 경유) — 허브 index.html 의 검증된 프록시 체인 + 야후 차트 파싱 이식 ──
   // 네이버·야후 금융은 브라우저 직접요청을 CORS 로 막음 → codetabs·allorigins·corsproxy 를 거쳐 우회(허브가 프로덕션에서 쓰는 방식)
+  var RELAY=''; try{ RELAY=(localStorage.getItem('relay_url')||'').replace(/\/+$/,''); }catch(e){}  // 허브 ⚙ 중계서버 설정과 같은 키(같은 도메인이라 공유)
   var PX=[function(u){return u;},
           function(u){return 'https://api.codetabs.com/v1/proxy/?quest='+encodeURIComponent(u);},
           function(u){return 'https://api.allorigins.win/get?url='+encodeURIComponent(u);},
           function(u){return 'https://corsproxy.io/?url='+encodeURIComponent(u);},
           function(u){return 'https://api.allorigins.win/raw?url='+encodeURIComponent(u);}];
+  if(RELAY) PX.unshift(function(u){return RELAY+'/?url='+encodeURIComponent(u);});
   function fetchText(u,ms){ return new Promise(function(res,rej){ var c=('AbortController'in window)?new AbortController():null; var t=setTimeout(function(){ if(c)c.abort(); rej(0); }, ms||6000); fetch(u,c?{signal:c.signal}:{}).then(function(r){ clearTimeout(t); if(!r.ok){rej(0);return;} r.text().then(res,function(){rej(0);}); },function(){ clearTimeout(t); rej(0); }); }); }
   function parseMaybe(t){ var j=JSON.parse(t); if(j&&typeof j.contents==='string') return JSON.parse(j.contents); return j; }
   function pxJson(u){ return PX.reduce(function(pr,mk){ return pr.catch(function(){ return fetchText(mk(u),6000).then(parseMaybe); }); }, Promise.reject(0)); }
@@ -122,7 +124,7 @@
         }
         document.getElementById('liveNote').innerHTML= got.length
           ? '이 줄은 화면을 <b>여는 순간</b> 받은 실시간 값입니다. 지수는 공개 프록시를 거쳐서 들쭉날쭉할 수 있어요.'
-          : '지금은 <b>원달러만</b> 실시간이고 지수·원자재는 프록시가 막혀 못 받았습니다. 아래 매크로(FRED)는 며칠 늦은 기록이에요.';
+          : '지금은 <b>원달러만</b> 실시간입니다. 지수·원자재는 공개 프록시가 죽어서(허브도 마찬가지) 못 받아요. <b>중계서버</b>를 깔면 다 살아납니다 — 허브의 ⚙ 중계서버 설정에 주소만 넣으면 여기도 같이 적용돼요.';
       });
     });
   }
