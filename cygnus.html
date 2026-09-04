@@ -1,4 +1,4 @@
-<!-- v 20260904-2910  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260904-3010  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -42,17 +42,8 @@
   <a class="btn" href="axes.html">축·전략</a><a class="btn" href="predict.html">예측·채점</a><a class="btn" href="index.html">허브</a>
 </header>
 <main>
-  <h2>실시간 <span class="tag" id="liveTag">브라우저로 직접 · 화면 열 때 갱신</span></h2>
-  <div class="grid" id="live"></div>
-  <p class="muted" id="liveNote" style="margin:-4px 0 10px"></p>
-
   <h2>레짐 요약 <span class="tag">성장×물가 4분면 + 유동성 · 공식 근거 있을 때만</span></h2>
   <div class="regime" id="regime"></div>
-
-  <h2>매크로 지표 <span class="tag" id="macroTag"></span><span class="tag">FRED=공식(며칠 늦음)</span></h2>
-  <p class="muted" style="margin:-4px 0 8px">🕐 <b>(오늘/N일 전)</b> = 그 값의 기준일. FRED 는 실시간이 아니라 환율은 약 1주 늦습니다. <b>오늘 숫자가 필요하면 아래 「영웅문 붙여넣기」</b>를 쓰세요.</p>
-  <div class="grid" id="macro"></div>
-  <p class="muted" id="macroEmpty" hidden>아직 수집된 값이 없습니다 — GitHub Actions 「Macro Collector」를 한 번 실행하면 채워집니다.</p>
 
   <h2 id="sectors">산업 사슬 <span class="tag">공정 순서 · 회사 다섯 칸 · 판단은 달님 칸</span><span class="tag">🔗 축 연결 = 시장→산업→종목</span></h2>
   <p class="muted" style="margin:-4px 0 8px">각 산업에 <b>관련 대변화 축</b>이 붙어 있어요. 위 레짐/축이 움직이면 → 그 축에 걸린 산업을 보고 → 그 산업의 회사(종목)로 좁혀갑니다.</p>
@@ -100,11 +91,16 @@
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="sparseBtn" type="button">분석</button></div>
     <div id="sparsed"></div>
   </div>
+  <h2 id="ind">지표 — 실시간 + 매크로 <span class="tag" id="macroTag"></span><span class="tag">누르면 20·50일선 봉 위치 + 원본 링크</span></h2>
+  <p class="muted" style="margin:-4px 0 8px">각 카드를 <b>누르면</b> 20일·50일 이동평균선 사이 <b>현재 봉 위치</b>와 <b>원본 사이트 링크</b>가 열립니다. 값은 화면 열 때 실시간(야후) · 없으면 매크로(FRED, 며칠 늦음).</p>
+  <div id="indDetail"></div>
+  <div class="grid" id="indGrid"></div>
+  <p class="muted" id="macroEmpty" hidden>아직 수집된 값이 없습니다 — GitHub Actions 「Macro Collector」를 한 번 실행하면 채워집니다.</p>
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2910"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-3010"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-2910';
+  document.getElementById('ver').textContent='v 20260904-3010';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -141,32 +137,56 @@
     var c=chg==null?'':'<span class="'+(chg>0?'up':chg<0?'down':'')+'">'+(chg>0?'▲':chg<0?'▼':'')+' '+Math.abs(chg).toFixed(2)+'%</span>';
     el.innerHTML+='<div class="k" style="border-color:#93c5fd"><div class="n"><span>'+esc(name)+'</span><span style="color:#15803d">실시간</span></div><div class="v">'+(Math.abs(val)>=1000?val.toLocaleString('ko-KR',{maximumFractionDigits:0}):val.toLocaleString('ko-KR',{maximumFractionDigits:2}))+'<small>'+esc(unit)+'</small></div><div class="c">'+c+'</div><div class="src">'+esc(when)+'</div></div>';
   }
-  function loadLive(){
-    var now=window.Status.kstStr(new Date()).replace(' KST','');
-    // 순서=화면 순서. 심볼은 허브 YS 와 동일(검증). 원달러는 KRW=X
-    var L=[['원달러 환율','KRW=X','원'],['코스피','^KS11','pt'],['코스닥','^KQ11','pt'],['S&P500','^GSPC','pt'],['나스닥','^IXIC','pt'],['SOX 반도체','^SOX','pt'],['VIX','^VIX','pt'],['항셍','^HSI','pt'],['유가 WTI','CL=F','$'],['금','GC=F','$'],['구리','HG=F','$/lb']];
-    var slots={}; L.forEach(function(x){ slots[x[0]]=null; });
-    var jobs=L.map(function(x){ return yahoo(x[1]).then(function(r){ slots[x[0]]={v:r.v,chg:r.chg}; }).catch(function(){ slots[x[0]]='ERR'; }); });
-    Promise.all(jobs).then(function(){
-      // 원달러 야후 실패 시 예비: open.er-api.com (CORS 허용)
-      var fx=slots['원달러 환율'];
-      var pre=(fx==='ERR'||!fx) ? fetchText('https://open.er-api.com/v6/latest/USD',6000).then(function(t){ var d=JSON.parse(t); if(d.rates&&d.rates.KRW) slots['원달러 환율']={v:d.rates.KRW,chg:null,note:'시장환율'}; }).catch(function(){}) : Promise.resolve();
-      pre.then(function(){
-        document.getElementById('live').innerHTML='';
-        var got=[], miss=[];
-        L.forEach(function(x){ var r=slots[x[0]]; if(r&&r!=='ERR'){ got.push(x[0]); liveCard(x[0], r.v, r.chg, x[2], (r.note||'')+' '+now); } else { miss.push(x[0]); } });
-        // 실패한 것들은 카드로 쏟지 않고 한 줄로 — 화면이 고장난 것처럼 안 보이게
-        if(miss.length){
-          var el=document.getElementById('live');
-          el.innerHTML+='<div class="k" style="grid-column:1/-1;opacity:.85;border-style:dashed"><div class="n"><span>지수·원자재 '+miss.length+'개 실시간 대기</span></div><div class="v" style="font-size:13px;color:var(--sub);font-weight:400;line-height:1.5">'+miss.join(' · ')+'<br>지금 공개 프록시가 막혀 못 받았어요. <b>새로고침</b>하면 될 때도 있고, 안 되면 아래 매크로(FRED, 며칠 늦음)를 보거나 영웅문 값을 붙여넣으세요. 안정적으로 하려면 중계서버(무료)가 필요합니다.</div></div>';
-        }
-        document.getElementById('liveNote').innerHTML= got.length
-          ? '이 줄은 화면을 <b>여는 순간</b> 받은 실시간 값입니다. 지수는 공개 프록시를 거쳐서 들쭉날쭉할 수 있어요.'
-          : '지금은 <b>원달러만</b> 실시간입니다. 지수·원자재는 공개 프록시가 죽어서(허브도 마찬가지) 못 받아요. <b>중계서버</b>를 깔면 다 살아납니다 — 허브의 ⚙ 중계서버 설정에 주소만 넣으면 여기도 같이 적용돼요.';
-      });
+  function sma(a,n){ if(!a||a.length<n) return null; var s=0,i; for(i=a.length-n;i<a.length;i++) s+=a[i]; return s/n; }
+  function yahooHist(sym){ return pxJson('https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?range=6mo&interval=1d').then(function(d){ var r=d.chart.result[0]; var cl=(r.indicators.quote[0].close||[]).filter(function(v){return v!=null;}); return {closes:cl, price:cl.length?cl[cl.length-1]:null}; }); }
+  function srcLink(it){ if(it.yahoo) return {u:'https://finance.yahoo.com/quote/'+encodeURIComponent(it.yahoo),t:'Yahoo Finance ↗'}; var fid=it.fred||it.fred_fallback||it.symbol; if(it.source==='fred'&&fid) return {u:'https://fred.stlouisfed.org/series/'+encodeURIComponent(fid),t:'FRED ↗'}; return null; }
+  var IND=[], MV={};
+  function indCardHTML(it,i){
+    var m=MV[it.id]||{}; var val=m.value;
+    var vstr=(val==null)?'<span style="font-size:14px;color:var(--sub);font-weight:400">'+(it.yahoo?'실시간 대기…':'값 없음')+'</span>':fmt(val)+'<small>'+esc(it.unit||m.unit||'')+'</small>';
+    var badge=it.yahoo?'<span style="color:#15803d">실시간</span>':'<span>'+(it.source==='fred'?'FRED':it.source==='manual'?'수동':'')+'</span>';
+    return '<div class="k ind-card" data-i="'+i+'" style="cursor:pointer;border-color:'+(it.yahoo?'#93c5fd':'#e5e7eb')+'" title="누르면 20·50일선 위치·링크"><div class="n"><span>'+esc(it.name)+'</span>'+badge+'</div><div class="v" id="indv'+i+'">'+vstr+'</div><div class="c" id="indc'+i+'"></div><div class="src">누르기 ▸ 20·50일선</div></div>';
+  }
+  function loadInd(){
+    Promise.all([ get('data/indicators.json').catch(function(){return {items:[]};}), get('facts/macro.json').catch(function(){return {items:[]};}) ]).then(function(res){
+      IND=(res[0].items||[]); MV={}; (res[1].items||[]).forEach(function(m){ MV[m.id||m.name]=m; });
+      var g=document.getElementById('indGrid'); if(!g)return;
+      var mt=document.getElementById('macroTag'); if(mt&&res[1].collected_at) mt.textContent='매크로 수집 '+window.Status.kstStr(res[1].collected_at);
+      document.getElementById('macroEmpty').hidden=IND.length>0;
+      g.innerHTML=IND.map(indCardHTML).join('');
+      IND.forEach(function(it,i){ if(!it.yahoo) return; yahoo(it.yahoo).then(function(r){
+        var v=document.getElementById('indv'+i), c=document.getElementById('indc'+i);
+        if(v&&r.v!=null) v.innerHTML=fmt(r.v)+'<small>'+esc(it.unit||'')+'</small>';
+        if(c&&r.chg!=null) c.innerHTML='<span class="'+(r.chg>0?'up':r.chg<0?'down':'')+'">'+(r.chg>0?'▲':r.chg<0?'▼':'')+' '+Math.abs(r.chg).toFixed(2)+'%</span>';
+      }).catch(function(){}); });
     });
   }
-  loadLive();
+  document.addEventListener('click',function(e){ var t=e.target; var card=t&&t.closest?t.closest('.ind-card'):null; if(card){ showIndDetail(IND[+card.getAttribute('data-i')]); } });
+  function showIndDetail(it){ if(!it)return; var box=document.getElementById('indDetail'); var lk=srcLink(it);
+    box.innerHTML='<div class="card" style="border-color:#93c5fd;background:#f8fbff"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><b style="font-size:16px">'+esc(it.name)+' — 20·50일선 봉 위치</b><span>'+(lk?'<a class="btn" target="_blank" rel="noopener" href="'+lk.u+'">'+esc(lk.t)+'</a> ':'')+'<button class="btn" type="button" id="indClose">닫기</button></span></div><div id="maBody" style="margin-top:10px">'+(it.yahoo?'불러오는 중…':'')+'</div></div>';
+    document.getElementById('indClose').onclick=function(){ box.innerHTML=''; };
+    if(!it.yahoo){ var mm=MV[it.id]||{}; document.getElementById('maBody').innerHTML='<p class="muted">이 지표는 발표형(FRED/수동)이라 이동평균 봉 위치가 없어요. 위 <b>'+(lk?esc(lk.t):'원본')+'</b> 링크에서 추세를 보세요.'+(mm.value!=null?'<br>최근값 <b>'+fmt(mm.value)+'</b> '+esc(it.unit||'')+' (기준 '+esc(mm.as_of||'')+')':'')+'</p>'; return; }
+    yahooHist(it.yahoo).then(function(h){ var b=document.getElementById('maBody'); if(b) b.innerHTML=renderMAbar(h,it); }).catch(function(err){ var b=document.getElementById('maBody'); if(b) b.innerHTML='<p class="muted">이동평균을 못 받았어요('+esc(err&&err.message||'프록시 막힘')+'). 새로고침하거나 중계서버를 켜면 됩니다. 그동안 위 링크에서 차트를 보세요.</p>'; });
+    box.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+  function renderMAbar(h,it){
+    var p=h.price, m20=sma(h.closes,20), m50=sma(h.closes,50), u=esc(it.unit||'');
+    if(p==null) return '<p class="muted">가격 데이터가 없어요.</p>';
+    if(m20==null) return '<p class="muted">최근 거래일이 20일 미만이라 이동평균을 못 냅니다(현재 '+p.toLocaleString()+u+').</p>';
+    var al = (m50!=null)?((p>m20&&m20>m50)?['🟢 정배열(강세)','good']:(p<m20&&m20<m50)?['🔴 역배열(약세)','bad']:['🟡 혼조(전환 구간)','mid']):['🟡 20일선 기준','mid'];
+    var pos20=p>=m20?'위':'아래', pos50=m50!=null?(p>=m50?'위':'아래'):'-';
+    var vals=[p,m20]; if(m50!=null) vals.push(m50);
+    var lo=Math.min.apply(null,vals), hi=Math.max.apply(null,vals), pad=(hi-lo)*0.25||Math.abs(hi)*0.01; lo-=pad; hi+=pad;
+    function pc(x){ return ((x-lo)/(hi-lo)*100).toFixed(1); }
+    var bar='<div style="position:relative;height:56px;margin:20px 0 34px;background:linear-gradient(90deg,#fee2e2,#fef9c3,#dcfce7);border-radius:6px">';
+    if(m50!=null) bar+='<div style="position:absolute;left:'+pc(m50)+'%;top:0;bottom:0;border-left:2px dashed #6b7280"><span style="position:absolute;top:-17px;left:-16px;font-size:11px;color:#6b7280;white-space:nowrap">50일 '+Math.round(m50).toLocaleString()+'</span></div>';
+    bar+='<div style="position:absolute;left:'+pc(m20)+'%;top:0;bottom:0;border-left:2px solid #2563eb"><span style="position:absolute;bottom:-17px;left:-16px;font-size:11px;color:#2563eb;white-space:nowrap">20일 '+Math.round(m20).toLocaleString()+'</span></div>';
+    bar+='<div style="position:absolute;left:'+pc(p)+'%;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:#111;border:2px solid #fff;box-shadow:0 0 0 2px #111"><span style="position:absolute;top:-21px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:700;white-space:nowrap">봉 '+Math.round(p).toLocaleString()+'</span></div></div>';
+    var tbl='<table style="margin-top:4px"><tr><th>현재 봉</th><th>20일선</th><th>50일선</th><th>정렬</th></tr><tr><td><b>'+p.toLocaleString()+u+'</b></td><td>'+Math.round(m20).toLocaleString()+' <span class="muted">('+pos20+')</span></td><td>'+(m50!=null?Math.round(m50).toLocaleString()+' <span class="muted">('+pos50+')</span>':'-')+'</td><td><span class="j '+al[1]+'">'+al[0]+'</span></td></tr></table>';
+    var note='<p class="muted" style="font-size:12px;margin-top:6px">봉이 20일선 <b>'+pos20+'</b>'+(m50!=null?' · 50일선 <b>'+pos50+'</b>':'')+'. 정배열=단기(20)선이 장기(50)선 위 = 상승추세, 역배열=하락추세.</p>';
+    return bar+tbl+note;
+  }
+  loadInd();
 
   get('data/axes.json').then(function(d){
     var rg=d.regime||{}, el=document.getElementById('regime');
@@ -179,18 +199,7 @@
     el.innerHTML+='<div class="k" style="min-height:0;background:'+(eps?'#fffef5':'#fafafa')+'"><div class="n">⑤ 선행EPS(실적)</div><div class="v" style="font-size:16px">'+ev+ed+'</div></div>';
   }).catch(function(e){console.error(e.message)});
 
-  get('facts/macro.json').then(function(d){
-    var el=document.getElementById('macro'), items=d.items||[];
-    document.getElementById('macroTag').textContent='수집 '+window.Status.kstStr(d.collected_at)+' · '+d.ok+'/'+d.total;
-    document.getElementById('macroEmpty').hidden=items.length>0;
-    items.forEach(function(r){
-      if(r.value==null){ var pend=r.pending&&!r.error; el.innerHTML+='<div class="k'+(pend?'':' err')+'" style="'+(pend?'opacity:.7':'')+'"><div class="n"><span>'+esc(r.name)+'</span><span>'+(pend?'참고':'')+'</span></div><div class="v" style="'+(pend?'font-size:14px;color:var(--sub);font-weight:400':'')+'">'+(pend?'참고값 없음 (선택 입력)':esc(r.error||'값 없음'))+'</div><div class="src">'+esc(r.source)+'</div></div>'; return; }
-      var ch=r.change_pct==null?'':'<span class="'+(r.change_pct>0?'up':r.change_pct<0?'down':'')+'">'+(r.change_pct>0?'▲':r.change_pct<0?'▼':'')+' '+Math.abs(r.change_pct).toFixed(2)+'%</span>';
-      var j=r.judge?'<span class="j '+(JC[r.judge]||'mid')+'" title="'+esc(r.rule)+'">'+esc(r.judge)+'</span>':'';
-      var age=freshness(r.as_of);
-      el.innerHTML+='<div class="k"><div class="n"><span>'+esc(r.name)+'</span><span>'+(r.official?'공식':'보조')+'</span></div><div class="v">'+fmt(r.value)+'<small>'+esc(r.unit)+'</small></div><div class="c">'+ch+' '+j+'</div><div class="src">기준 '+esc(r.as_of)+age.badge+' · '+esc(r.source)+'</div></div>';
-    });
-  }).catch(function(){ document.getElementById('macroEmpty').hidden=false; });
+  // (매크로 카드는 하단 「지표」 섹션에서 실시간과 합쳐 렌더한다 — loadInd)
 
 
   get('facts/dart.json').then(function(d){
