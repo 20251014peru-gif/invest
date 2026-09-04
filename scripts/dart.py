@@ -93,9 +93,13 @@ def run():
     if new_orders and topic:
         body = "\n".join(f"[{o['sector']}] {o['company']} · {o['report_nm']}" for o in new_orders[:10])
         try:
-            urllib.request.urlopen(urllib.request.Request("https://ntfy.sh/" + topic, data=body.encode("utf-8"),
+            r = urllib.request.urlopen(urllib.request.Request("https://ntfy.sh/" + topic, data=body.encode("utf-8"),
                 headers={"Title": "[수주공시] 관심 종목", "Priority": "4"}), timeout=10)
-        except Exception: pass
+            print(f"ntfy 전송 OK (HTTP {r.status}) · 토픽 끝4자리=…{topic[-4:]} · 수주 {len(new_orders)}건")
+        except Exception as e:
+            print(f"ntfy 전송 실패: {type(e).__name__}: {e} · 토픽 끝4자리=…{topic[-4:]}")
+    elif new_orders and not topic:
+        print("새 수주 있으나 NTFY_TOPIC 미설정 — 알림 생략")
     return len(items)
 
 def fail(msg):
