@@ -1,4 +1,4 @@
-<!-- v 20260904-1420  index.html — invest 허브(문 하나). 첫 화면 7칸, 노션식(값 있을 때만)↔일반식, 칸 접기 기억, 자가 점검 -->
+<!-- v 20260904-1530  index.html — invest 허브(문 하나). 첫 화면 7칸, 노션식(값 있을 때만)↔일반식, 칸 접기 기억, 자가 점검 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -36,6 +36,7 @@
 <header>
   <h1>투자 시스템 허브 <small id="ver"></small></h1>
   <a class="btn" href="axes.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">축·전략</a>
+  <a class="btn" href="predict.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">예측·채점</a>
   <button class="btn" id="modeBtn" type="button">노션식</button>
   <button class="btn" id="checkBtn" type="button">자가 점검</button>
 </header>
@@ -47,10 +48,10 @@
   </section>
 </main>
 <div id="tip"></div>
-<script src="js/status.js" data-app="hub" data-version="v 20260904-1420"></script>
+<script src="js/status.js" data-app="hub" data-version="v 20260904-1530"></script>
 <script>
 (function(){
-  var VER='v 20260904-1420'; document.getElementById('ver').textContent=VER;
+  var VER='v 20260904-1530'; document.getElementById('ver').textContent=VER;
   var CELLS=[['market','c1'],['kr-us','c2'],['sector','c3'],['signals','c4'],['failed','c5'],['review','c6'],['alerts','c7']];
   var LS='hub_ui'; var ui={}; try{ui=JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){}
   function save(){ try{localStorage.setItem(LS,JSON.stringify(ui))}catch(e){} }
