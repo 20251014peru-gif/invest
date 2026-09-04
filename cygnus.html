@@ -1,4 +1,4 @@
-<!-- v 20260904-2530  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260904-2705  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -67,11 +67,29 @@
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="parseBtn" type="button">읽어내기</button><button class="btn" id="copyBtn" type="button" hidden>JSON 복사</button><span class="muted" style="align-self:center">복사한 JSON 을 raw/supply.json 의 items 에 붙여넣으면 전략 카드 '수급'의 재료가 됩니다</span></div>
     <div id="parsed"></div>
   </div>
+
+  <h2 id="eps">선행EPS 붙여넣기 — 실적(⑤축) <span class="tag">네이버 「기업실적분석」의 EPS·추정(E)을 복사</span></h2>
+  <div class="card">
+    <details style="margin-bottom:10px"><summary style="cursor:pointer;font-weight:600">📖 사용법 (처음이면 펼쳐 보세요)</summary>
+      <ol style="margin:8px 0;padding-left:20px;line-height:1.9">
+        <li>아래 <b>종목 버튼</b>을 누르면 그 종목의 네이버 「종목분석」 페이지가 새 탭으로 열립니다.</li>
+        <li>페이지 중간 <b>「기업실적분석」 표</b>에서 <b>EPS(원)</b> 줄을 찾습니다. 오른쪽에 <b>2025.12(E)</b> 처럼 <b>(E)</b> 붙은 칸이 <b>추정=선행 EPS</b>예요.</li>
+        <li>그 줄에서 <b>올해와 내년(E) 두 칸</b>을 눈으로 확인해, 여기에 <b>「종목명  올해EPS  내년EPS(E)」</b> 한 줄로 적습니다. (숫자만 왼→오 순서면 됩니다)</li>
+        <li>여러 종목을 <b>한 줄에 하나씩</b> 적고 <b>읽어내기</b>. 내년(E)이 올해보다 높으면 ↑상향, 낮으면 ↓하향으로 자동 판정됩니다.</li>
+        <li>확실히 상향/하향인 게 눈에 보이면 줄 끝에 <b>상향</b> 또는 <b>하향</b>을 적어도 됩니다(그 글자가 우선).</li>
+      </ol>
+      <p class="muted" style="margin:4px 0 0">예: <code>삼성전자  4,800  5,200</code> → 내년 5,200이 올해 4,800보다 높음 → <b>상향</b></p>
+    </details>
+    <div id="epsLinks" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
+    <textarea id="epaste" placeholder="한 줄에 한 종목:  종목명  올해EPS  내년EPS(E)&#10;예)&#10;삼성전자  4,800  5,200&#10;SK하이닉스  25,000  22,000  하향&#10;NAVER  9,050  9,100"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="eparseBtn" type="button">읽어내기</button><button class="btn" id="ecopyBtn" type="button" hidden>JSON 복사</button><span class="muted" style="align-self:center">읽은 결과는 이 브라우저에 저장되고 위 레짐 요약의 「⑤ 선행EPS」 칸이 바뀝니다. JSON 은 raw/eps.json 에 붙여넣으면 서버도 재료로 씁니다</span></div>
+    <div id="eparsed"></div>
+  </div>
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2530"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2705"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-2530';
+  document.getElementById('ver').textContent='v 20260904-2705';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -140,6 +158,10 @@
     [['성장',rg.growth],['물가',rg.inflation],['유동성',rg.liquidity],['4분면',rg.quadrant],['근거',rg.basis||'없음']].forEach(function(p){
       el.innerHTML+='<div class="k" style="min-height:0"><div class="n">'+p[0]+'</div><div class="v" style="font-size:16px">'+esc(p[1]||'미확인')+'</div></div>';
     });
+    var eps=loadEPS();
+    var ev = eps ? esc(eps.verdict) : '미확인';
+    var ed = eps ? (' <small style="color:var(--sub)">↑'+eps.up+' ↓'+eps.down+' · '+esc(eps.as_of)+'</small>') : ' <small style="color:var(--sub)">붙여넣기 없음</small>';
+    el.innerHTML+='<div class="k" style="min-height:0;background:'+(eps?'#fffef5':'#fafafa')+'"><div class="n">⑤ 선행EPS(실적)</div><div class="v" style="font-size:16px">'+ev+ed+'</div></div>';
   }).catch(function(e){console.error(e.message)});
 
   get('facts/macro.json').then(function(d){
@@ -243,6 +265,57 @@
     document.getElementById('copyBtn').hidden=false;
   };
   document.getElementById('copyBtn').onclick=function(){ var b=this; if(!last)return; (navigator.clipboard?navigator.clipboard.writeText(JSON.stringify(last)+','):Promise.reject()).then(function(){b.textContent='복사됨 ✓';setTimeout(function(){b.textContent='JSON 복사'},1500)},function(){}); };
+
+  // 선행EPS 붙여넣기 — ⑤축(실적) 재료. 줄마다 이름+추정EPS(+3개월전)+상향/하향 방향을 읽는다
+  var EKEY='cygnus_eps', elast=null;
+  function loadEPS(){ try{var v=localStorage.getItem(EKEY);return v?JSON.parse(v):null;}catch(e){return null;} }
+  function parseEPS(t){
+    var out={schema:'eps/1',as_of:window.Status.kstNow().toISOString().slice(0,10),collected_at:window.Status.kstStr(new Date()),source:'컨센서스 붙여넣기',items:[],up:0,down:0,verdict:'혼조/유지'};
+    t.split(/\r?\n/).forEach(function(l){
+      var s=l.trim(); if(!s)return;
+      var sc=s.replace(/\d+\s*개월\s*전?/g,'개월전').replace(/\d+\s*M\s*전?/gi,'M전'); // '3개월전'의 3 같은 기간 숫자 제거
+      var nums=(sc.replace(/,/g,'').match(/[-+]?\d+(?:\.\d+)?/g)||[]).map(parseFloat);
+      var upw=/상향|증가|개선|\+|올림|상승/.test(s), dnw=/하향|감소|악화|내림|하락|\-(?=\s|$)/.test(s);
+      // 이름 = 맨 앞의 숫자가 아닌 토큰들
+      var nm=(s.match(/^[^\d]+/)||[''])[0].replace(/추정|EPS|컨센서스|투자정보/g,'').trim();
+      if(!nm && !nums.length) return;
+      // 왼→오(과거→미래) 순으로 붙여넣는다고 보고, 맨 오른쪽=선행(내년E), 그 왼쪽=직전(올해)
+      var eps=nums.length?nums[nums.length-1]:null, prev=nums.length>1?nums[nums.length-2]:null, chg=null, dir='유지';
+      if(prev!=null&&eps!=null&&prev!==0){ chg=(eps-prev)/Math.abs(prev)*100; dir=chg>1?'상향':chg<-1?'하향':'유지'; }
+      if(upw) dir='상향'; if(dnw) dir='하향';
+      if(dir==='상향') out.up++; else if(dir==='하향') out.down++;
+      out.items.push({name:nm||'(이름없음)',eps:eps,prev:prev,chg_pct:chg==null?null:Math.round(chg*10)/10,dir:dir});
+    });
+    out.verdict = out.up>out.down?'상향(우호)':out.down>out.up?'하향(부담)':'혼조/유지';
+    return out;
+  }
+  function renderEPS(){
+    var eps=loadEPS(); if(!eps)return; var box=document.getElementById('eparsed'); if(!box)return;
+    box.innerHTML='<p><b>⑤축 결론:</b> <span class="tag" style="background:'+(eps.verdict.indexOf('상향')>=0?'#dcfce7':eps.verdict.indexOf('하향')>=0?'#fee2e2':'#f1f5f9')+'">'+esc(eps.verdict)+'</span> <span class="muted">상향 '+eps.up+' · 하향 '+eps.down+' · 기준 '+esc(eps.as_of)+'</span></p>'+
+      '<table><tr><th>종목</th><th>선행(내년E)</th><th>직전(올해)</th><th>변화</th><th>방향</th></tr>'+eps.items.map(function(r){return '<tr><td>'+esc(r.name)+'</td><td>'+(r.eps==null?'-':fmt(r.eps))+'</td><td>'+(r.prev==null?'-':fmt(r.prev))+'</td><td>'+(r.chg_pct==null?'-':(r.chg_pct>0?'▲':r.chg_pct<0?'▼':'')+Math.abs(r.chg_pct)+'%')+'</td><td><span class="'+(r.dir==='상향'?'up':r.dir==='하향'?'down':'')+'">'+esc(r.dir)+'</span></td></tr>'}).join('')+'</table>';
+  }
+  var epb=document.getElementById('eparseBtn');
+  if(epb){ epb.onclick=function(){
+    var t=document.getElementById('epaste').value; if(!t.trim())return;
+    elast=parseEPS(t); try{localStorage.setItem(EKEY,JSON.stringify(elast));}catch(e){}
+    renderEPS(); document.getElementById('ecopyBtn').hidden=false;
+    var rk=document.querySelectorAll('#regime .k'); if(rk.length){ var last=rk[rk.length-1]; if(/선행EPS/.test(last.textContent)){ last.querySelector('.v').innerHTML=esc(elast.verdict)+' <small style="color:var(--sub)">↑'+elast.up+' ↓'+elast.down+'</small>'; last.style.background='#fffef5'; } }
+  };
+    document.getElementById('ecopyBtn').onclick=function(){ var b=this; if(!elast)return; (navigator.clipboard?navigator.clipboard.writeText(JSON.stringify(elast)):Promise.reject()).then(function(){b.textContent='복사됨 ✓';setTimeout(function(){b.textContent='JSON 복사'},1500)},function(){}); };
+    renderEPS();
+    // 종목별 네이버 「기업실적분석」 바로가기 — sectors.json 에서 자동 생성
+    var lk=document.getElementById('epsLinks');
+    if(lk){ get('data/sectors.json').then(function(d){
+      (d.sectors||[]).forEach(function(sec){
+        var comps=(sec.companies||[]).filter(function(c){return c.code});
+        if(!comps.length) return;
+        lk.innerHTML += '<span class="muted" style="align-self:center;font-size:12px;margin-left:4px">'+esc(sec.name)+':</span>';
+        comps.forEach(function(c){
+          lk.innerHTML += '<a class="btn" style="padding:4px 9px;font-size:12px" target="_blank" rel="noopener" href="https://finance.naver.com/item/main.naver?code='+encodeURIComponent(c.code)+'">'+esc(c.name)+' ↗</a>';
+        });
+      });
+    }).catch(function(e){ lk.innerHTML='<span class="muted">종목 목록을 못 불러왔어요('+esc(e.message)+'). 네이버금융에서 종목명 검색 → 기업실적분석 표를 쓰세요.</span>'; }); }
+  }
 })();
 </script>
 </body>
