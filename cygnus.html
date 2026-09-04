@@ -1,4 +1,4 @@
-<!-- v 20260904-3110  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260904-3310  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -49,6 +49,7 @@
     <a class="btn" href="#supply" style="padding:4px 10px;font-size:13px">수급</a>
     <a class="btn" href="#eps" style="padding:4px 10px;font-size:13px">선행EPS</a>
     <a class="btn" href="#pos" style="padding:4px 10px;font-size:13px">종목위치</a>
+    <a class="btn" href="#cap" style="padding:4px 10px;font-size:13px">📸캡쳐분석</a>
     <a class="btn" href="#ind" style="padding:4px 10px;font-size:13px">지표</a>
   </div>
   <h2 id="regimeH">레짐 요약 <span class="tag">성장×물가 4분면 + 유동성 · 공식 근거 있을 때만</span></h2>
@@ -100,16 +101,20 @@
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="sparseBtn" type="button">분석</button></div>
     <div id="sparsed"></div>
   </div>
+  <h2 id="cap">📸 캡쳐 분석 결과 <span class="tag">캡쳐를 채팅에 보내면 Claude가 읽어 채움 · 복사 스크램블 없음</span></h2>
+  <p class="muted" style="margin:-4px 0 8px">네이버 종목 화면(기업실적분석/투자정보)을 <b>캡쳐해서 채팅에 보내면</b>, 이미지에서 직접 읽은 재무요약·고점진단·적정주가가 여기 종목별로 쌓입니다.</p>
+  <div id="capBox" class="muted">아직 분석된 캡쳐가 없어요. 네이버 종목 화면을 캡쳐해서 채팅에 보내주세요.</div>
+
   <h2 id="ind">지표 — 실시간 + 매크로 <span class="tag" id="macroTag"></span><span class="tag">누르면 20·50일선 봉 위치 + 원본 링크</span></h2>
   <p class="muted" style="margin:-4px 0 8px">각 카드를 <b>누르면</b> 20일·50일 이동평균선 사이 <b>현재 봉 위치</b>와 <b>원본 사이트 링크</b>가 열립니다. 값은 화면 열 때 실시간(야후) · 없으면 매크로(FRED, 며칠 늦음).</p>
   <div id="indDetail"></div>
   <div class="grid" id="indGrid"></div>
   <p class="muted" id="macroEmpty" hidden>아직 수집된 값이 없습니다 — GitHub Actions 「Macro Collector」를 한 번 실행하면 채워집니다.</p>
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-3110"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-3310"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-3110';
+  document.getElementById('ver').textContent='v 20260904-3310';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -334,6 +339,7 @@
   var epb=document.getElementById('eparseBtn');
   if(epb){ epb.onclick=function(){
     var t=document.getElementById('epaste').value; if(!t.trim())return;
+    if(/영업이익률|부채비율|자산총계|당기순이익/.test(t)){ document.getElementById('eparsed').innerHTML='<p class="muted" style="background:#fefce8;padding:8px;border-radius:6px">이건 <b>기업실적분석 표 전체</b>네요. 여기(선행EPS)는 간단한 줄만 읽어요. 아래 <b>「종목 위치 분석 — 네이버 통째 붙여넣기」</b> 칸에 넣으면 <b>재무 요약</b>이 나옵니다. (선행EPS만 넣으려면: 종목명  올해EPS  내년EPS)</p>'; return; }
     elast=parseEPS(t); try{localStorage.setItem(EKEY,JSON.stringify(elast));}catch(e){}
     renderEPS(); document.getElementById('ecopyBtn').hidden=false;
     var rk=document.querySelectorAll('#regime .k'); if(rk.length){ var last=rk[rk.length-1]; if(/선행EPS/.test(last.textContent)){ last.querySelector('.v').innerHTML=esc(elast.verdict)+' <small style="color:var(--sub)">↑'+elast.up+' ↓'+elast.down+'</small>'; last.style.background='#fffef5'; } }
@@ -432,8 +438,64 @@
     box.innerHTML=top+sig+'<table><tr><th>항목</th><th>계산 과정</th><th>판정</th></tr>'+rows.join('')+'</table>'+
       '<p class="muted" style="font-size:12px;margin-top:6px">※ 신호는 참고예요. 최종 판단은 아래 회사표 「판단(달님)」 칸에 적으세요.</p>';
   }
+  // 네이버 기업실적분석 전체 → 재무 요약(믿을 수 있는 블록만 + 일관성 검사 + 고점 진단)
+  function finLine(t,label){ var L=t.split(/\r?\n/); for(var i=0;i<L.length;i++){ if(L[i].indexOf(label)>=0){ var nz=(L[i].split(label).slice(1).join(label).replace(/,/g,'').match(/-?\d+(?:\.\d+)?/g)||[]).map(parseFloat); if(nz.length) return nz; } } return null; }
+  function parseFin(t){
+    if(!/영업이익률|ROE|부채비율/.test(t)) return null;
+    var f={ rev:finLine(t,'매출액'), op:finLine(t,'영업이익(발표기준)')||finLine(t,'영업이익'), ni:finLine(t,'당기순이익'),
+      opm:finLine(t,'영업이익률'), nim:finLine(t,'순이익률'), roe:finLine(t,'ROE'), debt:finLine(t,'부채비율'),
+      per:finLine(t,'PER'), pbr:finLine(t,'PBR'), divy:finLine(t,'배당수익률') };
+    f.consistent=null;
+    if(f.op&&f.rev&&f.opm&&f.rev[0]){ var calc=f.op[0]/f.rev[0]*100; f.consistent=Math.abs(calc-f.opm[0])<3; f.opmCalc=calc; }
+    return f;
+  }
+  function yoy(a){ return (a&&a.length>1&&a[1])?((a[0]-a[1])/Math.abs(a[1])*100):null; }
+  function pctTag(v){ return v==null?'':' <span class="'+(v>0?'up':v<0?'down':'')+'">'+(v>0?'▲':v<0?'▼':'')+Math.abs(v).toFixed(1)+'%</span>'; }
+  function renderFin(f){
+    if(!f) return '';
+    var rows=[];
+    if(f.rev) rows.push(['성장 · 매출', fmt(f.rev[0])+pctTag(yoy(f.rev)), '외형 성장']);
+    if(f.opm) rows.push(['수익성 · 영업이익률', f.opm[0]+'%'+pctTag(yoy(f.opm)), f.opm[0]>40?'초고마진(호황 정점 특징)':f.opm[0]>15?'양호':'박함']);
+    if(f.nim) rows.push(['순이익률', f.nim[0]+'%'+pctTag(yoy(f.nim)), '']);
+    if(f.roe) rows.push(['자본효율 · ROE', f.roe[0]+'%'+pctTag(yoy(f.roe)), (yoy(f.roe)!=null&&yoy(f.roe)<0)?'높지만 꺾이는 중':'']);
+    if(f.debt) rows.push(['안정성 · 부채비율', f.debt[0]+'%'+pctTag(yoy(f.debt)), f.debt[0]<50?'건전(낮을수록 좋음)':f.debt[0]<100?'보통':'높음 주의']);
+    var diag='';
+    if(f.opm&&f.opm[0]>40){ var roeDn=yoy(f.roe)!=null&&yoy(f.roe)<0;
+      diag='<div class="k" style="grid-column:1/-1;margin:0 0 10px;background:#fefce8;border:1px solid #fde047"><b>⚠️ 경기민감 고점 신호 가능</b><div class="muted" style="font-size:12px;margin-top:3px">영업이익률 '+f.opm[0]+'%로 초고마진'+(roeDn?' · ROE 꺾이는 중':'')+'. 반도체 같은 경기민감주에서 이 조합은 <b>사이클 정점 부근</b>일 수 있어요. 이럴 때 낮은 PER은 "싸다"가 아니라 "곧 이익 꺾인다"는 신호일 수 있음(밸류 함정) → <b>내년 EPS 방향(⑤)</b>이 핵심 판단.</div></div>';
+    }
+    var warn=(f.consistent===false)?'<p class="muted" style="font-size:12px">⚠️ 숫자가 안 맞아요(영업이익÷매출='+(f.opmCalc!=null?f.opmCalc.toFixed(1):'?')+'% ≠ 표기 '+(f.opm?f.opm[0]:'?')+'%). 복사 중 열이 틀어진 듯 — 그 값은 참고만.</p>':(f.consistent===true?'<p class="muted" style="font-size:12px">✓ 손익·수익성·안정성 블록 일관성 확인됨.</p>':'');
+    var valwarn='<p class="muted" style="font-size:12px">※ EPS·PER·BPS·PBR(표 오른쪽 열)은 복사 시 자주 어긋나요. 밸류는 「종목 위치」의 현재가·PER(투자정보 박스)로 보세요.</p>';
+    return '<h3 style="margin:14px 0 4px">📋 재무 요약 <span class="muted" style="font-size:12px;font-weight:400">(네이버 기업실적분석)</span></h3>'+diag+
+      '<table><tr><th>구분</th><th>값(전기 대비)</th><th>해석</th></tr>'+rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td class="muted">'+r[2]+'</td></tr>'}).join('')+'</table>'+warn+valwarn;
+  }
+  // 📸 캡쳐 분석 결과 — raw/financials.json 렌더 (Claude 가 캡쳐에서 읽어 채움)
+  function frow(label,v,extra){ if(v==null||v==='') return ''; return '<tr><td>'+label+'</td><td><b>'+v+'</b></td><td class="muted">'+(extra||'')+'</td></tr>'; }
+  function pctv(v){ return v==null?null:(v>0?'▲':v<0?'▼':'')+Math.abs(v)+'%'; }
+  function capCard(it){
+    var fin=it.fin||{}, val=it.val||{};
+    var h='<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;align-items:center"><b style="font-size:16px">'+esc(it.name||'')+(it.code?' <span class="muted" style="font-size:12px">'+esc(it.code)+'</span>':'')+'</b><span class="muted" style="font-size:12px">캡쳐 기준 '+esc(it.captured||it.as_of||'')+'</span></div>';
+    if(it.signal) h+='<div class="k" style="margin:8px 0;background:'+(String(it.signal).indexOf('🟢')>=0?'#dcfce7':String(it.signal).indexOf('🔴')>=0?'#fee2e2':'#fefce8')+'"><b>'+esc(it.signal)+'</b></div>';
+    if(it.diag) h+='<div class="k" style="margin:8px 0;background:#fefce8;border:1px solid #fde047"><b>⚠️ '+esc(it.diag)+'</b></div>';
+    var rows=[
+      frow('성장 · 매출 YoY', pctv(fin.rev_yoy)),
+      frow('영업이익률', fin.op_margin!=null?fin.op_margin+'%':null, fin.op_margin_prev!=null?'전기 '+fin.op_margin_prev+'%':''),
+      frow('순이익률', fin.net_margin!=null?fin.net_margin+'%':null),
+      frow('ROE', fin.roe!=null?fin.roe+'%':null, fin.roe_prev!=null?'전기 '+fin.roe_prev+'%':''),
+      frow('부채비율', fin.debt_ratio!=null?fin.debt_ratio+'%':null, fin.debt_ratio!=null?(fin.debt_ratio<50?'건전':fin.debt_ratio<100?'보통':'높음'):''),
+      frow('현재가', val.price!=null?fmt(val.price):null, (val.w52lo!=null&&val.w52hi!=null)?'52주 '+fmt(val.w52lo)+'~'+fmt(val.w52hi):''),
+      frow('PER / PBR', (val.per!=null?val.per+'배':'-')+' / '+(val.pbr!=null?val.pbr+'배':'-')),
+      frow('EPS 올해→내년', (val.eps_this!=null?fmt(val.eps_this):'-')+' → '+(val.eps_next!=null?fmt(val.eps_next):'-')),
+      frow('배당수익률', val.div_yield!=null?val.div_yield+'%':null)
+    ].filter(Boolean).join('');
+    h+='<table style="margin-top:8px"><tr><th>구분</th><th>값</th><th>참고</th></tr>'+rows+'</table>';
+    if(it.note) h+='<p style="margin-top:8px;background:#fffef5;padding:8px;border-radius:6px">📝 '+esc(it.note)+'</p>';
+    h+='<p class="muted" style="font-size:12px;margin-top:4px">최종 판단은 산업 사슬 회사표 「판단(달님)」 칸에.</p></div>';
+    return h;
+  }
+  get('raw/financials.json').then(function(d){ var box=document.getElementById('capBox'); var its=(d.items||[]); if(!its.length){return;} box.classList.remove('muted'); box.innerHTML=its.slice().reverse().map(capCard).join(''); }).catch(function(){});
+
   var spb=document.getElementById('sparseBtn');
-  if(spb){ spb.onclick=function(){ var t=document.getElementById('spaste').value; if(!t.trim())return; renderSnap(parseSnap(t)); }; }
+  if(spb){ spb.onclick=function(){ var t=document.getElementById('spaste').value; if(!t.trim())return; renderSnap(parseSnap(t)); var fin=renderFin(parseFin(t)); if(fin){ var box=document.getElementById('sparsed'); box.innerHTML=fin+box.innerHTML; } }; }
 })();
 </script>
 </body>
