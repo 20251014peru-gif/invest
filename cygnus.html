@@ -1,4 +1,4 @@
-<!-- v 20260904-2030  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260904-2110  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -63,10 +63,10 @@
     <div id="parsed"></div>
   </div>
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2030"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2110"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-2030';
+  document.getElementById('ver').textContent='v 20260904-2110';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -82,10 +82,19 @@
     var label=days<=0?'오늘':days+'일 전';
     return {days:days,badge:' <b style="color:'+color+'">('+label+')</b>'};
   }
-  // ── 실시간 (브라우저에서 직접, 한국 IP) — 허브 index.html 과 성공투자 app.py 의 검증된 네이버 호출 이식 ──
-  // 원달러: api.stock.naver.com/marketindex (허브가 쓰는 것, CORS 확인) · 지수: m.stock.naver.com/api/index (app.py, 브라우저에선 막힐 수 있어 실패해도 화면 안 깨짐)
-  function jget(u){ return fetch(u,{cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
+  // ── 실시간 (브라우저에서, 공개 CORS 프록시 경유) — 허브 index.html 의 검증된 프록시 체인 + 야후 차트 파싱 이식 ──
+  // 네이버·야후 금융은 브라우저 직접요청을 CORS 로 막음 → codetabs·allorigins·corsproxy 를 거쳐 우회(허브가 프로덕션에서 쓰는 방식)
+  var PX=[function(u){return u;},
+          function(u){return 'https://api.codetabs.com/v1/proxy/?quest='+encodeURIComponent(u);},
+          function(u){return 'https://api.allorigins.win/get?url='+encodeURIComponent(u);},
+          function(u){return 'https://corsproxy.io/?url='+encodeURIComponent(u);},
+          function(u){return 'https://api.allorigins.win/raw?url='+encodeURIComponent(u);}];
+  function fetchText(u,ms){ return new Promise(function(res,rej){ var c=('AbortController'in window)?new AbortController():null; var t=setTimeout(function(){ if(c)c.abort(); rej(0); }, ms||6000); fetch(u,c?{signal:c.signal}:{}).then(function(r){ clearTimeout(t); if(!r.ok){rej(0);return;} r.text().then(res,function(){rej(0);}); },function(){ clearTimeout(t); rej(0); }); }); }
+  function parseMaybe(t){ var j=JSON.parse(t); if(j&&typeof j.contents==='string') return JSON.parse(j.contents); return j; }
+  function pxJson(u){ return PX.reduce(function(pr,mk){ return pr.catch(function(){ return fetchText(mk(u),6000).then(parseMaybe); }); }, Promise.reject(0)); }
   function nnum(x){ var m=String(x==null?'':x).replace(/,/g,'').match(/-?\d+(\.\d+)?/); return m?parseFloat(m[0]):null; }
+  // 야후 차트 1일 — 검증: 허브 loadMarketsDirect. meta.regularMarketPrice / chartPreviousClose
+  function yahoo(sym){ return pxJson('https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?range=1d&interval=1d').then(function(d){ var m=d.chart.result[0].meta; var pv=m.chartPreviousClose||m.previousClose; return {v:m.regularMarketPrice, chg:pv?(m.regularMarketPrice-pv)/pv*100:null}; }); }
   function liveCard(name, val, chg, unit, when, err){
     var el=document.getElementById('live');
     if(val==null){ el.innerHTML+='<div class="k" style="opacity:.7"><div class="n"><span>'+esc(name)+'</span><span>실시간</span></div><div class="v" style="font-size:14px;color:var(--sub);font-weight:400">'+esc(err||'못 받음')+'</div></div>'; return; }
@@ -94,27 +103,20 @@
   }
   function loadLive(){
     var now=window.Status.kstStr(new Date()).replace(' KST','');
-    var jobs=[];
-    // 원달러 (검증: 허브)
-    jobs.push(jget('https://api.stock.naver.com/marketindex/exchange/FX_USDKRW').then(function(d){
-      var v=nnum(d.closePrice||d.price); if(!v||v<500) throw new Error('값 이상');
-      liveCard('원달러 환율', v, nnum(d.fluctuationsRatio), '원', '네이버 · '+now);
-    }).catch(function(e){
-      // 예비: 무키 글로벌 환율(허브 fallback 과 동일)
-      return jget('https://open.er-api.com/v6/latest/USD').then(function(d){ liveCard('원달러 환율', d.rates&&d.rates.KRW, null, '원', '시장환율(참고) · '+now); })
-             .catch(function(){ liveCard('원달러 환율', null, null, '원', now, '네이버·예비 둘 다 못 받음'); });
-    }));
-    // 코스피·코스닥·VKOSPI (검증: app.py, 브라우저 CORS 는 열어봐야 앎)
-    [['코스피','KOSPI'],['코스닥','KOSDAQ'],['VKOSPI(변동성)','VKOSPI']].forEach(function(p){
-      jobs.push(jget('https://m.stock.naver.com/api/index/'+p[1]+'/price').then(function(a){
-        var d=Array.isArray(a)?a[0]:a; var v=nnum(d.closePrice); var chg=nnum(d.fluctuationsRatio);
-        var cd=d.compareToPreviousPrice; if(chg!=null&&cd&&(cd.code==='5'||cd.code==='4')) chg=-Math.abs(chg);
-        liveCard(p[0], v, chg, 'pt', '네이버 · '+now);
-      }).catch(function(e){ liveCard(p[0], null, null, 'pt', now, '실시간 못 받음(브라우저 차단일 수 있음)'); }));
-    });
+    // 순서=화면 순서. 심볼은 허브 YS 와 동일(검증). 원달러는 KRW=X
+    var L=[['원달러 환율','KRW=X','원'],['코스피','^KS11','pt'],['코스닥','^KQ11','pt'],['S&P500','^GSPC','pt'],['나스닥','^IXIC','pt'],['SOX 반도체','^SOX','pt'],['VIX','^VIX','pt'],['항셍','^HSI','pt'],['유가 WTI','CL=F','$'],['금','GC=F','$'],['구리','HG=F','$/lb']];
+    var slots={}; L.forEach(function(x){ slots[x[0]]=null; });
+    var jobs=L.map(function(x){ return yahoo(x[1]).then(function(r){ slots[x[0]]={v:r.v,chg:r.chg}; }).catch(function(){ slots[x[0]]='ERR'; }); });
     Promise.all(jobs).then(function(){
-      var got=document.querySelectorAll('#live .k .v').length - document.querySelectorAll('#live .k[style*="opacity"]').length;
-      document.getElementById('liveNote').innerHTML='이 줄은 이 화면을 <b>지금 여는 순간</b> 브라우저(한국)가 네이버에서 직접 받은 값입니다. 아래 매크로(FRED)는 자동 수집이라 며칠 늦어요. 지수가 "못 받음"이면 네이버가 브라우저 요청을 막은 것 — 원달러는 되니 그건 실시간입니다.';
+      // 원달러 야후 실패 시 예비: open.er-api.com (CORS 허용)
+      var fx=slots['원달러 환율'];
+      var pre=(fx==='ERR'||!fx) ? fetchText('https://open.er-api.com/v6/latest/USD',6000).then(function(t){ var d=JSON.parse(t); if(d.rates&&d.rates.KRW) slots['원달러 환율']={v:d.rates.KRW,chg:null,note:'시장환율'}; }).catch(function(){}) : Promise.resolve();
+      pre.then(function(){
+        document.getElementById('live').innerHTML='';
+        var got=0;
+        L.forEach(function(x){ var r=slots[x[0]]; if(r&&r!=='ERR'){ got++; liveCard(x[0], r.v, r.chg, x[2], (r.note||'')+' '+now); } else { liveCard(x[0], null, null, x[2], now, '실시간 못 받음(프록시·야후 지연일 수 있음, 새로고침)'); } });
+        document.getElementById('liveNote').innerHTML='이 줄은 화면을 <b>여는 순간</b> 브라우저가 공개 프록시를 거쳐 받은 실시간 값입니다(허브와 같은 방식). "못 받음"이면 그 프록시가 잠깐 느린 것 — <b>새로고침</b>하면 대개 채워집니다. 아래 매크로(FRED)는 자동 기록이라 며칠 늦어요.';
+      });
     });
   }
   loadLive();
