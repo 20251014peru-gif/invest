@@ -1,4 +1,4 @@
-<!-- v 20260904-2110  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260904-2140  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -63,10 +63,10 @@
     <div id="parsed"></div>
   </div>
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2110"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2140"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-2110';
+  document.getElementById('ver').textContent='v 20260904-2140';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -113,9 +113,16 @@
       var pre=(fx==='ERR'||!fx) ? fetchText('https://open.er-api.com/v6/latest/USD',6000).then(function(t){ var d=JSON.parse(t); if(d.rates&&d.rates.KRW) slots['원달러 환율']={v:d.rates.KRW,chg:null,note:'시장환율'}; }).catch(function(){}) : Promise.resolve();
       pre.then(function(){
         document.getElementById('live').innerHTML='';
-        var got=0;
-        L.forEach(function(x){ var r=slots[x[0]]; if(r&&r!=='ERR'){ got++; liveCard(x[0], r.v, r.chg, x[2], (r.note||'')+' '+now); } else { liveCard(x[0], null, null, x[2], now, '실시간 못 받음(프록시·야후 지연일 수 있음, 새로고침)'); } });
-        document.getElementById('liveNote').innerHTML='이 줄은 화면을 <b>여는 순간</b> 브라우저가 공개 프록시를 거쳐 받은 실시간 값입니다(허브와 같은 방식). "못 받음"이면 그 프록시가 잠깐 느린 것 — <b>새로고침</b>하면 대개 채워집니다. 아래 매크로(FRED)는 자동 기록이라 며칠 늦어요.';
+        var got=[], miss=[];
+        L.forEach(function(x){ var r=slots[x[0]]; if(r&&r!=='ERR'){ got.push(x[0]); liveCard(x[0], r.v, r.chg, x[2], (r.note||'')+' '+now); } else { miss.push(x[0]); } });
+        // 실패한 것들은 카드로 쏟지 않고 한 줄로 — 화면이 고장난 것처럼 안 보이게
+        if(miss.length){
+          var el=document.getElementById('live');
+          el.innerHTML+='<div class="k" style="grid-column:1/-1;opacity:.85;border-style:dashed"><div class="n"><span>지수·원자재 '+miss.length+'개 실시간 대기</span></div><div class="v" style="font-size:13px;color:var(--sub);font-weight:400;line-height:1.5">'+miss.join(' · ')+'<br>지금 공개 프록시가 막혀 못 받았어요. <b>새로고침</b>하면 될 때도 있고, 안 되면 아래 매크로(FRED, 며칠 늦음)를 보거나 영웅문 값을 붙여넣으세요. 안정적으로 하려면 중계서버(무료)가 필요합니다.</div></div>';
+        }
+        document.getElementById('liveNote').innerHTML= got.length
+          ? '이 줄은 화면을 <b>여는 순간</b> 받은 실시간 값입니다. 지수는 공개 프록시를 거쳐서 들쭉날쭉할 수 있어요.'
+          : '지금은 <b>원달러만</b> 실시간이고 지수·원자재는 프록시가 막혀 못 받았습니다. 아래 매크로(FRED)는 며칠 늦은 기록이에요.';
       });
     });
   }
