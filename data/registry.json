@@ -120,13 +120,13 @@
       "name": "유튜버 검증 엔진 v4.3",
       "file": "20251014peru-gif.github.io/youtube3.html + (로컬) Flask 5055",
       "axis": "유튜브",
-      "status": "absorbing",
+      "status": "absorbed",
       "since": "",
       "reads": [],
       "writes": [
         "Firestore youtube_predictions"
       ],
-      "note": "채점·신뢰도만 flow 로 흡수 예정(결정 11). 흡수 전엔 dalnim-alerts [유튜브] 입력이 끊기므로 순서 지킬 것"
+      "note": "채점(judge_prediction ±2%)·출처별 적중률 → scripts/score.py + predict.html 로 옮김(2026-09-04). 종합점수·유도율은 원칙 14 로 폐기. 요약기 V2(v9) 는 예측 기능이 없어 그대로 두고, 로컬 자동시작(유튜브요약기_자동시작.vbs)은 달님이 해제"
     },
     {
       "id": "cygnus-flask",
@@ -160,6 +160,36 @@
       "reads": [],
       "writes": [],
       "note": "로컬 kakao-mcp config.json 보관을 없애고 Firestore 한 곳으로(철칙 2). dalnim-alerts·kakao-mcp 폴더 접근 필요"
+    },
+    {
+      "id": "score",
+      "name": "오픈북 채점",
+      "file": "scripts/score.py + .github/workflows/score.yml",
+      "axis": "검증",
+      "status": "active",
+      "since": "2026-09-04",
+      "reads": [
+        "raw/predictions.json"
+      ],
+      "writes": [
+        "analysis/scores.json",
+        "facts/source_trust.json",
+        "data/status.json"
+      ]
+    },
+    {
+      "id": "predict",
+      "name": "예측 입력·채점 보기",
+      "file": "predict.html",
+      "axis": "검증",
+      "status": "active",
+      "since": "2026-09-04",
+      "reads": [
+        "raw/predictions.json",
+        "analysis/scores.json",
+        "facts/source_trust.json"
+      ],
+      "writes": []
     }
   ]
 }

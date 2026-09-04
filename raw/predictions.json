@@ -1,0 +1,8 @@
+{
+  "schema": "predictions/1",
+  "_설명": "오픈북 예측 한 줄 = 한 항목. 출처(source.type: youtube|self|strategy)를 가리지 않는다. 기한(due)이 지나면 score.py 가 채점. 삭제 대신 status=withdrawn(철칙 2). 시각은 KST.",
+  "_필드": {"id": "pred-YYYYMMDD-난수", "source": {"type": "youtube|self|strategy", "name": "채널명 또는 '달님' 또는 전략id", "video": "영상 URL(있으면)"},
+             "target": "대상(사람 말)", "ticker": "조회 심볼(삼성전자=005930.KS, SOX=^SOX, NVDA)", "direction": "상승|하락|돌파|하회",
+             "baseline": "기준선(있으면)", "made_at": "발표 시각 KST", "due": "검증 기한 YYYY-MM-DD", "invalidation": "반증 조건", "reason": "이유", "status": "pending|withdrawn"},
+  "items": []
+}
