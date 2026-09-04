@@ -1,4 +1,4 @@
-<!-- v 20260904-3410  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260904-3510  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -97,10 +97,10 @@
   <div id="capBox" class="muted">아직 분석된 캡쳐가 없어요. 네이버 종목 화면을 캡쳐해서 채팅에 보내주세요.</div>
 
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-3410"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-3510"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-3410';
+  document.getElementById('ver').textContent='v 20260904-3510';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -138,7 +138,7 @@
     el.innerHTML+='<div class="k" style="border-color:#93c5fd"><div class="n"><span>'+esc(name)+'</span><span style="color:#15803d">실시간</span></div><div class="v">'+(Math.abs(val)>=1000?val.toLocaleString('ko-KR',{maximumFractionDigits:0}):val.toLocaleString('ko-KR',{maximumFractionDigits:2}))+'<small>'+esc(unit)+'</small></div><div class="c">'+c+'</div><div class="src">'+esc(when)+'</div></div>';
   }
   function sma(a,n){ if(!a||a.length<n) return null; var s=0,i; for(i=a.length-n;i<a.length;i++) s+=a[i]; return s/n; }
-  function yahooHist(sym){ return pxJson('https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?range=6mo&interval=1d').then(function(d){ var r=d.chart.result[0], m=r.meta||{}; var cl=(r.indicators.quote[0].close||[]).filter(function(v){return v!=null;}); var pv=m.chartPreviousClose||m.previousClose; var px=(m.regularMarketPrice!=null?m.regularMarketPrice:(cl.length?cl[cl.length-1]:null)); return {closes:cl, price:px, chg:(pv&&px!=null)?(px-pv)/pv*100:null}; }); }
+  function yahooHist(sym){ return pxJson('https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?range=6mo&interval=1d').then(function(d){ var r=d.chart.result[0], m=r.meta||{}, q=(r.indicators&&r.indicators.quote&&r.indicators.quote[0])||{}; var O=q.open||[],H=q.high||[],L=q.low||[],C=q.close||[]; var cl=[],oh=[]; for(var i=0;i<C.length;i++){ if(C[i]!=null){ cl.push(C[i]); oh.push({o:O[i],h:H[i],l:L[i],c:C[i]}); } } var pv=m.chartPreviousClose||m.previousClose; var px=(m.regularMarketPrice!=null?m.regularMarketPrice:(cl.length?cl[cl.length-1]:null)); return {closes:cl, ohlc:oh, price:px, chg:(pv&&px!=null)?(px-pv)/pv*100:null}; }); }
   function alignEmoji(price,closes){ var m20=sma(closes,20), m50=sma(closes,50); if(m20==null||price==null) return ''; return (m50!=null)?((price>m20&&m20>m50)?'🟢':(price<m20&&m20<m50)?'🔴':'🟡'):'🟡'; }
   function srcLink(it){ if(it.yahoo) return {u:'https://finance.yahoo.com/quote/'+encodeURIComponent(it.yahoo),t:'Yahoo Finance ↗'}; var fid=it.fred||it.fred_fallback||it.symbol; if(it.source==='fred'&&fid) return {u:'https://fred.stlouisfed.org/series/'+encodeURIComponent(fid),t:'FRED ↗'}; return null; }
   var IND=[], MV={};
@@ -172,21 +172,36 @@
     box.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
   function renderMAbar(h,it){
-    var p=h.price, m20=sma(h.closes,20), m50=sma(h.closes,50), u=esc(it.unit||'');
-    if(p==null) return '<p class="muted">가격 데이터가 없어요.</p>';
-    if(m20==null) return '<p class="muted">최근 거래일이 20일 미만이라 이동평균을 못 냅니다(현재 '+p.toLocaleString()+u+').</p>';
-    var al = (m50!=null)?((p>m20&&m20>m50)?['🟢 정배열(강세)','good']:(p<m20&&m20<m50)?['🔴 역배열(약세)','bad']:['🟡 혼조(전환 구간)','mid']):['🟡 20일선 기준','mid'];
-    var pos20=p>=m20?'위':'아래', pos50=m50!=null?(p>=m50?'위':'아래'):'-';
-    var vals=[p,m20]; if(m50!=null) vals.push(m50);
-    var lo=Math.min.apply(null,vals), hi=Math.max.apply(null,vals), pad=(hi-lo)*0.25||Math.abs(hi)*0.01; lo-=pad; hi+=pad;
-    function pc(x){ return ((x-lo)/(hi-lo)*100).toFixed(1); }
-    var bar='<div style="position:relative;height:56px;margin:20px 0 34px;background:linear-gradient(90deg,#fee2e2,#fef9c3,#dcfce7);border-radius:6px">';
-    if(m50!=null) bar+='<div style="position:absolute;left:'+pc(m50)+'%;top:0;bottom:0;border-left:2px dashed #6b7280"><span style="position:absolute;top:-17px;left:-16px;font-size:11px;color:#6b7280;white-space:nowrap">50일 '+Math.round(m50).toLocaleString()+'</span></div>';
-    bar+='<div style="position:absolute;left:'+pc(m20)+'%;top:0;bottom:0;border-left:2px solid #2563eb"><span style="position:absolute;bottom:-17px;left:-16px;font-size:11px;color:#2563eb;white-space:nowrap">20일 '+Math.round(m20).toLocaleString()+'</span></div>';
-    bar+='<div style="position:absolute;left:'+pc(p)+'%;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:#111;border:2px solid #fff;box-shadow:0 0 0 2px #111"><span style="position:absolute;top:-21px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:700;white-space:nowrap">봉 '+Math.round(p).toLocaleString()+'</span></div></div>';
-    var tbl='<table style="margin-top:4px"><tr><th>현재 봉</th><th>20일선</th><th>50일선</th><th>정렬</th></tr><tr><td><b>'+p.toLocaleString()+u+'</b></td><td>'+Math.round(m20).toLocaleString()+' <span class="muted">('+pos20+')</span></td><td>'+(m50!=null?Math.round(m50).toLocaleString()+' <span class="muted">('+pos50+')</span>':'-')+'</td><td><span class="j '+al[1]+'">'+al[0]+'</span></td></tr></table>';
-    var note='<p class="muted" style="font-size:12px;margin-top:6px">봉이 20일선 <b>'+pos20+'</b>'+(m50!=null?' · 50일선 <b>'+pos50+'</b>':'')+'. 정배열=단기(20)선이 장기(50)선 위 = 상승추세, 역배열=하락추세.</p>';
-    return bar+tbl+note;
+    var p=h.price, closes=h.closes||[], ohlc=h.ohlc||[], u=esc(it.unit||'');
+    if(p==null||closes.length<2) return '<p class="muted">가격 데이터가 없어요.</p>';
+    var m20now=sma(closes,20), m50now=sma(closes,50);
+    if(m20now==null) return '<p class="muted">최근 거래일이 20일 미만이라 이동평균을 못 냅니다(현재 '+p.toLocaleString()+u+').</p>';
+    var al=(m50now!=null)?((p>m20now&&m20now>m50now)?['🟢 정배열(강세)','good']:(p<m20now&&m20now<m50now)?['🔴 역배열(약세)','bad']:['🟡 혼조(전환 구간)','mid']):['🟡 20일선 기준','mid'];
+    var pos20=p>=m20now?'위':'아래', pos50=m50now!=null?(p>=m50now?'위':'아래'):'-';
+    // 최근 20봉
+    var N=Math.min(20, ohlc.length), st=ohlc.length-N;
+    function smaAt(g,n){ if(g+1<n) return null; var su=0; for(var j=g-n+1;j<=g;j++) su+=closes[j]; return su/n; }
+    var pts=[]; for(var i=0;i<N;i++){ var g=st+i; var d=ohlc[g]; pts.push({o:d.o,hi:d.h,lo:d.l,c:d.c,m20:smaAt(g,20),m50:smaAt(g,50)}); }
+    var vs=[]; pts.forEach(function(d){ [d.hi,d.lo,d.m20,d.m50].forEach(function(v){ if(v!=null) vs.push(v); }); });
+    var lo=Math.min.apply(null,vs), hi=Math.max.apply(null,vs), pad=(hi-lo)*0.08||Math.abs(hi)*0.01; lo-=pad; hi+=pad;
+    var W=Math.max(320,N*28), HH=210, pL=6,pR=6,pT=12,pB=12;
+    function X(i){ return pL+(i+0.5)*((W-pL-pR)/N); }
+    function Y(v){ return pT+(1-(v-lo)/(hi-lo))*(HH-pT-pB); }
+    var cw=Math.max(3,(W-pL-pR)/N*0.55);
+    var cndl=pts.map(function(d){ return d; }).map(function(d,i){ var x=X(i); var up=(d.o!=null)?d.c>=d.o:true; var col=up?'#e11d48':'#2563eb';
+      var wick=(d.hi!=null&&d.lo!=null)?'<line x1="'+x.toFixed(1)+'" y1="'+Y(d.hi).toFixed(1)+'" x2="'+x.toFixed(1)+'" y2="'+Y(d.lo).toFixed(1)+'" stroke="'+col+'" stroke-width="1"/>':'';
+      var oo=(d.o!=null?d.o:d.c), y1=Y(Math.max(oo,d.c)), y2=Y(Math.min(oo,d.c)), bh=Math.max(1.2,y2-y1);
+      var body='<rect x="'+(x-cw/2).toFixed(1)+'" y="'+y1.toFixed(1)+'" width="'+cw.toFixed(1)+'" height="'+bh.toFixed(1)+'" fill="'+col+'"/>';
+      return wick+body; }).join('');
+    function poly(key,color,dash){ var pp=pts.map(function(d,i){ return d[key]!=null?(X(i).toFixed(1)+','+Y(d[key]).toFixed(1)):null; }).filter(Boolean).join(' '); return pp?'<polyline points="'+pp+'" fill="none" stroke="'+color+'" stroke-width="1.6"'+(dash?' stroke-dasharray="5 3"':'')+'/>':''; }
+    var lastX=X(N-1), lastY=Y(p<hi&&p>lo?p:pts[N-1].c);
+    var svg='<div style="overflow-x:auto;margin:6px 0"><svg viewBox="0 0 '+W+' '+HH+'" width="100%" height="210" preserveAspectRatio="none" style="min-width:'+W+'px;background:#fff;border:1px solid #eee;border-radius:6px">'+
+      poly('m50','#6b7280',true)+poly('m20','#2563eb',false)+cndl+
+      '<line x1="'+lastX.toFixed(1)+'" y1="0" x2="'+lastX.toFixed(1)+'" y2="'+HH+'" stroke="#111" stroke-width="0.6" stroke-dasharray="2 3" opacity="0.4"/></svg></div>';
+    var legend='<div class="muted" style="font-size:12px;margin:2px 0 6px">최근 '+N+'봉 · <span style="color:#e11d48">■</span>상승 <span style="color:#2563eb">■</span>하락 · <span style="color:#2563eb">—</span> 20일선 <span style="color:#6b7280">┈</span> 50일선</div>';
+    var tbl='<table style="margin-top:4px"><tr><th>현재 봉</th><th>20일선</th><th>50일선</th><th>정렬</th></tr><tr><td><b>'+p.toLocaleString()+u+'</b></td><td>'+Math.round(m20now).toLocaleString()+' <span class="muted">('+pos20+')</span></td><td>'+(m50now!=null?Math.round(m50now).toLocaleString()+' <span class="muted">('+pos50+')</span>':'-')+'</td><td><span class="j '+al[1]+'">'+al[0]+'</span></td></tr></table>';
+    var note='<p class="muted" style="font-size:12px;margin-top:6px">봉이 20일선 <b>'+pos20+'</b>'+(m50now!=null?' · 50일선 <b>'+pos50+'</b>':'')+'. 정배열=단기(20)선이 장기(50)선 위 = 상승추세, 역배열=하락추세.</p>';
+    return legend+svg+tbl+note;
   }
   loadInd();
 
