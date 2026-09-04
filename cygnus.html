@@ -1,4 +1,4 @@
-<!-- v 20260904-2705  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260904-2910  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -81,15 +81,30 @@
       <p class="muted" style="margin:4px 0 0">예: <code>삼성전자  4,800  5,200</code> → 내년 5,200이 올해 4,800보다 높음 → <b>상향</b></p>
     </details>
     <div id="epsLinks" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
-    <textarea id="epaste" placeholder="한 줄에 한 종목:  종목명  올해EPS  내년EPS(E)&#10;예)&#10;삼성전자  4,800  5,200&#10;SK하이닉스  25,000  22,000  하향&#10;NAVER  9,050  9,100"></textarea>
+    <textarea id="epaste" placeholder="한 줄에 한 종목:  종목명  작년EPS  올해EPS  내년EPS(E)  (2~3개 다 됨)&#10;예)&#10;삼성전자  4,200  4,800  5,200&#10;SK하이닉스  30,000  25,000  22,000&#10;NAVER  9,050  9,100"></textarea>
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="eparseBtn" type="button">읽어내기</button><button class="btn" id="ecopyBtn" type="button" hidden>JSON 복사</button><span class="muted" style="align-self:center">읽은 결과는 이 브라우저에 저장되고 위 레짐 요약의 「⑤ 선행EPS」 칸이 바뀝니다. JSON 은 raw/eps.json 에 붙여넣으면 서버도 재료로 씁니다</span></div>
     <div id="eparsed"></div>
   </div>
+
+  <h2 id="pos">종목 위치 분석 — 네이버 통째 붙여넣기 <span class="tag">지금 주가가 싼 자리인지·비싼 자리인지</span></h2>
+  <div class="card">
+    <details style="margin-bottom:10px"><summary style="cursor:pointer;font-weight:600">📖 사용법</summary>
+      <ol style="margin:8px 0;padding-left:20px;line-height:1.9">
+        <li>위 <b>종목 버튼</b>으로 네이버 종목 페이지를 엽니다.</li>
+        <li>페이지에서 <b>Ctrl+A → Ctrl+C</b>(전체 복사) 하거나, 최소한 <b>「투자정보」 박스(현재가·52주최고/최저·PER·PBR·EPS)</b>가 포함되게 드래그 복사합니다.</li>
+        <li>여기에 붙여넣고 <b>분석</b>. 가격이 1년 중 어디인지(상·중·하)와 업종 대비 밸류를 <b>계산 과정까지</b> 보여줍니다.</li>
+      </ol>
+      <p class="muted" style="margin:4px 0 0">현재가·52주최고·52주최저·PER·동일업종PER 라벨을 찾아 숫자를 읽습니다. 못 읽으면 그 항목만 건너뜁니다.</p>
+    </details>
+    <textarea id="spaste" placeholder="네이버 종목 페이지를 통째로(Ctrl+A → Ctrl+C) 붙여넣으세요. '현재가 72,000 ... 52주최고 88,800 52주최저 49,900 ... PER 15.20 ... 동일업종 PER 20.10' 같은 값을 찾아 상·중·하를 계산합니다."></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="sparseBtn" type="button">분석</button></div>
+    <div id="sparsed"></div>
+  </div>
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2705"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260904-2910"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-2705';
+  document.getElementById('ver').textContent='v 20260904-2910';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -280,11 +295,13 @@
       var nm=(s.match(/^[^\d]+/)||[''])[0].replace(/추정|EPS|컨센서스|투자정보/g,'').trim();
       if(!nm && !nums.length) return;
       // 왼→오(과거→미래) 순으로 붙여넣는다고 보고, 맨 오른쪽=선행(내년E), 그 왼쪽=직전(올해)
-      var eps=nums.length?nums[nums.length-1]:null, prev=nums.length>1?nums[nums.length-2]:null, chg=null, dir='유지';
+      var n=nums.length;
+      var eps=n?nums[n-1]:null, prev=n>1?nums[n-2]:null, chg=null, dir='유지', mono='';
       if(prev!=null&&eps!=null&&prev!==0){ chg=(eps-prev)/Math.abs(prev)*100; dir=chg>1?'상향':chg<-1?'하향':'유지'; }
+      if(n>=3){ var a=nums[n-3],bb=nums[n-2],cc=nums[n-1]; if(cc>bb&&bb>a){dir='상향';mono='3년 연속↑';} else if(cc<bb&&bb<a){dir='하향';mono='3년 연속↓';} }
       if(upw) dir='상향'; if(dnw) dir='하향';
       if(dir==='상향') out.up++; else if(dir==='하향') out.down++;
-      out.items.push({name:nm||'(이름없음)',eps:eps,prev:prev,chg_pct:chg==null?null:Math.round(chg*10)/10,dir:dir});
+      out.items.push({name:nm||'(이름없음)',eps:eps,prev:prev,eps3:nums.slice(-3),trend:mono,chg_pct:chg==null?null:Math.round(chg*10)/10,dir:dir});
     });
     out.verdict = out.up>out.down?'상향(우호)':out.down>out.up?'하향(부담)':'혼조/유지';
     return out;
@@ -292,7 +309,7 @@
   function renderEPS(){
     var eps=loadEPS(); if(!eps)return; var box=document.getElementById('eparsed'); if(!box)return;
     box.innerHTML='<p><b>⑤축 결론:</b> <span class="tag" style="background:'+(eps.verdict.indexOf('상향')>=0?'#dcfce7':eps.verdict.indexOf('하향')>=0?'#fee2e2':'#f1f5f9')+'">'+esc(eps.verdict)+'</span> <span class="muted">상향 '+eps.up+' · 하향 '+eps.down+' · 기준 '+esc(eps.as_of)+'</span></p>'+
-      '<table><tr><th>종목</th><th>선행(내년E)</th><th>직전(올해)</th><th>변화</th><th>방향</th></tr>'+eps.items.map(function(r){return '<tr><td>'+esc(r.name)+'</td><td>'+(r.eps==null?'-':fmt(r.eps))+'</td><td>'+(r.prev==null?'-':fmt(r.prev))+'</td><td>'+(r.chg_pct==null?'-':(r.chg_pct>0?'▲':r.chg_pct<0?'▼':'')+Math.abs(r.chg_pct)+'%')+'</td><td><span class="'+(r.dir==='상향'?'up':r.dir==='하향'?'down':'')+'">'+esc(r.dir)+'</span></td></tr>'}).join('')+'</table>';
+      '<table><tr><th>종목</th><th>EPS 3년치(작→내년E)</th><th>선행(내년E)</th><th>변화</th><th>방향</th></tr>'+eps.items.map(function(r){return '<tr><td>'+esc(r.name)+'</td><td>'+((r.eps3&&r.eps3.length)?r.eps3.map(fmt).join(' → '):'-')+(r.trend?' <span class="muted" style="font-size:11px">'+r.trend+'</span>':'')+'</td><td>'+(r.eps==null?'-':fmt(r.eps))+'</td><td>'+(r.chg_pct==null?'-':(r.chg_pct>0?'▲':r.chg_pct<0?'▼':'')+Math.abs(r.chg_pct)+'%')+'</td><td><span class="'+(r.dir==='상향'?'up':r.dir==='하향'?'down':'')+'">'+esc(r.dir)+'</span></td></tr>'}).join('')+'</table>';
   }
   var epb=document.getElementById('eparseBtn');
   if(epb){ epb.onclick=function(){
@@ -316,6 +333,87 @@
       });
     }).catch(function(e){ lk.innerHTML='<span class="muted">종목 목록을 못 불러왔어요('+esc(e.message)+'). 네이버금융에서 종목명 검색 → 기업실적분석 표를 쓰세요.</span>'; }); }
   }
+
+  // 종목 위치 분석 — 네이버 통째 붙여넣기: 라벨 뒤 첫 숫자를 읽어 가격 위치(52주)·밸류(PER) 계산
+  function afterLabel(flat,label){ var m=flat.match(new RegExp(label+'[^0-9\\-]{0,6}(-?[0-9][0-9,\\.]*)')); return m?parseFloat(m[1].replace(/,/g,'')):null; }
+  function afterAny(flat,labels){ for(var i=0;i<labels.length;i++){ var v=afterLabel(flat,labels[i]); if(v!=null)return v; } return null; }
+  function parseSnap(t){
+    var flat=t.replace(/\r/g,' ').replace(/\n/g,' ');
+    var nm=(t.match(/([가-힣A-Za-z][가-힣A-Za-z0-9&\.]{1,20})/)||['',''])[1];
+    return {
+      name:nm,
+      price:afterLabel(flat,'현재가'),
+      hi:afterAny(flat,['52주\\s*최고','52주최고','52주 최고']),
+      lo:afterAny(flat,['52주\\s*최저','52주최저','52주 최저']),
+      sectorPer:afterAny(flat,['동일업종\\s*PER','업종\\s*PER']),
+      per:afterLabel(flat,'(?<!업종\\s)PER'),
+      pbr:afterLabel(flat,'PBR')
+    };
+  }
+  function band3(pct){ return pct>=66.7?['상','bad']:pct<=33.3?['하','good']:['중','mid']; }
+  // 위 「선행EPS」 칸에 저장된 값에서 이 종목의 내년EPS·방향을 가져온다(이름 매칭)
+  function epsForName(nm){ var st=loadEPS(); if(!st||!st.items||!st.items.length) return null;
+    if(st.items.length===1) return st.items[0];
+    for(var i=0;i<st.items.length;i++){ var it=st.items[i]; if(it.name&&nm&&(nm.indexOf(it.name)>=0||it.name.indexOf(nm)>=0)) return it; } return null; }
+  function renderSnap(x){
+    var box=document.getElementById('sparsed'); var rows=[];
+    var ei=epsForName(x.name);           // {eps:내년, prev:올해, dir}
+    var fundPos=null, epsDir=ei?ei.dir:null;
+    var top='<p><b>'+esc(x.name||'종목')+'</b>'+(x.price!=null?' · 현재가 <b>'+fmt(x.price)+'</b>':'')+'</p>';
+
+    // ① 적정주가 위치 (내년EPS × PER) — 핵심 기준
+    if(ei&&ei.eps!=null&&x.price!=null&&(x.sectorPer!=null||x.per!=null)){
+      var basePer = x.sectorPer!=null?x.sectorPer:x.per, baseNm = x.sectorPer!=null?'업종PER':'현재PER';
+      var fair = ei.eps*basePer;
+      var up = (fair-x.price)/x.price*100;
+      fundPos = up>20?['싼 자리','good']: up<-20?['비싼 자리','bad']:['보통','mid'];
+      var alt = (x.sectorPer!=null&&x.per!=null)?' <span class="muted">(현재PER 기준이면 '+fmt(Math.round(ei.eps*x.per))+'원)</span>':'';
+      rows.push('<tr><td><b>적정주가 위치</b><br><span class="muted" style="font-size:12px">내년EPS×PER</span></td>'+
+        '<td><code>적정 = 내년EPS '+fmt(ei.eps)+' × '+baseNm+' '+basePer+' = <b>'+fmt(Math.round(fair))+'원</b></code>'+alt+'<br>'+
+        '<code>상승여력 = ('+fmt(Math.round(fair))+' − '+fmt(x.price)+') ÷ '+fmt(x.price)+' × 100 = <b>'+(up>0?'+':'')+up.toFixed(0)+'%</b></code></td>'+
+        '<td><span class="j '+fundPos[1]+'" title=">+20% 싼 자리 / ±20% 보통 / <−20% 비싼 자리">'+fundPos[0]+'</span></td></tr>');
+    } else {
+      rows.push('<tr><td><b>적정주가 위치</b></td><td class="muted">'+(ei?'현재가/PER 를 못 읽었어요':'위 「선행EPS」 칸에 이 종목 EPS 를 먼저 넣어주세요 — 그래야 내년EPS×PER 로 적정주가를 계산해요')+'</td><td>-</td></tr>');
+    }
+
+    // ② 가격 위치 (52주) — 참고
+    if(x.price!=null&&x.hi!=null&&x.lo!=null&&x.hi>x.lo){
+      var pct=(x.price-x.lo)/(x.hi-x.lo)*100, b=band3(pct);
+      rows.push('<tr><td><b>가격 위치</b><br><span class="muted" style="font-size:12px">52주 밴드</span></td>'+
+        '<td><code>('+fmt(x.price)+' − '+fmt(x.lo)+') ÷ ('+fmt(x.hi)+' − '+fmt(x.lo)+') × 100 = <b>'+pct.toFixed(1)+'%</b></code><br>'+
+        '<span class="muted">52주 최저 '+fmt(x.lo)+' ~ 최고 '+fmt(x.hi)+'</span></td>'+
+        '<td><span class="j '+b[1]+'" title="0–33 하 / 33–66 중 / 66–100 상">'+b[0]+'</span></td></tr>');
+    } else rows.push('<tr><td><b>가격 위치</b></td><td class="muted">현재가/52주최고/52주최저 중 못 읽은 값이 있어요</td><td>-</td></tr>');
+
+    // ③ 밸류 위치 (업종 대비 PER) — 참고
+    if(x.per!=null&&x.sectorPer!=null&&x.sectorPer!==0){
+      var r=x.per/x.sectorPer, lab=r<0.8?['저평가(싼 편)','good']:r>1.2?['고평가(비싼 편)','bad']:['적정','mid'];
+      rows.push('<tr><td><b>밸류 위치</b><br><span class="muted" style="font-size:12px">업종 대비 PER</span></td>'+
+        '<td><code>PER '+x.per+' ÷ 업종 '+x.sectorPer+' = <b>'+r.toFixed(2)+'배</b></code><br>'+
+        '<span class="muted">1 미만이면 업종보다 쌈'+(x.pbr!=null?' · PBR '+x.pbr:'')+'</span></td>'+
+        '<td><span class="j '+lab[1]+'" title="<0.8 저평가 / 0.8–1.2 적정 / >1.2 고평가">'+lab[0]+'</span></td></tr>');
+    } else rows.push('<tr><td><b>밸류 위치</b></td><td class="muted">PER 또는 동일업종 PER 를 못 읽었어요'+(x.per!=null?' (현재 PER '+x.per+')':'')+'</td><td>-</td></tr>');
+
+    // ④ 종합 신호 — 적정주가 위치 + 실적 방향
+    var sig='';
+    if(fundPos&&epsDir){
+      var cheap=fundPos[0]==='싼 자리', pricey=fundPos[0]==='비싼 자리', upd=epsDir==='상향', dnd=epsDir==='하향';
+      var em,txt,cls;
+      if(cheap&&upd){em='🟢';txt='쌀 때 실적 오르는 자리';cls='good';}
+      else if(pricey&&dnd){em='🔴';txt='비쌀 때 실적 꺾이는 자리';cls='bad';}
+      else if(cheap&&dnd){em='🟡';txt='싸지만 실적 꺾임 — 함정 주의';cls='mid';}
+      else if(pricey&&upd){em='🟡';txt='실적 좋지만 이미 비쌈';cls='mid';}
+      else {em='🟡';txt='중립 — 가격·실적 뚜렷하지 않음';cls='mid';}
+      sig='<div class="k" style="grid-column:1/-1;margin:0 0 10px;background:'+(cls==='good'?'#dcfce7':cls==='bad'?'#fee2e2':'#fefce8')+';border:1px solid '+(cls==='good'?'#86efac':cls==='bad'?'#fca5a5':'#fde047')+'"><div style="font-size:18px;font-weight:700">'+em+' '+esc(txt)+'</div><div class="muted" style="font-size:12px;margin-top:3px">근거: 적정주가 위치 <b>'+esc(fundPos[0])+'</b> + 실적 방향 <b>'+esc(epsDir)+'</b></div></div>';
+    } else {
+      sig='<div class="muted" style="margin-bottom:8px;font-size:13px">종합 신호는 <b>적정주가 위치</b>와 <b>실적 방향(⑤)</b> 둘 다 있어야 나와요. 위 「선행EPS」 칸에 이 종목 EPS 를 넣고, 여기에 현재가·PER 이 들어오면 자동으로 뜹니다.</div>';
+    }
+
+    box.innerHTML=top+sig+'<table><tr><th>항목</th><th>계산 과정</th><th>판정</th></tr>'+rows.join('')+'</table>'+
+      '<p class="muted" style="font-size:12px;margin-top:6px">※ 신호는 참고예요. 최종 판단은 아래 회사표 「판단(달님)」 칸에 적으세요.</p>';
+  }
+  var spb=document.getElementById('sparseBtn');
+  if(spb){ spb.onclick=function(){ var t=document.getElementById('spaste').value; if(!t.trim())return; renderSnap(parseSnap(t)); }; }
 })();
 </script>
 </body>
