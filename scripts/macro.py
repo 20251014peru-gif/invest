@@ -1,4 +1,4 @@
-# v 20260904-1700  macro.py — CYGNUS 정적판의 수집기. data/indicators.json 을 읽어 FRED(공식)·Yahoo(보조) 값을 모은다.
+# v 20260904-1810  macro.py — CYGNUS 정적판의 수집기. data/indicators.json 을 읽어 FRED(공식)·Yahoo(보조) 값을 모은다.
 # 쓰기: facts/macro.json(최신), facts/macro_history.json(일별 누적), data/status.json(job macro)
 # 규칙: 시각 3칸(as_of=시장 기준일, published=출처 발표 시각(모르면 빈칸), collected_at=수집 KST). 실패한 지표는 값 대신 error 를 남긴다(조용한 실패 금지).
 import json, os, sys, csv, io, datetime as dt, urllib.request
@@ -34,7 +34,16 @@ def fetch_yahoo(symbol):
     if h is None or len(h) == 0: return []
     return [(i.to_pydatetime().date().isoformat(), float(v)) for i, v in h["Close"].dropna().items()][-5:]
 
-FETCH = {"fred": fetch_fred, "yahoo": fetch_yahoo}
+def fetch_stooq(symbol):
+    """stooq.com 일봉 CSV(무키). 열: Date,Open,High,Low,Close,Volume"""
+    url = f"https://stooq.com/q/d/l/?s={symbol}&i=d"
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (invest macro collector)"})
+    raw = urllib.request.urlopen(req, timeout=20).read().decode("utf-8", "replace")
+    rows = [(r["Date"], float(r["Close"])) for r in csv.DictReader(io.StringIO(raw)) if r.get("Close") not in (None, "", "N/D")]
+    if not rows: raise RuntimeError("stooq 응답 비어 있음(심볼 확인)")
+    return rows[-5:]
+
+FETCH = {"fred": fetch_fred, "yahoo": fetch_yahoo, "stooq": fetch_stooq}
 
 def judge(ind, value, change_pct):
     """달님 규칙(indicators.json thresholds)으로 우호/주의/부담 판정. 규칙 없으면 빈칸."""
@@ -64,8 +73,15 @@ def run(fetch_map=None, manual=None):
                 if m: rec.update({"value": float(m["value"]), "as_of": m.get("as_of", ""), "published": m.get("published", "")})
                 else: rec["error"] = "수동 입력 없음(raw/manual_macro.json)"
             else:
-                rows = fetch_map[ind["source"]](ind["symbol"])
-                if len(rows) < 1: raise RuntimeError("데이터 없음")
+                try:
+                    rows = fetch_map[ind["source"]](ind["symbol"])
+                    if len(rows) < 1: raise RuntimeError("데이터 없음")
+                except Exception as e1:                                  # 1순위 실패 → 예비 출처(있으면) 한 번 더
+                    fb = ind.get("fallback")
+                    if not fb or fb["source"] not in fetch_map: raise
+                    rows = fetch_map[fb["source"]](fb["symbol"])
+                    if len(rows) < 1: raise RuntimeError(f"1순위 {e1} / 예비도 데이터 없음")
+                    rec["source"] = fb["source"] + "(예비)"; rec["symbol"] = fb["symbol"]
                 rec["as_of"], rec["value"] = rows[-1]
                 if len(rows) >= 2:
                     rec["prev"] = rows[-2][1]
@@ -82,7 +98,7 @@ def run(fetch_map=None, manual=None):
                     "official": True, "rule": "0 아래=역전", "value": round(v["us10y"]["value"] - v["us2y"]["value"], 3), "prev": None, "change_pct": None,
                     "as_of": v["us10y"]["as_of"], "published": "", "collected_at": kst_iso(), "judge": "역전" if v["us10y"]["value"] < v["us2y"]["value"] else "정상", "error": ""})
     ok = sum(1 for r in out if r["value"] is not None)
-    save(P("facts", "macro.json"), {"schema": "macro/1", "version": "v 20260904-1700", "collected_at": kst_iso(), "ok": ok, "total": len(out), "items": out})
+    save(P("facts", "macro.json"), {"schema": "macro/1", "version": "v 20260904-1810", "collected_at": kst_iso(), "ok": ok, "total": len(out), "items": out})
     # 이력: 날짜(KST) 키로 값만
     hist = load(P("facts", "macro_history.json"), {"schema": "macro_history/1", "days": {}})
     today = kst_now().date().isoformat()

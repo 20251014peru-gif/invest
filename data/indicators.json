@@ -1,44 +1,52 @@
 {
   "schema": "indicators/1",
-  "version": "v 20260904-1700",
-  "_설명": "CYGNUS 매크로 지표 설정(원칙 8: 출처·규칙은 설정 파일). source: fred(공식, 키 불필요 CSV) | yahoo(보조, 근거 아님) | manual(수동 입력). 임계값은 market-check.html 의 달님 규칙(확인). axis 는 axes.json id.",
+  "version": "v 20260904-1810",
+  "_설명": "CYGNUS 매크로 지표 설정(원칙 8: 출처·규칙은 설정 파일). source: fred(공식, 키 불필요 CSV) | stooq(보조, 무키 CSV) | yahoo(보조, Actions 에서 429 잦음 → 예비) | manual(수동 입력). 임계값은 market-check.html 의 달님 규칙(확인). axis 는 axes.json id.",
   "history_days": 400,
   "items": [
     {
       "id": "sp500",
       "name": "S&P500",
-      "source": "yahoo",
-      "symbol": "^GSPC",
+      "source": "fred",
+      "symbol": "SP500",
       "unit": "pt",
       "axis": "earnings",
-      "official": false,
+      "official": true,
       "rule": "전일 대비 +1% 이상=강 / −1% 이하=약",
       "thresholds": {
         "strong_pct": 1,
         "weak_pct": -1
       },
-      "note": ""
+      "note": "",
+      "fallback": {
+        "source": "yahoo",
+        "symbol": "^GSPC"
+      }
     },
     {
       "id": "nasdaq",
       "name": "나스닥",
-      "source": "yahoo",
-      "symbol": "^IXIC",
+      "source": "fred",
+      "symbol": "NASDAQCOM",
       "unit": "pt",
       "axis": "earnings",
-      "official": false,
+      "official": true,
       "rule": "+1.5%=강 / AI·기술주 방향",
       "thresholds": {
         "strong_pct": 1.5,
         "weak_pct": -1.5
       },
-      "note": ""
+      "note": "",
+      "fallback": {
+        "source": "yahoo",
+        "symbol": "^IXIC"
+      }
     },
     {
       "id": "sox",
       "name": "SOX 반도체",
-      "source": "yahoo",
-      "symbol": "^SOX",
+      "source": "stooq",
+      "symbol": "^sox",
       "unit": "pt",
       "axis": "earnings",
       "official": false,
@@ -47,7 +55,11 @@
         "strong_pct": 2,
         "weak_pct": -2
       },
-      "note": ""
+      "note": "stooq 심볼 추정 — 첫 실행으로 확인",
+      "fallback": {
+        "source": "yahoo",
+        "symbol": "^SOX"
+      }
     },
     {
       "id": "vix",
@@ -83,17 +95,18 @@
     {
       "id": "dxy",
       "name": "달러지수 DXY",
-      "source": "yahoo",
-      "symbol": "DX-Y.NYB",
+      "source": "fred",
+      "symbol": "DTWEXBGS",
       "unit": "pt",
       "axis": "fx_liquidity",
-      "official": false,
-      "rule": "98 이하=약달러 우호 / 104 이상=부담",
-      "thresholds": {
-        "good_max": 98,
-        "bad_min": 104
-      },
-      "note": ""
+      "official": true,
+      "rule": "방향만(광의 달러지수). DXY 98/104 규칙은 영웅문 붙여넣기 값에 적용",
+      "thresholds": {},
+      "note": "FRED 광의 달러지수(DXY 와 척도 다름 → 98/104 규칙 미적용, 방향만)",
+      "fallback": {
+        "source": "yahoo",
+        "symbol": "DX-Y.NYB"
+      }
     },
     {
       "id": "us10y",
@@ -125,8 +138,8 @@
     {
       "id": "hsi",
       "name": "항셍지수",
-      "source": "yahoo",
-      "symbol": "^HSI",
+      "source": "stooq",
+      "symbol": "^hsi",
       "unit": "pt",
       "axis": "policy_geo",
       "official": false,
@@ -135,7 +148,11 @@
         "strong_pct": 1,
         "weak_pct": -1
       },
-      "note": ""
+      "note": "",
+      "fallback": {
+        "source": "yahoo",
+        "symbol": "^HSI"
+      }
     },
     {
       "id": "wti",
@@ -152,38 +169,50 @@
     {
       "id": "copper",
       "name": "구리",
-      "source": "yahoo",
-      "symbol": "HG=F",
+      "source": "stooq",
+      "symbol": "hg.f",
       "unit": "$/lb",
       "axis": "commodity",
       "official": false,
       "rule": "",
       "thresholds": {},
-      "note": ""
+      "note": "stooq 선물 심볼 추정",
+      "fallback": {
+        "source": "yahoo",
+        "symbol": "HG=F"
+      }
     },
     {
       "id": "gold",
       "name": "금",
-      "source": "yahoo",
-      "symbol": "GC=F",
+      "source": "stooq",
+      "symbol": "gc.f",
       "unit": "$/oz",
       "axis": "credit_vol",
       "official": false,
       "rule": "",
       "thresholds": {},
-      "note": ""
+      "note": "stooq 선물 심볼 추정",
+      "fallback": {
+        "source": "yahoo",
+        "symbol": "GC=F"
+      }
     },
     {
       "id": "bdry",
       "name": "해운 BDRY",
-      "source": "yahoo",
-      "symbol": "BDRY",
+      "source": "stooq",
+      "symbol": "bdry.us",
       "unit": "$",
       "axis": "inflation_growth",
       "official": false,
       "rule": "",
       "thresholds": {},
-      "note": ""
+      "note": "",
+      "fallback": {
+        "source": "yahoo",
+        "symbol": "BDRY"
+      }
     },
     {
       "id": "m2",
