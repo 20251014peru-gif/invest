@@ -1,4 +1,4 @@
-# v 20260904-1810  macro.py — CYGNUS 정적판의 수집기. data/indicators.json 을 읽어 FRED(공식)·Yahoo(보조) 값을 모은다.
+# v 20260904-1930  macro.py — CYGNUS 정적판의 수집기. data/indicators.json 을 읽어 FRED(공식)·Yahoo(보조) 값을 모은다.
 # 쓰기: facts/macro.json(최신), facts/macro_history.json(일별 누적), data/status.json(job macro)
 # 규칙: 시각 3칸(as_of=시장 기준일, published=출처 발표 시각(모르면 빈칸), collected_at=수집 KST). 실패한 지표는 값 대신 error 를 남긴다(조용한 실패 금지).
 import json, os, sys, csv, io, datetime as dt, urllib.request
@@ -66,11 +66,12 @@ def run(fetch_map=None, manual=None):
     for ind in cfg["items"]:
         rec = {"id": ind["id"], "name": ind["name"], "unit": ind["unit"], "axis": ind["axis"], "source": ind["source"],
                "symbol": ind["symbol"], "official": ind["official"], "rule": ind.get("rule", ""),
-               "value": None, "prev": None, "change_pct": None, "as_of": "", "published": "", "collected_at": kst_iso(), "judge": "", "error": ""}
+               "value": None, "prev": None, "change_pct": None, "as_of": "", "published": "", "collected_at": kst_iso(), "judge": "", "error": "", "pending": False}
         try:
             if ind["source"] == "manual":
                 m = manual.get(ind["id"])
                 if m: rec.update({"value": float(m["value"]), "as_of": m.get("as_of", ""), "published": m.get("published", "")})
+                elif ind.get("optional"): rec["pending"] = True          # 참고 지표 미입력 = 오류 아님
                 else: rec["error"] = "수동 입력 없음(raw/manual_macro.json)"
             else:
                 try:
@@ -98,7 +99,7 @@ def run(fetch_map=None, manual=None):
                     "official": True, "rule": "0 아래=역전", "value": round(v["us10y"]["value"] - v["us2y"]["value"], 3), "prev": None, "change_pct": None,
                     "as_of": v["us10y"]["as_of"], "published": "", "collected_at": kst_iso(), "judge": "역전" if v["us10y"]["value"] < v["us2y"]["value"] else "정상", "error": ""})
     ok = sum(1 for r in out if r["value"] is not None)
-    save(P("facts", "macro.json"), {"schema": "macro/1", "version": "v 20260904-1810", "collected_at": kst_iso(), "ok": ok, "total": len(out), "items": out})
+    save(P("facts", "macro.json"), {"schema": "macro/1", "version": "v 20260904-1930", "collected_at": kst_iso(), "ok": ok, "total": len(out), "items": out})
     # 이력: 날짜(KST) 키로 값만
     hist = load(P("facts", "macro_history.json"), {"schema": "macro_history/1", "days": {}})
     today = kst_now().date().isoformat()
