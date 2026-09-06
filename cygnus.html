@@ -1,4 +1,4 @@
-<!-- v 20260904-3510  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260906-0300 (탭 UI·사이트맵)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -9,7 +9,7 @@
   :root{--bg:#f6f7fb;--card:#fff;--line:#e3e6ee;--ink:#1f2430;--sub:#6b7280;--p1:#dbeafe;--p2:#dcfce7;--p3:#fef3c7;--p5:#fee2e2;--p6:#ede9fe}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
-  header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+  header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);flex-wrap:wrap}
   header h1{font-size:18px;margin:0;flex:1}header small{color:var(--sub);font-size:12px}
   .btn{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);font:inherit;font-size:14px;cursor:pointer;text-decoration:none;color:inherit;display:inline-flex;align-items:center}
   .btn.pri{background:var(--p1);border-color:#93c5fd}
@@ -34,23 +34,41 @@
   pre{background:#f7f7f9;border-radius:10px;padding:10px;font:12.5px/1.5 Consolas,monospace;white-space:pre-wrap;word-break:break-all}
   .muted{color:var(--sub);font-size:13px}
   .jcell:empty:before{content:attr(data-ph);color:#bbb}
+  /* ── 탭 UI ── */
+  .topwrap{position:sticky;top:0;z-index:6;background:var(--card)}
+  .tabbar{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;background:var(--card);padding:8px 12px;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
+  .tab{min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);font:inherit;font-size:14px;font-weight:700;cursor:pointer;color:var(--sub);white-space:nowrap}
+  .tab.on{background:var(--p1);border-color:#93c5fd;color:var(--ink)}
+  .tabsub{color:var(--sub);font-size:12.5px;margin:2px 0 12px}
+  [hidden]{display:none!important}
+  /* ── 사이트맵 ── */
+  .fbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+  .fbox small{color:var(--sub);font-size:12px;display:block;margin:1px 0 4px}
+  .fbox.c1{background:#eef6ff}.fbox.c2{background:#f0fdf4}.fbox.c3{background:#fefce8}.fbox.c4{background:#fef2f2}
+  .fbox .chip2{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:8px;padding:2px 8px;margin:3px 3px 0 0;font-size:12.5px}
+  .arrow{text-align:center;color:var(--sub);font-size:12px;margin:6px 0}
+  .mtree{line-height:1.95;font-size:14px}
+  .mtree b.hub{background:var(--p6);border-radius:8px;padding:1px 8px}
+  .mtree a{color:#1d4ed8;text-decoration:none}
 </style>
 </head>
 <body>
+<div class="topwrap">
 <header>
   <h1>🦢 CYGNUS 시장 상태 <small id="ver"></small></h1>
   <a class="btn" href="axes.html">축·전략</a><a class="btn" href="predict.html">예측·채점</a><a class="btn" href="index.html">허브</a>
 </header>
+<nav class="tabbar" id="tabbar">
+  <button class="tab" type="button" data-go="market">🌐 시장</button>
+  <button class="tab" type="button" data-go="sector">🏭 산업·종목</button>
+  <button class="tab" type="button" data-go="supply">💰 수급</button>
+  <button class="tab" type="button" data-go="stock">🔍 종목분석</button>
+  <button class="tab" type="button" data-go="map">🗺 사이트맵</button>
+</nav>
+</div>
 <main>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px;position:sticky;top:0;background:#fbfbf9;padding:8px 4px;z-index:5;border-bottom:1px solid #e5e7eb">
-    <span class="muted" style="align-self:center;font-size:12px">바로가기</span>
-    <a class="btn" href="#regimeH" style="padding:4px 10px;font-size:13px">레짐</a>
-    <a class="btn" href="#ind" style="padding:4px 10px;font-size:13px">지표</a>
-    <a class="btn" href="#sectors" style="padding:4px 10px;font-size:13px">산업</a>
-    <a class="btn" href="#supply" style="padding:4px 10px;font-size:13px">수급</a>
-    <a class="btn" href="#pos" style="padding:4px 10px;font-size:13px">종목분석</a>
-    <a class="btn" href="#cap" style="padding:4px 10px;font-size:13px">📸캡쳐분석</a>
-  </div>
+  <div class="tabsub" id="tabsub"></div>
+  <section class="tabpanel" data-tab="market">
   <h2 id="regimeH">레짐 요약 <span class="tag">성장×물가 4분면 + 유동성 · 공식 근거 있을 때만</span></h2>
   <div class="regime" id="regime"></div>
 
@@ -60,21 +78,28 @@
   <div class="grid" id="indGrid"></div>
   <p class="muted" id="macroEmpty" hidden>아직 수집된 값이 없습니다 — GitHub Actions 「Macro Collector」를 한 번 실행하면 채워집니다.</p>
 
-  <h2 id="sectors">산업 사슬 <span class="tag">공정 순서 · 회사 다섯 칸 · 판단은 달님 칸</span><span class="tag">🔗 축 연결 = 시장→산업→종목</span></h2>
+  </section>
+  <section class="tabpanel" data-tab="sector" hidden>
+  <h2 id="sectors">산업 사슬<span class="tag">공정 순서 · 회사 다섯 칸 · 판단은 달님 칸</span><span class="tag">🔗 축 연결 = 시장→산업→종목</span></h2>
   <p class="muted" style="margin:-4px 0 8px">각 산업에 <b>관련 대변화 축</b>이 붙어 있어요. 위 레짐/축이 움직이면 → 그 축에 걸린 산업을 보고 → 그 산업의 회사(종목)로 좁혀갑니다.</p>
   <div class="card" id="dartPanel" style="margin-bottom:12px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>📢 최근 공시</b><span class="tag" id="dartTag">DART 자동 수집</span></div><div id="dartBox" class="muted" style="margin-top:6px">불러오는 중…</div></div>
+  <div class="card" id="board" style="margin-bottom:12px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>💬 토론실 근거글</b><span class="tag" id="boardTag">종목토론실 자동 필터</span><span class="tag" style="background:#fee2e2;color:#991b1b">미검증 주장 · 판단은 달님</span></div><div id="boardBox" class="muted" style="margin-top:6px">불러오는 중…</div></div>
   <div id="hotBanner" style="margin:0 0 8px;font-size:14px"></div>
   <div id="sectorChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
   <div id="sectorBox"></div>
 
-  <h2 id="supply">영웅문 붙여넣기 — 수급 <span class="tag">투자자별 매매동향 화면을 복사해서 붙여넣기</span></h2>
+  </section>
+  <section class="tabpanel" data-tab="supply" hidden>
+  <h2 id="supply">영웅문 붙여넣기 — 수급<span class="tag">투자자별 매매동향 화면을 복사해서 붙여넣기</span></h2>
   <div class="card">
     <textarea id="paste" placeholder="영웅문 [0257] 투자자별 매매동향 등에서 복사한 텍스트를 붙여넣으세요. 외국인·기관·개인 순매수와 코스피·코스닥 등락을 찾아냅니다."></textarea>
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="parseBtn" type="button">읽어내기</button><button class="btn" id="copyBtn" type="button" hidden>JSON 복사</button><span class="muted" style="align-self:center">복사한 JSON 을 raw/supply.json 의 items 에 붙여넣으면 전략 카드 '수급'의 재료가 됩니다</span></div>
     <div id="parsed"></div>
   </div>
 
-  <h2 id="pos">종목 붙여넣기 — 분석 <span class="tag">선행EPS · 가격 위치 · 재무 요약을 한 번에</span></h2>
+  </section>
+  <section class="tabpanel" data-tab="stock" hidden>
+  <h2 id="pos">종목 붙여넣기 — 분석<span class="tag">선행EPS · 가격 위치 · 재무 요약을 한 번에</span></h2>
   <div class="card">
     <details style="margin-bottom:10px"><summary style="cursor:pointer;font-weight:600">📖 사용법 (무엇을 붙여도 자동 판별)</summary>
       <div style="margin:8px 0;line-height:1.9">
@@ -95,12 +120,54 @@
   <h2 id="cap">📸 캡쳐 분석 결과 <span class="tag">캡쳐를 채팅에 보내면 Claude가 읽어 채움 · 복사 스크램블 없음</span></h2>
   <p class="muted" style="margin:-4px 0 8px">네이버 종목 화면(기업실적분석/투자정보)을 <b>캡쳐해서 채팅에 보내면</b>, 이미지에서 직접 읽은 재무요약·고점진단·적정주가가 여기 종목별로 쌓입니다. 잘못 올렸거나 값이 바뀌면 카드의 <b>[지우기]</b>로 숨기고 다시 보내주세요.</p>
   <div id="capBox" class="muted">아직 분석된 캡쳐가 없어요. 네이버 종목 화면을 캡쳐해서 채팅에 보내주세요.</div>
+  </section>
+
+  <section class="tabpanel" data-tab="map" hidden>
+  <h2>🗺 사이트맵 — 시스템 연결도 <span class="tag">데이터가 폰까지 오는 길 · 프로그램 관계</span></h2>
+
+  <div class="card" style="margin-bottom:12px">
+    <b>① 데이터 흐름 <span class="tag" style="background:var(--p2)">나 없이 자동</span></b>
+    <div class="flow" style="margin-top:8px">
+      <div class="fbox c1"><b>수집기 (GitHub Actions)</b><small>정해진 시각에 저절로 실행 — 컴퓨터·나 필요 없음</small>
+        <span class="chip2">macro.py · 매크로/금리(매시)</span><span class="chip2">dart.py · 공시(30분)</span><span class="chip2">board.py · 토론실(하루 1회)</span><span class="chip2">score.py · 점수(하루 2회)</span><span class="chip2">뉴스레이더 collector(20분)</span>
+      </div>
+      <div class="arrow">↓ 결과를 저장</div>
+      <div class="fbox c2"><b>데이터 창고 (레포 안 JSON)</b><small>화면이 매번 새로 읽는 원본</small>
+        <span class="chip2">facts/macro.json</span><span class="chip2">facts/dart.json</span><span class="chip2">facts/board.json</span><span class="chip2">data/axes.json</span><span class="chip2">data/sectors.json</span><span class="chip2">data/status.json</span>
+      </div>
+      <div class="arrow">↓ 화면이 읽어 표시</div>
+      <div class="fbox c3"><b>CYGNUS 화면 (이 페이지)</b><small>위 탭으로 이동</small>
+        <span class="chip2">🌐 시장(레짐·지표)</span><span class="chip2">🏭 산업·종목(공시·토론실)</span><span class="chip2">💰 수급</span><span class="chip2">🔍 종목분석(캡쳐)</span>
+      </div>
+      <div class="arrow">↓ 중요한 것만</div>
+      <div class="fbox c4"><b>폰 알림 (ntfy)</b><small>손 안 대도 뜸</small>
+        <span class="chip2">📢 수주 공시</span><span class="chip2">💬 토론실 근거글(하루 1통)</span><span class="chip2">📰 뉴스 속보</span><span class="chip2">🧰 업무</span><span class="chip2">⚠ 수집 실패 경보</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <b>② 프로그램 연결</b>
+    <div class="mtree" style="margin-top:6px">
+      <b class="hub">나의 시스템 (허브)</b><br>
+      ├ <a href="index.html">투자 허브</a> → <a href="cygnus.html">CYGNUS(이 화면)</a> · <a href="axes.html">축·전략</a> · <a href="predict.html">예측·채점</a><br>
+      ├ 📊 시장상태 · 📢 공시 (허브 바로가기 카드)<br>
+      ├ 🗞 뉴스레이더 &nbsp; ├ 🧰 워크로그(업무일지) &nbsp; ├ 📷 스캔 앱<br>
+      └ ⏰ 알림은 모두 <b>ntfy</b> 로 폰에 모임
+    </div>
+  </div>
+
+  <div class="card">
+    <b>③ 지금 켜져 있는 자동 수집</b> <span class="tag">status.json 실시간</span>
+    <div id="mapJobs" class="muted" style="margin-top:6px">불러오는 중…</div>
+  </div>
+  </section>
 
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260904-3510"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260906-0300 (탭 UI·사이트맵)"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-3510';
+  document.getElementById('ver').textContent='v 20260906-0300 (탭 UI·사이트맵)';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -229,6 +296,24 @@
         return '<tr><td>'+esc(d2)+'</td><td><b>'+esc(i.company)+'</b> <small>'+esc(i.sector)+'</small></td><td><span class="j" style="background:'+(KC[i.kind]||'#eef')+'">'+esc(i.kind)+'</span></td><td><a href="'+esc(i.url)+'" target="_blank" rel="noopener">'+esc(i.report_nm)+'</a></td></tr>';}).join('')+'</table></div>';
   }).catch(function(e){ document.getElementById('dartBox').textContent='공시 못 불러옴: '+e.message; });
 
+  // 💬 종목토론실 근거글 — board.py 가 노이즈 걸러 남긴 '근거 있는 주장 후보'(미검증). 강도 상/중/하.
+  get('facts/board.json').then(function(d){
+    var box=document.getElementById('boardBox'), items=(d.items||[]);
+    document.getElementById('boardTag').textContent = d.updated ? ('갱신 '+window.Status.kstStr(d.updated)+' · '+items.length+'건') : '자동 필터 (첫 실행 대기)';
+    if(!items.length){ box.innerHTML='아직 없음 — GitHub Actions 「Board Signals」가 돌면 관심 종목 토론실에서 <b>근거 있는 주장</b>만 뽑아 여기 뜹니다. (ANTHROPIC_API_KEY Secret 필요)<br><small>토론실 글은 검증 안 된 주장입니다. 근거 후보를 모아줄 뿐, 사실 확인·판단은 달님이 합니다.</small>'; return; }
+    var SC={'상':'#dcfce7','중':'#fef3c7','하':'#eef'};
+    var VC={'적중':'#dcfce7','빗나감':'#fee2e2','무관':'#eef','미검증':'#f3f4f6'};
+    box.innerHTML='<div style="overflow-x:auto"><table><tr><th>강도</th><th>회사</th><th>요약</th><th>시점</th><th>검증</th><th>원글</th></tr>'+
+      items.slice(0,40).map(function(i){var v=(i.verify&&i.verify.status)||'미검증';
+        return '<tr><td><span class="j" style="background:'+(SC[i.strength]||'#eef')+'" title="'+esc(i.why||'')+'">'+esc(i.strength||'중')+'</span></td>'+
+          '<td><b>'+esc(i.company)+'</b> <small>'+esc(i.sector)+'</small></td>'+
+          '<td>'+esc(i.topic||i.title)+'</td>'+
+          '<td><small>'+esc(i.when||'')+'</small></td>'+
+          '<td><span class="j" style="background:'+(VC[v]||'#f3f4f6')+'"'+((i.verify&&i.verify.note)?' title="'+esc(i.verify.note)+'"':'')+'>'+esc(v)+'</span></td>'+
+          '<td><a href="'+esc(i.url)+'" target="_blank" rel="noopener">보기</a></td></tr>';}).join('')+'</table></div>'+
+      '<p class="muted" style="margin:6px 2px 0;font-size:12px">⚠ 검증 안 된 주장 후보입니다. LLM 이 "근거를 대려는 글인지"만 걸렀을 뿐, 맞다는 뜻이 아닙니다. 확인·판단은 달님.</p>';
+  }).catch(function(e){ document.getElementById('boardBox').textContent='토론실 못 불러옴: '+e.message; });
+
   // 산업 사슬 — 노션식 토글: 볼 산업만 켜고 나머지는 끈다(브라우저 기억). 값 있을 때만 카드.
   var SEC_ACTIVE={};
   // 회사 판단 칸 — 달님이 직접 입력, 브라우저에 저장(키=종목코드 또는 이름)
@@ -237,13 +322,19 @@
   function fillJudge(){ var J=loadJ(); Array.prototype.forEach.call(document.querySelectorAll('.jcell'), function(td){ var k=td.dataset.key, v=J[k]||''; td.textContent=v; td.dataset.ph=(v?'':'판단 입력…'); }); }
   document.addEventListener('input', function(e){ var td=e.target.closest&&e.target.closest('.jcell'); if(!td)return; var J=loadJ(); var v=td.textContent.trim(); if(v)J[td.dataset.key]=v; else delete J[td.dataset.key]; try{localStorage.setItem(JKEY,JSON.stringify(J))}catch(_){} });
 
+  // ── 회사표 🟢🔴 자동 신호 뱃지 — 캡쳐분석(cai_results) 결과를 종목별로 회사명 옆에 표시 ──
+  function caiAll(){ try{return JSON.parse(localStorage.getItem('cai_results')||'[]')}catch(e){return []} }
+  function caiMatch(key){ var rs=caiAll(); for(var i=0;i<rs.length;i++){ var r=rs[i]; var nm=r.name||'', cd=r.code!=null?String(r.code):''; if((cd&&String(key)===cd)||(nm&&(nm.indexOf(key)>=0||String(key).indexOf(nm)>=0))) return r; } return null; }
+  function decorateBadges(){ Array.prototype.forEach.call(document.querySelectorAll('.caisig'), function(sp){ var r=caiMatch(sp.dataset.k); var s=(r&&r.signal)||''; var em=(s.match(/[🟢🟡🔴]/)||[''])[0]; sp.innerHTML=em?' <span title="'+esc(s)+'" style="cursor:help">'+em+'</span>':''; }); }
+  document.addEventListener('cai-updated', decorateBadges);
+
   var SECLS='cygnus_sectors_on';
   function secCard(x){
     var h='<div class="card" style="margin-bottom:10px"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>'+esc(x.name)+'</b><span class="tag">'+esc(x.phase)+'</span><span class="tag">'+esc(x.phase_tag||'')+'</span><span class="muted">기준 '+esc(x.as_of)+'</span></div>';
     h+='<div class="muted" style="margin:6px 0">'+(x.chain||[]).map(esc).join(' → ')+(x.timing?' · '+esc(x.timing.note)+' <span class="tag">'+esc(x.timing.tag)+'</span>':'')+'</div>';
     if(x.axes&&x.axes.length){ h+='<div style="margin:4px 0 8px">'+x.axes.map(function(a){var hot=SEC_ACTIVE[a.axis];return '<span class="tag" title="'+esc(a.why)+(hot?' — 지금: '+esc(hot.headline):'')+'" style="background:'+(hot?'#fee2e2':'#ede9fe')+';border-color:'+(hot?'#f5b7b1':'#c4b5fd')+';cursor:help">'+(hot?'🔥':'🔗')+' '+esc(a.name)+'</span>'}).join(' ')+' <span class="muted" style="font-size:12px">← 🔥=지금 이 축이 움직임</span></div>'; }
     h+='<div style="overflow-x:auto"><table><tr><th>고리</th><th>회사</th><th>상태</th><th>근거</th><th>판단(달님)</th><th>검증(뭘 보면 판가름)</th><th>표시</th></tr>'+
-      (x.companies||[]).map(function(c){return '<tr><td>'+esc(c.link)+'</td><td><b>'+esc(c.name)+'</b>'+(c.code?' <small>'+esc(c.code)+'</small>':'')+'</td><td>'+esc(c.state)+'</td><td>'+esc(c.evidence)+'</td><td class="jcell" data-key="'+esc(c.code||c.name)+'" contenteditable="true" style="min-width:110px;background:#fffef5;cursor:text"></td><td>'+esc(c.verify)+'</td><td><span class="tag">'+esc(c.tag)+'</span></td></tr>'}).join('')+'</table></div>';
+      (x.companies||[]).map(function(c){return '<tr><td>'+esc(c.link)+'</td><td><b>'+esc(c.name)+'</b>'+(c.code?' <small>'+esc(c.code)+'</small>':'')+'<span class="caisig" data-k="'+esc(c.code||c.name)+'"></span></td><td>'+esc(c.state)+'</td><td>'+esc(c.evidence)+'</td><td class="jcell" data-key="'+esc(c.code||c.name)+'" contenteditable="true" style="min-width:110px;background:#fffef5;cursor:text"></td><td>'+esc(c.verify)+'</td><td><span class="tag">'+esc(c.tag)+'</span></td></tr>'}).join('')+'</table></div>';
     if(x.risks&&x.risks.length) h+='<div class="muted" style="margin-top:6px">변수: '+x.risks.map(esc).join(' · ')+'</div>';
     return h+'</div>';
   }
@@ -263,13 +354,18 @@
     function render(){
       box.innerHTML=''; var shown=0;
       secs.forEach(function(x){ if(on[x.id]){ box.innerHTML+=secCard(x); shown++; } });
-      if(!shown) box.innerHTML='<div class="muted" style="padding:10px">위 칩에서 볼 산업을 켜세요.</div>'; else fillJudge();
+      if(!shown) box.innerHTML='<div class="muted" style="padding:10px">위 칩에서 볼 산업을 켜세요.</div>'; else { fillJudge(); decorateBadges(); }
       Array.prototype.forEach.call(chips.children, function(ch){ var id=ch.dataset.id; if(id) ch.className='btn'+(on[id]?' pri':''); });
     }
-    // 지금 주목 배너
-    var hotList=secs.filter(function(x){return hotAxes(x).length}).sort(function(a,b){return hotAxes(b).length-hotAxes(a).length}).map(function(x){var h=hotAxes(x);return '<b>'+esc(x.name)+'</b> <small>축'+h.length+'개: '+h.map(function(a){return esc(active[a.axis].headline||a.name)}).join(', ')+'</small>'});
-    var banner=document.getElementById('hotBanner');
-    if(banner) banner.innerHTML = hotList.length ? '🔥 <b>지금 주목할 산업(축이 많이 걸린 순):</b><br>'+hotList.join('<br>')+' <span class="muted">— 축 상태(레짐/8축)에서 자동 연결</span>' : '<span class="muted">지금 특별히 움직이는 축은 없음(레짐 안정) — 산업 칩에서 골라 보세요.</span>';
+    // 지금 주목 배너 — 축(🔥) + 회사 실적신호(🟢, 캡쳐분석) 종합 (⑤축×산업 연결)
+    function greenCount(x){ var n=0; (x.companies||[]).forEach(function(c){ var r=caiMatch(c.code||c.name); if(r&&r.signal&&r.signal.indexOf('🟢')>=0) n++; }); return n; }
+    function updateHot(){
+      var hotList=secs.filter(function(x){return hotAxes(x).length||greenCount(x)}).map(function(x){return {x:x,h:hotAxes(x).length,g:greenCount(x)};}).sort(function(a,b){return (b.h+b.g)-(a.h+a.g)}).map(function(o){var x=o.x,parts=[]; if(o.h)parts.push('축'+o.h+'개'); if(o.g)parts.push('🟢 실적 '+o.g+'종목'); return '<b>'+esc(x.name)+'</b> <small>'+parts.join(' · ')+(o.h?' ('+hotAxes(x).map(function(a){return esc(active[a.axis].headline||a.name)}).join(', ')+')':'')+'</small>';});
+      var banner=document.getElementById('hotBanner');
+      if(banner) banner.innerHTML = hotList.length ? '🔥 <b>지금 주목할 산업(축+실적 종합):</b><br>'+hotList.join('<br>')+' <span class="muted">— 축(레짐/8축) + 회사 실적신호(🟢)에서 자동 연결</span>' : '<span class="muted">지금 특별히 움직이는 축·실적 신호가 없음 — 산업 칩에서 골라 보세요.</span>';
+    }
+    updateHot();
+    document.addEventListener('cai-updated', updateHot);
     chips.innerHTML='<button class="btn" type="button" data-all="1">모두</button><button class="btn" type="button" data-none="1">끄기</button>'+
       secs.map(function(x){var hot=hotAxes(x).length?'🔥 ':'';return '<button class="btn" type="button" data-id="'+esc(x.id)+'">'+hot+esc(x.name)+'</button>'}).join('');
     chips.onclick=function(e){ var b=e.target.closest('button'); if(!b)return;
@@ -388,6 +484,11 @@
         '<td><code>적정 = 내년EPS '+fmt(ei.eps)+' × '+baseNm+' '+basePer+' = <b>'+fmt(Math.round(fair))+'원</b></code>'+alt+'<br>'+
         '<code>상승여력 = ('+fmt(Math.round(fair))+' − '+fmt(x.price)+') ÷ '+fmt(x.price)+' × 100 = <b>'+(up>0?'+':'')+up.toFixed(0)+'%</b></code></td>'+
         '<td><span class="j '+fundPos[1]+'" title=">+20% 싼 자리 / ±20% 보통 / <−20% 비싼 자리">'+fundPos[0]+'</span></td></tr>');
+      var buyL=Math.round(fair*0.85), stopL=Math.round(x.price*0.95);
+      rows.push('<tr><td><b>매수·손절</b><br><span class="muted" style="font-size:12px">참고선</span></td>'+
+        '<td><code>매수선 = 적정 '+fmt(Math.round(fair))+' × 0.85 = <b>'+fmt(buyL)+'원</b></code> (안전마진 15%)<br>'+
+        '<code>손절선 = 매수가 −5%</code> · 예) 현재가 기준 <b>'+fmt(stopL)+'원</b> <span class="muted">(계좌 −12.5%면 전체 서킷)</span></td>'+
+        '<td><span class="muted">규칙</span></td></tr>');
     } else {
       rows.push('<tr><td><b>적정주가 위치</b></td><td class="muted">'+(ei?'현재가/PER 를 못 읽었어요':'위 「선행EPS」 칸에 이 종목 EPS 를 먼저 넣어주세요 — 그래야 내년EPS×PER 로 적정주가를 계산해요')+'</td><td>-</td></tr>');
     }
@@ -447,7 +548,7 @@
     if(f.rev) rows.push(['성장 · 매출', fmt(f.rev[0])+pctTag(yoy(f.rev)), '외형 성장']);
     if(f.opm) rows.push(['수익성 · 영업이익률', f.opm[0]+'%'+pctTag(yoy(f.opm)), f.opm[0]>40?'초고마진(호황 정점 특징)':f.opm[0]>15?'양호':'박함']);
     if(f.nim) rows.push(['순이익률', f.nim[0]+'%'+pctTag(yoy(f.nim)), '']);
-    if(f.roe) rows.push(['자본효율 · ROE', f.roe[0]+'%'+pctTag(yoy(f.roe)), (yoy(f.roe)!=null&&yoy(f.roe)<0)?'높지만 꺾이는 중':'']);
+    if(f.roe) rows.push(['자본효율 · ROE', f.roe[0]+'%'+pctTag(yoy(f.roe)), (f.roe[0]>=15?'높음(좋음)':f.roe[0]<8?'낮음 — 저평가면 함정 주의':'보통')+((yoy(f.roe)!=null&&yoy(f.roe)<0)?' · 꺾이는 중':'')]);
     if(f.debt) rows.push(['안정성 · 부채비율', f.debt[0]+'%'+pctTag(yoy(f.debt)), f.debt[0]<50?'건전(낮을수록 좋음)':f.debt[0]<100?'보통':'높음 주의']);
     var diag='';
     if(f.opm&&f.opm[0]>40){ var roeDn=yoy(f.roe)!=null&&yoy(f.roe)<0;
@@ -515,7 +616,7 @@
 (function(){ // 섹션 접기/펴기
   var main=document.querySelector('main'); if(!main) return;
   var COL='cygnus_collapsed', col={}; try{col=JSON.parse(localStorage.getItem(COL)||'{}');}catch(e){}
-  var hs=[], k=main.children, i; for(i=0;i<k.length;i++){ if(k[i].tagName==='H2') hs.push(k[i]); }
+  var hs=[].slice.call(main.querySelectorAll('h2')), i=0;
   hs.forEach(function(h){
     var id=h.id||('sec'+i++); 
     var body=document.createElement('div'); body.className='secbody';
@@ -529,6 +630,55 @@
     h.addEventListener('click',function(e){ var tg=e.target; if(tg.tagName==='A'||tg.tagName==='BUTTON'||(tg.closest&&tg.closest('a,button'))) return; col[id]=!col[id]; try{localStorage.setItem(COL,JSON.stringify(col));}catch(e){} apply(); });
   });
 })();
+(function(){ // ── 탭 이동(클릭·←→) + 마지막 탭 기억 + ntfy 해시(#board 등) 지원 ──
+  var SUB={market:'레짐 4분면 + 매크로·실시간 지표 — 시장이 지금 어디에 있나',
+    sector:'산업 사슬 · DART 공시 · 토론실 근거글 — 축→산업→종목으로 좁히기',
+    supply:'영웅문 「투자자별 매매동향」 붙여넣기 → 수급 재료',
+    stock:'종목 붙여넣기/캡쳐 분석 — 선행EPS·가격위치·재무·적정주가',
+    map:'전체 시스템 연결도 — 수집기 → 데이터 → 화면 → 폰'};
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  var panels=[].slice.call(document.querySelectorAll('.tabpanel'));
+  if(!tabs.length||!panels.length) return;
+  var jobsLoaded=false;
+  function loadJobs(){
+    if(jobsLoaded) return; jobsLoaded=true;
+    var el=document.getElementById('mapJobs'); if(!el) return;
+    fetch('data/status.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+      var E={ok:'🟢',stopped:'⚪',fail:'🔴'}, js=(d.jobs||[]);
+      if(!js.length){ el.textContent='status.json 에 잡이 없습니다(첫 수집 대기).'; return; }
+      el.innerHTML='<div style="overflow-x:auto"><table><tr><th>상태</th><th>수집</th><th>최근</th><th>메모</th></tr>'+
+        js.map(function(j){return '<tr><td>'+(E[j.status]||'·')+' '+(j.status||'')+'</td><td><b>'+(j.name||j.id||'')+'</b></td><td>'+(j.ran?(window.Status?window.Status.kstStr(j.ran):j.ran):'-')+'</td><td class="muted">'+(j.note||j.cause||'')+'</td></tr>';}).join('')+'</table></div>';
+    }).catch(function(){ el.textContent='status.json 못 불러옴.'; });
+  }
+  function show(name){
+    var ok=false;
+    panels.forEach(function(p){ var m=(p.getAttribute('data-tab')===name); p.hidden=!m; if(m)ok=true; });
+    if(!ok){ name='market'; panels.forEach(function(p){p.hidden=(p.getAttribute('data-tab')!=='market')}); }
+    tabs.forEach(function(t){ t.classList.toggle('on', t.getAttribute('data-go')===name); });
+    var s=document.getElementById('tabsub'); if(s) s.textContent=SUB[name]||'';
+    try{localStorage.setItem('cygnus_tab',name);}catch(e){}
+    if(name==='map') loadJobs();
+    window.scrollTo(0,0);
+  }
+  tabs.forEach(function(t){ t.addEventListener('click',function(){ show(t.getAttribute('data-go')); }); });
+  document.addEventListener('keydown',function(e){
+    var tg=e.target; if(tg&&(/(INPUT|TEXTAREA|SELECT)/.test(tg.tagName)||tg.isContentEditable)) return;
+    if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight') return;
+    var names=tabs.map(function(t){return t.getAttribute('data-go')});
+    var onEl=document.querySelector('.tab.on');
+    var cur=onEl?names.indexOf(onEl.getAttribute('data-go')):0; if(cur<0)cur=0;
+    var nx=e.key==='ArrowRight'?(cur+1)%names.length:(cur-1+names.length)%names.length;
+    show(names[nx]);
+  });
+  var HASH={board:'sector',sectors:'sector',supply:'supply',ind:'market',regimeH:'market',pos:'stock',cap:'stock'};
+  function fromHash(){ var h=(location.hash||'').replace('#',''); if(HASH[h]){ show(HASH[h]); var el=document.getElementById(h); if(el) setTimeout(function(){ el.scrollIntoView({behavior:'smooth',block:'start'}); },60); return true; } return false; }
+  window.addEventListener('hashchange',fromHash);
+  if(!fromHash()){
+    var start='market'; try{ var s=localStorage.getItem('cygnus_tab'); if(s)start=s; }catch(e){}
+    show(start);
+  }
+})();
 </script>
+<script src="js/capture_ai.js"></script>
 </body>
 </html>
