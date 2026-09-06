@@ -15,6 +15,8 @@ def load(p, default):
     try:
         with open(p, encoding="utf-8") as f: return json.load(f)
     except FileNotFoundError: return default
+    except (json.JSONDecodeError, ValueError):
+        print(f"[경고] {p} JSON 손상 — 기본값으로 진행(자동 복구)"); return default
 
 def save(p, obj):
     os.makedirs(os.path.dirname(p), exist_ok=True)
