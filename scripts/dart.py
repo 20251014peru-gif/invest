@@ -16,6 +16,8 @@ def load(p, d):
     try:
         with open(p, encoding="utf-8") as f: return json.load(f)
     except FileNotFoundError: return d
+    except (json.JSONDecodeError, ValueError):
+        print(f"[경고] {p} JSON 손상 — 기본값으로 진행(자동 복구)"); return d
 def save(p, o):
     os.makedirs(os.path.dirname(p), exist_ok=True)
     with open(p, "w", encoding="utf-8", newline="\n") as f: json.dump(o, f, ensure_ascii=False, indent=2)
@@ -91,11 +93,13 @@ def run():
     # 새 수주는 ntfy(있으면)
     topic = os.environ.get("NTFY_TOPIC", "").strip()
     if new_orders and topic:
-        body = "\n".join(f"[{o['sector']}] {o['company']} · {o['report_nm']}" for o in new_orders[:10])
+        # 각 공시마다 DART 원문 링크를 줄로 붙여 탭하면 바로 열리게 (ntfy 가 URL 을 링크로 만듦)
+        body = "\n\n".join(f"[{o['sector']}] {o['company']} · {o['report_nm']}\n{o['url']}" for o in new_orders[:10])
         h = lambda v: v.encode("utf-8").decode("latin-1")  # HTTP 헤더 UTF-8 우회(한글 latin-1 오류 방지)
         try:
             r = urllib.request.urlopen(urllib.request.Request("https://ntfy.sh/" + topic, data=body.encode("utf-8"),
-                headers={"Title": h("[수주공시] 관심 종목"), "Priority": "4"}), timeout=10)
+                headers={"Title": h("[수주공시] 관심 종목"), "Priority": "4",
+                         "Click": "https://20251014peru-gif.github.io/invest/cygnus.html#sectors"}), timeout=10)
             print(f"ntfy 전송 OK (HTTP {r.status}) · 토픽 끝4자리=…{topic[-4:]} · 수주 {len(new_orders)}건")
         except Exception as e:
             print(f"ntfy 전송 실패: {type(e).__name__}: {e} · 토픽 끝4자리=…{topic[-4:]}")
