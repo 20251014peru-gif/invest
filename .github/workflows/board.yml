@@ -1,0 +1,42 @@
+# v 20260906-0200  board.yml — 종목토론실 근거글 수집(scripts/board.py) 하루 1회(장 마감 후). 새 글만 LLM 필터라 비용 최소. 그날 근거글은 한 통에 묶어 알림. 실패 시 ntfy.
+name: Board Signals
+on:
+  schedule:
+    - cron: '20 9 * * *'      # 매일 UTC 09:20 = KST 18:20 (장 마감 후, 컴 없이 자동, 알림도 하루 한 번)
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: board
+  cancel-in-progress: false
+jobs:
+  board:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 수집·분석하고 커밋·push (충돌 나면 최신으로 다시)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          RELAY_URL: ${{ secrets.RELAY_URL }}
+        run: |
+          set -e
+          git config user.name "board-bot"; git config user.email "bot@users.noreply.github.com"
+          for i in 1 2 3 4; do
+            git fetch origin main; git reset --hard origin/main
+            python scripts/board.py
+            git add facts/board.json data/status.json 2>/dev/null || true
+            if git diff --cached --quiet; then echo "::notice::변경 없음"; exit 0; fi
+            git commit -q -m "auto: board $(date -u +%Y-%m-%dT%H:%MZ)"
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((i*5))
+          done
+          echo "::error::push 4회 실패"; exit 1
+      - name: 실패하면 폰으로 알림
+        if: failure()
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: '[ -n "$NTFY_TOPIC" ] && curl -s -H "Title: [실패] 토론실 분석" -H "Priority: 4" -d "invest board.yml 실패 — 허브 띠·Actions 로그 확인" "https://ntfy.sh/$NTFY_TOPIC" || true'
