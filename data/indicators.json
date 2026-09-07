@@ -1,393 +1,9 @@
 {
   "schema": "indicators/1",
-  "version": "v 20260907-1740",
-  "_설명": "대변화 축 지표. 시세류(yahoo 필드 있음)는 중계서버 경유 야후 실시간(GitHub 서버에서), 경제지표는 FRED, 없는 건 manual. relay=Cloudflare Worker. ecos=한국은행 OpenAPI(ECOS_KEY). derive=yoy 는 월간 지수를 전년동월비 %로.",
+  "version": "v 20260907-1830",
+  "_설명": "대변화 축 지표. 시세류(yahoo 필드 있음)는 중계서버 경유 야후 실시간(GitHub 서버에서), 경제지표는 FRED, 없는 건 manual. relay=Cloudflare Worker. ecos=한국은행 OpenAPI(ECOS_KEY). derive=yoy 는 월간 지수를 전년동월비 %로. group=kr|us|world(cygnus 화면 묶음, 순서는 groups 순).",
   "history_days": 400,
   "items": [
-    {
-      "id": "sp500",
-      "name": "S&P500",
-      "source": "yahoo_relay",
-      "symbol": "SP500",
-      "unit": "pt",
-      "axis": "earnings",
-      "official": false,
-      "rule": "전일 대비 +1% 이상=강 / −1% 이하=약",
-      "thresholds": {
-        "strong_pct": 1,
-        "weak_pct": -1
-      },
-      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
-      "yahoo": "^GSPC",
-      "fred_fallback": "SP500"
-    },
-    {
-      "id": "nasdaq",
-      "name": "나스닥",
-      "source": "yahoo_relay",
-      "symbol": "NASDAQCOM",
-      "unit": "pt",
-      "axis": "earnings",
-      "official": false,
-      "rule": "+1.5%=강 / AI·기술주 방향",
-      "thresholds": {
-        "strong_pct": 1.5,
-        "weak_pct": -1.5
-      },
-      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
-      "yahoo": "^IXIC",
-      "fred_fallback": "NASDAQCOM"
-    },
-    {
-      "id": "sox",
-      "name": "SOX 반도체",
-      "source": "yahoo_relay",
-      "symbol": "",
-      "unit": "pt",
-      "axis": "earnings",
-      "official": false,
-      "rule": "+2%=강 / 삼성·하이닉스 직결",
-      "thresholds": {
-        "strong_pct": 2,
-        "weak_pct": -2
-      },
-      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
-      "yahoo": "^SOX"
-    },
-    {
-      "id": "vix",
-      "name": "VIX",
-      "source": "yahoo_relay",
-      "symbol": "VIXCLS",
-      "unit": "pt",
-      "axis": "credit_vol",
-      "official": true,
-      "rule": "17 이하=안정 / 20~30=주의 / 30 이상=위험",
-      "thresholds": {
-        "good_max": 17,
-        "warn_min": 20,
-        "bad_min": 30
-      },
-      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
-      "yahoo": "^VIX",
-      "fred_fallback": "VIXCLS"
-    },
-    {
-      "id": "usdkrw",
-      "name": "원달러 환율",
-      "source": "ecos",
-      "symbol": "731Y001/0000001",
-      "unit": "원",
-      "axis": "fx_liquidity",
-      "official": true,
-      "rule": "1430 이하=우호 / 1480 이상=부담",
-      "thresholds": {
-        "good_max": 1430,
-        "bad_min": 1480
-      },
-      "note": "ECOS 원/미국달러 매매기준율(전 영업일, 공식) — 2026-09-07 확인. 실시간은 cygnus 화면의 야후(yahoo 필드) 줄이 담당",
-      "yahoo": "KRW=X",
-      "ecos": {
-        "stat": "731Y001",
-        "item": "0000001",
-        "cycle": "D"
-      }
-    },
-    {
-      "id": "dxy",
-      "name": "달러지수 DXY",
-      "source": "yahoo_relay",
-      "symbol": "DTWEXBGS",
-      "unit": "pt",
-      "axis": "fx_liquidity",
-      "official": false,
-      "rule": "98 이하=약달러 우호 / 104 이상=부담",
-      "thresholds": {
-        "good_max": 98,
-        "bad_min": 104
-      },
-      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
-      "yahoo": "DX-Y.NYB"
-    },
-    {
-      "id": "us10y",
-      "name": "미 10년물",
-      "source": "fred",
-      "symbol": "DGS10",
-      "unit": "%",
-      "axis": "bond_curve",
-      "official": true,
-      "rule": "4.2% 이하=우호 / 4.5% 이상=부담",
-      "thresholds": {
-        "good_max": 4.2,
-        "bad_min": 4.5
-      },
-      "note": ""
-    },
-    {
-      "id": "us2y",
-      "name": "미 2년물",
-      "source": "fred",
-      "symbol": "DGS2",
-      "unit": "%",
-      "axis": "policy_rate",
-      "official": true,
-      "rule": "",
-      "thresholds": {},
-      "note": ""
-    },
-    {
-      "id": "hsi",
-      "name": "항셍지수",
-      "source": "yahoo_relay",
-      "symbol": "",
-      "unit": "pt",
-      "axis": "policy_geo",
-      "official": false,
-      "rule": "+1%=강 / 중국 리스크",
-      "thresholds": {
-        "strong_pct": 1,
-        "weak_pct": -1
-      },
-      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
-      "yahoo": "^HSI"
-    },
-    {
-      "id": "wti",
-      "name": "유가 WTI",
-      "source": "yahoo_relay",
-      "symbol": "DCOILWTICO",
-      "unit": "$",
-      "axis": "commodity",
-      "official": true,
-      "rule": "4주 15% 이상 변동 시 축 7 변화 조건",
-      "thresholds": {},
-      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
-      "yahoo": "CL=F",
-      "fred_fallback": "DCOILWTICO"
-    },
-    {
-      "id": "copper",
-      "name": "구리",
-      "source": "yahoo_relay",
-      "symbol": "",
-      "unit": "$/lb",
-      "axis": "commodity",
-      "official": false,
-      "rule": "",
-      "thresholds": {},
-      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
-      "yahoo": "HG=F"
-    },
-    {
-      "id": "gold",
-      "name": "금",
-      "source": "yahoo_relay",
-      "symbol": "",
-      "unit": "$/oz",
-      "axis": "credit_vol",
-      "official": false,
-      "rule": "",
-      "thresholds": {},
-      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
-      "yahoo": "GC=F"
-    },
-    {
-      "id": "bdry",
-      "name": "해운 BDRY",
-      "source": "yahoo_relay",
-      "symbol": "",
-      "unit": "$",
-      "axis": "inflation_growth",
-      "official": false,
-      "rule": "",
-      "thresholds": {},
-      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
-      "yahoo": "BDRY"
-    },
-    {
-      "id": "m2",
-      "name": "미 M2",
-      "source": "fred",
-      "symbol": "M2SL",
-      "unit": "십억$",
-      "axis": "fx_liquidity",
-      "official": true,
-      "rule": "",
-      "thresholds": {},
-      "note": "월간"
-    },
-    {
-      "id": "fed_bs",
-      "name": "연준 자산",
-      "source": "fred",
-      "symbol": "WALCL",
-      "unit": "백만$",
-      "axis": "fx_liquidity",
-      "official": true,
-      "rule": "",
-      "thresholds": {},
-      "note": "주간"
-    },
-    {
-      "id": "ism_pmi",
-      "name": "ISM 제조업 PMI",
-      "source": "manual",
-      "symbol": "",
-      "unit": "pt",
-      "axis": "inflation_growth",
-      "official": true,
-      "rule": "50 위=확장 / 아래=수축",
-      "thresholds": {
-        "good_min": 50
-      },
-      "note": "FRED 에 없음(NAPM 중단). ismworld.org 발표 후 수동 입력"
-    },
-    {
-      "id": "china_pmi",
-      "name": "중국 PMI",
-      "source": "manual",
-      "symbol": "",
-      "unit": "pt",
-      "axis": "policy_geo",
-      "official": true,
-      "rule": "50 기준",
-      "thresholds": {
-        "good_min": 50
-      },
-      "note": "국가통계국 발표 후 수동 입력"
-    },
-    {
-      "id": "fedfunds",
-      "name": "연준 실효금리 FFR",
-      "source": "fred",
-      "symbol": "FEDFUNDS",
-      "unit": "%",
-      "axis": "policy_rate",
-      "official": true,
-      "rule": "방향만 본다(전월 대비 ↑인상 ↓인하). 축① 현재값 근거",
-      "thresholds": {},
-      "note": "FRED 월간(확인 2026-09-07: 2026-08 = 3.63). 상단 목표금리 대신 실효금리 — 방향 판단엔 같음"
-    },
-    {
-      "id": "cpi_yoy",
-      "name": "미국 CPI 전년비",
-      "source": "fred",
-      "symbol": "CPIAUCSL",
-      "derive": "yoy",
-      "unit": "%",
-      "axis": "inflation_growth",
-      "official": true,
-      "rule": "2.5 이하=우호 / 3.0 이상=부담 (기준값은 Claude 추정 → 달님 판별)",
-      "thresholds": {
-        "good_max": 2.5,
-        "bad_min": 3.0
-      },
-      "note": "FRED 월간 지수(확인 2026-09-07: 2026-07 = 332.813)를 12개월 전 대비 %로 계산. 다음 발표까지 값 고정"
-    },
-    {
-      "id": "core_pce_yoy",
-      "name": "미국 근원 PCE 전년비",
-      "source": "fred",
-      "symbol": "PCEPILFE",
-      "derive": "yoy",
-      "unit": "%",
-      "axis": "inflation_growth",
-      "official": true,
-      "rule": "2.5 이하=우호 / 3.0 이상=부담 (기준값 추정)",
-      "thresholds": {
-        "good_max": 2.5,
-        "bad_min": 3.0
-      },
-      "note": "연준이 보는 물가. FRED 월간 지수(확인 2026-09-07: 2026-07 = 130.658) → 전년비"
-    },
-    {
-      "id": "kr10y",
-      "name": "한국 국고채 10년",
-      "source": "ecos",
-      "symbol": "817Y002/010210000",
-      "unit": "%",
-      "axis": "bond_curve",
-      "official": true,
-      "rule": "방향만(미10년과 같이 움직이는지)",
-      "thresholds": {},
-      "note": "ECOS 시장금리(일별) 국고채(10년) — 2026-09-07 중계 경유 확인. FRED 월간(IRLTLT01KRM156N, 3개월 지연)에서 교체",
-      "ecos": {
-        "stat": "817Y002",
-        "item": "010210000",
-        "cycle": "D"
-      }
-    },
-    {
-      "id": "bok_rate",
-      "name": "한은 기준금리",
-      "source": "ecos",
-      "symbol": "722Y001/0101000",
-      "ecos": {
-        "stat": "722Y001",
-        "item": "0101000",
-        "cycle": "M"
-      },
-      "unit": "%",
-      "axis": "policy_rate",
-      "official": true,
-      "optional": true,
-      "rule": "방향만(인상·동결·인하)",
-      "thresholds": {},
-      "note": "ECOS_KEY Secret 필요. 통계표 722Y001·항목 0101000 = 한국은행 기준금리(월) — 2026-09-07 중계서버 경유로 확인. GitHub 서버는 ECOS 직접 접속 불가라 relay 경유"
-    },
-    {
-      "id": "kr3y",
-      "name": "한국 국고채 3년",
-      "source": "ecos",
-      "symbol": "817Y002/010200000",
-      "ecos": {
-        "stat": "817Y002",
-        "item": "010200000",
-        "cycle": "D"
-      },
-      "unit": "%",
-      "axis": "bond_curve",
-      "official": true,
-      "optional": true,
-      "rule": "방향만",
-      "thresholds": {},
-      "note": "ECOS 시장금리(일별) 817Y002·항목 010200000 = 국고채(3년) — 2026-09-07 중계서버 경유로 확인"
-    },
-    {
-      "id": "kr_aa3",
-      "name": "회사채 AA- 3년",
-      "source": "ecos",
-      "symbol": "817Y002/010300000",
-      "ecos": {
-        "stat": "817Y002",
-        "item": "010300000",
-        "cycle": "D"
-      },
-      "unit": "%",
-      "axis": "credit_vol",
-      "official": true,
-      "rule": "국고3년과의 차이(신용 스프레드)로 본다",
-      "thresholds": {},
-      "note": "ECOS 시장금리(일별) 회사채(3년, AA-) — 2026-09-07 확인"
-    },
-    {
-      "id": "kr_bbb3",
-      "name": "회사채 BBB- 3년",
-      "source": "ecos",
-      "symbol": "817Y002/010320000",
-      "ecos": {
-        "stat": "817Y002",
-        "item": "010320000",
-        "cycle": "D"
-      },
-      "unit": "%",
-      "axis": "credit_vol",
-      "official": true,
-      "rule": "한계기업 조달금리. 급등=신용 스트레스",
-      "thresholds": {},
-      "note": "ECOS 시장금리(일별) 회사채(3년, BBB-) — 2026-09-07 확인"
-    },
     {
       "id": "kospi",
       "name": "KOSPI",
@@ -407,7 +23,8 @@
         "weak_pct": -1.5
       },
       "note": "ECOS 주식시장(일) KOSPI지수 종가(전 영업일) — 2026-09-07 확인",
-      "yahoo": "^KS11"
+      "yahoo": "^KS11",
+      "group": "kr"
     },
     {
       "id": "kosdaq",
@@ -428,7 +45,122 @@
         "weak_pct": -2
       },
       "note": "ECOS 주식시장(일) KOSDAQ지수 종가 — 2026-09-07 확인",
-      "yahoo": "^KQ11"
+      "yahoo": "^KQ11",
+      "group": "kr"
+    },
+    {
+      "id": "usdkrw",
+      "name": "원달러 환율",
+      "source": "ecos",
+      "symbol": "731Y001/0000001",
+      "unit": "원",
+      "axis": "fx_liquidity",
+      "official": true,
+      "rule": "1430 이하=우호 / 1480 이상=부담",
+      "thresholds": {
+        "good_max": 1430,
+        "bad_min": 1480
+      },
+      "note": "ECOS 원/미국달러 매매기준율(전 영업일, 공식) — 2026-09-07 확인. 실시간은 cygnus 화면의 야후(yahoo 필드) 줄이 담당",
+      "yahoo": "KRW=X",
+      "ecos": {
+        "stat": "731Y001",
+        "item": "0000001",
+        "cycle": "D"
+      },
+      "group": "kr"
+    },
+    {
+      "id": "bok_rate",
+      "name": "한은 기준금리",
+      "source": "ecos",
+      "symbol": "722Y001/0101000",
+      "ecos": {
+        "stat": "722Y001",
+        "item": "0101000",
+        "cycle": "M"
+      },
+      "unit": "%",
+      "axis": "policy_rate",
+      "official": true,
+      "optional": true,
+      "rule": "방향만(인상·동결·인하)",
+      "thresholds": {},
+      "note": "ECOS_KEY Secret 필요. 통계표 722Y001·항목 0101000 = 한국은행 기준금리(월) — 2026-09-07 중계서버 경유로 확인. GitHub 서버는 ECOS 직접 접속 불가라 relay 경유",
+      "group": "kr"
+    },
+    {
+      "id": "kr3y",
+      "name": "한국 국고채 3년",
+      "source": "ecos",
+      "symbol": "817Y002/010200000",
+      "ecos": {
+        "stat": "817Y002",
+        "item": "010200000",
+        "cycle": "D"
+      },
+      "unit": "%",
+      "axis": "bond_curve",
+      "official": true,
+      "optional": true,
+      "rule": "방향만",
+      "thresholds": {},
+      "note": "ECOS 시장금리(일별) 817Y002·항목 010200000 = 국고채(3년) — 2026-09-07 중계서버 경유로 확인",
+      "group": "kr"
+    },
+    {
+      "id": "kr10y",
+      "name": "한국 국고채 10년",
+      "source": "ecos",
+      "symbol": "817Y002/010210000",
+      "unit": "%",
+      "axis": "bond_curve",
+      "official": true,
+      "rule": "방향만(미10년과 같이 움직이는지)",
+      "thresholds": {},
+      "note": "ECOS 시장금리(일별) 국고채(10년) — 2026-09-07 중계 경유 확인. FRED 월간(IRLTLT01KRM156N, 3개월 지연)에서 교체",
+      "ecos": {
+        "stat": "817Y002",
+        "item": "010210000",
+        "cycle": "D"
+      },
+      "group": "kr"
+    },
+    {
+      "id": "kr_aa3",
+      "name": "회사채 AA- 3년",
+      "source": "ecos",
+      "symbol": "817Y002/010300000",
+      "ecos": {
+        "stat": "817Y002",
+        "item": "010300000",
+        "cycle": "D"
+      },
+      "unit": "%",
+      "axis": "credit_vol",
+      "official": true,
+      "rule": "국고3년과의 차이(신용 스프레드)로 본다",
+      "thresholds": {},
+      "note": "ECOS 시장금리(일별) 회사채(3년, AA-) — 2026-09-07 확인",
+      "group": "kr"
+    },
+    {
+      "id": "kr_bbb3",
+      "name": "회사채 BBB- 3년",
+      "source": "ecos",
+      "symbol": "817Y002/010320000",
+      "ecos": {
+        "stat": "817Y002",
+        "item": "010320000",
+        "cycle": "D"
+      },
+      "unit": "%",
+      "axis": "credit_vol",
+      "official": true,
+      "rule": "한계기업 조달금리. 급등=신용 스트레스",
+      "thresholds": {},
+      "note": "ECOS 시장금리(일별) 회사채(3년, BBB-) — 2026-09-07 확인",
+      "group": "kr"
     },
     {
       "id": "kr_cpi_yoy",
@@ -449,7 +181,303 @@
         "good_max": 2.0,
         "bad_min": 3.0
       },
-      "note": "ECOS 소비자물가지수 총지수(2020=100, 월) → 전년동월비 계산 — 2026-09-07 확인"
+      "note": "ECOS 소비자물가지수 총지수(2020=100, 월) → 전년동월비 계산 — 2026-09-07 확인",
+      "group": "kr"
+    },
+    {
+      "id": "sp500",
+      "name": "S&P500",
+      "source": "yahoo_relay",
+      "symbol": "SP500",
+      "unit": "pt",
+      "axis": "earnings",
+      "official": false,
+      "rule": "전일 대비 +1% 이상=강 / −1% 이하=약",
+      "thresholds": {
+        "strong_pct": 1,
+        "weak_pct": -1
+      },
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "^GSPC",
+      "fred_fallback": "SP500",
+      "group": "us"
+    },
+    {
+      "id": "nasdaq",
+      "name": "나스닥",
+      "source": "yahoo_relay",
+      "symbol": "NASDAQCOM",
+      "unit": "pt",
+      "axis": "earnings",
+      "official": false,
+      "rule": "+1.5%=강 / AI·기술주 방향",
+      "thresholds": {
+        "strong_pct": 1.5,
+        "weak_pct": -1.5
+      },
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "^IXIC",
+      "fred_fallback": "NASDAQCOM",
+      "group": "us"
+    },
+    {
+      "id": "sox",
+      "name": "SOX 반도체",
+      "source": "yahoo_relay",
+      "symbol": "",
+      "unit": "pt",
+      "axis": "earnings",
+      "official": false,
+      "rule": "+2%=강 / 삼성·하이닉스 직결",
+      "thresholds": {
+        "strong_pct": 2,
+        "weak_pct": -2
+      },
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "^SOX",
+      "group": "us"
+    },
+    {
+      "id": "vix",
+      "name": "VIX",
+      "source": "yahoo_relay",
+      "symbol": "VIXCLS",
+      "unit": "pt",
+      "axis": "credit_vol",
+      "official": true,
+      "rule": "17 이하=안정 / 20~30=주의 / 30 이상=위험",
+      "thresholds": {
+        "good_max": 17,
+        "warn_min": 20,
+        "bad_min": 30
+      },
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "^VIX",
+      "fred_fallback": "VIXCLS",
+      "group": "us"
+    },
+    {
+      "id": "dxy",
+      "name": "달러지수 DXY",
+      "source": "yahoo_relay",
+      "symbol": "DTWEXBGS",
+      "unit": "pt",
+      "axis": "fx_liquidity",
+      "official": false,
+      "rule": "98 이하=약달러 우호 / 104 이상=부담",
+      "thresholds": {
+        "good_max": 98,
+        "bad_min": 104
+      },
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "DX-Y.NYB",
+      "group": "us"
+    },
+    {
+      "id": "us10y",
+      "name": "미 10년물",
+      "source": "fred",
+      "symbol": "DGS10",
+      "unit": "%",
+      "axis": "bond_curve",
+      "official": true,
+      "rule": "4.2% 이하=우호 / 4.5% 이상=부담",
+      "thresholds": {
+        "good_max": 4.2,
+        "bad_min": 4.5
+      },
+      "note": "",
+      "group": "us"
+    },
+    {
+      "id": "us2y",
+      "name": "미 2년물",
+      "source": "fred",
+      "symbol": "DGS2",
+      "unit": "%",
+      "axis": "policy_rate",
+      "official": true,
+      "rule": "",
+      "thresholds": {},
+      "note": "",
+      "group": "us"
+    },
+    {
+      "id": "fedfunds",
+      "name": "연준 실효금리 FFR",
+      "source": "fred",
+      "symbol": "FEDFUNDS",
+      "unit": "%",
+      "axis": "policy_rate",
+      "official": true,
+      "rule": "방향만 본다(전월 대비 ↑인상 ↓인하). 축① 현재값 근거",
+      "thresholds": {},
+      "note": "FRED 월간(확인 2026-09-07: 2026-08 = 3.63). 상단 목표금리 대신 실효금리 — 방향 판단엔 같음",
+      "group": "us"
+    },
+    {
+      "id": "cpi_yoy",
+      "name": "미국 CPI 전년비",
+      "source": "fred",
+      "symbol": "CPIAUCSL",
+      "derive": "yoy",
+      "unit": "%",
+      "axis": "inflation_growth",
+      "official": true,
+      "rule": "2.5 이하=우호 / 3.0 이상=부담 (기준값은 Claude 추정 → 달님 판별)",
+      "thresholds": {
+        "good_max": 2.5,
+        "bad_min": 3.0
+      },
+      "note": "FRED 월간 지수(확인 2026-09-07: 2026-07 = 332.813)를 12개월 전 대비 %로 계산. 다음 발표까지 값 고정",
+      "group": "us"
+    },
+    {
+      "id": "core_pce_yoy",
+      "name": "미국 근원 PCE 전년비",
+      "source": "fred",
+      "symbol": "PCEPILFE",
+      "derive": "yoy",
+      "unit": "%",
+      "axis": "inflation_growth",
+      "official": true,
+      "rule": "2.5 이하=우호 / 3.0 이상=부담 (기준값 추정)",
+      "thresholds": {
+        "good_max": 2.5,
+        "bad_min": 3.0
+      },
+      "note": "연준이 보는 물가. FRED 월간 지수(확인 2026-09-07: 2026-07 = 130.658) → 전년비",
+      "group": "us"
+    },
+    {
+      "id": "m2",
+      "name": "미 M2",
+      "source": "fred",
+      "symbol": "M2SL",
+      "unit": "십억$",
+      "axis": "fx_liquidity",
+      "official": true,
+      "rule": "",
+      "thresholds": {},
+      "note": "월간",
+      "group": "us"
+    },
+    {
+      "id": "fed_bs",
+      "name": "연준 자산",
+      "source": "fred",
+      "symbol": "WALCL",
+      "unit": "백만$",
+      "axis": "fx_liquidity",
+      "official": true,
+      "rule": "",
+      "thresholds": {},
+      "note": "주간",
+      "group": "us"
+    },
+    {
+      "id": "ism_pmi",
+      "name": "ISM 제조업 PMI",
+      "source": "manual",
+      "symbol": "",
+      "unit": "pt",
+      "axis": "inflation_growth",
+      "official": true,
+      "rule": "50 위=확장 / 아래=수축",
+      "thresholds": {
+        "good_min": 50
+      },
+      "note": "FRED 에 없음(NAPM 중단). ismworld.org 발표 후 수동 입력",
+      "group": "us"
+    },
+    {
+      "id": "hsi",
+      "name": "항셍지수",
+      "source": "yahoo_relay",
+      "symbol": "",
+      "unit": "pt",
+      "axis": "policy_geo",
+      "official": false,
+      "rule": "+1%=강 / 중국 리스크",
+      "thresholds": {
+        "strong_pct": 1,
+        "weak_pct": -1
+      },
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "^HSI",
+      "group": "world"
+    },
+    {
+      "id": "wti",
+      "name": "유가 WTI",
+      "source": "yahoo_relay",
+      "symbol": "DCOILWTICO",
+      "unit": "$",
+      "axis": "commodity",
+      "official": true,
+      "rule": "4주 15% 이상 변동 시 축 7 변화 조건",
+      "thresholds": {},
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "CL=F",
+      "fred_fallback": "DCOILWTICO",
+      "group": "world"
+    },
+    {
+      "id": "copper",
+      "name": "구리",
+      "source": "yahoo_relay",
+      "symbol": "",
+      "unit": "$/lb",
+      "axis": "commodity",
+      "official": false,
+      "rule": "",
+      "thresholds": {},
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "HG=F",
+      "group": "world"
+    },
+    {
+      "id": "gold",
+      "name": "금",
+      "source": "yahoo_relay",
+      "symbol": "",
+      "unit": "$/oz",
+      "axis": "credit_vol",
+      "official": false,
+      "rule": "",
+      "thresholds": {},
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "GC=F",
+      "group": "world"
+    },
+    {
+      "id": "bdry",
+      "name": "해운 BDRY",
+      "source": "yahoo_relay",
+      "symbol": "",
+      "unit": "$",
+      "axis": "inflation_growth",
+      "official": false,
+      "rule": "",
+      "thresholds": {},
+      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "yahoo": "BDRY",
+      "group": "world"
+    },
+    {
+      "id": "china_pmi",
+      "name": "중국 PMI",
+      "source": "manual",
+      "symbol": "",
+      "unit": "pt",
+      "axis": "policy_geo",
+      "official": true,
+      "rule": "50 기준",
+      "thresholds": {
+        "good_min": 50
+      },
+      "note": "국가통계국 발표 후 수동 입력",
+      "group": "world"
     }
   ],
   "relay": "https://wild-unit-3884dalnim-relay.20251014peru.workers.dev",
@@ -472,7 +500,13 @@
         "warn_min": 0.6,
         "bad_min": 1.0,
         "good_max": 0.5
-      }
+      },
+      "group": "kr"
     }
-  ]
+  ],
+  "groups": {
+    "kr": "🇰🇷 한국",
+    "us": "🇺🇸 미국",
+    "world": "🌍 국제"
+  }
 }

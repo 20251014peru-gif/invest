@@ -1,0 +1,49 @@
+{
+  "schema": "regime_rules/1",
+  "version": "v 20260907-1900",
+  "_설명": "레짐 요약 규칙(원칙 8: 규칙은 설정 파일). 성장·물가·유동성 각각 신호 목록 → 가중 합계 → 판정. kind: level(값이 hi 이상 +1 / lo 이하 −1) · trend(N일 변화율 pct 이상 +1 / 이하 −1, facts/macro_history.json) · direction(전기 대비 오르면 +1, 내리면 −1, 같으면 0). sign=-1 이면 부호 뒤집음(예: 유동성에서 금리↑는 긴축=+1 이므로 그대로, 금리↓는 −1). 신뢰: official 신호가 need_official 개 이상 값이 있으면 '확인', 참고 신호만 있으면 '추정', 아무 값도 없으면 '판단 불가'. 숫자 기준값은 전부 Claude 초안(추정) — 달님 판별 후 확정",
+  "growth": {
+    "name": "성장",
+    "labels": {"up": "확장", "flat": "혼조", "down": "둔화"},
+    "need_official": 1,
+    "cut": {"up": 1.5, "down": -1.5},
+    "signals": [
+      {"id": "ism_pmi",   "kind": "level",  "hi": 50,  "lo": 49.99, "weight": 2, "why": "미국 제조업 확장/수축 기준선 50"},
+      {"id": "china_pmi", "kind": "level",  "hi": 50,  "lo": 49.99, "weight": 1, "why": "중국 제조업 50 기준"},
+      {"id": "kospi",     "kind": "trend",  "days": 20, "pct": 2,   "weight": 1, "why": "코스피 20일 추세(±2%)"},
+      {"id": "sp500",     "kind": "trend",  "days": 20, "pct": 2,   "weight": 1, "why": "S&P 20일 추세(±2%)"},
+      {"id": "copper",    "kind": "trend",  "days": 20, "pct": 3,   "weight": 1, "why": "구리는 경기 선행(±3%)"},
+      {"id": "bdry",      "kind": "trend",  "days": 20, "pct": 5,   "weight": 1, "why": "해운 운임(±5%)"}
+    ],
+    "flip": "PMI 가 50 을 넘나들거나, 코스피·S&P 20일 추세가 ±2% 를 벗어나면 판정이 바뀐다"
+  },
+  "inflation": {
+    "name": "물가",
+    "labels": {"up": "높음", "flat": "중립", "down": "낮음"},
+    "need_official": 1,
+    "cut": {"up": 1.5, "down": -1.5},
+    "signals": [
+      {"id": "cpi_yoy",      "kind": "level", "hi": 3.0, "lo": 2.0, "weight": 2, "why": "미국 CPI 전년비 3%↑ 높음 / 2%↓ 낮음"},
+      {"id": "core_pce_yoy", "kind": "level", "hi": 3.0, "lo": 2.0, "weight": 2, "why": "연준이 보는 근원 PCE"},
+      {"id": "kr_cpi_yoy",   "kind": "level", "hi": 3.0, "lo": 2.0, "weight": 1, "why": "한국 CPI 전년비"}
+    ],
+    "direction_from": ["cpi_yoy", "core_pce_yoy"],
+    "flip": "CPI·근원 PCE 전년비가 3.0% 아래로 내려오면 중립, 2.0% 아래면 낮음"
+  },
+  "liquidity": {
+    "name": "유동성",
+    "labels": {"up": "긴축적", "flat": "중립", "down": "완화적"},
+    "need_official": 1,
+    "cut": {"up": 1.5, "down": -1.5},
+    "signals": [
+      {"id": "fedfunds",      "kind": "direction", "weight": 2, "why": "연준 금리 방향(오르면 긴축)"},
+      {"id": "bok_rate",      "kind": "direction", "weight": 2, "why": "한은 기준금리 방향"},
+      {"id": "credit_spread", "kind": "level", "hi": 0.6, "lo": 0.4, "weight": 2, "why": "신용 스프레드 0.6%p↑ 돈이 마름"},
+      {"id": "dxy",           "kind": "level", "hi": 104, "lo": 98,  "weight": 1, "why": "강달러=신흥국 유동성 빠짐"},
+      {"id": "m2",            "kind": "trend", "days": 30, "pct": 0.5, "weight": 1, "sign": -1, "why": "미 M2 늘면 완화"},
+      {"id": "fed_bs",        "kind": "trend", "days": 30, "pct": 0.5, "weight": 1, "sign": -1, "why": "연준 자산 늘면 완화(QT 면 긴축)"}
+    ],
+    "flip": "연준·한은이 인하로 돌아서거나 신용 스프레드가 0.4%p 아래로 좁혀지면 완화 쪽"
+  },
+  "quadrant_axes": {"growth": "growth", "inflation": "inflation"}
+}

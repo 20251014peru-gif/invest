@@ -55,9 +55,10 @@
       "status": "active",
       "since": "2026-09-04",
       "reads": [
+        "analysis/regime.json",
         "data/axes.json",
-        "data/strategies.json",
         "data/features.json",
+        "data/strategies.json",
         "facts/macro.json",
         "facts/macro_history.json"
       ],
@@ -220,6 +221,7 @@
       "status": "active",
       "since": "2026-09-04",
       "reads": [
+        "analysis/regime.json",
         "data/axes.json",
         "data/indicators.json",
         "data/sectors.json",
@@ -247,6 +249,25 @@
         "facts/dart.json",
         "data/status.json"
       ]
+    },
+    {
+      "id": "regime",
+      "name": "레짐 판정",
+      "file": "scripts/regime.py",
+      "axis": "내용",
+      "status": "active",
+      "since": "2026-09-07",
+      "reads": [
+        "data/regime_rules.json",
+        "facts/macro.json",
+        "facts/macro_history.json",
+        "data/axes.json"
+      ],
+      "writes": [
+        "analysis/regime.json",
+        "data/status.json"
+      ],
+      "note": "macro.yml 에서 macro.py 다음에 실행. 화면은 js/regime.js(axes·cygnus 공통)"
     }
   ]
 }
