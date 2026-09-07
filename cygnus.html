@@ -1,4 +1,4 @@
-<!-- v 20260907-2200 (읽는 순서 띠, 기준일·수집시각·주기 표시, 고른 지표 12·수동입력 링크·레짐 규칙 판정 카드, 지표 3묶음, KOSPI·KOSDAQ, ECOS, 한 판, 전일비 수정)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260907-2300 (보고서 함, 읽는 순서 띠, 기준일·수집시각·주기 표시, 고른 지표 12·수동입력 링크·레짐 규칙 판정 카드, 지표 3묶음, KOSPI·KOSDAQ, ECOS, 한 판, 전일비 수정)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -85,6 +85,11 @@
     <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center;gap:8px">전부 보기 — 100대 통계지표 <span class="tag" id="krAllTag"></span></summary>
       <div id="krKeyBody" style="margin-top:8px"></div>
     </details>
+  </div>
+  <div id="repBox" style="margin-top:16px" hidden>
+    <h2 style="margin-top:0">📚 보고서 함 <span class="tag" id="repTag"></span><span class="tag">분기 큰 틀 4 + 월간 · 판정은 달님 · 기록은 수동</span></h2>
+    <p class="muted" style="margin:-4px 0 8px">보고서마다 최근 기록(기준기간 · 위/그대로/아래 · 메모)과 다음 발표일. 기록은 <a href="manual.html#reports">수동 입력 › 보고서 기록</a>. 발표일은 규칙 기반 추정.</p>
+    <div class="grid" id="repCards" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))"></div>
   </div>
 
   </section>
@@ -173,12 +178,12 @@
   </section>
 
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260907-2200"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260907-2300"></script>
 <script src="js/nav.js" data-page="market"></script>
 <script src="js/regime.js"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260907-2200';
+  document.getElementById('ver').textContent='v 20260907-2300';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -292,6 +297,26 @@
     return legend+svg+tbl+note;
   }
   loadInd();
+  // 보고서 함: data/reports.json + raw/report_log.json + analysis/calendar.json
+  Promise.all([get('data/reports.json'), get('raw/report_log.json').catch(function(){return {items:[]}}), get('analysis/calendar.json').catch(function(){return null})]).then(function(r){
+    var reps=(r[0].items||[]), log=(r[1].items||[]), cal=r[2], box=document.getElementById('repBox'), el=document.getElementById('repCards'); if(!box||!reps.length) return;
+    var latest={}; log.forEach(function(e){ latest[e.id]=e; });
+    var nextOf=function(id){ var u=(cal&&cal.upcoming||[]).filter(function(x){return x.id===id})[0]; return u?u.date.slice(5)+(u.time?' '+u.time:''):''; };
+    var missOf=function(id){ return (cal&&cal.missing||[]).filter(function(x){return x.id===id})[0]; };
+    var vc={'위':'#166534','그대로':'#374151','아래':'#991b1b'};
+    var order={quarter:0,month:1,auto:2}, tiers={quarter:'분기',month:'월간',auto:'자동'};
+    el.innerHTML=reps.slice().sort(function(a,b){return (order[a.tier]||0)-(order[b.tier]||0)}).map(function(x){
+      var l=latest[x.id], m=missOf(x.id), nx=nextOf(x.id);
+      var hist=log.filter(function(e){return e.id===x.id}).slice(-4).map(function(e){return '<span style="color:'+(vc[e.verdict]||'#374151')+'">'+esc(e.period)+' '+esc(e.verdict||'')+'</span>'}).join(' → ');
+      return '<div class="card" style="'+(m?'border-color:#fde68a;background:#fffbeb':'')+'"><div class="n" style="display:flex;justify-content:space-between;gap:6px;align-items:center"><span><span class="chip2">'+esc(tiers[x.tier]||x.tier)+'</span> <b>'+esc(x.name)+'</b></span><span class="tag">'+esc(x.axis)+'</span></div>'+
+        (x.auto?'<div style="font-size:13px;margin-top:6px;color:var(--sub)">자동 수집 → 위 지표 카드('+esc((x.auto||[]).join(', '))+')</div>':
+          (l?'<div style="font-size:20px;font-weight:700;margin:4px 0 2px;color:'+(vc[l.verdict]||'#374151')+'">'+esc(l.verdict||'')+' <small style="font-size:12px;font-weight:400;color:var(--sub)">'+esc(l.period)+' · 읽음 '+esc(l.date||'')+'</small></div><div style="font-size:13px">'+esc(l.memo||'')+'</div>'+(Object.keys(l.fields||{}).length?'<div style="font-size:12px;color:var(--sub);margin-top:3px">'+esc(Object.keys(l.fields).map(function(k){return k+' '+l.fields[k]}).join(' · '))+'</div>':''):'<div style="font-size:13px;color:var(--sub);margin-top:6px">기록 없음</div>'))+
+        (hist?'<div style="font-size:12px;margin-top:4px">'+hist+'</div>':'')+
+        '<div class="muted" style="font-size:12px;margin-top:6px">'+(m?'<a href="manual.html#rep:'+esc(x.id)+'" style="color:#b45309;font-weight:600">📝 '+esc(m.period)+' 미입력 '+m.days_late+'일 → 기록</a> · ':'')+(nx?'다음 발표 '+esc(nx):'')+(x.url?' · <a href="'+esc(x.url)+'" target="_blank" rel="noopener">출처 ↗</a>':'')+'</div></div>';
+    }).join('');
+    var t=document.getElementById('repTag'); if(t) t.textContent=log.length+'건 기록'+(cal?' · 달력 '+String(cal.today||''):'');
+    box.hidden=false;
+  }).catch(function(){});
   // 한국 경제 — 고른 지표(key_stats.pick) + 전부 보기: facts/kr_key.json (ECOS KeyStatisticList). 파일 없으면 구역 자체를 숨김(노션식)
   Promise.all([get('facts/kr_key.json'), get('data/indicators.json').catch(function(){return {};})]).then(function(res){
     var k=res[0], pick=((res[1].key_stats||{}).pick)||[], newDays=(res[1].key_stats||{}).new_days||14;

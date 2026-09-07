@@ -1,6 +1,6 @@
 {
   "schema": "indicators/1",
-  "version": "v 20260907-2100",
+  "version": "v 20260907-2300",
   "_설명": "대변화 축 지표. 시세류(yahoo 필드 있음)는 중계서버 경유 야후 실시간(GitHub 서버에서), 경제지표는 FRED, 없는 건 manual. relay=Cloudflare Worker. ecos=한국은행 OpenAPI(ECOS_KEY). derive=yoy 는 월간 지수를 전년동월비 %로. group=kr|us|world(cygnus 화면 묶음, 순서는 groups 순). cycle=D|W|M|Q(발표 주기, 화면 표시용).",
   "history_days": 400,
   "items": [
@@ -551,6 +551,57 @@
         "good_min": 5
       },
       "note": "ECOS 수출금액지수 총지수(403Y001/*AA, 2020=100, 월) → 전년동월비 — 2026-09-07 확인(7월 233.11). 관세청 통관 기준"
+    },
+    {
+      "id": "payems_chg",
+      "name": "미 비농업고용 증감",
+      "source": "fred",
+      "symbol": "PAYEMS",
+      "derive": "diff",
+      "unit": "천명",
+      "axis": "inflation_growth",
+      "group": "us",
+      "cycle": "M",
+      "official": true,
+      "rule": "월 +100천 이상=확장 / 아래=수축 (기준값 추정). 레짐 신호는 +150/0",
+      "thresholds": {
+        "good_min": 100
+      },
+      "note": "FRED PAYEMS(전체 비농업 고용자 수, 천명) 전월 대비 증감 — 2026-09-07 확인(8월 159,075). 매월 첫 금요일 21:30 KST"
+    },
+    {
+      "id": "unrate",
+      "name": "미 실업률",
+      "source": "fred",
+      "symbol": "UNRATE",
+      "unit": "%",
+      "axis": "inflation_growth",
+      "group": "us",
+      "cycle": "M",
+      "official": true,
+      "rule": "방향(오르면 경기 둔화). 4.5% 위면 부담(추정)",
+      "thresholds": {
+        "bad_min": 4.5
+      },
+      "note": "FRED UNRATE — 2026-09-07 확인(8월 4.1%)"
+    },
+    {
+      "id": "ahe_yoy",
+      "name": "미 시간당 임금 전년비",
+      "source": "fred",
+      "symbol": "CES0500000003",
+      "derive": "yoy",
+      "unit": "%",
+      "axis": "inflation_growth",
+      "group": "us",
+      "cycle": "M",
+      "official": true,
+      "rule": "4% 이상=임금발 물가 압력 / 3% 이하=완화 (추정)",
+      "thresholds": {
+        "good_max": 3.0,
+        "bad_min": 4.0
+      },
+      "note": "FRED CES0500000003(민간 전체 시간당 임금 $) 전년비 — 2026-09-07 확인(8월 $37.75)"
     }
   ],
   "relay": "https://wild-unit-3884dalnim-relay.20251014peru.workers.dev",

@@ -1,4 +1,4 @@
-# v 20260907-2100  macro.py — CYGNUS 정적판의 수집기. data/indicators.json 을 읽어 FRED(공식)·ECOS(공식, ECOS_KEY)·Yahoo(보조) 값을 모은다. derive=yoy 는 12개월 전 대비 %. derived=차이 파생(신용 스프레드). key_stats=ECOS 100대 지표 한 판(facts/kr_key.json).
+# v 20260907-2300  macro.py — CYGNUS 정적판의 수집기. data/indicators.json 을 읽어 FRED(공식)·ECOS(공식, ECOS_KEY)·Yahoo(보조) 값을 모은다. derive=yoy 는 12개월 전 대비 %. derived=차이 파생(신용 스프레드). key_stats=ECOS 100대 지표 한 판(facts/kr_key.json).
 # 쓰기: facts/macro.json(최신), facts/macro_history.json(일별 누적), data/status.json(job macro)
 # 규칙: 시각 3칸(as_of=시장 기준일, published=출처 발표 시각(모르면 빈칸), collected_at=수집 KST). 실패한 지표는 값 대신 error 를 남긴다(조용한 실패 금지).
 import json, os, sys, csv, io, datetime as dt, urllib.request, urllib.parse
@@ -87,6 +87,11 @@ def fetch_ecos(ecos, relay=""):
     if not rows: raise RuntimeError("ECOS 응답 비어 있음(통계표·항목 코드 확인)")
     return rows[-20:]
 
+def derive_diff(rows):
+    """월간 수준 → 전기 대비 증감(같은 단위). 반환 [(전월, 전월증감), (최신, 증감)]"""
+    if len(rows) < 3: raise RuntimeError(f"diff 계산에 3개 필요, {len(rows)}개")
+    return [(rows[-2][0], round(rows[-2][1] - rows[-3][1], 3)), (rows[-1][0], round(rows[-1][1] - rows[-2][1], 3))]
+
 def derive_yoy(rows):
     """월간 지수 → 전년동월비 %. rows 오름차순, 13개 이상 필요. 반환 [(전월, 전월yoy), (최신, yoy)]"""
     if len(rows) < 14: raise RuntimeError(f"yoy 계산에 14개월 필요, {len(rows)}개")
@@ -146,6 +151,8 @@ def run(fetch_map=None, manual=None):
                 if len(rows) < 1: raise RuntimeError("데이터 없음")
             if rows is not None and ind.get("derive") == "yoy":
                 rows = derive_yoy(rows)
+            elif rows is not None and ind.get("derive") == "diff":
+                rows = derive_diff(rows)
             if rows is not None:                                          # yahoo_relay·else 공통: 받아온 값을 rec 에 넣는다
                 rec["as_of"], rec["value"] = rows[-1]
                 if len(rows) >= 2:
@@ -206,7 +213,7 @@ def run(fetch_map=None, manual=None):
         except Exception as e:
             errors.append(f"kr_key: {type(e).__name__}: {e}"[:200])
     ok = sum(1 for r in out if r["value"] is not None)
-    save(P("facts", "macro.json"), {"schema": "macro/1", "version": "v 20260907-2100", "collected_at": kst_iso(), "ok": ok, "total": len(out), "items": out})
+    save(P("facts", "macro.json"), {"schema": "macro/1", "version": "v 20260907-2300", "collected_at": kst_iso(), "ok": ok, "total": len(out), "items": out})
     # 이력: 날짜(KST) 키로 값만
     hist = load(P("facts", "macro_history.json"), {"schema": "macro_history/1", "days": {}})
     today = kst_now().date().isoformat()

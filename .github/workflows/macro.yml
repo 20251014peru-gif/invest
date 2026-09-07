@@ -1,4 +1,4 @@
-# v 20260907-1900  macro.yml — CYGNUS 매크로 수집(scripts/macro.py) 하루 2회. 정각 회피 + concurrency + 실패 시 status.json fail + ntfy
+# v 20260907-2300  macro.yml — CYGNUS 매크로 수집(scripts/macro.py) 하루 2회. 정각 회피 + concurrency + 실패 시 status.json fail + ntfy
 name: Macro Collector
 on:
   schedule:
@@ -22,6 +22,7 @@ jobs:
       - name: 실행하고 커밋·push (충돌 나면 최신으로 다시 실행)
         env:
           ECOS_KEY: ${{ secrets.ECOS_KEY }}     # 한은 ECOS 키(선택). 없으면 bok_rate·kr3y 는 '미설정'
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }} # 발표 달력 알림(선택). 없으면 알림 생략
         run: |
           set -e
           git config user.name "macro-bot"
@@ -33,7 +34,8 @@ jobs:
             git reset --hard origin/main
             python scripts/macro.py
             python scripts/regime.py || echo "::warning::레짐 판정 실패(값 없음) — status.json 에 표시됨"
-            git add facts/macro.json facts/macro_history.json facts/kr_key.json analysis/regime.json data/status.json 2>/dev/null || true
+            NTFY_TOPIC="$NTFY_TOPIC" python scripts/calendar.py || echo "::warning::발표 달력 실패"
+            git add facts/macro.json facts/macro_history.json facts/kr_key.json facts/calendar_sent.json analysis/regime.json analysis/calendar.json data/status.json 2>/dev/null || true
             if git diff --cached --quiet; then echo "::notice::변경 없음"; exit 0; fi
             git commit -q -m "auto: macro $(date -u +%Y-%m-%dT%H:%MZ)"
             if git push origin HEAD:main; then echo "::notice::push 성공 (시도 $i 회)"; exit 0; fi

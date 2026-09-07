@@ -1,4 +1,4 @@
-<!-- v 20260907-2200  manual.html — 수동 지표 입력(ISM PMI·중국 PMI 등). 읽기: data/indicators.json(source=manual) · raw/manual_macro.json(현재 값). 쓰기: 브라우저에서 JSON 을 만들어 복사 → GitHub 편집 링크에 붙여넣기(정적 사이트라 직접 저장은 못 함, 철칙 1·5). 저장 뒤 Macro Collector 가 다음 실행 때 읽는다 -->
+<!-- v 20260907-2300  manual.html — 수동 입력: 지표 값(raw/manual_macro.json) + 보고서 기록(raw/report_log.json, 발표 달력 analysis/calendar.json). 읽기: data/indicators.json(source=manual) · raw/manual_macro.json(현재 값). 쓰기: 브라우저에서 JSON 을 만들어 복사 → GitHub 편집 링크에 붙여넣기(정적 사이트라 직접 저장은 못 함, 철칙 1·5). 저장 뒤 Macro Collector 가 다음 실행 때 읽는다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -28,14 +28,19 @@
   textarea{width:100%;min-height:180px;font:13px/1.4 ui-monospace,Consolas,monospace;border:1px solid var(--line);border-radius:12px;padding:10px}
   .out{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
   .ok{background:var(--p2);border-radius:10px;padding:8px 10px;font-size:13.5px;margin-top:8px}
-  @media (max-width:600px){.row{grid-template-columns:1fr}}
+  @media (max-width:600px){.row{grid-template-columns:1fr}#repGrid{grid-template-columns:1fr!important}}
+  .rl{display:block;width:100%;text-align:left;margin-bottom:6px;min-height:44px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);font:inherit;cursor:pointer}.rl.on{background:var(--p1);border-color:#93c5fd}.rl small{display:block;color:var(--sub);font-size:12px}
+  .vbtn{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);font:inherit;font-size:15px;cursor:pointer}.vbtn.on{background:var(--p3);border-color:#fde68a;font-weight:700}
+  table.hist{width:100%;border-collapse:collapse;font-size:13px}table.hist td,table.hist th{padding:6px 8px;border-top:1px solid var(--line);text-align:left;vertical-align:top}table.hist th{background:var(--p1);border:0}
 </style>
 </head>
 <body>
 <header>
-  <h1>수동 지표 입력 <small id="ver"></small></h1>
+  <h1>수동 입력 — 지표 · 보고서 <small id="ver"></small></h1>
 </header>
 <main>
+  <div style="display:flex;gap:8px;margin-bottom:12px"><button class="btn p" type="button" id="tabInd">지표 값 입력</button><button class="btn" type="button" id="tabRep">보고서 기록</button></div>
+  <section id="secInd">
   <div class="steps">
     <div class="s"><b>1</b>아래 <b>출처 열기</b>로 공식 발표치를 확인</div>
     <div class="s"><b>2</b>값·기준월·발표일 입력 → <b>JSON 만들기</b></div>
@@ -53,12 +58,38 @@
     <textarea id="json" readonly placeholder="JSON 만들기를 누르면 raw/manual_macro.json 전체 내용이 여기 나옵니다"></textarea>
     <div id="msg" hidden class="ok"></div>
   </div>
+  </section>
+  <section id="secRep" hidden>
+    <div class="steps">
+      <div class="s"><b>1</b>왼쪽에서 보고서 고르기 → <b>출처 열기</b>로 원문 확인</div>
+      <div class="s"><b>2</b>기준기간·숫자 몇 개·<b>판정(위/그대로/아래)</b>·한 줄 메모</div>
+      <div class="s"><b>3</b><b>기록 만들기</b> → 복사 → GitHub 에서 열기 → 붙여넣기 → Commit</div>
+      <div class="s"><b>4</b>지표 칸이 있는 보고서(ISM·중국 PMI)는 지표 값도 같이 갱신됨</div>
+    </div>
+    <div id="calBox" class="card" style="background:#f8fbff"></div>
+    <div style="display:grid;grid-template-columns:260px 1fr;gap:12px" id="repGrid">
+      <div id="repList"></div>
+      <div id="repForm" class="card"><p style="color:var(--sub)">왼쪽에서 보고서를 고르세요</p></div>
+    </div>
+    <div class="out" style="margin-top:12px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+        <button class="btn p" type="button" id="repMake">기록 만들기</button>
+        <button class="btn" type="button" id="repCopy">복사</button>
+        <a class="btn g" target="_blank" rel="noopener" href="https://github.com/20251014peru-gif/invest/edit/main/raw/report_log.json">GitHub 에서 열기(report_log) ↗</a>
+        <a class="btn" target="_blank" rel="noopener" href="https://github.com/20251014peru-gif/invest/actions/workflows/macro.yml">지금 실행 ↗</a>
+      </div>
+      <textarea id="repJson" readonly placeholder="기록 만들기를 누르면 raw/report_log.json 전체(새 기록 포함)가 여기 나옵니다"></textarea>
+      <div id="repMsg" hidden class="ok"></div>
+    </div>
+    <h3 style="font-size:15px;margin:16px 0 6px">기록 이력</h3>
+    <div id="repHist" class="card"></div>
+  </section>
 </main>
-<script src="js/status.js" data-app="manual" data-version="v 20260907-2200"></script>
+<script src="js/status.js" data-app="manual" data-version="v 20260907-2300"></script>
 <script src="js/nav.js" data-page="manual"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260907-2200';
+  document.getElementById('ver').textContent='v 20260907-2300';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' '+r.status);return r.json()})};
   var IND=[], CUR={schema:'manual_macro/1',items:{}};
@@ -95,6 +126,74 @@
     return out;
   }
   document.getElementById('make').onclick=build;
+
+  // ---- 보고서 기록 ----
+  var REP={items:[]}, LOG={schema:'report_log/1',items:[]}, CAL=null, cur=null, verdict='';
+  var tabInd=document.getElementById('tabInd'), tabRep=document.getElementById('tabRep');
+  function showTab(which){ document.getElementById('secInd').hidden=which!=='ind'; document.getElementById('secRep').hidden=which!=='rep'; tabInd.classList.toggle('p',which==='ind'); tabRep.classList.toggle('p',which==='rep'); if(which==='rep'&&!REP.items.length) loadRep(); }
+  tabInd.onclick=function(){showTab('ind')}; tabRep.onclick=function(){showTab('rep')};
+  if(location.hash==='#reports'||/^#rep:/.test(location.hash)) showTab('rep');
+  function loadRep(){
+    Promise.all([get('data/reports.json'), get('raw/report_log.json').catch(function(){return LOG;}), get('analysis/calendar.json').catch(function(){return null;})]).then(function(r){
+      REP=r[0]; LOG=r[1]||LOG; LOG.items=LOG.items||[]; CAL=r[2];
+      var cb=document.getElementById('calBox');
+      if(CAL){ var up=(CAL.upcoming||[]).slice(0,6).map(function(x){return '<span style="display:inline-block;margin:2px 8px 2px 0">'+esc(x.date.slice(5))+' '+esc(x.time||'')+' <b>'+esc(x.name)+'</b></span>'}).join('');
+        var miss=(CAL.missing||[]).map(function(x){return '<a href="#rep:'+esc(x.id)+'" style="color:#b45309;font-weight:600;margin-right:10px" data-rep="'+esc(x.id)+'">📝 '+esc(x.name)+' '+esc(x.period)+' 미입력('+x.days_late+'일)</a>'}).join('');
+        cb.innerHTML='<b>발표 달력</b> <small style="color:var(--sub)">기준 '+esc(CAL.today)+' · 규칙 기반 추정</small><div style="font-size:13.5px;margin-top:4px">14일 내: '+(up||'없음')+'</div>'+(miss?'<div style="margin-top:4px;font-size:13.5px">'+miss+'</div>':'<div style="font-size:13px;color:#166534;margin-top:4px">미입력 없음</div>');
+      } else cb.innerHTML='<b>발표 달력</b> — analysis/calendar.json 없음(Macro Collector 한 번 돌면 생김)';
+      var want=(location.hash.match(/^#rep:(.+)$/)||[])[1];
+      renderList(); renderHist();
+      if(want) pick(want);
+    }).catch(function(e){ document.getElementById('repList').innerHTML='<p style="color:#991b1b">reports.json 읽기 실패: '+esc(e.message)+'</p>'; });
+  }
+  function latestOf(id){ var l=LOG.items.filter(function(e){return e.id===id}); return l.length?l[l.length-1]:null; }
+  function renderList(){
+    var tiers=REP.tiers||{}; var h='';
+    ['quarter','month','auto'].forEach(function(t){ var its=REP.items.filter(function(x){return (x.tier||'month')===t}); if(!its.length) return;
+      h+='<div style="font-size:12px;color:var(--sub);margin:8px 0 4px">'+esc(tiers[t]||t)+'</div>'+its.map(function(x){ var l=latestOf(x.id); return '<button class="rl'+(cur&&cur.id===x.id?' on':'')+'" type="button" data-rep="'+esc(x.id)+'"'+(x.auto?' disabled style="opacity:.6"':'')+'>'+esc(x.name)+'<small>'+esc(x.axis)+' · '+(x.auto?'자동 수집':(l?'최근 '+esc(l.period)+' '+esc(l.verdict||''):'기록 없음'))+'</small></button>'; }).join('');
+    });
+    document.getElementById('repList').innerHTML=h;
+    document.querySelectorAll('#repList button[data-rep]').forEach(function(b){ b.onclick=function(){ pick(b.getAttribute('data-rep')); }; });
+  }
+  document.addEventListener('click',function(e){ var a=e.target.closest&&e.target.closest('a[data-rep]'); if(a){ e.preventDefault(); showTab('rep'); pick(a.getAttribute('data-rep')); } });
+  function guessPeriod(x){ var d=new Date(Date.now()+9*3600*1000); var k=(x.schedule||{}).kind, y=d.getUTCFullYear(), m=d.getUTCMonth()+1;
+    if(k==='months'){ return (x.schedule.months||[]).length===2 ? y+'-H'+(m<=6?1:2) : y+'Q'+(Math.floor((m-1)/3)+1); }
+    if(k==='nth_weekday'&&x.schedule.every){ var t=new Date(Date.UTC(y,m-1,d.getUTCDate())); var day=(t.getUTCDay()+6)%7; t.setUTCDate(t.getUTCDate()-day+3); var y0=t.getUTCFullYear(); var w=Math.ceil(((t-Date.UTC(y0,0,1))/86400000+1)/7); return y0+'-W'+(w<10?'0':'')+w; }
+    var pm=new Date(Date.UTC(y,m-2,1)); var mm=(k==='month_day'&&x.schedule.day>15)||k==='month_end'?m:pm.getUTCMonth()+1; var yy=(k==='month_day'&&x.schedule.day>15)||k==='month_end'?y:pm.getUTCFullYear(); return yy+'-'+(mm<10?'0':'')+mm; }
+  function pick(id){
+    cur=REP.items.filter(function(x){return x.id===id})[0]; if(!cur) return; verdict=''; renderList();
+    var l=latestOf(id);
+    var f=document.getElementById('repForm');
+    f.innerHTML='<h3 style="margin:0 0 6px">'+esc(cur.name)+' <span class="tag">'+esc(cur.org)+'</span><span class="tag">축 '+esc(cur.axis)+'</span>'+(cur.url?'<a class="btn" style="min-height:36px;margin-left:auto" target="_blank" rel="noopener" href="'+esc(cur.url)+'">출처 열기 ↗</a>':'')+'</h3>'+
+      '<div class="cur">읽을 것: '+esc(cur.read||'')+(cur.schedule&&cur.schedule.note?' · 발표: '+esc(cur.schedule.note):'')+'</div>'+
+      (l?'<div class="cur">최근 기록: '+esc(l.period)+' · '+esc(l.verdict||'')+' · '+esc(l.memo||'')+'</div>':'')+
+      '<div class="row"><div><label>기준기간 (2026-08 / 2026Q3 / 2026-W36)</label><input id="rp_period" value="'+esc(guessPeriod(cur))+'"></div><div><label>읽은 날</label><input id="rp_date" value="'+new Date(Date.now()+9*3600*1000).toISOString().slice(0,10)+'"></div><div><label>원문 주소(선택)</label><input id="rp_url" placeholder="https://"></div></div>'+
+      '<div class="row" style="margin-top:8px">'+(cur.fields||[]).map(function(fd){ return '<div><label>'+esc(fd.label)+(fd.indicator?' <span class="tag">지표 '+esc(fd.indicator)+' 도 갱신</span>':'')+'</label><input inputmode="decimal" data-f="'+esc(fd.key)+'" placeholder="'+esc(fd.unit||'')+'"></div>'; }).join('')+'</div>'+
+      '<div style="margin-top:10px"><label>'+esc(cur.verdict_q||'직전보다')+'</label><div style="display:flex;gap:8px;margin-top:4px">'+(REP.verdicts||['위','그대로','아래']).map(function(v){return '<button class="vbtn" type="button" data-v="'+esc(v)+'">'+esc(v)+'</button>'}).join('')+'</div></div>'+
+      '<div style="margin-top:10px"><label>한 줄 메모 (왜 그렇게 봤나)</label><input id="rp_memo" placeholder="예: 신규주문 −3.0 으로 둔화, 가격 71.1 그대로"></div>';
+    f.querySelectorAll('.vbtn').forEach(function(b){ b.onclick=function(){ verdict=b.getAttribute('data-v'); f.querySelectorAll('.vbtn').forEach(function(x){x.classList.toggle('on',x===b)}); }; });
+    history.replaceState(null,'','#rep:'+id);
+  }
+  function renderHist(){
+    var rows=LOG.items.slice().reverse().slice(0,30);
+    document.getElementById('repHist').innerHTML=rows.length?'<div style="overflow-x:auto"><table class="hist"><thead><tr><th>보고서</th><th>기준</th><th>판정</th><th>숫자</th><th>메모</th><th>읽은 날</th></tr></thead><tbody>'+rows.map(function(e){ var nm=(REP.items.filter(function(x){return x.id===e.id})[0]||{}).name||e.id; return '<tr><td>'+esc(nm)+'</td><td>'+esc(e.period)+'</td><td><b>'+esc(e.verdict||'')+'</b></td><td>'+esc(Object.keys(e.fields||{}).map(function(k){return k+' '+e.fields[k]}).join(' · '))+'</td><td>'+esc(e.memo||'')+'</td><td>'+esc(e.date||'')+'</td></tr>'; }).join('')+'</tbody></table></div>':'<p style="color:var(--sub)">기록 없음</p>';
+  }
+  function buildRep(){
+    if(!cur){ alert('보고서를 먼저 고르세요'); return; }
+    var period=document.getElementById('rp_period').value.trim(), date=document.getElementById('rp_date').value.trim(), memo=document.getElementById('rp_memo').value.trim(), url=document.getElementById('rp_url').value.trim();
+    var fields={}; document.querySelectorAll('#repForm input[data-f]').forEach(function(i){ var v=i.value.trim(); if(v!==''&&!isNaN(parseFloat(v))) fields[i.getAttribute('data-f')]=parseFloat(v); });
+    var m=document.getElementById('repMsg'); m.hidden=false;
+    if(!period||!verdict){ m.textContent='기준기간과 판정(위/그대로/아래)은 필수'; return; }
+    var entry={id:cur.id,period:period,date:date,fields:fields,verdict:verdict,memo:memo,url:url,entered:new Date(Date.now()+9*3600*1000).toISOString().slice(0,16).replace('T',' ')+' KST'};
+    var items=LOG.items.filter(function(e){return !(e.id===entry.id&&e.period===entry.period)}).concat([entry]);
+    var out={schema:'report_log/1',_설명:LOG._설명||'보고서 기록',items:items};
+    document.getElementById('repJson').value=JSON.stringify(out,null,2);
+    var ind=(cur.fields||[]).filter(function(fd){return fd.indicator&&fields[fd.key]!=null});
+    m.textContent='기록 1건 담김('+items.length+'건). 복사 → GitHub 에서 열기(report_log) → Ctrl+A → 붙여넣기 → Commit'+(ind.length?'. 지표 '+ind.map(function(fd){return fd.indicator}).join(', ')+' 는 「지표 값 입력」 탭에서도 같은 값을 넣어 주세요':'');
+    return out;
+  }
+  document.getElementById('repMake').onclick=buildRep;
+  document.getElementById('repCopy').onclick=function(){ if(!document.getElementById('repJson').value) buildRep(); var t=document.getElementById('repJson').value; if(!t) return; (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){ document.getElementById('repMsg').textContent='복사됨 — GitHub 에서 열기(report_log) → Ctrl+A → Ctrl+V → Commit changes'; },function(){ document.getElementById('repJson').select(); document.execCommand('copy'); }); };
   document.getElementById('copy').onclick=function(){ if(!document.getElementById('json').value) build(); var t=document.getElementById('json').value; (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){ document.getElementById('msg').textContent='복사됨 — GitHub 에서 열기 → Ctrl+A → Ctrl+V → Commit changes'; },function(){ document.getElementById('json').select(); document.execCommand('copy'); document.getElementById('msg').textContent='복사됨(구형 방식)'; }); };
 })();
 </script>
