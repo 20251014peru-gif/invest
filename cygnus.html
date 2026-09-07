@@ -1,4 +1,4 @@
-<!-- v 20260906-0300 (탭 UI·사이트맵)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260907-1740 (ECOS 지표·한국 경제 100)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -77,6 +77,10 @@
   <div id="indDetail"></div>
   <div class="grid" id="indGrid"></div>
   <p class="muted" id="macroEmpty" hidden>아직 수집된 값이 없습니다 — GitHub Actions 「Macro Collector」를 한 번 실행하면 채워집니다.</p>
+  <details id="krKey" style="margin-top:14px" hidden><summary style="cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center;gap:8px">🇰🇷 한국 경제 한 판 <span class="tag" id="krKeyTag"></span><span class="tag">한국은행 100대 통계지표 · 판정 없음 · 참고</span></summary>
+    <p class="muted" style="margin:6px 0">한국은행이 고른 100개 핵심 통계를 그대로 보여줍니다. 축 판정에는 안 쓰고, 성장률·경상수지·고용처럼 가끔 확인하는 값을 여기서 봅니다. 값 옆은 기준 시점(월·분기·일).</p>
+    <div id="krKeyBody"></div>
+  </details>
 
   </section>
   <section class="tabpanel" data-tab="sector" hidden>
@@ -164,7 +168,7 @@
   </section>
 
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260906-0300 (탭 UI·사이트맵)"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260907-1740"></script>
 <script>
 (function(){
   document.getElementById('ver').textContent='v 20260906-0300 (탭 UI·사이트맵)';
@@ -207,12 +211,12 @@
   function sma(a,n){ if(!a||a.length<n) return null; var s=0,i; for(i=a.length-n;i<a.length;i++) s+=a[i]; return s/n; }
   function yahooHist(sym){ return pxJson('https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?range=6mo&interval=1d').then(function(d){ var r=d.chart.result[0], m=r.meta||{}, q=(r.indicators&&r.indicators.quote&&r.indicators.quote[0])||{}; var O=q.open||[],H=q.high||[],L=q.low||[],C=q.close||[]; var cl=[],oh=[]; for(var i=0;i<C.length;i++){ if(C[i]!=null){ cl.push(C[i]); oh.push({o:O[i],h:H[i],l:L[i],c:C[i]}); } } var pv=m.chartPreviousClose||m.previousClose; var px=(m.regularMarketPrice!=null?m.regularMarketPrice:(cl.length?cl[cl.length-1]:null)); return {closes:cl, ohlc:oh, price:px, chg:(pv&&px!=null)?(px-pv)/pv*100:null}; }); }
   function alignEmoji(price,closes){ var m20=sma(closes,20), m50=sma(closes,50); if(m20==null||price==null) return ''; return (m50!=null)?((price>m20&&m20>m50)?'🟢':(price<m20&&m20<m50)?'🔴':'🟡'):'🟡'; }
-  function srcLink(it){ if(it.yahoo) return {u:'https://finance.yahoo.com/quote/'+encodeURIComponent(it.yahoo),t:'Yahoo Finance ↗'}; var fid=it.fred||it.fred_fallback||it.symbol; if(it.source==='fred'&&fid) return {u:'https://fred.stlouisfed.org/series/'+encodeURIComponent(fid),t:'FRED ↗'}; return null; }
+  function srcLink(it){ if(it.yahoo) return {u:'https://finance.yahoo.com/quote/'+encodeURIComponent(it.yahoo),t:'Yahoo Finance ↗'}; var fid=it.fred||it.fred_fallback||it.symbol; if(it.source==='fred'&&fid) return {u:'https://fred.stlouisfed.org/series/'+encodeURIComponent(fid),t:'FRED ↗'}; if(it.source==='ecos') return {u:'https://ecos.bok.or.kr/',t:'한국은행 ECOS ↗'}; return null; }
   var IND=[], MV={};
   function indCardHTML(it,i){
     var m=MV[it.id]||{}; var val=m.value;
     var vstr=(val==null)?'<span style="font-size:14px;color:var(--sub);font-weight:400">'+(it.yahoo?'실시간 대기…':'값 없음')+'</span>':fmt(val)+'<small>'+esc(it.unit||m.unit||'')+'</small>';
-    var badge=it.yahoo?'<span style="color:#15803d">실시간</span>':'<span>'+(it.source==='fred'?'FRED':it.source==='manual'?'수동':'')+'</span>';
+    var badge=it.yahoo?'<span style="color:#15803d">실시간</span>':'<span>'+(it.source==='fred'?'FRED':it.source==='ecos'?'한국은행':it.source==='manual'?'수동':'')+'</span>';
     return '<div class="k ind-card" data-i="'+i+'" style="cursor:pointer;border-color:'+(it.yahoo?'#93c5fd':'#e5e7eb')+'" title="누르면 20·50일선 위치·링크"><div class="n"><span>'+esc(it.name)+' <b id="inddot'+i+'" title="🟢 정배열(상승추세) · 🔴 역배열(하락) · 🟡 혼조"></b></span>'+badge+'</div><div class="v" id="indv'+i+'">'+vstr+'</div><div class="c" id="indc'+i+'"></div><div class="src">누르기 ▸ 20·50일선</div></div>';
   }
   function loadInd(){
@@ -271,6 +275,18 @@
     return legend+svg+tbl+note;
   }
   loadInd();
+  // 한국 경제 한 판: facts/kr_key.json (ECOS KeyStatisticList). 없으면 접이식 자체를 숨김(노션식)
+  get('facts/kr_key.json').then(function(k){
+    var box=document.getElementById('krKey'), body=document.getElementById('krKeyBody'); if(!box||!k||!(k.items||[]).length) return;
+    var groups={}; (k.items||[]).forEach(function(r){ (groups[r['class']||'기타']=groups[r['class']||'기타']||[]).push(r); });
+    var fmtv=function(v){ var n=parseFloat(String(v).replace(/,/g,'')); return isNaN(n)?esc(v):n.toLocaleString('ko-KR',{maximumFractionDigits:3}); };
+    var asof=function(t){ t=String(t||''); return t.length===8?t.slice(0,4)+'-'+t.slice(4,6)+'-'+t.slice(6):t.length===6?t.slice(0,4)+'-'+t.slice(4):t; };
+    body.innerHTML='<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(320px,1fr))">'+Object.keys(groups).map(function(g){
+      return '<div class="card"><b>'+esc(g)+'</b><table>'+groups[g].map(function(r){ return '<tr><td>'+esc(r.name)+'</td><td style="text-align:right;white-space:nowrap"><b>'+fmtv(r.value)+'</b> <small class="muted">'+esc(r.unit||'')+'</small></td><td class="muted" style="white-space:nowrap;font-size:12px">'+esc(asof(r.as_of))+'</td></tr>'; }).join('')+'</table></div>';
+    }).join('')+'</div>';
+    var t=document.getElementById('krKeyTag'); if(t) t.textContent=(k.count||k.items.length)+'개 · 수집 '+window.Status.kstStr(k.collected_at);
+    box.hidden=false;
+  }).catch(function(){});
 
   get('data/axes.json').then(function(d){
     var rg=d.regime||{}, el=document.getElementById('regime');
