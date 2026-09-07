@@ -1,4 +1,4 @@
-// v 20260904-1310  status.js — 모든 앱 공통: ① 상단 경고 띠(status.json) ② 🐞 오류 오버레이 + [복사]
+// v 20260907-2050  status.js — 모든 앱 공통: ① 상단 경고 띠(status.json) ② 🐞 오류 오버레이 + [복사]
 // 사용법:  <script src="js/status.js" data-app="hub" data-version="v 20260904-1310"></script>
 // 규칙:   철칙 4 "실패는 소리를 낸다" — 문제가 있을 때만 나타난다(노션식). 문제 없으면 화면에 아무것도 안 그린다.
 // 읽는 파일: data/status.json (schema "status/1")  — 이 파일은 워크플로(GitHub Actions)가 쓰고, 사람은 읽기만.
@@ -44,9 +44,12 @@
   /* ---------- ① 상단 경고 띠 ---------- */
   function showBand(level, title, jobs) {
     var old = document.getElementById('st-band'); if (old) old.remove();
+    // 닫기: 같은 문제(작업 id + 마지막 실행 시각)면 다시 안 띄움. 새 실패/새 실행이면 다시 뜸(조용한 실패 금지는 유지)
+    var key = jobs.map(function (j) { return (j.id || j.name) + '@' + (j.ran || '') + '@' + (j.status || ''); }).sort().join('|');
+    try { if (localStorage.getItem('st_band_closed') === key) return; } catch (e) { }
     var band = document.createElement('div'); band.id = 'st-band'; if (level === 'warn') band.className = 'warn';
     var h = '<div class="st-title"><span>' + (level === 'warn' ? '⚠️' : '🔴') + ' ' + title + '</span>' +
-      '<button type="button" data-act="fold">접기/펴기</button></div>';
+      '<button type="button" data-act="fold">접기/펴기</button><button type="button" data-act="close" title="이 문제는 봤음 — 새 문제가 생기면 다시 뜸" style="margin-left:6px">닫기 ✕</button></div>';
     jobs.forEach(function (j) {
       h += '<div class="st-job"><b>' + esc(j.name || j.id) + '</b> ' + esc(j.statusText) +
         (j.ran ? ' · 마지막 ' + kstStr(j.ran) : '') +
@@ -56,6 +59,7 @@
     });
     band.innerHTML = h;
     band.querySelector('[data-act=fold]').onclick = function () { band.classList.toggle('folded'); };
+    band.querySelector('[data-act=close]').onclick = function () { try { localStorage.setItem('st_band_closed', key); } catch (e) { } band.remove(); };
     document.body.prepend(band);
   }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
