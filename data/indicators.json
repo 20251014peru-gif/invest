@@ -1,7 +1,7 @@
 {
   "schema": "indicators/1",
-  "version": "v 20260904-2230",
-  "_설명": "대변화 축 지표. 시세류(yahoo 필드 있음)는 중계서버 경유 야후 실시간(GitHub 서버에서), 경제지표는 FRED, 없는 건 manual. relay=Cloudflare Worker.",
+  "version": "v 20260907-1540",
+  "_설명": "대변화 축 지표. 시세류(yahoo 필드 있음)는 중계서버 경유 야후 실시간(GitHub 서버에서), 경제지표는 FRED, 없는 건 manual. relay=Cloudflare Worker. ecos=한국은행 OpenAPI(ECOS_KEY). derive=yoy 는 월간 지수를 전년동월비 %로.",
   "history_days": 400,
   "items": [
     {
@@ -252,6 +252,98 @@
         "good_min": 50
       },
       "note": "국가통계국 발표 후 수동 입력"
+    },
+    {
+      "id": "fedfunds",
+      "name": "연준 실효금리 FFR",
+      "source": "fred",
+      "symbol": "FEDFUNDS",
+      "unit": "%",
+      "axis": "policy_rate",
+      "official": true,
+      "rule": "방향만 본다(전월 대비 ↑인상 ↓인하). 축① 현재값 근거",
+      "thresholds": {},
+      "note": "FRED 월간(확인 2026-09-07: 2026-08 = 3.63). 상단 목표금리 대신 실효금리 — 방향 판단엔 같음"
+    },
+    {
+      "id": "cpi_yoy",
+      "name": "미국 CPI 전년비",
+      "source": "fred",
+      "symbol": "CPIAUCSL",
+      "derive": "yoy",
+      "unit": "%",
+      "axis": "inflation_growth",
+      "official": true,
+      "rule": "2.5 이하=우호 / 3.0 이상=부담 (기준값은 Claude 추정 → 달님 판별)",
+      "thresholds": {
+        "good_max": 2.5,
+        "bad_min": 3.0
+      },
+      "note": "FRED 월간 지수(확인 2026-09-07: 2026-07 = 332.813)를 12개월 전 대비 %로 계산. 다음 발표까지 값 고정"
+    },
+    {
+      "id": "core_pce_yoy",
+      "name": "미국 근원 PCE 전년비",
+      "source": "fred",
+      "symbol": "PCEPILFE",
+      "derive": "yoy",
+      "unit": "%",
+      "axis": "inflation_growth",
+      "official": true,
+      "rule": "2.5 이하=우호 / 3.0 이상=부담 (기준값 추정)",
+      "thresholds": {
+        "good_max": 2.5,
+        "bad_min": 3.0
+      },
+      "note": "연준이 보는 물가. FRED 월간 지수(확인 2026-09-07: 2026-07 = 130.658) → 전년비"
+    },
+    {
+      "id": "kr10y",
+      "name": "한국 국고채 10년",
+      "source": "fred",
+      "symbol": "IRLTLT01KRM156N",
+      "unit": "%",
+      "axis": "bond_curve",
+      "official": true,
+      "rule": "방향만(미10년과 같이 움직이는지)",
+      "thresholds": {},
+      "note": "OECD 경유 FRED 월간 — 2~3개월 지연(확인 2026-09-07: 최신 2026-06 = 4.181). 빠른 값은 ECOS kr3y 로"
+    },
+    {
+      "id": "bok_rate",
+      "name": "한은 기준금리",
+      "source": "ecos",
+      "symbol": "722Y001/0101000",
+      "ecos": {
+        "stat": "722Y001",
+        "item": "0101000",
+        "cycle": "M"
+      },
+      "unit": "%",
+      "axis": "policy_rate",
+      "official": true,
+      "optional": true,
+      "rule": "방향만(인상·동결·인하)",
+      "thresholds": {},
+      "note": "ECOS_KEY Secret 필요(무료 발급 ecos.bok.or.kr). 통계표 722Y001·항목 0101000 은 미확인 — 키 넣은 첫 실행에서 검증, 틀리면 error 로 표시"
+    },
+    {
+      "id": "kr3y",
+      "name": "한국 국고채 3년",
+      "source": "ecos",
+      "symbol": "817Y002/010200000",
+      "ecos": {
+        "stat": "817Y002",
+        "item": "010200000",
+        "cycle": "D"
+      },
+      "unit": "%",
+      "axis": "bond_curve",
+      "official": true,
+      "optional": true,
+      "rule": "방향만",
+      "thresholds": {},
+      "note": "ECOS 일별 시장금리. 통계표 817Y002·항목 010200000 은 미확인 — 첫 실행에서 검증"
     }
   ],
   "relay": "https://wild-unit-3884dalnim-relay.20251014peru.workers.dev"
