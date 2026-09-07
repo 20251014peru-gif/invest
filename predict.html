@@ -1,4 +1,4 @@
-<!-- v 20260904-1530  predict.html — 오픈북 예측 입력·채점 결과·출처별 신뢰도. 읽기: raw/predictions.json · analysis/scores.json · facts/source_trust.json -->
+<!-- v 20260907-2200  predict.html — 오픈북 예측 입력·채점 결과·출처별 신뢰도. 읽기: raw/predictions.json · analysis/scores.json · facts/source_trust.json -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -34,7 +34,6 @@
 <body>
 <header>
   <h1>오픈북 예측·채점 <small id="ver"></small></h1>
-  <a class="btn" href="axes.html">축·전략</a><a class="btn" href="index.html">허브</a>
 </header>
 <main>
   <h2>예측 적기 <span class="tag">미리 적고, 기한에 채점(원칙 15)</span></h2>
@@ -65,10 +64,11 @@
   <h2>대기 중 예측 <span class="tag" id="pendTag"></span></h2>
   <div class="wrap"><table id="pend"><thead><tr><th>기한</th><th>출처</th><th>대상·티커</th><th>방향</th><th>반증 조건</th></tr></thead><tbody></tbody></table><div class="empty" id="pendEmpty" hidden>대기 중 예측이 없습니다</div></div>
 </main>
-<script src="js/status.js" data-app="predict" data-version="v 20260904-1530"></script>
+<script src="js/status.js" data-app="predict" data-version="v 20260907-2200"></script>
+<script src="js/nav.js" data-page="predict"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260904-1530';
+  document.getElementById('ver').textContent='v 20260907-2200';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var f=document.getElementById('f'), out=document.getElementById('out');

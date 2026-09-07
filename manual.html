@@ -1,4 +1,4 @@
-<!-- v 20260907-2000  manual.html — 수동 지표 입력(ISM PMI·중국 PMI 등). 읽기: data/indicators.json(source=manual) · raw/manual_macro.json(현재 값). 쓰기: 브라우저에서 JSON 을 만들어 복사 → GitHub 편집 링크에 붙여넣기(정적 사이트라 직접 저장은 못 함, 철칙 1·5). 저장 뒤 Macro Collector 가 다음 실행 때 읽는다 -->
+<!-- v 20260907-2200  manual.html — 수동 지표 입력(ISM PMI·중국 PMI 등). 읽기: data/indicators.json(source=manual) · raw/manual_macro.json(현재 값). 쓰기: 브라우저에서 JSON 을 만들어 복사 → GitHub 편집 링크에 붙여넣기(정적 사이트라 직접 저장은 못 함, 철칙 1·5). 저장 뒤 Macro Collector 가 다음 실행 때 읽는다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -34,7 +34,6 @@
 <body>
 <header>
   <h1>수동 지표 입력 <small id="ver"></small></h1>
-  <a class="btn" href="cygnus.html">CYGNUS</a><a class="btn" href="axes.html">축·전략</a><a class="btn" href="index.html">허브</a>
 </header>
 <main>
   <div class="steps">
@@ -55,10 +54,11 @@
     <div id="msg" hidden class="ok"></div>
   </div>
 </main>
-<script src="js/status.js" data-app="manual" data-version="v 20260907-2000"></script>
+<script src="js/status.js" data-app="manual" data-version="v 20260907-2200"></script>
+<script src="js/nav.js" data-page="manual"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260907-2000';
+  document.getElementById('ver').textContent='v 20260907-2200';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' '+r.status);return r.json()})};
   var IND=[], CUR={schema:'manual_macro/1',items:{}};

@@ -1,4 +1,4 @@
-<!-- v 20260907-2100  index.html — invest 허브(문 하나). 첫 화면 7칸, 노션식(값 있을 때만)↔일반식, 칸 접기 기억, 자가 점검 -->
+<!-- v 20260907-2200  index.html — invest 허브(문 하나). 첫 화면 7칸, 노션식(값 있을 때만)↔일반식, 칸 접기 기억, 자가 점검 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -35,12 +35,8 @@
 <body>
 <header>
   <h1>투자 시스템 허브 <small id="ver"></small></h1>
-  <a class="btn" href="axes.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">축·전략</a>
-  <a class="btn" href="cygnus.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">시장</a>
-  <a class="btn" href="predict.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">예측·채점</a>
-  <a class="btn" href="manual.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">수동 입력</a>
-  <button class="btn" id="modeBtn" type="button">노션식</button>
-  <button class="btn" id="checkBtn" type="button">자가 점검</button>
+  <button class="btn" id="modeBtn" type="button" title="값 있는 칸만 보기 ↔ 7칸 전부 보기">노션식</button>
+  <button class="btn" id="checkBtn" type="button" title="이 화면이 제대로 붙었는지 점검">자가 점검</button>
 </header>
 <main>
   <div class="grid" id="grid"></div>
@@ -50,10 +46,11 @@
   </section>
 </main>
 <div id="tip"></div>
-<script src="js/status.js" data-app="hub" data-version="v 20260907-2100"></script>
+<script src="js/status.js" data-app="hub" data-version="v 20260907-2200"></script>
+<script src="js/nav.js" data-page="hub"></script>
 <script>
 (function(){
-  var VER='v 20260907-2100'; document.getElementById('ver').textContent=VER;
+  var VER='v 20260907-2200'; document.getElementById('ver').textContent=VER;
   var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var CELLS=[['market','c1'],['kr-us','c2'],['sector','c3'],['signals','c4'],['failed','c5'],['review','c6'],['alerts','c7']];
   var LS='hub_ui'; var ui={}; try{ui=JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){}
