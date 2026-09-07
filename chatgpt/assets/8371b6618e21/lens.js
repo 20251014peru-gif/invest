@@ -9,7 +9,7 @@ export function usable(r,now=new Date()){if(!r||r.error||r.pending||number(r.val
 export function macroReading(items,now=new Date()){
  const map=new Map(items.map(r=>[r.id,r]));const r=id=>usable(map.get(id),now)?map.get(id):null;const sign=id=>{const x=r(id);return x&&number(x.prev)!==null?Math.sign(x.value-x.prev):null;};
  const pmi=r('ism_pmi'),jobs=r('payems_chg'),infl=['cpi_yoy','core_pce_yoy','kr_cpi_yoy'].map(sign),enough=!!(pmi&&jobs&&infl.every(x=>x!==null));
- const title=!enough?'전체 국면을 결론내리기에는 핵심 자료 확인이 더 필요합니다.':pmi.value>50&&jobs.value>0?(infl.every(x=>x<0)?'미 제조업 확장·고용 증가와 물가 상승률 둔화가 함께 관찰됩니다.':'미 제조업 확장·고용 증가 신호가 있지만, 물가둔화는 고르지 않습니다.'):pmi.value<50&&jobs.value<0?'미 제조업 위축과 고용 감소가 함께 관찰됩니다.':'미 제조업과 고용 신호를 함께 확인해야 하는 혼합 구간입니다.';
+ const title=!enough?'전체 국면을 결론내리기에는 핵심 자료 확인이 더 필요합니다.':pmi.value>50&&jobs.value>0?(infl.every(x=>x<0)?'미 제조업 확장·고용 증가와 물가 상승률 둔화가 함께 관찰됩니다.':'미 제조업 확장·고용 증가 신호가 있지만, 물가 둔화는 고르지 않습니다.'):pmi.value<50&&jobs.value<0?'미 제조업 위축과 고용 감소가 함께 관찰됩니다.':'미 제조업과 고용 신호를 함께 확인해야 하는 혼합 구간입니다.';
  const direction=id=>sign(id)===null?'이전 값 확인 필요':sign(id)>0?'직전 값보다 상승':sign(id)<0?'직전 값보다 하락':'직전 값과 동일';
  const rows=[{name:'경기·고용',ids:['ism_pmi','payems_chg','unrate','kr_lead'],reading:pmi?`미 제조업 PMI는 ${pmi.value>50?'확장':pmi.value<50?'위축':'경계'} 기준에 있습니다. 고용과 한국 경기의 방향을 함께 봅니다.`:'제조업 자료 확인 필요',better:'신규주문·고용·한국 선행지수가 함께 개선되는지',worse:'제조업 위축과 고용 감소·실업률 상승이 겹치는지'},
  {name:'물가',ids:['cpi_yoy','core_pce_yoy','kr_cpi_yoy'],reading:`미 CPI ${direction('cpi_yoy')}, 근원 PCE ${direction('core_pce_yoy')}, 한국 CPI ${direction('kr_cpi_yoy')}.`,better:'기조 물가 상승률이 둔화하면서 고용이 유지되는지',worse:'물가 상승률 재상승과 경기 둔화가 겹치는지'},
