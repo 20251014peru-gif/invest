@@ -17,9 +17,13 @@ MODEL   = os.environ.get("BOARD_MODEL", "claude-haiku-4-5-20251001").strip()
 TOPIC   = os.environ.get("NTFY_TOPIC", "").strip()
 MAX_CO      = int(os.environ.get("BOARD_MAX_CO", "40"))     # 이번 실행에서 훑을 회사 수 상한(비용/시간)
 POSTS_PER   = int(os.environ.get("BOARD_POSTS_PER", "20"))  # 회사당 최근 글 상한
-NEW_LIMIT   = int(os.environ.get("BOARD_NEW_LIMIT", "120")) # 한 번에 LLM 에 보낼 새 글 총 상한
+NEW_LIMIT   = int(os.environ.get("BOARD_NEW_LIMIT", "200")) # 한 번에 LLM 에 보낼 새 글 총 상한
 KEEP_DAYS   = int(os.environ.get("BOARD_KEEP_DAYS", "90"))  # 근거글 보관 일수(분기 주장까지 검증 가능하게 길게)
 SEEN_DAYS   = int(os.environ.get("BOARD_SEEN_DAYS", "21"))  # 이미 본 글 nid 기억 일수(노이즈 재분석 방지=비용)
+HOT_PAGES   = int(os.environ.get("BOARD_HOT_PAGES", "3"))   # 핫종목은 이 페이지 수까지 깊게(나머지는 1페이지)
+# 핫종목 = 토론 활발한 대장주(산업별 1~2). 놓침 줄이려 깊게 판다. 코드만 넣으면 됨.
+HOT = set((os.environ.get("BOARD_HOT") or
+    "005930 000660 042660 329180 247540 373220 012450 034020 196170 068270").split())
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
 
 
@@ -60,22 +64,26 @@ def _clean(t):
     t = html.unescape(t)
     return re.sub(r"\s+", " ", t).strip()
 
-def fetch_board(code):
-    """한 종목 토론실 1페이지 → [{nid, title}] (최근 글 위주). 실패하면 빈 리스트(수집은 계속)."""
-    url = f"https://finance.naver.com/item/board.naver?code={code}"
-    try:
-        htmltext = _fetch_raw(url)
-    except Exception as e:
-        print(f"  · {code} 목록 실패: {type(e).__name__}"); return []
+def fetch_board(code, pages=1):
+    """한 종목 토론실 최근 글 → [{nid, title}]. pages 만큼 페이지를 넘겨 긁는다(핫종목은 더 깊게).
+    실패하면 지금까지 모은 것만 반환(수집은 계속). 새 글이 없는 페이지가 나오면 조기 종료."""
     seen, out = set(), []
-    for m in _ROW.finditer(htmltext):
-        nid = m.group(1)
-        if nid in seen: continue
-        seen.add(nid)
-        title = _clean(m.group(2))
-        if not title or len(title) < 4: continue
-        out.append({"nid": nid, "title": title})
-        if len(out) >= POSTS_PER: break
+    for pg in range(1, pages + 1):
+        url = f"https://finance.naver.com/item/board.naver?code={code}&page={pg}"
+        try:
+            htmltext = _fetch_raw(url)
+        except Exception as e:
+            print(f"  · {code} p{pg} 목록 실패: {type(e).__name__}"); break
+        got = 0
+        for m in _ROW.finditer(htmltext):
+            nid = m.group(1)
+            if nid in seen: continue
+            seen.add(nid)
+            title = _clean(m.group(2))
+            if not title or len(title) < 4: continue
+            out.append({"nid": nid, "title": title}); got += 1
+            if len(out) >= POSTS_PER * pages: break
+        if got == 0 or len(out) >= POSTS_PER * pages: break   # 더 없거나 상한 도달
     return out
 
 
@@ -149,7 +157,8 @@ def run():
     # 1) 목록 수집 → 새 글만
     fresh, idx = [], 0
     for co in cos:
-        for post in fetch_board(co["code"]):
+        pages = HOT_PAGES if co["code"] in HOT else 1   # 핫종목만 깊게
+        for post in fetch_board(co["code"], pages):
             if post["nid"] in seen_nid: continue
             seen_nid.add(post["nid"]); seen[post["nid"]] = now_iso
             fresh.append({"i": idx, "code": co["code"], "company": co["company"],
