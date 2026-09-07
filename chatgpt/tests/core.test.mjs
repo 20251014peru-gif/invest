@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {number,delta,judgment,series,windowSeries,mergeIndicators,normalizeNews,matches,parseRoute,hashRoute,kst,usClock,instant,safeUrl,esc,spark} from '../core.js';
+test('빈 값과 문자열 숫자를 0으로 만들지 않는다',()=>{for(const x of [null,undefined,'', '3',NaN,Infinity])assert.equal(number(x),null);assert.equal(number(0),0);assert.equal(delta({value:null,prev:2}),null);});
+test('금리 변화는 퍼센트포인트이며 0 기준 비율은 계산하지 않는다',()=>{assert.match(delta({value:3,prev:2.5,unit:'%'}).text,/0.5%p/);assert.equal(delta({value:2,prev:0}).pct,null);assert.equal(delta({value:0,prev:0}).diff,0);assert.equal(delta({value:1,prev:2,cycle:'M'}).period,'전월');});
+test('상승과 우호 판정은 독립이며 오류는 보류한다',()=>{assert.equal(delta({value:20,prev:15}).cls,'up');assert.equal(judgment({value:20,judge:'위험'}).cls,'bad');assert.equal(judgment({value:20,judge:'우호',error:'실패'}).label,'판단 보류');});
+test('누락 지표를 드러내고 기존 0 값은 보존한다',()=>{const r=mergeIndicators({items:[{id:'a',group:'kr'},{id:'b',group:'us'}]},{items:[{id:'a',value:0,prev:null}]});assert.equal(r[0].value,0);assert.equal(r[1].missing,true);assert.equal(r[1].value,null);});
+test('이력은 날짜순, 결측 배제, 실제 달력 기간으로 자른다',()=>{const r=series({days:{'2026-09-08':{a:3},'2026-08-01':{a:1},'2026-09-07':{a:null}}},'a');assert.deepEqual(r.map(x=>x.value),[1,3]);assert.equal(windowSeries(r,30).length,1);assert.match(spark(r.slice(0,1)),/누적 중/);});
+test('서울 날짜 변경과 미국 서머타임을 반영한다',()=>{assert.match(kst('2026-09-07T18:00:00Z'),/2026-09-08 03:00/);assert.match(usClock('2026-07-01T00:00:00Z'),/13시간/);assert.match(usClock('2026-01-01T00:00:00Z'),/14시간/);assert.equal(instant('2026-09-08T10:00:00'),null);});
+test('뉴스 추적주소 중복 제거와 본문 검색',()=>{const r=normalizeNews([{title:'기사',url:'https://example.com/a?utm_source=x',body:'반도체 수출 회복',date:'Mon, 07 Sep 2026 01:06:00 +0900'},{title:'복제',url:'https://example.com/a'}]);assert.equal(r.length,1);assert.equal(r[0].duplicates,2);assert.ok(matches(r[0].body,'반도체 회복'));assert.equal(normalizeNews([{title:'x',url:'javascript:alert(1)'}]).length,0);});
+test('고유 주소 인코딩 및 비정상 주소와 HTML 차단',()=>{assert.equal(parseRoute(hashRoute('indicators','한/국')).id,'한/국');assert.equal(parseRoute('#/indicators/%ZZ').kind,'invalid');assert.equal(safeUrl('javascript:alert(1)'),'');assert.equal(esc('<script>'),'&lt;script&gt;');});
