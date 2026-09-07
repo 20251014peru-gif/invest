@@ -1,4 +1,4 @@
-<!-- v 20260907-2100 (기준일·수집시각·주기 표시, 고른 지표 12·수동입력 링크·레짐 규칙 판정 카드, 지표 3묶음, KOSPI·KOSDAQ, ECOS, 한 판, 전일비 수정)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260907-2200 (읽는 순서 띠, 기준일·수집시각·주기 표시, 고른 지표 12·수동입력 링크·레짐 규칙 판정 카드, 지표 3묶음, KOSPI·KOSDAQ, ECOS, 한 판, 전일비 수정)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -58,7 +58,6 @@
 <div class="topwrap">
 <header>
   <h1>🦢 CYGNUS 시장 상태 <small id="ver"></small></h1>
-  <a class="btn" href="axes.html">축·전략</a><a class="btn" href="predict.html">예측·채점</a><a class="btn" href="index.html">허브</a>
 </header>
 <nav class="tabbar" id="tabbar">
   <button class="tab" type="button" data-go="market">🌐 시장</button>
@@ -174,11 +173,12 @@
   </section>
 
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260907-2100"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260907-2200"></script>
+<script src="js/nav.js" data-page="market"></script>
 <script src="js/regime.js"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260907-2100';
+  document.getElementById('ver').textContent='v 20260907-2200';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };

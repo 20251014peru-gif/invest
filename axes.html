@@ -1,4 +1,4 @@
-<!-- v 20260907-2100  axes.html — 대변화 축 8개×6단계 + 레짐 요약 + 전략 카드 5개 보기. 축 이름을 누르면 읽기창(6단계 전문 + 지표 실측 + 30일 추이 + 출처 링크 + 읽는 법). 데이터는 data/axes.json · data/strategies.json · data/features.json · facts/macro.json · facts/macro_history.json · analysis/regime.json(js/regime.js) (전부 읽기 전용) -->
+<!-- v 20260907-2200  axes.html — 대변화 축 8개×6단계 + 레짐 요약 + 전략 카드 5개 보기. 축 이름을 누르면 읽기창(6단계 전문 + 지표 실측 + 30일 추이 + 출처 링크 + 읽는 법). 데이터는 data/axes.json · data/strategies.json · data/features.json · facts/macro.json · facts/macro_history.json · analysis/regime.json(js/regime.js) (전부 읽기 전용) -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -76,8 +76,7 @@
 <body>
 <header>
   <h1>축·전략 보기 <small id="ver"></small></h1>
-  <button class="btn" id="fullBtn" type="button">6단계 전부</button>
-  <a class="btn" href="index.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">허브</a>
+  <button class="btn" id="fullBtn" type="button" hidden title="폰에서는 표가 앞 3칸만 보입니다. 누르면 8칸 전부(가로 스크롤)">표 전체 열기</button>
 </header>
 <main>
   <h2>레짐 요약 <span class="tag">성장×물가 4분면 + 유동성</span><span class="tag">규칙 계산 · 근거 지표 · 바뀌는 조건</span><span class="tag est">기준값 추정</span></h2>
@@ -90,16 +89,17 @@
 </main>
 <div id="dim" hidden></div>
 <aside id="reader" hidden aria-label="축 읽기창"></aside>
-<script src="js/status.js" data-app="axes" data-version="v 20260907-2100"></script>
+<script src="js/status.js" data-app="axes" data-version="v 20260907-2200"></script>
+<script src="js/nav.js" data-page="axes"></script>
 <script src="js/regime.js"></script>
 <script>
 (function(){
-  var VER='v 20260907-2100';
+  var VER='v 20260907-2200';
   document.getElementById('ver').textContent=VER;
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var li=function(a){return Array.isArray(a)?'<ul>'+a.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>':esc(a)};
   var phone=innerWidth<600, full=false, btn=document.getElementById('fullBtn');
-  function applyMode(){ document.body.classList.toggle('phone',phone&&!full); btn.classList.toggle('on',full); btn.textContent=full?'전부 보는 중':'6단계 전부'; }
+  function applyMode(){ document.body.classList.toggle('phone',phone&&!full); btn.hidden=!phone; btn.classList.toggle('on',full); btn.textContent=full?'표 앞 3칸만':'표 전체 열기'; }
   btn.onclick=function(){ full=!full; applyMode(); }; applyMode();
   var getJ=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' '+r.status);return r.json()})};
 
