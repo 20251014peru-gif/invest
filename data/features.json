@@ -258,7 +258,25 @@
       "tip": "폰에서는 축 표가 앞 3칸(축·지표·현재)만 보임. 누르면 8칸 전부, 가로 스크롤",
       "source": "axes.html",
       "manual": "컴에서는 항상 8칸이 보여 이 버튼이 없음. 폰에서 6단계 뒷부분(변화 조건·대응·반대·무효화)을 보려면 이 버튼이나 축 이름 클릭(읽기창이 더 편함)"
+    },
+    "manual.reports": {
+      "title": "보고서 기록",
+      "tip": "보고서 고르기 → 숫자 몇 개 + 위/그대로/아래 + 한 줄 메모 → 기록 만들기 → 복사 → GitHub report_log 에 붙여넣기",
+      "source": "raw/report_log.json ← data/reports.json",
+      "manual": "큰 틀 보고서(분기 4: IMF WEO·연준 SEP·한은 경제전망·한은 금융안정)와 월간 보고서(ISM·수출 1~20일·중국 PMI·KRX 주간)를 같은 틀로 기록. 판정은 '직전보다 위/그대로/아래' 하나. 숫자는 틀에 있는 것만. 같은 보고서·같은 기준기간을 다시 넣으면 최신이 유효"
+    },
+    "cygnus.reports": {
+      "title": "보고서 함",
+      "tip": "보고서마다 최근 판정·메모·다음 발표일. 미입력이면 노란 카드",
+      "source": "data/reports.json + raw/report_log.json + analysis/calendar.json",
+      "manual": "판정 이력(→)으로 큰 틀 흐름을 본다: 분기 4개가 같은 방향이면 레짐이 굳는 중, 엇갈리면 전환 구간(추정). 발표일은 규칙 기반 추정 — 기관 일정표와 다르면 reports.json schedule 을 고침"
+    },
+    "hub.calendar": {
+      "title": "발표 달력·미입력",
+      "tip": "확인 필요 칸: 오늘 발표 · 미입력 보고서 · 값 없는 수동 지표 · 다가오는 발표 5개",
+      "source": "analysis/calendar.json",
+      "manual": "오늘 발표는 아침 ntfy 로도 옴(NTFY_TOPIC). 미입력 3일 넘으면 상단 띠에 경고. 발표일 규칙은 data/reports.json"
     }
   },
-  "version": "v 20260907-2200"
+  "version": "v 20260907-2300"
 }

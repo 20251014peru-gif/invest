@@ -1,0 +1,81 @@
+{
+  "schema": "calendar/1",
+  "version": "v 20260907-2300",
+  "computed_at": "2026-09-07T18:36:21+09:00",
+  "today": "2026-09-07",
+  "due_today": [],
+  "upcoming": [
+    {
+      "id": "krx_flow",
+      "name": "KRX 외국인·기관 주간 순매수",
+      "tier": "month",
+      "date": "2026-09-11",
+      "time": "18:00",
+      "period": "2026-W37",
+      "url": "https://data.krx.co.kr/",
+      "auto": false,
+      "note": "매주 금요일 장 마감 후. 자동 수집 실험 전까지 수동 · optional=미입력 경고 안 함"
+    },
+    {
+      "id": "fed_sep",
+      "name": "연준 경제전망·점도표(SEP)",
+      "tier": "quarter",
+      "date": "2026-09-18",
+      "time": "",
+      "period": "2026Q3",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "auto": false,
+      "note": "분기 FOMC 둘째 날 새벽 3시 KST(추정, 일정표 확인)"
+    },
+    {
+      "id": "krx_flow",
+      "name": "KRX 외국인·기관 주간 순매수",
+      "tier": "month",
+      "date": "2026-09-18",
+      "time": "18:00",
+      "period": "2026-W38",
+      "url": "https://data.krx.co.kr/",
+      "auto": false,
+      "note": "매주 금요일 장 마감 후. 자동 수집 실험 전까지 수동 · optional=미입력 경고 안 함"
+    },
+    {
+      "id": "kr_export_20",
+      "name": "관세청 1~20일 수출",
+      "tier": "month",
+      "date": "2026-09-21",
+      "time": "09:00",
+      "period": "2026-09",
+      "url": "https://www.customs.go.kr/kcs/na/ntt/selectNttList.do?mi=2891&bbsId=1362",
+      "auto": false,
+      "note": "매월 21일 아침(주말이면 다음 영업일)"
+    }
+  ],
+  "missing": [],
+  "latest": {
+    "ism_mfg": {
+      "id": "ism_mfg",
+      "period": "2026-08",
+      "date": "2026-09-07",
+      "fields": {
+        "pmi": 54.6,
+        "new_orders": 53.7,
+        "prices": 71.1
+      },
+      "verdict": "아래",
+      "memo": "8개월 연속 확장이나 신규주문 −3.0 으로 둔화. 가격 71.1 그대로. 메모리·반도체·구리 공급 부족 목록",
+      "url": "https://www.ismworld.org/globalassets/pub/research-and-surveys/rob/pmi/nope202608pmi.pdf"
+    },
+    "china_pmi": {
+      "id": "china_pmi",
+      "period": "2026-08",
+      "date": "2026-09-07",
+      "fields": {
+        "pmi": 49.8
+      },
+      "verdict": "위",
+      "memo": "49.8(+0.6) 수축권이지만 회복 중, 신규주문 50.6. 원문 미확인(요약표 기준)",
+      "url": "https://www.stats.gov.cn/sj/"
+    }
+  },
+  "_정직": "발표일은 규칙(대개 그때) 기준 추정. 기관 일정표와 다르면 data/reports.json 의 schedule 을 고친다"
+}

@@ -10,8 +10,10 @@
       "status": "active",
       "since": "2026-09-04",
       "reads": [
-        "data/status.json",
-        "data/registry.json"
+        "analysis/calendar.json",
+        "analysis/regime.json",
+        "data/registry.json",
+        "data/status.json"
       ],
       "writes": []
     },
@@ -221,15 +223,18 @@
       "status": "active",
       "since": "2026-09-04",
       "reads": [
+        "analysis/calendar.json",
         "analysis/regime.json",
         "data/axes.json",
         "data/indicators.json",
+        "data/reports.json",
         "data/sectors.json",
         "data/status.json",
         "facts/board.json",
         "facts/dart.json",
         "facts/kr_key.json",
-        "facts/macro.json"
+        "facts/macro.json",
+        "raw/report_log.json"
       ],
       "writes": [
         "raw/supply.json(복사·붙여넣기)"
@@ -277,8 +282,11 @@
       "status": "active",
       "since": "2026-09-07",
       "reads": [
+        "analysis/calendar.json",
         "data/indicators.json",
-        "raw/manual_macro.json"
+        "data/reports.json",
+        "raw/manual_macro.json",
+        "raw/report_log.json"
       ],
       "writes": [],
       "note": "브라우저에서 JSON 만들어 복사 → GitHub 편집 링크(raw/manual_macro.json). 직접 저장 없음"
@@ -293,6 +301,37 @@
       "reads": [],
       "writes": [],
       "note": "모든 화면 헤더 아래 ①허브→②시장→③축·전략→④예측·채점→⑤수동 입력. 순서·문구는 nav.js 의 NAV 한 곳"
+    },
+    {
+      "id": "calendar",
+      "name": "발표 달력",
+      "file": "scripts/calendar.py",
+      "axis": "내용",
+      "status": "active",
+      "since": "2026-09-07",
+      "reads": [
+        "data/reports.json",
+        "raw/report_log.json"
+      ],
+      "writes": [
+        "analysis/calendar.json",
+        "facts/calendar_sent.json",
+        "data/status.json"
+      ],
+      "note": "macro.yml 에서 regime.py 다음. 오늘 발표 ntfy 1회, 미입력 3일↑ status stale"
+    },
+    {
+      "id": "reports",
+      "name": "보고서 목록·기록",
+      "file": "data/reports.json",
+      "axis": "내용",
+      "status": "active",
+      "since": "2026-09-07",
+      "reads": [],
+      "writes": [
+        "raw/report_log.json(수동)"
+      ],
+      "note": "분기 큰 틀 4 + 월간 4 + 자동 1. 화면: manual.html 보고서 탭, cygnus 보고서 함, 허브 확인 필요 칸"
     }
   ]
 }

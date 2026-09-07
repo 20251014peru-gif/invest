@@ -1,4 +1,4 @@
-<!-- v 20260907-2200  index.html — invest 허브(문 하나). 첫 화면 7칸, 노션식(값 있을 때만)↔일반식, 칸 접기 기억, 자가 점검 -->
+<!-- v 20260907-2300  index.html — invest 허브(문 하나). 첫 화면 7칸, 노션식(값 있을 때만)↔일반식, 칸 접기 기억, 자가 점검 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -46,11 +46,11 @@
   </section>
 </main>
 <div id="tip"></div>
-<script src="js/status.js" data-app="hub" data-version="v 20260907-2200"></script>
+<script src="js/status.js" data-app="hub" data-version="v 20260907-2300"></script>
 <script src="js/nav.js" data-page="hub"></script>
 <script>
 (function(){
-  var VER='v 20260907-2200'; document.getElementById('ver').textContent=VER;
+  var VER='v 20260907-2300'; document.getElementById('ver').textContent=VER;
   var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var CELLS=[['market','c1'],['kr-us','c2'],['sector','c3'],['signals','c4'],['failed','c5'],['review','c6'],['alerts','c7']];
   var LS='hub_ui'; var ui={}; try{ui=JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){}
@@ -88,14 +88,21 @@
   }
   // 확인 필요 칸: 수동 지표 중 값 없는 것 + 수집 실패 지표 → 입력·확인 링크(값 있을 때만 칸이 나타남)
   function fillReview(){
-    fetch('facts/macro.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(m){
-      var el=grid.querySelector('[data-id=review]'); if(!el) return;
+    Promise.all([fetch('facts/macro.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).catch(function(){return {items:[]}}), fetch('analysis/calendar.json?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()}).catch(function(){return null})]).then(function(res){
+      var m=res[0], cal=res[1], el=grid.querySelector('[data-id=review]'); if(!el) return;
       var need=(m.items||[]).filter(function(x){return x.source==='manual'&&x.value==null});
       var fail=(m.items||[]).filter(function(x){return x.error&&x.source!=='manual'});
-      if(!need.length&&!fail.length) return;
+      var miss=cal?(cal.missing||[]):[], today=cal?(cal.due_today||[]):[], up=cal?(cal.upcoming||[]).filter(function(x){return !today.some(function(t){return t.id===x.id&&t.date===x.date})}).slice(0,5):[];
+      var lines=[];
+      today.forEach(function(x){ lines.push('📅 <b>오늘 '+esc(x.time||'')+' '+esc(x.name)+'</b>'+(x.auto?' <small>(자동 수집)</small>':' → <a href="manual.html#rep:'+esc(x.id)+'">기록</a>')); });
+      miss.forEach(function(x){ lines.push('📝 <b>'+esc(x.name)+' '+esc(x.period)+'</b> 미입력 '+x.days_late+'일 → <a href="manual.html#rep:'+esc(x.id)+'">보고서 기록</a>'); });
+      need.forEach(function(x){ lines.push('📝 <b>'+esc(x.name)+'</b> 값 없음 → <a href="manual.html#'+esc(x.id)+'">수동 입력</a>'); });
+      fail.forEach(function(x){ lines.push('⚠ <b>'+esc(x.name)+'</b> 수집 실패 <small>'+esc(String(x.error).slice(0,50))+'</small> → <a href="cygnus.html">지표</a>'); });
+      if(up.length) lines.push('<span style="color:var(--sub)">다가오는 발표: '+up.map(function(x){return esc(x.date.slice(5))+' '+esc(x.name)}).join(' · ')+'</span>');
+      if(!lines.length) return;
       el.classList.remove('empty');
-      el.querySelector('.body').innerHTML=need.map(function(x){return '📝 <b>'+esc(x.name)+'</b> 값 없음 → <a href="manual.html#'+esc(x.id)+'">수동 입력</a>'}).concat(fail.map(function(x){return '⚠ <b>'+esc(x.name)+'</b> 수집 실패 <small>'+esc(String(x.error).slice(0,50))+'</small> → <a href="cygnus.html">지표</a>'})).join('<br>');
-    }).catch(function(){});
+      el.querySelector('.body').innerHTML=lines.join('<br>');
+    });
   }
   // 국내/미국 칸: facts/macro.json 요약(값 있을 때만)
   function fillMarkets(){

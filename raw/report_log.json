@@ -1,0 +1,30 @@
+{
+  "schema": "report_log/1",
+  "_설명": "보고서 기록. 항목: id(reports.json) · period(2026-08, 2026Q3, 2026-W36) · date(읽은 날) · fields{} · verdict(위/그대로/아래) · memo(한 줄) · url. 덮어쓰지 않고 새 항목 추가(같은 id+period 면 최신이 유효)",
+  "items": [
+    {
+      "id": "ism_mfg",
+      "period": "2026-08",
+      "date": "2026-09-07",
+      "fields": {
+        "pmi": 54.6,
+        "new_orders": 53.7,
+        "prices": 71.1
+      },
+      "verdict": "아래",
+      "memo": "8개월 연속 확장이나 신규주문 −3.0 으로 둔화. 가격 71.1 그대로. 메모리·반도체·구리 공급 부족 목록",
+      "url": "https://www.ismworld.org/globalassets/pub/research-and-surveys/rob/pmi/nope202608pmi.pdf"
+    },
+    {
+      "id": "china_pmi",
+      "period": "2026-08",
+      "date": "2026-09-07",
+      "fields": {
+        "pmi": 49.8
+      },
+      "verdict": "위",
+      "memo": "49.8(+0.6) 수축권이지만 회복 중, 신규주문 50.6. 원문 미확인(요약표 기준)",
+      "url": "https://www.stats.gov.cn/sj/"
+    }
+  ]
+}

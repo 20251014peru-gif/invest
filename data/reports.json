@@ -1,0 +1,307 @@
+{
+  "schema": "reports/1",
+  "version": "v 20260907-2300",
+  "_설명": "읽는 보고서 목록(큰 틀). 각 항목: 발표 규칙(schedule) · 축 · 입력 틀(fields: 숫자 몇 개) · 판정(verdict: 위/아래/그대로) · 한 줄 메모. 기록은 raw/report_log.json. 발표 규칙 kind: month_day(매월 day일, bizday=true 면 영업일 보정) · nth_weekday(n번째 요일, weekday 0=월…4=금) · month_end · months(특정 달의 day일) · manual(달력에 안 넣음). 시각은 KST. 정확한 발표일은 기관 일정표로 확인 — 여기 규칙은 '대개 그때'(추정)",
+  "tiers": {
+    "quarter": "분기 큰 틀 4개",
+    "month": "매월 보고서 함",
+    "auto": "자동 수집(기록 불필요)"
+  },
+  "items": [
+    {
+      "id": "imf_weo",
+      "tier": "quarter",
+      "name": "IMF 세계경제전망(WEO)",
+      "org": "IMF",
+      "url": "https://www.imf.org/en/Publications/WEO",
+      "axis": "③",
+      "schedule": {
+        "kind": "months",
+        "months": [
+          1,
+          4,
+          7,
+          10
+        ],
+        "day": 15,
+        "note": "4·10월 전체, 1·7월 업데이트. 날짜는 해마다 달라 ±2주(추정)"
+      },
+      "read": "요약 2쪽 + 전망표: 세계·미국·중국·한국 성장률이 직전 대비 위/아래",
+      "fields": [
+        {
+          "key": "world_gdp",
+          "label": "세계 성장률 전망(%)",
+          "unit": "%"
+        },
+        {
+          "key": "us_gdp",
+          "label": "미국(%)",
+          "unit": "%"
+        },
+        {
+          "key": "kr_gdp",
+          "label": "한국(%)",
+          "unit": "%"
+        },
+        {
+          "key": "rev",
+          "label": "직전 대비 수정(%p, +위/−아래)",
+          "unit": "%p"
+        }
+      ],
+      "verdict_q": "세계 성장 전망이 직전보다"
+    },
+    {
+      "id": "fed_sep",
+      "tier": "quarter",
+      "name": "연준 경제전망·점도표(SEP)",
+      "org": "Federal Reserve",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "axis": "①",
+      "schedule": {
+        "kind": "months",
+        "months": [
+          3,
+          6,
+          9,
+          12
+        ],
+        "day": 18,
+        "note": "분기 FOMC 둘째 날 새벽 3시 KST(추정, 일정표 확인)"
+      },
+      "read": "점도표 중앙값(올해·내년) + 성명에서 바뀐 문구 한 줄",
+      "fields": [
+        {
+          "key": "dot_this",
+          "label": "점도표 중앙값 올해 말(%)",
+          "unit": "%"
+        },
+        {
+          "key": "dot_next",
+          "label": "내년 말(%)",
+          "unit": "%"
+        },
+        {
+          "key": "pce_proj",
+          "label": "근원PCE 전망 올해(%)",
+          "unit": "%"
+        }
+      ],
+      "verdict_q": "금리 경로가 직전 점도표보다"
+    },
+    {
+      "id": "bok_outlook",
+      "tier": "quarter",
+      "name": "한국은행 경제전망",
+      "org": "한국은행",
+      "url": "https://www.bok.or.kr/portal/bbs/B0000245/list.do?menuNo=200761",
+      "axis": "③",
+      "schedule": {
+        "kind": "months",
+        "months": [
+          2,
+          5,
+          8,
+          11
+        ],
+        "day": 25,
+        "note": "2·5·8·11월 금통위 날(추정, 일정표 확인)"
+      },
+      "read": "올해·내년 성장률·물가 전망 숫자와 직전 대비 수정",
+      "fields": [
+        {
+          "key": "kr_gdp_this",
+          "label": "올해 성장률(%)",
+          "unit": "%"
+        },
+        {
+          "key": "kr_gdp_next",
+          "label": "내년(%)",
+          "unit": "%"
+        },
+        {
+          "key": "kr_cpi_this",
+          "label": "올해 물가(%)",
+          "unit": "%"
+        }
+      ],
+      "verdict_q": "한은 성장 전망이 직전보다"
+    },
+    {
+      "id": "bok_fsr",
+      "tier": "quarter",
+      "name": "한국은행 금융안정보고서",
+      "org": "한국은행",
+      "url": "https://www.bok.or.kr/portal/bbs/B0000232/list.do?menuNo=200045",
+      "axis": "⑥",
+      "schedule": {
+        "kind": "months",
+        "months": [
+          6,
+          12
+        ],
+        "day": 25,
+        "note": "6·12월 하순(추정)"
+      },
+      "read": "금융안정지수(FSI) 수준 + 위험 요인 1순위(가계부채·PF·부동산)",
+      "fields": [
+        {
+          "key": "fsi",
+          "label": "금융안정지수",
+          "unit": "pt"
+        },
+        {
+          "key": "hh_debt",
+          "label": "가계부채/GDP(%)",
+          "unit": "%"
+        }
+      ],
+      "verdict_q": "금융 위험이 직전 보고서보다"
+    },
+    {
+      "id": "ism_mfg",
+      "tier": "month",
+      "name": "ISM 제조업 PMI 보고서",
+      "org": "ISM",
+      "url": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/",
+      "axis": "③",
+      "schedule": {
+        "kind": "month_day",
+        "day": 1,
+        "bizday": true,
+        "time": "23:00",
+        "note": "매월 1영업일 밤 11시 KST"
+      },
+      "read": "헤드라인 · 신규주문 · 가격 · 공급부족 품목(메모리·구리 있나)",
+      "fields": [
+        {
+          "key": "pmi",
+          "label": "PMI",
+          "unit": "pt",
+          "indicator": "ism_pmi"
+        },
+        {
+          "key": "new_orders",
+          "label": "신규주문",
+          "unit": "pt"
+        },
+        {
+          "key": "prices",
+          "label": "가격지수",
+          "unit": "pt"
+        }
+      ],
+      "verdict_q": "제조업 경기가 전월보다"
+    },
+    {
+      "id": "kr_export_20",
+      "tier": "month",
+      "name": "관세청 1~20일 수출",
+      "org": "관세청",
+      "url": "https://www.customs.go.kr/kcs/na/ntt/selectNttList.do?mi=2891&bbsId=1362",
+      "axis": "⑤",
+      "schedule": {
+        "kind": "month_day",
+        "day": 21,
+        "bizday": true,
+        "time": "09:00",
+        "note": "매월 21일 아침(주말이면 다음 영업일)"
+      },
+      "read": "총수출 전년비 · 반도체 전년비 (조업일수 차이 주의)",
+      "fields": [
+        {
+          "key": "total_yoy",
+          "label": "총수출 전년비(%)",
+          "unit": "%"
+        },
+        {
+          "key": "semi_yoy",
+          "label": "반도체 전년비(%)",
+          "unit": "%"
+        }
+      ],
+      "verdict_q": "수출이 전월 같은 기간보다"
+    },
+    {
+      "id": "china_pmi",
+      "tier": "month",
+      "name": "중국 NBS 제조업 PMI",
+      "org": "국가통계국",
+      "url": "https://www.stats.gov.cn/sj/",
+      "axis": "⑧",
+      "schedule": {
+        "kind": "month_end",
+        "time": "10:30",
+        "note": "매월 말일 오전(31일 없는 달은 30일)"
+      },
+      "read": "제조업 PMI 하나(50 기준) + 신규주문",
+      "fields": [
+        {
+          "key": "pmi",
+          "label": "제조업 PMI",
+          "unit": "pt",
+          "indicator": "china_pmi"
+        }
+      ],
+      "verdict_q": "중국 제조업이 전월보다"
+    },
+    {
+      "id": "krx_flow",
+      "tier": "month",
+      "name": "KRX 외국인·기관 주간 순매수",
+      "org": "KRX 정보데이터시스템",
+      "url": "https://data.krx.co.kr/",
+      "axis": "수급",
+      "schedule": {
+        "kind": "nth_weekday",
+        "weekday": 4,
+        "every": true,
+        "time": "18:00",
+        "note": "매주 금요일 장 마감 후. 자동 수집 실험 전까지 수동 · optional=미입력 경고 안 함"
+      },
+      "read": "코스피 외국인·기관 주간 순매수(억원)",
+      "fields": [
+        {
+          "key": "foreign",
+          "label": "외국인 순매수(억원)",
+          "unit": "억원"
+        },
+        {
+          "key": "inst",
+          "label": "기관 순매수(억원)",
+          "unit": "억원"
+        }
+      ],
+      "verdict_q": "외국인 자금이 지난주보다",
+      "optional": true
+    },
+    {
+      "id": "us_jobs",
+      "tier": "auto",
+      "name": "미국 고용보고서",
+      "org": "BLS",
+      "url": "https://www.bls.gov/news.release/empsit.toc.htm",
+      "axis": "③",
+      "schedule": {
+        "kind": "nth_weekday",
+        "n": 1,
+        "weekday": 4,
+        "time": "21:30",
+        "note": "매월 첫 금요일 21:30 KST(여름엔 21:30, 겨울 22:30)"
+      },
+      "read": "비농업고용 증감 · 실업률 · 시간당 임금 — FRED 로 자동 수집(payems_chg·unrate·ahe_yoy)",
+      "fields": [],
+      "auto": [
+        "payems_chg",
+        "unrate",
+        "ahe_yoy"
+      ]
+    }
+  ],
+  "verdicts": [
+    "위",
+    "그대로",
+    "아래"
+  ],
+  "log_since": "2026-09-01"
+}
