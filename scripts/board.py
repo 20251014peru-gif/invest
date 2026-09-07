@@ -127,7 +127,7 @@ def call_claude(posts):
 def set_status(status, note="", cause="", fix=""):
     stj = load(P("data", "status.json"), {"schema": "status/1", "jobs": []})
     job = {"id": "board", "name": "토론실 근거", "status": status, "ran": kst_iso(),
-           "due": kst_iso(kst_now() + dt.timedelta(hours=14)) if status == "ok" else "",
+           "due": kst_iso(kst_now() + dt.timedelta(hours=16)) if status == "ok" else "",
            "cause": cause, "fix": fix, "link": "cygnus.html#board", "note": note}
     stj["jobs"] = [j for j in stj.get("jobs", []) if j.get("id") != "board"] + [job]
     stj["updated"] = kst_iso(); save(P("data", "status.json"), stj)
