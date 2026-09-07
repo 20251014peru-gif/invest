@@ -1,13 +1,13 @@
 {
   "schema": "regime/1",
-  "version": "v 20260907-1900",
-  "computed_at": "2026-09-07T17:14:12+09:00",
-  "macro_collected_at": "2026-09-07T16:33:23+09:00",
+  "version": "v 20260907-2100",
+  "computed_at": "2026-09-07T18:06:00+09:00",
+  "macro_collected_at": "2026-09-07T18:06:00+09:00",
   "growth": {
     "name": "성장",
-    "verdict": "혼조",
-    "confidence": "추정",
-    "score": 0,
+    "verdict": "확장",
+    "confidence": "확인",
+    "score": 3,
     "direction": "",
     "signals": [
       {
@@ -20,7 +20,9 @@
         "as_of": "",
         "score": null,
         "read": "값 없음",
-        "unit": "pt"
+        "unit": "pt",
+        "cycle": "M",
+        "collected_at": "2026-09-07T18:05:57+09:00"
       },
       {
         "id": "china_pmi",
@@ -32,19 +34,51 @@
         "as_of": "",
         "score": null,
         "read": "값 없음",
-        "unit": "pt"
+        "unit": "pt",
+        "cycle": "M",
+        "collected_at": "2026-09-07T18:05:58+09:00"
+      },
+      {
+        "id": "kr_lead",
+        "name": "선행지수순환변동치",
+        "why": "통계청 선행지수순환변동치 — 전월 대비 오르면 확장",
+        "weight": 2,
+        "official": true,
+        "value": 104.2,
+        "as_of": "2026-07",
+        "score": 1,
+        "read": "103.8 → 104.2pt ↑",
+        "unit": "pt",
+        "cycle": "M",
+        "collected_at": "2026-09-07T18:05:58+09:00"
+      },
+      {
+        "id": "kr_export_yoy",
+        "name": "수출금액지수 전년비",
+        "why": "수출금액 전년비 +5%↑ 확장 / 0%↓ 둔화",
+        "weight": 1,
+        "official": true,
+        "value": 64.2,
+        "as_of": "2026-07",
+        "score": 1,
+        "read": "64.2% → 기준 위",
+        "unit": "%",
+        "cycle": "M",
+        "collected_at": "2026-09-07T18:05:59+09:00"
       },
       {
         "id": "kospi",
-        "name": "kospi",
+        "name": "KOSPI",
         "why": "코스피 20일 추세(±2%)",
         "weight": 1,
-        "official": false,
-        "value": null,
-        "as_of": "",
+        "official": true,
+        "value": 6687.21,
+        "as_of": "2026-09-04",
         "score": null,
-        "read": "값 없음",
-        "unit": ""
+        "read": "6,687pt (이력 1일 — 20일 추세는 이력 쌓인 뒤)",
+        "unit": "pt",
+        "cycle": "D",
+        "collected_at": "2026-09-07T18:05:45+09:00"
       },
       {
         "id": "sp500",
@@ -56,7 +90,9 @@
         "as_of": "2026-09-07",
         "score": 0,
         "read": "3일 +0.0% → 횡보 (이력 3일뿐, 20일 되면 정확)",
-        "unit": "pt"
+        "unit": "pt",
+        "cycle": "D",
+        "collected_at": "2026-09-07T18:05:55+09:00"
       },
       {
         "id": "copper",
@@ -68,7 +104,9 @@
         "as_of": "2026-09-07",
         "score": 0,
         "read": "3일 +0.1% → 횡보 (이력 3일뿐, 20일 되면 정확)",
-        "unit": "$/lb"
+        "unit": "$/lb",
+        "cycle": "D",
+        "collected_at": "2026-09-07T18:05:57+09:00"
       },
       {
         "id": "bdry",
@@ -80,19 +118,21 @@
         "as_of": "2026-09-07",
         "score": 0,
         "read": "3일 -0.1% → 횡보 (이력 3일뿐, 20일 되면 정확)",
-        "unit": "$"
+        "unit": "$",
+        "cycle": "D",
+        "collected_at": "2026-09-07T18:05:58+09:00"
       }
     ],
-    "used": 3,
-    "official_used": 0,
-    "flip": "PMI 가 50 을 넘나들거나, 코스피·S&P 20일 추세가 ±2% 를 벗어나면 판정이 바뀐다",
-    "reason": "S&P500 3일 +0.0% → 횡보 (이력 3일뿐, 20일 되면 정확) · 구리 3일 +0.1% → 횡보 (이력 3일뿐, 20일 되면 정확) · 해운 BDRY 3일 -0.1% → 횡보 (이력 3일뿐, 20일 되면 정확)"
+    "used": 5,
+    "official_used": 2,
+    "flip": "선행지수가 전월 대비 꺾이거나 PMI 가 50 을 넘나들거나, 수출 전년비가 0% 아래로 가면 판정이 바뀐다",
+    "reason": "선행지수순환변동치 103.8 → 104.2pt ↑ · 수출금액지수 전년비 64.2% → 기준 위 · S&P500 3일 +0.0% → 횡보 (이력 3일뿐, 20일 되면 정확) · 구리 3일 +0.1% → 횡보 (이력 3일뿐, 20일 되면 정확) · 해운 BDRY 3일 -0.1% → 횡보 (이력 3일뿐, 20일 되면 정확)"
   },
   "inflation": {
     "name": "물가",
     "verdict": "높음",
     "confidence": "확인",
-    "score": 4,
+    "score": 5,
     "direction": "내려오는 중",
     "signals": [
       {
@@ -105,7 +145,9 @@
         "as_of": "2026-07-01",
         "score": 1,
         "read": "3.54% → 기준 위",
-        "unit": "%"
+        "unit": "%",
+        "cycle": "M",
+        "collected_at": "2026-09-07T18:05:57+09:00"
       },
       {
         "id": "core_pce_yoy",
@@ -117,31 +159,35 @@
         "as_of": "2026-07-01",
         "score": 1,
         "read": "3.34% → 기준 위",
-        "unit": "%"
+        "unit": "%",
+        "cycle": "M",
+        "collected_at": "2026-09-07T18:05:57+09:00"
       },
       {
         "id": "kr_cpi_yoy",
-        "name": "kr_cpi_yoy",
+        "name": "한국 CPI 전년비",
         "why": "한국 CPI 전년비",
         "weight": 1,
-        "official": false,
-        "value": null,
-        "as_of": "",
-        "score": null,
-        "read": "값 없음",
-        "unit": ""
+        "official": true,
+        "value": 3.09,
+        "as_of": "2026-08",
+        "score": 1,
+        "read": "3.09% → 기준 위",
+        "unit": "%",
+        "cycle": "M",
+        "collected_at": "2026-09-07T18:05:54+09:00"
       }
     ],
-    "used": 2,
-    "official_used": 2,
+    "used": 3,
+    "official_used": 3,
     "flip": "CPI·근원 PCE 전년비가 3.0% 아래로 내려오면 중립, 2.0% 아래면 낮음",
-    "reason": "미국 CPI 전년비 3.54% → 기준 위 · 미국 근원 PCE 전년비 3.34% → 기준 위"
+    "reason": "미국 CPI 전년비 3.54% → 기준 위 · 미국 근원 PCE 전년비 3.34% → 기준 위 · 한국 CPI 전년비 3.09% → 기준 위"
   },
   "liquidity": {
     "name": "유동성",
-    "verdict": "중립",
+    "verdict": "긴축적",
     "confidence": "확인",
-    "score": 0,
+    "score": 4,
     "direction": "",
     "signals": [
       {
@@ -154,7 +200,9 @@
         "as_of": "2026-08-01",
         "score": 0,
         "read": "3.63 → 3.63% 동결",
-        "unit": "%"
+        "unit": "%",
+        "cycle": "M",
+        "collected_at": "2026-09-07T18:05:57+09:00"
       },
       {
         "id": "bok_rate",
@@ -162,23 +210,27 @@
         "why": "한은 기준금리 방향",
         "weight": 2,
         "official": true,
-        "value": null,
-        "as_of": "",
-        "score": null,
-        "read": "값 없음",
-        "unit": "%"
+        "value": 3.0,
+        "as_of": "2026-08",
+        "score": 1,
+        "read": "2.75 → 3% ↑",
+        "unit": "%",
+        "cycle": "M",
+        "collected_at": "2026-09-07T18:05:48+09:00"
       },
       {
         "id": "credit_spread",
-        "name": "credit_spread",
+        "name": "신용 스프레드 AA-−국고3년",
         "why": "신용 스프레드 0.6%p↑ 돈이 마름",
         "weight": 2,
-        "official": false,
-        "value": null,
-        "as_of": "",
-        "score": null,
-        "read": "값 없음",
-        "unit": ""
+        "official": true,
+        "value": 0.675,
+        "as_of": "2026-09-07",
+        "score": 1,
+        "read": "0.68%p → 기준 위",
+        "unit": "%p",
+        "cycle": "D",
+        "collected_at": "2026-09-07T18:05:59+09:00"
       },
       {
         "id": "dxy",
@@ -186,11 +238,13 @@
         "why": "강달러=신흥국 유동성 빠짐",
         "weight": 1,
         "official": false,
-        "value": 99.118,
+        "value": 98.956,
         "as_of": "2026-09-07",
         "score": 0,
-        "read": "99.12pt → 중간",
-        "unit": "pt"
+        "read": "98.96pt → 중간",
+        "unit": "pt",
+        "cycle": "D",
+        "collected_at": "2026-09-07T18:05:56+09:00"
       },
       {
         "id": "m2",
@@ -202,7 +256,9 @@
         "as_of": "2026-07-01",
         "score": 0,
         "read": "3일 +0.0% → 횡보 (이력 3일뿐, 30일 되면 정확)",
-        "unit": "십억$"
+        "unit": "십억$",
+        "cycle": "M",
+        "collected_at": "2026-09-07T18:05:57+09:00"
       },
       {
         "id": "fed_bs",
@@ -214,25 +270,119 @@
         "as_of": "2026-09-02",
         "score": 0,
         "read": "3일 +0.0% → 횡보 (이력 3일뿐, 30일 되면 정확)",
-        "unit": "백만$"
+        "unit": "백만$",
+        "cycle": "W",
+        "collected_at": "2026-09-07T18:05:57+09:00"
       }
     ],
-    "used": 4,
-    "official_used": 3,
+    "used": 6,
+    "official_used": 5,
     "flip": "연준·한은이 인하로 돌아서거나 신용 스프레드가 0.4%p 아래로 좁혀지면 완화 쪽",
-    "reason": "연준 실효금리 FFR 3.63 → 3.63% 동결 · 달러지수 DXY 99.12pt → 중간 · 미 M2 3일 +0.0% → 횡보 (이력 3일뿐, 30일 되면 정확) · 연준 자산 3일 +0.0% → 횡보 (이력 3일뿐, 30일 되면 정확)"
+    "reason": "연준 실효금리 FFR 3.63 → 3.63% 동결 · 한은 기준금리 2.75 → 3% ↑ · 신용 스프레드 AA-−국고3년 0.68%p → 기준 위 · 달러지수 DXY 98.96pt → 중간 · 미 M2 3일 +0.0% → 횡보 (이력 3일뿐, 30일 되면 정확) · 연준 자산 3일 +0.0% → 횡보 (이력 3일뿐, 30일 되면 정확)"
   },
   "quadrant": {
-    "name": "보류",
-    "assets": "",
-    "confidence": "판단 불가",
-    "note": "성장 이 혼조/중립이라 4분면을 정하지 않음. 성장 점수 +0.0(±1.5 넘어야 확정)"
+    "name": "성장↑물가↑",
+    "assets": "원자재·가치·은행",
+    "confidence": "확인",
+    "note": "성장·물가 둘 다 판정이 나와 4분면 확정"
   },
-  "one_line": "성장 혼조(추정) · 물가 높음·내려오는 중(확인) · 유동성 중립(확인) → 4분면 보류",
+  "review": [
+    {
+      "block": "성장",
+      "id": "kr_export_yoy",
+      "kind": "level",
+      "current": "hi 5 / lo 0",
+      "suggest": "",
+      "sample": 1,
+      "days": 1,
+      "status": "이력 부족 1/20일"
+    },
+    {
+      "block": "성장",
+      "id": "kospi",
+      "kind": "trend",
+      "current": "±2% / 20일",
+      "suggest": "",
+      "sample": 0,
+      "days": 1,
+      "status": "이력 부족 1/40일"
+    },
+    {
+      "block": "성장",
+      "id": "sp500",
+      "kind": "trend",
+      "current": "±2% / 20일",
+      "suggest": "",
+      "sample": 0,
+      "days": 4,
+      "status": "이력 부족 4/40일"
+    },
+    {
+      "block": "성장",
+      "id": "copper",
+      "kind": "trend",
+      "current": "±3% / 20일",
+      "suggest": "",
+      "sample": 0,
+      "days": 4,
+      "status": "이력 부족 4/40일"
+    },
+    {
+      "block": "성장",
+      "id": "bdry",
+      "kind": "trend",
+      "current": "±5% / 20일",
+      "suggest": "",
+      "sample": 0,
+      "days": 4,
+      "status": "이력 부족 4/40일"
+    },
+    {
+      "block": "유동성",
+      "id": "credit_spread",
+      "kind": "level",
+      "current": "hi 0.6 / lo 0.4",
+      "suggest": "",
+      "sample": 1,
+      "days": 1,
+      "status": "이력 부족 1/20일"
+    },
+    {
+      "block": "유동성",
+      "id": "dxy",
+      "kind": "level",
+      "current": "hi 104 / lo 98",
+      "suggest": "",
+      "sample": 4,
+      "days": 4,
+      "status": "이력 부족 4/20일"
+    },
+    {
+      "block": "유동성",
+      "id": "m2",
+      "kind": "trend",
+      "current": "±0.5% / 30일",
+      "suggest": "",
+      "sample": 0,
+      "days": 4,
+      "status": "이력 부족 4/50일"
+    },
+    {
+      "block": "유동성",
+      "id": "fed_bs",
+      "kind": "trend",
+      "current": "±0.5% / 30일",
+      "suggest": "",
+      "sample": 0,
+      "days": 4,
+      "status": "이력 부족 4/50일"
+    }
+  ],
+  "one_line": "성장 확장(확인) · 물가 높음·내려오는 중(확인) · 유동성 긴축적(확인) → 4분면 성장↑물가↑ → 원자재·가치·은행 우위",
   "memo": {
-    "text": "물가↑·성장 유지 → 원자재·가치·은행 우위(추정)",
-    "basis": "확인: CPI 3.4%·연준 매파·금 기록·유가 $90 / 추정: 성장·유동성 해석",
-    "as_of": "2026-09-04",
+    "text": "물가↑·성장 판정 보류 → 4분면 보류(자동). 수동 견해: 원자재·가치·은행 우위(추정)",
+    "basis": "확인: 한은 3.0% 인상·CPI 3.54%·근원PCE 3.34%·FFR 동결 / 추정: 성장 방향(PMI 입력 전) — 자동 판정은 analysis/regime.json",
+    "as_of": "2026-09-07",
     "_tag": "축 문장(수동, Claude 초안) — 위 자동 판정과 다르면 달님이 판별"
   },
   "_정직": "숫자 기준값은 data/regime_rules.json 의 Claude 초안(추정). 신호 값이 없으면 그 신호는 빼고 계산하며, 공식 신호가 하나도 없으면 '추정', 아무 값도 없으면 '판단 불가'"
