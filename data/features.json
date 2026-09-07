@@ -222,7 +222,31 @@
       "source": "analysis/regime.json ← data/regime_rules.json",
       "manual": "규칙 파일의 신호(예: CPI 3%↑ = 물가 높음 +2점)를 더해 점수 → 판정. 값 없는 신호는 '값 없음'으로 보이고 계산에서 빠짐. 공식 신호가 없으면 '추정', 아무 값도 없으면 '판단 불가'. 4분면은 성장·물가 둘 다 확정일 때만 정함(혼조·중립이면 '보류'). 기준값을 바꾸려면 data/regime_rules.json 만 고치면 됨 — 화면·코드 수정 없음. 20·30일 추세 신호는 이력이 그만큼 쌓여야 정확(2026-09-04 부터 쌓임)",
       "_tag": "기준값 Claude 초안(추정) — 달님 판별"
+    },
+    "manual.form": {
+      "title": "수동 지표 입력",
+      "tip": "ISM PMI 등 자동 출처 없는 값을 넣는 곳 — 출처 링크·입력·JSON 복사·GitHub 편집 링크",
+      "source": "raw/manual_macro.json",
+      "manual": "1 출처 열기 → 2 값·기준월 입력 → 3 JSON 만들기·복사 → 4 GitHub 에서 열기(편집 화면) → Ctrl+A → 붙여넣기 → Commit changes → 5 다음 수집 때 반영(지금 실행 링크로 즉시). cygnus·axes 의 '수동 입력 →' 링크가 여기로 옴"
+    },
+    "cygnus.krpick": {
+      "title": "한국 경제 — 고른 지표",
+      "tip": "100대 통계지표 중 고른 12개: 값·전기 대비 변화·뜻·오르면·언제. 새 값 14일 NEW",
+      "source": "facts/kr_key.json + data/indicators.json key_stats.pick",
+      "manual": "고르는 목록·뜻 문장은 indicators.json 의 key_stats.pick(이름은 100대 목록과 글자까지 같아야 함). 새 발표가 나오면 이전 값을 보관해 전기 대비 변화를 보여주고 NEW 가 위로 옴. 판정은 하지 않음(참고)"
+    },
+    "regime.review": {
+      "title": "기준값 재검토",
+      "tip": "추정 기준값을 이력 실측(1σ·25/75 백분위)과 비교해 제안. 자동 반영 안 함",
+      "source": "analysis/regime.json.review",
+      "manual": "레짐 규칙의 '추정' 기준값 9개(20일 추세 ±2/3/5%, 스프레드 0.6/0.4, DXY 104/98, M2·연준자산 ±0.5%, 수출 +5/0)는 이력이 20~50일 쌓이면 실측 분포로 제안값이 나옴. 제안을 채택하려면 data/regime_rules.json 의 숫자를 고친다"
+    },
+    "cygnus.when": {
+      "title": "기준일·수집시각·주기",
+      "tip": "카드 아랫줄: 기준(데이터 날짜) · 수집(GitHub 수집 시각 KST) · 일간/주간/월간/분기. 실시간 카드는 야후 시각",
+      "source": "facts/macro.json cycle·as_of·collected_at",
+      "manual": "기준 = 그 값이 가리키는 날(월간이면 그 달 1일). 수집 = 우리 서버가 받아온 시각. 실시간 = 브라우저가 야후에서 받은 시각(장중이면 현재가). 주기는 data/indicators.json 의 cycle"
     }
   },
-  "version": "v 20260907-1900"
+  "version": "v 20260907-2100"
 }

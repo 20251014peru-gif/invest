@@ -1,4 +1,4 @@
-// v 20260907-1900  regime.js — 레짐 요약 카드(공통). analysis/regime.json(regime/1) 을 읽어 el 에 그린다. axes.html·cygnus.html 이 같이 씀.
+// v 20260907-2100  regime.js — 레짐 요약 카드(공통). analysis/regime.json(regime/1) 을 읽어 el 에 그린다. axes.html·cygnus.html 이 같이 씀.
 // 사용: <script src="js/regime.js"></script> 뒤에 window.Regime.render(document.getElementById('regime'), {compact:false})
 // 원칙: 판정 옆에 반드시 신뢰(확인/추정/판단 불가) · 근거 지표 값 · 바뀌는 조건. 값 없는 신호는 '값 없음' 으로 그대로 보인다(조용히 숨기지 않음).
 (function () {
@@ -16,13 +16,14 @@
     '.rg details summary{cursor:pointer;font-size:12.5px;color:#2563eb;min-height:32px;display:flex;align-items:center;margin-top:6px}' +
     '.rg .one{grid-column:1/-1;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:10px 14px;font-size:14px}' +
     '.rg .one small{display:block;color:#6b7280;font-size:12px;margin-top:2px}';
+  var CYC = { D: '일간', W: '주간', M: '월간', Q: '분기', A: '연간' };
   function tag(c) { var k = c === '확인' ? 'ok' : c === '추정' ? 'est' : 'na'; return '<span class="rt ' + k + '">' + esc(c) + '</span>'; }
   function kst(iso) { if (!iso) return ''; var m = String(iso).match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/); return m ? m[1] + ' ' + m[2] : String(iso).slice(0, 16); }
   function block(b, compact) {
     var sig = (b.signals || []).map(function (s) {
       var none = s.score == null;
       return '<li' + (none ? ' class="none"' : '') + '><span class="w">' + esc(s.name) + '</span><span class="r">' + esc(s.read) + '</span>' +
-        (s.as_of ? '<span class="off">' + esc(s.as_of) + '</span>' : '') + '<span class="off">' + (s.official ? '공식' : '참고') + ' ×' + esc(s.weight) + '</span></li>';
+        (s.as_of ? '<span class="off">기준 ' + esc(s.as_of) + (s.cycle ? ' · ' + esc(CYC[s.cycle] || s.cycle) : '') + '</span>' : '') + '<span class="off">' + (s.official ? '공식' : '참고') + ' ×' + esc(s.weight) + '</span></li>';
     }).join('');
     var head = '<div class="rn"><span>' + esc(b.name) + '</span>' + tag(b.confidence) + '</div>' +
       '<div class="rv">' + esc(b.verdict) + (b.direction ? ' <small>· ' + esc(b.direction) + '</small>' : '') + ' <small>점수 ' + (b.score > 0 ? '+' : '') + esc(b.score) + ' · 신호 ' + esc(b.used) + '/' + (b.signals || []).length + '(공식 ' + esc(b.official_used) + ')</small></div>';
@@ -41,6 +42,11 @@
       h += block(r.growth, opt.compact) + block(r.inflation, opt.compact) + block(r.liquidity, opt.compact);
       h += '<div class="rk q"><div class="rn"><span>4분면 (성장×물가)</span>' + tag(q.confidence) + '</div><div class="rv">' + esc(q.name) + (q.assets ? ' <small>→ ' + esc(q.assets) + ' 우위</small>' : '') + '</div><div style="font-size:12.5px;color:#374151;margin-top:4px">' + esc(q.note || '') + '</div>' +
         (r.growth && r.growth.verdict !== '판단 불가' ? '' : '') + '</div>';
+      if (r.review && r.review.length) {
+        var rows = r.review.map(function (x) { return '<tr><td>' + esc(x.block) + '</td><td>' + esc(x.id) + '</td><td>' + esc(x.current) + '</td><td>' + esc(x.status) + '</td><td>' + esc(x.suggest || '—') + '</td></tr>'; }).join('');
+        var nSug = r.review.filter(function (x) { return x.status === '제안 있음'; }).length;
+        h += '<div class="rk" style="grid-column:1/-1"><details' + (nSug ? ' open' : '') + '><summary>기준값 재검토(추정 ' + r.review.length + '개) — ' + (nSug ? '<b>제안 ' + nSug + '개</b>' : '아직 이력 부족, 제안 없음') + '</summary><div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:12.5px;min-width:520px"><thead><tr><th style="text-align:left;padding:4px 6px">칸</th><th style="text-align:left;padding:4px 6px">신호</th><th style="text-align:left;padding:4px 6px">현행(추정)</th><th style="text-align:left;padding:4px 6px">상태</th><th style="text-align:left;padding:4px 6px">제안(실측)</th></tr></thead><tbody>' + rows + '</tbody></table></div><div style="font-size:12px;color:#6b7280;margin-top:6px">제안은 자동 반영하지 않음 — 달님이 보고 data/regime_rules.json 의 숫자를 고치면 다음 판정부터 적용</div></details></div>';
+      }
       if (r.memo && (r.memo.text || r.memo.basis)) h += '<div class="rk memo"><div class="rn"><span>축 문장(수동)</span><span class="rt est">초안 ' + esc(r.memo.as_of || '') + '</span></div><div style="font-size:13.5px;margin-top:4px">' + esc(r.memo.text) + '</div>' + (r.memo.basis ? '<div style="font-size:12px;color:#6b7280;margin-top:4px">근거: ' + esc(r.memo.basis) + '</div>' : '') + '</div>';
       el.innerHTML = h;
       if (typeof opt.after === 'function') opt.after(r);

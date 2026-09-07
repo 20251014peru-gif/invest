@@ -268,6 +268,20 @@
         "data/status.json"
       ],
       "note": "macro.yml 에서 macro.py 다음에 실행. 화면은 js/regime.js(axes·cygnus 공통)"
+    },
+    {
+      "id": "manual",
+      "name": "수동 지표 입력",
+      "file": "manual.html",
+      "axis": "내용",
+      "status": "active",
+      "since": "2026-09-07",
+      "reads": [
+        "data/indicators.json",
+        "raw/manual_macro.json"
+      ],
+      "writes": [],
+      "note": "브라우저에서 JSON 만들어 복사 → GitHub 편집 링크(raw/manual_macro.json). 직접 저장 없음"
     }
   ]
 }

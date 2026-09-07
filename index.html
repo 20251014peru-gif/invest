@@ -1,4 +1,4 @@
-<!-- v 20260904-1740  index.html — invest 허브(문 하나). 첫 화면 7칸, 노션식(값 있을 때만)↔일반식, 칸 접기 기억, 자가 점검 -->
+<!-- v 20260907-2100  index.html — invest 허브(문 하나). 첫 화면 7칸, 노션식(값 있을 때만)↔일반식, 칸 접기 기억, 자가 점검 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -38,6 +38,7 @@
   <a class="btn" href="axes.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">축·전략</a>
   <a class="btn" href="cygnus.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">시장</a>
   <a class="btn" href="predict.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">예측·채점</a>
+  <a class="btn" href="manual.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">수동 입력</a>
   <button class="btn" id="modeBtn" type="button">노션식</button>
   <button class="btn" id="checkBtn" type="button">자가 점검</button>
 </header>
@@ -49,10 +50,11 @@
   </section>
 </main>
 <div id="tip"></div>
-<script src="js/status.js" data-app="hub" data-version="v 20260904-1740"></script>
+<script src="js/status.js" data-app="hub" data-version="v 20260907-2100"></script>
 <script>
 (function(){
-  var VER='v 20260904-1740'; document.getElementById('ver').textContent=VER;
+  var VER='v 20260907-2100'; document.getElementById('ver').textContent=VER;
+  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var CELLS=[['market','c1'],['kr-us','c2'],['sector','c3'],['signals','c4'],['failed','c5'],['review','c6'],['alerts','c7']];
   var LS='hub_ui'; var ui={}; try{ui=JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){}
   function save(){ try{localStorage.setItem(LS,JSON.stringify(ui))}catch(e){} }
@@ -73,11 +75,29 @@
   }
   // 시장 상태 칸: axes.json 의 레짐 요약. 값이 있으면 요약, 없으면 '미확인'과 축 보기 링크만
   function fillMarket(){
-    fetch('data/axes.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
-      var rg=d.regime||{}, el=grid.querySelector('[data-id=market]'); if(!el) return;
-      var known=[rg.growth,rg.inflation,rg.liquidity].some(function(v){return v&&v!=='미확인'});
+    // 규칙 판정(analysis/regime.json) 우선, 없으면 축 문장(axes.json regime)
+    fetch('analysis/regime.json?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(r){
+      var el=grid.querySelector('[data-id=market]'); if(!el) return; el.classList.remove('empty');
+      var t=function(c){return '<span style="font-size:11px;padding:0 6px;border-radius:6px;background:'+(c==='확인'?'#dcfce7':c==='추정'?'#fef3c7':'#fee2e2')+'">'+c+'</span>'};
+      el.querySelector('.body').innerHTML='<b>'+esc(r.one_line)+'</b><br><small>성장 '+t(r.growth.confidence)+' 물가 '+t(r.inflation.confidence)+' 유동성 '+t(r.liquidity.confidence)+' · 판정 '+String(r.computed_at||'').slice(5,16).replace('T',' ')+' · 값 수집 '+String(r.macro_collected_at||'').slice(5,16).replace('T',' ')+'</small><br><a href="axes.html">근거·바뀌는 조건 →</a>';
+    }).catch(function(){
+      fetch('data/axes.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+        var rg=d.regime||{}, el=grid.querySelector('[data-id=market]'); if(!el) return;
+        var known=[rg.growth,rg.inflation,rg.liquidity].some(function(v){return v&&v!=='미확인'});
+        el.classList.remove('empty');
+        el.querySelector('.body').innerHTML=(known?'성장 '+rg.growth+' · 물가 '+rg.inflation+' · 유동성 '+rg.liquidity+' · '+(rg.quadrant||'')+'<br>':'현재값 미확인 · ')+'<a href="axes.html">축 8개 · 전략 카드 5개 보기 →</a>';
+      }).catch(function(){});
+    });
+  }
+  // 확인 필요 칸: 수동 지표 중 값 없는 것 + 수집 실패 지표 → 입력·확인 링크(값 있을 때만 칸이 나타남)
+  function fillReview(){
+    fetch('facts/macro.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(m){
+      var el=grid.querySelector('[data-id=review]'); if(!el) return;
+      var need=(m.items||[]).filter(function(x){return x.source==='manual'&&x.value==null});
+      var fail=(m.items||[]).filter(function(x){return x.error&&x.source!=='manual'});
+      if(!need.length&&!fail.length) return;
       el.classList.remove('empty');
-      el.querySelector('.body').innerHTML=(known?'성장 '+rg.growth+' · 물가 '+rg.inflation+' · 유동성 '+rg.liquidity+' · '+(rg.quadrant||'')+'<br>':'현재값 미확인 · ')+'<a href="axes.html">축 8개 · 전략 카드 5개 보기 →</a>';
+      el.querySelector('.body').innerHTML=need.map(function(x){return '📝 <b>'+esc(x.name)+'</b> 값 없음 → <a href="manual.html#'+esc(x.id)+'">수동 입력</a>'}).concat(fail.map(function(x){return '⚠ <b>'+esc(x.name)+'</b> 수집 실패 <small>'+esc(String(x.error).slice(0,50))+'</small> → <a href="cygnus.html">지표</a>'})).join('<br>');
     }).catch(function(){});
   }
   // 국내/미국 칸: facts/macro.json 요약(값 있을 때만)
@@ -107,8 +127,8 @@
   modeBtn.onclick=function(){ ui.notion=!ui.notion; save(); applyMode(); };
 
   // features.json 한 곳에서 제목·툴팁을 읽는다(원칙 17)
-  fetch('data/features.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){ feats=d.features||{}; render(); applyMode(); fillMarket(); fillMarkets(); fillSectors(); })
-    .catch(function(e){ console.error('features.json 읽기 실패: '+e.message); render(); applyMode(); fillMarket(); fillMarkets(); fillSectors(); });
+  fetch('data/features.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){ feats=d.features||{}; render(); applyMode(); fillMarket(); fillMarkets(); fillSectors(); fillReview(); })
+    .catch(function(e){ console.error('features.json 읽기 실패: '+e.message); render(); applyMode(); fillMarket(); fillMarkets(); fillSectors(); fillReview(); });
 
   // 자가 점검(원칙 21): 파일 4개 읽힘 + 경고 띠 + 🐞 [복사] 가 실제로 뜨는지
   document.getElementById('checkBtn').onclick=function(){

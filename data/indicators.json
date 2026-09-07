@@ -1,7 +1,7 @@
 {
   "schema": "indicators/1",
-  "version": "v 20260907-1830",
-  "_설명": "대변화 축 지표. 시세류(yahoo 필드 있음)는 중계서버 경유 야후 실시간(GitHub 서버에서), 경제지표는 FRED, 없는 건 manual. relay=Cloudflare Worker. ecos=한국은행 OpenAPI(ECOS_KEY). derive=yoy 는 월간 지수를 전년동월비 %로. group=kr|us|world(cygnus 화면 묶음, 순서는 groups 순).",
+  "version": "v 20260907-2100",
+  "_설명": "대변화 축 지표. 시세류(yahoo 필드 있음)는 중계서버 경유 야후 실시간(GitHub 서버에서), 경제지표는 FRED, 없는 건 manual. relay=Cloudflare Worker. ecos=한국은행 OpenAPI(ECOS_KEY). derive=yoy 는 월간 지수를 전년동월비 %로. group=kr|us|world(cygnus 화면 묶음, 순서는 groups 순). cycle=D|W|M|Q(발표 주기, 화면 표시용).",
   "history_days": 400,
   "items": [
     {
@@ -24,7 +24,8 @@
       },
       "note": "ECOS 주식시장(일) KOSPI지수 종가(전 영업일) — 2026-09-07 확인",
       "yahoo": "^KS11",
-      "group": "kr"
+      "group": "kr",
+      "cycle": "D"
     },
     {
       "id": "kosdaq",
@@ -46,7 +47,8 @@
       },
       "note": "ECOS 주식시장(일) KOSDAQ지수 종가 — 2026-09-07 확인",
       "yahoo": "^KQ11",
-      "group": "kr"
+      "group": "kr",
+      "cycle": "D"
     },
     {
       "id": "usdkrw",
@@ -68,7 +70,8 @@
         "item": "0000001",
         "cycle": "D"
       },
-      "group": "kr"
+      "group": "kr",
+      "cycle": "D"
     },
     {
       "id": "bok_rate",
@@ -87,7 +90,8 @@
       "rule": "방향만(인상·동결·인하)",
       "thresholds": {},
       "note": "ECOS_KEY Secret 필요. 통계표 722Y001·항목 0101000 = 한국은행 기준금리(월) — 2026-09-07 중계서버 경유로 확인. GitHub 서버는 ECOS 직접 접속 불가라 relay 경유",
-      "group": "kr"
+      "group": "kr",
+      "cycle": "M"
     },
     {
       "id": "kr3y",
@@ -106,7 +110,8 @@
       "rule": "방향만",
       "thresholds": {},
       "note": "ECOS 시장금리(일별) 817Y002·항목 010200000 = 국고채(3년) — 2026-09-07 중계서버 경유로 확인",
-      "group": "kr"
+      "group": "kr",
+      "cycle": "D"
     },
     {
       "id": "kr10y",
@@ -124,7 +129,8 @@
         "item": "010210000",
         "cycle": "D"
       },
-      "group": "kr"
+      "group": "kr",
+      "cycle": "D"
     },
     {
       "id": "kr_aa3",
@@ -142,7 +148,8 @@
       "rule": "국고3년과의 차이(신용 스프레드)로 본다",
       "thresholds": {},
       "note": "ECOS 시장금리(일별) 회사채(3년, AA-) — 2026-09-07 확인",
-      "group": "kr"
+      "group": "kr",
+      "cycle": "D"
     },
     {
       "id": "kr_bbb3",
@@ -160,7 +167,8 @@
       "rule": "한계기업 조달금리. 급등=신용 스트레스",
       "thresholds": {},
       "note": "ECOS 시장금리(일별) 회사채(3년, BBB-) — 2026-09-07 확인",
-      "group": "kr"
+      "group": "kr",
+      "cycle": "D"
     },
     {
       "id": "kr_cpi_yoy",
@@ -182,7 +190,8 @@
         "bad_min": 3.0
       },
       "note": "ECOS 소비자물가지수 총지수(2020=100, 월) → 전년동월비 계산 — 2026-09-07 확인",
-      "group": "kr"
+      "group": "kr",
+      "cycle": "M"
     },
     {
       "id": "sp500",
@@ -200,7 +209,8 @@
       "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
       "yahoo": "^GSPC",
       "fred_fallback": "SP500",
-      "group": "us"
+      "group": "us",
+      "cycle": "D"
     },
     {
       "id": "nasdaq",
@@ -218,7 +228,8 @@
       "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
       "yahoo": "^IXIC",
       "fred_fallback": "NASDAQCOM",
-      "group": "us"
+      "group": "us",
+      "cycle": "D"
     },
     {
       "id": "sox",
@@ -235,7 +246,8 @@
       },
       "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
       "yahoo": "^SOX",
-      "group": "us"
+      "group": "us",
+      "cycle": "D"
     },
     {
       "id": "vix",
@@ -254,7 +266,8 @@
       "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
       "yahoo": "^VIX",
       "fred_fallback": "VIXCLS",
-      "group": "us"
+      "group": "us",
+      "cycle": "D"
     },
     {
       "id": "dxy",
@@ -271,7 +284,8 @@
       },
       "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
       "yahoo": "DX-Y.NYB",
-      "group": "us"
+      "group": "us",
+      "cycle": "D"
     },
     {
       "id": "us10y",
@@ -287,7 +301,8 @@
         "bad_min": 4.5
       },
       "note": "",
-      "group": "us"
+      "group": "us",
+      "cycle": "D"
     },
     {
       "id": "us2y",
@@ -300,7 +315,8 @@
       "rule": "",
       "thresholds": {},
       "note": "",
-      "group": "us"
+      "group": "us",
+      "cycle": "D"
     },
     {
       "id": "fedfunds",
@@ -313,7 +329,8 @@
       "rule": "방향만 본다(전월 대비 ↑인상 ↓인하). 축① 현재값 근거",
       "thresholds": {},
       "note": "FRED 월간(확인 2026-09-07: 2026-08 = 3.63). 상단 목표금리 대신 실효금리 — 방향 판단엔 같음",
-      "group": "us"
+      "group": "us",
+      "cycle": "M"
     },
     {
       "id": "cpi_yoy",
@@ -330,7 +347,8 @@
         "bad_min": 3.0
       },
       "note": "FRED 월간 지수(확인 2026-09-07: 2026-07 = 332.813)를 12개월 전 대비 %로 계산. 다음 발표까지 값 고정",
-      "group": "us"
+      "group": "us",
+      "cycle": "M"
     },
     {
       "id": "core_pce_yoy",
@@ -347,7 +365,8 @@
         "bad_min": 3.0
       },
       "note": "연준이 보는 물가. FRED 월간 지수(확인 2026-09-07: 2026-07 = 130.658) → 전년비",
-      "group": "us"
+      "group": "us",
+      "cycle": "M"
     },
     {
       "id": "m2",
@@ -360,7 +379,8 @@
       "rule": "",
       "thresholds": {},
       "note": "월간",
-      "group": "us"
+      "group": "us",
+      "cycle": "M"
     },
     {
       "id": "fed_bs",
@@ -373,7 +393,8 @@
       "rule": "",
       "thresholds": {},
       "note": "주간",
-      "group": "us"
+      "group": "us",
+      "cycle": "W"
     },
     {
       "id": "ism_pmi",
@@ -388,7 +409,10 @@
         "good_min": 50
       },
       "note": "FRED 에 없음(NAPM 중단). ismworld.org 발표 후 수동 입력",
-      "group": "us"
+      "group": "us",
+      "manual_url": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/",
+      "manual_hint": "매월 1영업일 발표. \"Manufacturing PMI\" 숫자 하나",
+      "cycle": "M"
     },
     {
       "id": "hsi",
@@ -405,7 +429,8 @@
       },
       "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
       "yahoo": "^HSI",
-      "group": "world"
+      "group": "world",
+      "cycle": "D"
     },
     {
       "id": "wti",
@@ -420,7 +445,8 @@
       "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
       "yahoo": "CL=F",
       "fred_fallback": "DCOILWTICO",
-      "group": "world"
+      "group": "world",
+      "cycle": "D"
     },
     {
       "id": "copper",
@@ -434,7 +460,8 @@
       "thresholds": {},
       "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
       "yahoo": "HG=F",
-      "group": "world"
+      "group": "world",
+      "cycle": "D"
     },
     {
       "id": "gold",
@@ -448,7 +475,8 @@
       "thresholds": {},
       "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
       "yahoo": "GC=F",
-      "group": "world"
+      "group": "world",
+      "cycle": "D"
     },
     {
       "id": "bdry",
@@ -462,7 +490,8 @@
       "thresholds": {},
       "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
       "yahoo": "BDRY",
-      "group": "world"
+      "group": "world",
+      "cycle": "D"
     },
     {
       "id": "china_pmi",
@@ -477,14 +506,145 @@
         "good_min": 50
       },
       "note": "국가통계국 발표 후 수동 입력",
-      "group": "world"
+      "group": "world",
+      "manual_url": "https://www.stats.gov.cn/sj/",
+      "manual_hint": "국가통계국 매월 말일 발표. 제조업 PMI(制造业PMI). 링크는 통계국 데이터 페이지(추정)",
+      "cycle": "M"
+    },
+    {
+      "id": "kr_lead",
+      "name": "선행지수순환변동치",
+      "source": "ecos",
+      "symbol": "901Y067/I16E",
+      "ecos": {
+        "stat": "901Y067",
+        "item": "I16E",
+        "cycle": "M"
+      },
+      "unit": "pt",
+      "axis": "inflation_growth",
+      "group": "kr",
+      "cycle": "M",
+      "official": true,
+      "rule": "전월 대비 오르면 경기 확장 신호(100 위면 추세 위)",
+      "thresholds": {},
+      "note": "ECOS 경기종합지수 8.1.2 선행지수순환변동치(2020=100) — 2026-09-07 확인(7월 104.2). 통계청 매월 말 발표"
+    },
+    {
+      "id": "kr_export_yoy",
+      "name": "수출금액지수 전년비",
+      "source": "ecos",
+      "symbol": "403Y001/*AA",
+      "ecos": {
+        "stat": "403Y001",
+        "item": "*AA",
+        "cycle": "M"
+      },
+      "derive": "yoy",
+      "unit": "%",
+      "axis": "earnings",
+      "group": "kr",
+      "cycle": "M",
+      "official": true,
+      "rule": "+5% 이상=확장 / 0% 이하=둔화 (기준값 추정)",
+      "thresholds": {
+        "good_min": 5
+      },
+      "note": "ECOS 수출금액지수 총지수(403Y001/*AA, 2020=100, 월) → 전년동월비 — 2026-09-07 확인(7월 233.11). 관세청 통관 기준"
     }
   ],
   "relay": "https://wild-unit-3884dalnim-relay.20251014peru.workers.dev",
   "key_stats": {
     "enabled": true,
     "file": "facts/kr_key.json",
-    "note": "ECOS KeyStatisticList(100대 통계지표) 1회 호출 → 판정 없이 참고표. cygnus '한국 경제 100' 접이식"
+    "note": "ECOS KeyStatisticList(100대 통계지표) 1회 호출 → facts/kr_key.json. pick = 화면 위에 카드로 보일 것(뜻·오르면·언제), 나머지는 접힘. 이전 값(prev)은 as_of 가 바뀔 때 저장 → 전기 대비 변화. new_days 안에 새 값이면 NEW",
+    "pick": [
+      {
+        "name": "한국은행 기준금리",
+        "axis": "①",
+        "meaning": "돈값의 기준. 9/5 3.0%로 인상",
+        "up": "성장주·부동산 부담, 은행 유리",
+        "when": "금통위 회의(연 8회)"
+      },
+      {
+        "name": "국고채수익률(3년)",
+        "axis": "②",
+        "meaning": "시장이 보는 금리 방향",
+        "up": "추가 인상 기대 → 고PER 부담",
+        "when": "매일"
+      },
+      {
+        "name": "회사채수익률(3년,AA-)",
+        "axis": "⑥",
+        "meaning": "기업 조달금리. 국고3년과 차이가 신용 스프레드",
+        "up": "차이 벌어지면 돈이 마름 → 신규 진입 대기",
+        "when": "매일"
+      },
+      {
+        "name": "원/달러 환율(종가)",
+        "axis": "④",
+        "meaning": "외국인 자금 방향",
+        "up": "1,480 위 외국인 매도 압력 / 1,430 아래 우호",
+        "when": "매일"
+      },
+      {
+        "name": "소비자물가지수",
+        "axis": "③",
+        "meaning": "한은이 못 내리는 이유(지수, 전월 대비 변화로 봄)",
+        "up": "인하 늦어짐",
+        "when": "매월 초"
+      },
+      {
+        "name": "선행지수순환변동치",
+        "axis": "③",
+        "meaning": "경기 선행지표 — 100 위·상승이면 확장 신호",
+        "up": "경기민감주·소재 유리",
+        "when": "매월 말"
+      },
+      {
+        "name": "수출금액지수",
+        "axis": "⑤",
+        "meaning": "한국 주식의 엔진(반도체·조선)",
+        "up": "수출주 실적 방향 ↑",
+        "when": "매월"
+      },
+      {
+        "name": "투자자예탁금",
+        "axis": "수급",
+        "meaning": "증시 대기 자금(조원)",
+        "up": "개인 매수 여력 ↑ — 전략 '수급' 카드 재료",
+        "when": "매월"
+      },
+      {
+        "name": "소비자심리지수",
+        "axis": "③",
+        "meaning": "내수 방향(100 기준)",
+        "up": "내수·유통주 앞섬",
+        "when": "매월 말"
+      },
+      {
+        "name": "경제성장률(실질, 계절조정 전기대비)",
+        "axis": "③",
+        "meaning": "경기 결과 확인(분기)",
+        "up": "레짐 '성장' 칸 근거",
+        "when": "분기(1·4·7·10월)"
+      },
+      {
+        "name": "경상수지",
+        "axis": "④",
+        "meaning": "원화가 강한 이유",
+        "up": "환율 안정 근거",
+        "when": "매월 초(1.5달 지연)"
+      },
+      {
+        "name": "M2(광의통화, 평잔)",
+        "axis": "④",
+        "meaning": "시중 유동성",
+        "up": "자산 가격 지지",
+        "when": "매월 중순(2달 지연)"
+      }
+    ],
+    "new_days": 14
   },
   "derived": [
     {
@@ -501,12 +661,20 @@
         "bad_min": 1.0,
         "good_max": 0.5
       },
-      "group": "kr"
+      "group": "kr",
+      "cycle": "D"
     }
   ],
   "groups": {
     "kr": "🇰🇷 한국",
     "us": "🇺🇸 미국",
     "world": "🌍 국제"
+  },
+  "cycles": {
+    "D": "일간",
+    "W": "주간",
+    "M": "월간",
+    "Q": "분기",
+    "A": "연간"
   }
 }

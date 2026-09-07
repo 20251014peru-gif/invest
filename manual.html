@@ -1,0 +1,102 @@
+<!-- v 20260907-2000  manual.html — 수동 지표 입력(ISM PMI·중국 PMI 등). 읽기: data/indicators.json(source=manual) · raw/manual_macro.json(현재 값). 쓰기: 브라우저에서 JSON 을 만들어 복사 → GitHub 편집 링크에 붙여넣기(정적 사이트라 직접 저장은 못 함, 철칙 1·5). 저장 뒤 Macro Collector 가 다음 실행 때 읽는다 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>수동 지표 입력</title>
+<style>
+  :root{--bg:#f6f7fb;--card:#fff;--line:#e3e6ee;--ink:#1f2430;--sub:#6b7280;--p1:#dbeafe;--p3:#fef3c7;--p2:#dcfce7;--p5:#fee2e2}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+  header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;flex:1}header small{color:var(--sub);font-size:12px}
+  .btn{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);font:inherit;font-size:14px;cursor:pointer;color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .btn.p{background:var(--p1);border-color:#93c5fd}.btn.g{background:var(--p2);border-color:#bbf7d0}
+  main{padding:14px 16px 80px;max-width:1100px;margin:0 auto}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:14px}
+  .steps .s{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13.5px}.steps .s>b:first-child{display:block;font-size:12px;color:var(--sub)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+  .card.focus{border-color:#93c5fd;box-shadow:0 0 0 3px var(--p1)}
+  .card h3{margin:0 0 4px;font-size:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .tag{font-size:12px;padding:1px 8px;border-radius:8px;border:1px solid var(--line);color:var(--sub)}
+  .cur{font-size:13px;color:var(--sub);margin-bottom:8px}
+  .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  label{font-size:12px;color:var(--sub);display:block}
+  input{width:100%;min-height:44px;font:inherit;font-size:16px;padding:6px 10px;border:1px solid var(--line);border-radius:10px}
+  .hint{font-size:12.5px;color:var(--sub);margin-top:6px}
+  textarea{width:100%;min-height:180px;font:13px/1.4 ui-monospace,Consolas,monospace;border:1px solid var(--line);border-radius:12px;padding:10px}
+  .out{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+  .ok{background:var(--p2);border-radius:10px;padding:8px 10px;font-size:13.5px;margin-top:8px}
+  @media (max-width:600px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>수동 지표 입력 <small id="ver"></small></h1>
+  <a class="btn" href="cygnus.html">CYGNUS</a><a class="btn" href="axes.html">축·전략</a><a class="btn" href="index.html">허브</a>
+</header>
+<main>
+  <div class="steps">
+    <div class="s"><b>1</b>아래 <b>출처 열기</b>로 공식 발표치를 확인</div>
+    <div class="s"><b>2</b>값·기준월·발표일 입력 → <b>JSON 만들기</b></div>
+    <div class="s"><b>3</b><b>복사</b> → <b>GitHub 에서 열기</b> → 전체 선택해 붙여넣기 → Commit changes</div>
+    <div class="s"><b>4</b>다음 자동 수집(매시)이나 <b>지금 실행</b> 링크로 반영. 레짐 '성장' 칸이 확인으로 바뀜</div>
+  </div>
+  <div id="list"><p style="color:var(--sub)">읽는 중…</p></div>
+  <div class="out">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+      <button class="btn p" type="button" id="make">JSON 만들기</button>
+      <button class="btn" type="button" id="copy">복사</button>
+      <a class="btn g" id="gh" target="_blank" rel="noopener" href="https://github.com/20251014peru-gif/invest/edit/main/raw/manual_macro.json">GitHub 에서 열기 ↗</a>
+      <a class="btn" target="_blank" rel="noopener" href="https://github.com/20251014peru-gif/invest/actions/workflows/macro.yml">지금 실행(Run workflow) ↗</a>
+    </div>
+    <textarea id="json" readonly placeholder="JSON 만들기를 누르면 raw/manual_macro.json 전체 내용이 여기 나옵니다"></textarea>
+    <div id="msg" hidden class="ok"></div>
+  </div>
+</main>
+<script src="js/status.js" data-app="manual" data-version="v 20260907-2000"></script>
+<script>
+(function(){
+  document.getElementById('ver').textContent='v 20260907-2000';
+  var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' '+r.status);return r.json()})};
+  var IND=[], CUR={schema:'manual_macro/1',items:{}};
+  Promise.all([get('data/indicators.json'), get('raw/manual_macro.json').catch(function(){return CUR;})]).then(function(r){
+    IND=(r[0].items||[]).filter(function(i){return i.source==='manual'}); CUR=r[1]||CUR; CUR.items=CUR.items||{};
+    var want=location.hash.replace('#','');
+    document.getElementById('list').innerHTML=IND.length?IND.map(function(it){
+      var c=CUR.items[it.id]||{};
+      return '<div class="card'+(it.id===want?' focus':'')+'" id="c-'+esc(it.id)+'"><h3>'+esc(it.name)+' <span class="tag">'+esc(it.id)+'</span><span class="tag">축 '+esc(it.axis)+'</span>'+(it.official?'<span class="tag">공식</span>':'')+
+        (it.manual_url?'<a class="btn" style="min-height:36px;margin-left:auto" target="_blank" rel="noopener" href="'+esc(it.manual_url)+'">출처 열기 ↗</a>':'')+'</h3>'+
+        '<div class="cur">지금 저장된 값: '+(c.value!=null?'<b>'+esc(c.value)+'</b> '+esc(it.unit||'')+' (기준 '+esc(c.as_of||'')+', 발표 '+esc(c.published||'미기재')+')':'<b>없음</b> — 그래서 화면에 "값 없음"')+
+        (it.rule?' · 규칙: '+esc(it.rule):'')+'</div>'+
+        '<div class="row"><div><label>값 ('+esc(it.unit||'')+')</label><input inputmode="decimal" data-k="value" data-id="'+esc(it.id)+'" value="'+esc(c.value!=null?c.value:'')+'" placeholder="예 48.7"></div>'+
+        '<div><label>기준월 (YYYY-MM)</label><input data-k="as_of" data-id="'+esc(it.id)+'" value="'+esc(c.as_of||'')+'" placeholder="2026-08"></div>'+
+        '<div><label>발표일 (YYYY-MM-DD, 모르면 비움)</label><input data-k="published" data-id="'+esc(it.id)+'" value="'+esc(c.published||'')+'" placeholder="2026-09-01"></div></div>'+
+        (it.manual_hint?'<div class="hint">'+esc(it.manual_hint)+'</div>':'')+'</div>';
+    }).join(''):'<p>수동 지표가 없습니다(data/indicators.json 에 source=manual 없음)</p>';
+    if(want){ var el=document.getElementById('c-'+want); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); }
+  }).catch(function(e){ document.getElementById('list').innerHTML='<p style="color:#991b1b">읽기 실패: '+esc(e.message)+'</p>'; });
+
+  function build(){
+    var items={}; var bad=[];
+    IND.forEach(function(it){
+      var v=document.querySelector('input[data-id="'+it.id+'"][data-k="value"]').value.trim();
+      var a=document.querySelector('input[data-id="'+it.id+'"][data-k="as_of"]').value.trim();
+      var p=document.querySelector('input[data-id="'+it.id+'"][data-k="published"]').value.trim();
+      if(!v&&!a) return;                                         // 비운 지표는 파일에서도 뺀다(= 값 없음)
+      if(isNaN(parseFloat(v))||!/^\d{4}-\d{2}(-\d{2})?$/.test(a)) { bad.push(it.name); return; }
+      items[it.id]={value:parseFloat(v),as_of:a,published:p,entered:new Date(Date.now()+9*3600*1000).toISOString().slice(0,16).replace('T',' ')+' KST'};
+    });
+    var out={schema:'manual_macro/1',_설명:CUR._설명||'자동 출처가 없는 지표(ISM PMI·중국 PMI 등)를 손으로 적는 곳. id 는 data/indicators.json 의 id. as_of=기준월/일, published=발표일. 값은 공식 발표치만(철칙 3).',items:items};
+    document.getElementById('json').value=JSON.stringify(out,null,2);
+    var m=document.getElementById('msg'); m.hidden=false; m.textContent=(Object.keys(items).length+'개 지표 담김. ')+(bad.length?'입력 형식 틀림(뺌): '+bad.join(', '):'복사 → GitHub 에서 열기 → 전체 선택(Ctrl+A) → 붙여넣기 → Commit changes');
+    return out;
+  }
+  document.getElementById('make').onclick=build;
+  document.getElementById('copy').onclick=function(){ if(!document.getElementById('json').value) build(); var t=document.getElementById('json').value; (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){ document.getElementById('msg').textContent='복사됨 — GitHub 에서 열기 → Ctrl+A → Ctrl+V → Commit changes'; },function(){ document.getElementById('json').select(); document.execCommand('copy'); document.getElementById('msg').textContent='복사됨(구형 방식)'; }); };
+})();
+</script>
+</body>
+</html>

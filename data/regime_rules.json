@@ -1,49 +1,232 @@
 {
   "schema": "regime_rules/1",
-  "version": "v 20260907-1900",
+  "version": "v 20260907-2100",
   "_설명": "레짐 요약 규칙(원칙 8: 규칙은 설정 파일). 성장·물가·유동성 각각 신호 목록 → 가중 합계 → 판정. kind: level(값이 hi 이상 +1 / lo 이하 −1) · trend(N일 변화율 pct 이상 +1 / 이하 −1, facts/macro_history.json) · direction(전기 대비 오르면 +1, 내리면 −1, 같으면 0). sign=-1 이면 부호 뒤집음(예: 유동성에서 금리↑는 긴축=+1 이므로 그대로, 금리↓는 −1). 신뢰: official 신호가 need_official 개 이상 값이 있으면 '확인', 참고 신호만 있으면 '추정', 아무 값도 없으면 '판단 불가'. 숫자 기준값은 전부 Claude 초안(추정) — 달님 판별 후 확정",
   "growth": {
     "name": "성장",
-    "labels": {"up": "확장", "flat": "혼조", "down": "둔화"},
+    "labels": {
+      "up": "확장",
+      "flat": "혼조",
+      "down": "둔화"
+    },
     "need_official": 1,
-    "cut": {"up": 1.5, "down": -1.5},
+    "cut": {
+      "up": 1.5,
+      "down": -1.5
+    },
     "signals": [
-      {"id": "ism_pmi",   "kind": "level",  "hi": 50,  "lo": 49.99, "weight": 2, "why": "미국 제조업 확장/수축 기준선 50"},
-      {"id": "china_pmi", "kind": "level",  "hi": 50,  "lo": 49.99, "weight": 1, "why": "중국 제조업 50 기준"},
-      {"id": "kospi",     "kind": "trend",  "days": 20, "pct": 2,   "weight": 1, "why": "코스피 20일 추세(±2%)"},
-      {"id": "sp500",     "kind": "trend",  "days": 20, "pct": 2,   "weight": 1, "why": "S&P 20일 추세(±2%)"},
-      {"id": "copper",    "kind": "trend",  "days": 20, "pct": 3,   "weight": 1, "why": "구리는 경기 선행(±3%)"},
-      {"id": "bdry",      "kind": "trend",  "days": 20, "pct": 5,   "weight": 1, "why": "해운 운임(±5%)"}
+      {
+        "id": "ism_pmi",
+        "kind": "level",
+        "hi": 50,
+        "lo": 49.99,
+        "weight": 2,
+        "why": "미국 제조업 확장/수축 기준선 50",
+        "basis_kind": "정의",
+        "basis": "ISM 공식 정의: 50 위 확장·아래 수축"
+      },
+      {
+        "id": "china_pmi",
+        "kind": "level",
+        "hi": 50,
+        "lo": 49.99,
+        "weight": 1,
+        "why": "중국 제조업 50 기준",
+        "basis_kind": "정의",
+        "basis": "NBS 공식 정의: 50 기준"
+      },
+      {
+        "id": "kr_lead",
+        "kind": "direction",
+        "weight": 2,
+        "why": "통계청 선행지수순환변동치 — 전월 대비 오르면 확장",
+        "basis_kind": "정의",
+        "basis": "선행지수는 방향이 정의 자체(상승=경기 확장 국면)"
+      },
+      {
+        "id": "kr_export_yoy",
+        "kind": "level",
+        "hi": 5,
+        "lo": 0,
+        "weight": 1,
+        "why": "수출금액 전년비 +5%↑ 확장 / 0%↓ 둔화",
+        "basis_kind": "추정",
+        "basis": "+5%는 명목 성장률 수준, 0% 아래는 역성장 — 이력 쌓이면 재검토"
+      },
+      {
+        "id": "kospi",
+        "kind": "trend",
+        "days": 20,
+        "pct": 2,
+        "weight": 1,
+        "why": "코스피 20일 추세(±2%)",
+        "basis_kind": "추정",
+        "basis": "20일 ±2% — 한 달 등락의 절반 수준. 이력 20일 쌓인 뒤 재검토"
+      },
+      {
+        "id": "sp500",
+        "kind": "trend",
+        "days": 20,
+        "pct": 2,
+        "weight": 1,
+        "why": "S&P 20일 추세(±2%)",
+        "basis_kind": "추정",
+        "basis": "20일 ±2% — 동일"
+      },
+      {
+        "id": "copper",
+        "kind": "trend",
+        "days": 20,
+        "pct": 3,
+        "weight": 1,
+        "why": "구리는 경기 선행(±3%)",
+        "basis_kind": "추정",
+        "basis": "구리는 변동이 커 ±3%"
+      },
+      {
+        "id": "bdry",
+        "kind": "trend",
+        "days": 20,
+        "pct": 5,
+        "weight": 1,
+        "why": "해운 운임(±5%)",
+        "basis_kind": "추정",
+        "basis": "운임은 더 커서 ±5%"
+      }
     ],
-    "flip": "PMI 가 50 을 넘나들거나, 코스피·S&P 20일 추세가 ±2% 를 벗어나면 판정이 바뀐다"
+    "flip": "선행지수가 전월 대비 꺾이거나 PMI 가 50 을 넘나들거나, 수출 전년비가 0% 아래로 가면 판정이 바뀐다"
   },
   "inflation": {
     "name": "물가",
-    "labels": {"up": "높음", "flat": "중립", "down": "낮음"},
+    "labels": {
+      "up": "높음",
+      "flat": "중립",
+      "down": "낮음"
+    },
     "need_official": 1,
-    "cut": {"up": 1.5, "down": -1.5},
+    "cut": {
+      "up": 1.5,
+      "down": -1.5
+    },
     "signals": [
-      {"id": "cpi_yoy",      "kind": "level", "hi": 3.0, "lo": 2.0, "weight": 2, "why": "미국 CPI 전년비 3%↑ 높음 / 2%↓ 낮음"},
-      {"id": "core_pce_yoy", "kind": "level", "hi": 3.0, "lo": 2.0, "weight": 2, "why": "연준이 보는 근원 PCE"},
-      {"id": "kr_cpi_yoy",   "kind": "level", "hi": 3.0, "lo": 2.0, "weight": 1, "why": "한국 CPI 전년비"}
+      {
+        "id": "cpi_yoy",
+        "kind": "level",
+        "hi": 3.0,
+        "lo": 2.0,
+        "weight": 2,
+        "why": "미국 CPI 전년비 3%↑ 높음 / 2%↓ 낮음",
+        "basis_kind": "관례",
+        "basis": "연준 목표 2% → 2% 이하 낮음, 3% 이상은 목표+1%p 로 명백히 높음"
+      },
+      {
+        "id": "core_pce_yoy",
+        "kind": "level",
+        "hi": 3.0,
+        "lo": 2.0,
+        "weight": 2,
+        "why": "연준이 보는 근원 PCE",
+        "basis_kind": "관례",
+        "basis": "연준이 실제로 보는 지표, 같은 2/3 기준"
+      },
+      {
+        "id": "kr_cpi_yoy",
+        "kind": "level",
+        "hi": 3.0,
+        "lo": 2.0,
+        "weight": 1,
+        "why": "한국 CPI 전년비",
+        "basis_kind": "관례",
+        "basis": "한은 목표 2% → 같은 기준"
+      }
     ],
-    "direction_from": ["cpi_yoy", "core_pce_yoy"],
+    "direction_from": [
+      "cpi_yoy",
+      "core_pce_yoy"
+    ],
     "flip": "CPI·근원 PCE 전년비가 3.0% 아래로 내려오면 중립, 2.0% 아래면 낮음"
   },
   "liquidity": {
     "name": "유동성",
-    "labels": {"up": "긴축적", "flat": "중립", "down": "완화적"},
+    "labels": {
+      "up": "긴축적",
+      "flat": "중립",
+      "down": "완화적"
+    },
     "need_official": 1,
-    "cut": {"up": 1.5, "down": -1.5},
+    "cut": {
+      "up": 1.5,
+      "down": -1.5
+    },
     "signals": [
-      {"id": "fedfunds",      "kind": "direction", "weight": 2, "why": "연준 금리 방향(오르면 긴축)"},
-      {"id": "bok_rate",      "kind": "direction", "weight": 2, "why": "한은 기준금리 방향"},
-      {"id": "credit_spread", "kind": "level", "hi": 0.6, "lo": 0.4, "weight": 2, "why": "신용 스프레드 0.6%p↑ 돈이 마름"},
-      {"id": "dxy",           "kind": "level", "hi": 104, "lo": 98,  "weight": 1, "why": "강달러=신흥국 유동성 빠짐"},
-      {"id": "m2",            "kind": "trend", "days": 30, "pct": 0.5, "weight": 1, "sign": -1, "why": "미 M2 늘면 완화"},
-      {"id": "fed_bs",        "kind": "trend", "days": 30, "pct": 0.5, "weight": 1, "sign": -1, "why": "연준 자산 늘면 완화(QT 면 긴축)"}
+      {
+        "id": "fedfunds",
+        "kind": "direction",
+        "weight": 2,
+        "why": "연준 금리 방향(오르면 긴축)",
+        "basis_kind": "정의",
+        "basis": "전월 대비 오르면 인상=긴축, 내리면 인하=완화, 같으면 동결"
+      },
+      {
+        "id": "bok_rate",
+        "kind": "direction",
+        "weight": 2,
+        "why": "한은 기준금리 방향",
+        "basis_kind": "정의",
+        "basis": "같음"
+      },
+      {
+        "id": "credit_spread",
+        "kind": "level",
+        "hi": 0.6,
+        "lo": 0.4,
+        "weight": 2,
+        "why": "신용 스프레드 0.6%p↑ 돈이 마름",
+        "basis_kind": "추정",
+        "basis": "AA-−국고3년. 평시 0.4~0.6%p 범위로 보고 0.6 위 긴축·0.4 아래 완화 — 이력 쌓이면 실측 평균으로 교체"
+      },
+      {
+        "id": "dxy",
+        "kind": "level",
+        "hi": 104,
+        "lo": 98,
+        "weight": 1,
+        "why": "강달러=신흥국 유동성 빠짐",
+        "basis_kind": "추정",
+        "basis": "104 위 강달러 부담, 98 아래 우호 — indicators.json 규칙과 동일"
+      },
+      {
+        "id": "m2",
+        "kind": "trend",
+        "days": 30,
+        "pct": 0.5,
+        "weight": 1,
+        "sign": -1,
+        "why": "미 M2 늘면 완화",
+        "basis_kind": "추정",
+        "basis": "30일 ±0.5% — 월간 통계라 이 정도가 유의미"
+      },
+      {
+        "id": "fed_bs",
+        "kind": "trend",
+        "days": 30,
+        "pct": 0.5,
+        "weight": 1,
+        "sign": -1,
+        "why": "연준 자산 늘면 완화(QT 면 긴축)",
+        "basis_kind": "추정",
+        "basis": "30일 ±0.5% — 동일"
+      }
     ],
     "flip": "연준·한은이 인하로 돌아서거나 신용 스프레드가 0.4%p 아래로 좁혀지면 완화 쪽"
   },
-  "quadrant_axes": {"growth": "growth", "inflation": "inflation"}
+  "quadrant_axes": {
+    "growth": "growth",
+    "inflation": "inflation"
+  },
+  "_판별": "2026-09-07 달님 위임으로 Claude 확정. 정의·관례 기반 7개(확정), 추정 8개(이력 20~30일 쌓인 뒤 실측으로 재검토). 점수 cut ±1.5 = 공식 신호 하나(×2)로는 안 넘고, 공식 하나 + 참고 하나 이상이어야 판정이 나오도록 한 값(추정)",
+  "review": {
+    "_설명": "추정 기준값 자동 재검토(regime.py 가 계산해 analysis/regime.json.review 에 넣음). trend 신호는 N일 변화율의 표준편차(1σ)를 제안값으로, level 추정 신호는 이력 25·75 백분위를 lo/hi 제안값으로. 이력이 min_days 미만이면 '이력 부족 N/M일'. 제안은 자동 반영하지 않음 — 달님이 규칙 파일을 고침",
+    "min_days": 20
+  }
 }

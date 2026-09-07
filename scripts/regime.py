@@ -1,4 +1,4 @@
-# v 20260907-1900  regime.py — 레짐 요약 계산. 읽기: data/regime_rules.json(규칙) · facts/macro.json(값) · facts/macro_history.json(추세) · data/axes.json(4분면 자산·메모)
+# v 20260907-2100  regime.py — 레짐 요약 계산. 읽기: data/regime_rules.json(규칙) · facts/macro.json(값) · facts/macro_history.json(추세) · data/axes.json(4분면 자산·메모)
 # 쓰기: analysis/regime.json(regime/1). 한 방향(원칙 10): facts → analysis. 근거 없으면 '판단 불가'(원칙 3). 숫자 기준은 규칙 파일에만(원칙 8).
 import json, os, sys, datetime as dt
 
@@ -34,7 +34,8 @@ def fmt(v):
 def read_signal(sg, rec, hist):
     """신호 하나 → {score(+1/0/-1/None), text, official, value, as_of}. None = 값 없음"""
     out = {"id": sg["id"], "name": (rec or {}).get("name", sg["id"]), "why": sg.get("why", ""), "weight": sg.get("weight", 1),
-           "official": bool((rec or {}).get("official")), "value": None, "as_of": "", "score": None, "read": "값 없음", "unit": (rec or {}).get("unit", "")}
+           "official": bool((rec or {}).get("official")), "value": None, "as_of": "", "score": None, "read": "값 없음", "unit": (rec or {}).get("unit", ""),
+           "cycle": (rec or {}).get("cycle", ""), "collected_at": (rec or {}).get("collected_at", "")}
     if not rec or rec.get("value") is None: return out
     v, out["value"], out["as_of"] = rec["value"], rec["value"], rec.get("as_of", "")
     k, s = sg["kind"], 0
@@ -77,6 +78,51 @@ def judge_block(rule, recs, hist):
             "signals": sigs, "used": len(have), "official_used": n_off, "flip": rule.get("flip", ""),
             "reason": " · ".join(f"{s['name']} {s['read']}" for s in have) if have else "쓸 수 있는 값이 없음"}
 
+def pct_changes(hist_days, iid, days):
+    """이력에서 N일 간격 변화율 표본(%). 재검토용"""
+    ks = sorted(k for k, v in hist_days.items() if isinstance(v, dict) and v.get(iid) is not None)
+    out = []
+    for i, k in enumerate(ks):
+        d0 = dt.date.fromisoformat(k)
+        for j in range(i - 1, -1, -1):
+            if (d0 - dt.date.fromisoformat(ks[j])).days >= days:
+                b = hist_days[ks[j]][iid]
+                if b: out.append((hist_days[k][iid] - b) / b * 100)
+                break
+    return out, ((dt.date.fromisoformat(ks[-1]) - dt.date.fromisoformat(ks[0])).days + 1 if ks else 0)
+
+def review(rules, hist):
+    """추정 기준값 자동 재검토: 제안만 하고 규칙은 안 바꾼다(달님 판별)."""
+    cfg = rules.get("review") or {}
+    if not cfg: return []
+    min_days = int(cfg.get("min_days", 20)); out = []
+    for k in ("growth", "inflation", "liquidity"):
+        for sg in rules[k]["signals"]:
+            if sg.get("basis_kind") != "추정": continue
+            row = {"block": rules[k]["name"], "id": sg["id"], "kind": sg["kind"], "current": "", "suggest": "", "sample": 0, "days": 0, "status": ""}
+            if sg["kind"] == "trend":
+                row["current"] = f"±{sg['pct']}% / {sg['days']}일"
+                xs, span = pct_changes(hist, sg["id"], sg["days"]); row["sample"], row["days"] = len(xs), span
+                if len(xs) < 5 or span < sg["days"] + min_days:
+                    row["status"] = f"이력 부족 {span}/{sg['days'] + min_days}일"; out.append(row); continue
+                m = sum(xs) / len(xs); sd = (sum((x - m) ** 2 for x in xs) / len(xs)) ** 0.5
+                row["suggest"] = f"±{round(sd, 1)}% (1σ, 표본 {len(xs)})"
+                row["status"] = "제안 있음" if abs(sd - sg["pct"]) >= 0.5 else "현행 유지(차이 0.5 미만)"
+            elif sg["kind"] == "level":
+                row["current"] = f"hi {sg['hi']} / lo {sg['lo']}"
+                ks = sorted(k2 for k2, v in hist.items() if isinstance(v, dict) and v.get(sg["id"]) is not None)
+                vals = sorted(hist[k2][sg["id"]] for k2 in ks); row["sample"] = len(vals)
+                row["days"] = (dt.date.fromisoformat(ks[-1]) - dt.date.fromisoformat(ks[0])).days + 1 if ks else 0
+                if len(vals) < min_days:
+                    row["status"] = f"이력 부족 {len(vals)}/{min_days}일"; out.append(row); continue
+                q = lambda p: vals[min(len(vals) - 1, int(p * len(vals)))]
+                row["suggest"] = f"hi {round(q(0.75), 2)} / lo {round(q(0.25), 2)} (25·75 백분위)"
+                row["status"] = "제안 있음"
+            else:
+                row["current"] = "방향"; row["status"] = "재검토 대상 아님"
+            out.append(row)
+    return out
+
 def run():
     rules = load(P("data", "regime_rules.json"), None)
     if not rules or rules.get("schema") != "regime_rules/1": raise SystemExit("data/regime_rules.json 규격 아님")
@@ -100,8 +146,8 @@ def run():
         if not ik and i["verdict"] != "판단 불가": near.append(f"물가 점수 {i['score']:+.1f}")
         quad = {"name": "보류", "assets": "", "confidence": "판단 불가", "note": " · ".join(miss) + " 이 혼조/중립이라 4분면을 정하지 않음. " + " · ".join(near)}
     ok_n = sum(1 for b in (g, i, l) if b["verdict"] != "판단 불가")
-    out = {"schema": "regime/1", "version": "v 20260907-1900", "computed_at": kst_iso(), "macro_collected_at": macro.get("collected_at", ""),
-           "growth": g, "inflation": i, "liquidity": l, "quadrant": quad,
+    out = {"schema": "regime/1", "version": "v 20260907-2100", "computed_at": kst_iso(), "macro_collected_at": macro.get("collected_at", ""),
+           "growth": g, "inflation": i, "liquidity": l, "quadrant": quad, "review": review(rules, hist),
            "one_line": f"성장 {g['verdict']}({g['confidence']}) · 물가 {i['verdict']}{('·' + i['direction']) if i['direction'] else ''}({i['confidence']}) · 유동성 {l['verdict']}({l['confidence']}) → 4분면 {quad['name']}" + (f" → {quad['assets']} 우위" if quad["assets"] else ""),
            "memo": {"text": (axes.get("regime") or {}).get("quadrant", ""), "basis": (axes.get("regime") or {}).get("basis", ""), "as_of": (axes.get("regime") or {}).get("as_of", ""), "_tag": "축 문장(수동, Claude 초안) — 위 자동 판정과 다르면 달님이 판별"},
            "_정직": "숫자 기준값은 data/regime_rules.json 의 Claude 초안(추정). 신호 값이 없으면 그 신호는 빼고 계산하며, 공식 신호가 하나도 없으면 '추정', 아무 값도 없으면 '판단 불가'"}
