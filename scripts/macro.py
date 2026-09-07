@@ -1,4 +1,4 @@
-# v 20260907-1540  macro.py — CYGNUS 정적판의 수집기. data/indicators.json 을 읽어 FRED(공식)·ECOS(공식, ECOS_KEY)·Yahoo(보조) 값을 모은다. derive=yoy 는 12개월 전 대비 %.
+# v 20260907-1740  macro.py — CYGNUS 정적판의 수집기. data/indicators.json 을 읽어 FRED(공식)·ECOS(공식, ECOS_KEY)·Yahoo(보조) 값을 모은다. derive=yoy 는 12개월 전 대비 %. derived=차이 파생(신용 스프레드). key_stats=ECOS 100대 지표 한 판(facts/kr_key.json).
 # 쓰기: facts/macro.json(최신), facts/macro_history.json(일별 누적), data/status.json(job macro)
 # 규칙: 시각 3칸(as_of=시장 기준일, published=출처 발표 시각(모르면 빈칸), collected_at=수집 KST). 실패한 지표는 값 대신 error 를 남긴다(조용한 실패 금지).
 import json, os, sys, csv, io, datetime as dt, urllib.request, urllib.parse
@@ -64,7 +64,7 @@ def fetch_yahoo_relay(symbol, relay):
     rows.append((today, float(price)))
     return rows
 
-def fetch_ecos(ecos):
+def fetch_ecos(ecos, relay=""):
     """한국은행 ECOS OpenAPI(무료 키, GitHub Secret ECOS_KEY). ecos={stat,item,cycle(M|D|A)}. 응답 row[].TIME/DATA_VALUE.
     반환 [(YYYY-MM-DD|YYYY-MM, value)] 최근 20개. 키 없거나 코드 틀리면 예외(조용한 실패 금지)."""
     key = os.environ.get("ECOS_KEY", "").strip()
@@ -73,7 +73,10 @@ def fetch_ecos(ecos):
     fmt = {"D": "%Y%m%d", "M": "%Y%m", "A": "%Y"}[cyc]
     start = (now - dt.timedelta(days={"D": 60, "M": 800, "A": 3650}[cyc])).strftime(fmt); end = now.strftime(fmt)
     url = f"https://ecos.bok.or.kr/api/StatisticSearch/{key}/json/kr/1/100/{ecos['stat']}/{cyc}/{start}/{end}/{ecos['item']}"
-    d = json.loads(urllib.request.urlopen(url, timeout=25).read().decode("utf-8", "replace"))
+    if relay:                                                             # GitHub(미국 IP)는 ecos.bok.or.kr 에 직접 못 붙음(2026-09-07 timeout 확인) → 중계서버 경유
+        url = relay.rstrip("/") + "/?url=" + urllib.parse.quote(url, safe="")
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (macro)"})
+    d = json.loads(urllib.request.urlopen(req, timeout=40).read().decode("utf-8", "replace"))
     if "RESULT" in d: raise RuntimeError("ECOS: " + str(d["RESULT"].get("MESSAGE", d["RESULT"]))[:120])
     rows = []
     for r in d.get("StatisticSearch", {}).get("row", []):
@@ -137,7 +140,7 @@ def run(fetch_map=None, manual=None):
                 if not os.environ.get("ECOS_KEY", "").strip() and ind.get("optional"):
                     rec["pending"] = True                                 # 키 없음 = 미설정(경고 띠 아님, 화면엔 '미설정')
                 else:
-                    rows = fetch_ecos(ind["ecos"])
+                    rows = fetch_ecos(ind["ecos"], cfg.get("relay", ""))
             else:
                 rows = fetch_map[ind["source"]](ind["symbol"])
                 if len(rows) < 1: raise RuntimeError("데이터 없음")
@@ -153,14 +156,46 @@ def run(fetch_map=None, manual=None):
         except Exception as e:
             rec["error"] = f"{type(e).__name__}: {e}"[:200]; errors.append(f"{ind['id']}: {rec['error']}")
         out.append(rec)
-    # 파생: 장단기차(10y-2y)
+    # 파생(설정 data/indicators.json.derived): a−b 차이. 예: 신용 스프레드 AA-−국고3년
     v = {r["id"]: r for r in out}
+    for dv in cfg.get("derived", []):
+        a, b = v.get(dv["a"], {}), v.get(dv["b"], {})
+        rec = {"id": dv["id"], "name": dv["name"], "unit": dv.get("unit", "%p"), "axis": dv["axis"], "source": "derived", "symbol": f"{dv['a']}-{dv['b']}",
+               "official": dv.get("official", True), "rule": dv.get("rule", ""), "value": None, "prev": None, "change_pct": None, "as_of": "", "published": "",
+               "collected_at": kst_iso(), "judge": "", "error": "", "pending": False}
+        if a.get("value") is not None and b.get("value") is not None:
+            rec["value"] = round(a["value"] - b["value"], 3); rec["as_of"] = a.get("as_of", "")
+            if a.get("prev") is not None and b.get("prev") is not None: rec["prev"] = round(a["prev"] - b["prev"], 3)
+            rec["judge"] = judge(dv, rec["value"], None)
+        else:
+            rec["error"] = f"재료 없음({dv['a']} 또는 {dv['b']})"; errors.append(f"{dv['id']}: {rec['error']}")
+        out.append(rec)
     if v.get("us10y", {}).get("value") is not None and v.get("us2y", {}).get("value") is not None:
         out.append({"id": "spread_10_2", "name": "장단기차 10y−2y", "unit": "%p", "axis": "bond_curve", "source": "derived", "symbol": "DGS10-DGS2",
                     "official": True, "rule": "0 아래=역전", "value": round(v["us10y"]["value"] - v["us2y"]["value"], 3), "prev": None, "change_pct": None,
                     "as_of": v["us10y"]["as_of"], "published": "", "collected_at": kst_iso(), "judge": "역전" if v["us10y"]["value"] < v["us2y"]["value"] else "정상", "error": ""})
+    # 한국 경제 한 판: ECOS 100대 통계지표 1회 호출 → facts/kr_key.json (판정 없음, 참고표). 실패해도 축 수집은 계속
+    ks = cfg.get("key_stats") or {}
+    if ks.get("enabled"):
+        try:
+            key = os.environ.get("ECOS_KEY", "").strip()
+            if not key: raise RuntimeError("ECOS_KEY 없음")
+            url = f"https://ecos.bok.or.kr/api/KeyStatisticList/{key}/json/kr/1/200"
+            relay = cfg.get("relay", "")
+            if relay: url = relay.rstrip("/") + "/?url=" + urllib.parse.quote(url, safe="")
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (macro)"})
+            kd = json.loads(urllib.request.urlopen(req, timeout=40).read().decode("utf-8", "replace"))
+            if "RESULT" in kd: raise RuntimeError("ECOS: " + str(kd["RESULT"].get("MESSAGE", ""))[:120])
+            rows = kd.get("KeyStatisticList", {}).get("row", [])
+            if not rows: raise RuntimeError("KeyStatisticList 비어 있음")
+            items_k = [{"class": r.get("CLASS_NAME", ""), "name": r.get("KEYSTAT_NAME", ""), "value": r.get("DATA_VALUE", ""), "as_of": r.get("CYCLE", ""), "unit": r.get("UNIT_NAME", "")} for r in rows]
+            save(P(ks.get("file", "facts/kr_key.json").split("/")[0], *ks.get("file", "facts/kr_key.json").split("/")[1:]),
+                 {"schema": "kr_key/1", "source": "ECOS KeyStatisticList(100대 통계지표)", "collected_at": kst_iso(), "count": len(items_k), "items": items_k})
+            print(f"한국 경제 한 판 {len(items_k)}개 저장")
+        except Exception as e:
+            errors.append(f"kr_key: {type(e).__name__}: {e}"[:200])
     ok = sum(1 for r in out if r["value"] is not None)
-    save(P("facts", "macro.json"), {"schema": "macro/1", "version": "v 20260907-1540", "collected_at": kst_iso(), "ok": ok, "total": len(out), "items": out})
+    save(P("facts", "macro.json"), {"schema": "macro/1", "version": "v 20260907-1740", "collected_at": kst_iso(), "ok": ok, "total": len(out), "items": out})
     # 이력: 날짜(KST) 키로 값만
     hist = load(P("facts", "macro_history.json"), {"schema": "macro_history/1", "days": {}})
     today = kst_now().date().isoformat()

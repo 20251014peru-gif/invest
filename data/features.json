@@ -202,7 +202,20 @@
       "source": "data/axes.json + facts/macro.json",
       "manual": "축 이름을 누르면 6단계 전문·지표 실측(30일 추이)·출처 링크·읽는 법이 한 창에. 주소 #축id 로 바로 열림. 인쇄 버튼은 읽기창만 A4 로",
       "_tag": "Claude 초안(추정) — 달님 판별 후 확정"
+    },
+    "cygnus.krkey": {
+      "title": "한국 경제 한 판",
+      "tip": "한국은행 100대 통계지표를 판정 없이 그대로 — 가끔 확인하는 값",
+      "source": "facts/kr_key.json",
+      "manual": "한국은행 KeyStatisticList(100대 통계지표)를 매크로 수집 때 1회 받아 저장. 축 판정에는 쓰지 않고 성장률·경상수지·고용·통화량 같은 값을 접이식에서 확인. 값이 없으면 칸 자체가 숨겨짐"
+    },
+    "axes.credit_spread": {
+      "title": "신용 스프레드",
+      "tip": "회사채 AA- 3년 − 국고채 3년. 0.6%p↑ 주의, 1.0%p↑ 위험(기준 추정)",
+      "source": "facts/macro.json derived",
+      "manual": "돈이 마르는지 보는 지표. 회사채(AA-)와 국고채(3년) 금리 차이가 벌어지면 기업 조달이 어려워진다는 뜻 → 축⑥ 신용·변동성의 변화 조건. 기준값 0.6/1.0%p 는 Claude 추정 — 달님 판별",
+      "_tag": "Claude 초안(추정)"
     }
   },
-  "version": "v 20260907-1600"
+  "version": "v 20260907-1740"
 }

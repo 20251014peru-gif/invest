@@ -1,6 +1,6 @@
 {
   "schema": "indicators/1",
-  "version": "v 20260907-1540",
+  "version": "v 20260907-1740",
   "_설명": "대변화 축 지표. 시세류(yahoo 필드 있음)는 중계서버 경유 야후 실시간(GitHub 서버에서), 경제지표는 FRED, 없는 건 manual. relay=Cloudflare Worker. ecos=한국은행 OpenAPI(ECOS_KEY). derive=yoy 는 월간 지수를 전년동월비 %로.",
   "history_days": 400,
   "items": [
@@ -75,8 +75,8 @@
     {
       "id": "usdkrw",
       "name": "원달러 환율",
-      "source": "yahoo_relay",
-      "symbol": "DEXKOUS",
+      "source": "ecos",
+      "symbol": "731Y001/0000001",
       "unit": "원",
       "axis": "fx_liquidity",
       "official": true,
@@ -85,9 +85,13 @@
         "good_max": 1430,
         "bad_min": 1480
       },
-      "note": "중계서버 경유 야후 실시간. 실패 시 FRED 예비(있으면)",
+      "note": "ECOS 원/미국달러 매매기준율(전 영업일, 공식) — 2026-09-07 확인. 실시간은 cygnus 화면의 야후(yahoo 필드) 줄이 담당",
       "yahoo": "KRW=X",
-      "fred_fallback": "DEXKOUS"
+      "ecos": {
+        "stat": "731Y001",
+        "item": "0000001",
+        "cycle": "D"
+      }
     },
     {
       "id": "dxy",
@@ -300,14 +304,19 @@
     {
       "id": "kr10y",
       "name": "한국 국고채 10년",
-      "source": "fred",
-      "symbol": "IRLTLT01KRM156N",
+      "source": "ecos",
+      "symbol": "817Y002/010210000",
       "unit": "%",
       "axis": "bond_curve",
       "official": true,
       "rule": "방향만(미10년과 같이 움직이는지)",
       "thresholds": {},
-      "note": "OECD 경유 FRED 월간 — 2~3개월 지연(확인 2026-09-07: 최신 2026-06 = 4.181). 빠른 값은 ECOS kr3y 로"
+      "note": "ECOS 시장금리(일별) 국고채(10년) — 2026-09-07 중계 경유 확인. FRED 월간(IRLTLT01KRM156N, 3개월 지연)에서 교체",
+      "ecos": {
+        "stat": "817Y002",
+        "item": "010210000",
+        "cycle": "D"
+      }
     },
     {
       "id": "bok_rate",
@@ -325,7 +334,7 @@
       "optional": true,
       "rule": "방향만(인상·동결·인하)",
       "thresholds": {},
-      "note": "ECOS_KEY Secret 필요(무료 발급 ecos.bok.or.kr). 통계표 722Y001·항목 0101000 은 미확인 — 키 넣은 첫 실행에서 검증, 틀리면 error 로 표시"
+      "note": "ECOS_KEY Secret 필요. 통계표 722Y001·항목 0101000 = 한국은행 기준금리(월) — 2026-09-07 중계서버 경유로 확인. GitHub 서버는 ECOS 직접 접속 불가라 relay 경유"
     },
     {
       "id": "kr3y",
@@ -343,8 +352,127 @@
       "optional": true,
       "rule": "방향만",
       "thresholds": {},
-      "note": "ECOS 일별 시장금리. 통계표 817Y002·항목 010200000 은 미확인 — 첫 실행에서 검증"
+      "note": "ECOS 시장금리(일별) 817Y002·항목 010200000 = 국고채(3년) — 2026-09-07 중계서버 경유로 확인"
+    },
+    {
+      "id": "kr_aa3",
+      "name": "회사채 AA- 3년",
+      "source": "ecos",
+      "symbol": "817Y002/010300000",
+      "ecos": {
+        "stat": "817Y002",
+        "item": "010300000",
+        "cycle": "D"
+      },
+      "unit": "%",
+      "axis": "credit_vol",
+      "official": true,
+      "rule": "국고3년과의 차이(신용 스프레드)로 본다",
+      "thresholds": {},
+      "note": "ECOS 시장금리(일별) 회사채(3년, AA-) — 2026-09-07 확인"
+    },
+    {
+      "id": "kr_bbb3",
+      "name": "회사채 BBB- 3년",
+      "source": "ecos",
+      "symbol": "817Y002/010320000",
+      "ecos": {
+        "stat": "817Y002",
+        "item": "010320000",
+        "cycle": "D"
+      },
+      "unit": "%",
+      "axis": "credit_vol",
+      "official": true,
+      "rule": "한계기업 조달금리. 급등=신용 스트레스",
+      "thresholds": {},
+      "note": "ECOS 시장금리(일별) 회사채(3년, BBB-) — 2026-09-07 확인"
+    },
+    {
+      "id": "kospi",
+      "name": "KOSPI",
+      "source": "ecos",
+      "symbol": "802Y001/0001000",
+      "ecos": {
+        "stat": "802Y001",
+        "item": "0001000",
+        "cycle": "D"
+      },
+      "unit": "pt",
+      "axis": "earnings",
+      "official": true,
+      "rule": "전일 대비 +1.5%=강 / −1.5%=약. 장세 판단·계좌 서킷브레이커 기준선",
+      "thresholds": {
+        "strong_pct": 1.5,
+        "weak_pct": -1.5
+      },
+      "note": "ECOS 주식시장(일) KOSPI지수 종가(전 영업일) — 2026-09-07 확인",
+      "yahoo": "^KS11"
+    },
+    {
+      "id": "kosdaq",
+      "name": "KOSDAQ",
+      "source": "ecos",
+      "symbol": "802Y001/0089000",
+      "ecos": {
+        "stat": "802Y001",
+        "item": "0089000",
+        "cycle": "D"
+      },
+      "unit": "pt",
+      "axis": "earnings",
+      "official": true,
+      "rule": "전일 대비 +2%=강 / −2%=약",
+      "thresholds": {
+        "strong_pct": 2,
+        "weak_pct": -2
+      },
+      "note": "ECOS 주식시장(일) KOSDAQ지수 종가 — 2026-09-07 확인",
+      "yahoo": "^KQ11"
+    },
+    {
+      "id": "kr_cpi_yoy",
+      "name": "한국 CPI 전년비",
+      "source": "ecos",
+      "symbol": "901Y009/0",
+      "ecos": {
+        "stat": "901Y009",
+        "item": "0",
+        "cycle": "M"
+      },
+      "derive": "yoy",
+      "unit": "%",
+      "axis": "inflation_growth",
+      "official": true,
+      "rule": "2.0 이하=우호 / 3.0 이상=부담 (기준값 추정 → 달님 판별)",
+      "thresholds": {
+        "good_max": 2.0,
+        "bad_min": 3.0
+      },
+      "note": "ECOS 소비자물가지수 총지수(2020=100, 월) → 전년동월비 계산 — 2026-09-07 확인"
     }
   ],
-  "relay": "https://wild-unit-3884dalnim-relay.20251014peru.workers.dev"
+  "relay": "https://wild-unit-3884dalnim-relay.20251014peru.workers.dev",
+  "key_stats": {
+    "enabled": true,
+    "file": "facts/kr_key.json",
+    "note": "ECOS KeyStatisticList(100대 통계지표) 1회 호출 → 판정 없이 참고표. cygnus '한국 경제 100' 접이식"
+  },
+  "derived": [
+    {
+      "id": "credit_spread",
+      "name": "신용 스프레드 AA-−국고3년",
+      "a": "kr_aa3",
+      "b": "kr3y",
+      "unit": "%p",
+      "axis": "credit_vol",
+      "official": true,
+      "rule": "0.6%p 이상=주의 / 1.0%p 이상=위험 (기준값 추정 → 달님 판별)",
+      "thresholds": {
+        "warn_min": 0.6,
+        "bad_min": 1.0,
+        "good_max": 0.5
+      }
+    }
+  ]
 }
