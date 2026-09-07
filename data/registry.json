@@ -188,14 +188,15 @@
       "name": "예측 입력·채점 보기",
       "file": "predict.html",
       "axis": "검증",
-      "status": "active",
+      "status": "stopped",
       "since": "2026-09-04",
       "reads": [
         "raw/predictions.json",
         "analysis/scores.json",
         "facts/source_trust.json"
       ],
-      "writes": []
+      "writes": [],
+      "note": "2026-09-07 예측 기능은 유튜브 요약 쪽으로 이관, 화면 중단"
     },
     {
       "id": "macro",
@@ -332,6 +333,47 @@
         "raw/report_log.json(수동)"
       ],
       "note": "분기 큰 틀 4 + 월간 4 + 자동 1. 화면: manual.html 보고서 탭, cygnus 보고서 함, 허브 확인 필요 칸"
+    },
+    {
+      "id": "journal",
+      "name": "투자일지",
+      "file": "journal.html",
+      "axis": "화면",
+      "status": "active",
+      "since": "2026-09-07",
+      "reads": [
+        "log/YYYY-MM-DD.json",
+        "log/index.json",
+        "analysis/calendar.json",
+        "Firestore invest_journal",
+        "Firestore invest_records"
+      ],
+      "writes": [
+        "Firestore invest_journal/<date>(+versions)",
+        "Firestore invest_records"
+      ],
+      "note": "문 하나(새 허브). 자동 초안은 scripts/journal.py(macro.yml). 옛 화면은 참고 서랍"
+    },
+    {
+      "id": "journal-draft",
+      "name": "일지 자동 초안",
+      "file": "scripts/journal.py",
+      "axis": "내용",
+      "status": "active",
+      "since": "2026-09-07",
+      "reads": [
+        "facts/macro.json",
+        "facts/macro_history.json",
+        "analysis/regime.json",
+        "analysis/calendar.json",
+        "raw/report_log.json",
+        "facts/dart.json",
+        "facts/board.json"
+      ],
+      "writes": [
+        "log/YYYY-MM-DD.json",
+        "log/index.json"
+      ]
     }
   ]
 }

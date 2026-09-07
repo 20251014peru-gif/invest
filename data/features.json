@@ -276,7 +276,13 @@
       "tip": "확인 필요 칸: 오늘 발표 · 미입력 보고서 · 값 없는 수동 지표 · 다가오는 발표 5개",
       "source": "analysis/calendar.json",
       "manual": "오늘 발표는 아침 ntfy 로도 옴(NTFY_TOPIC). 미입력 3일 넘으면 상단 띠에 경고. 발표일 규칙은 data/reports.json"
+    },
+    "journal.page": {
+      "title": "투자일지",
+      "tip": "하루 한 장: 위 결론 헤드라인+시장 상태 4칸, 아래 시간순 기록. 자동은 회색, 달님은 초록",
+      "source": "log/YYYY-MM-DD.json + Firestore invest_journal·invest_records",
+      "manual": "아침: 자동 초안(08:00)과 바뀐 지표를 보고 → 발표·근거글 확인 → 저녁: 「오늘 결론 쓰기」(강세/중립/약세/관망 + 헤드라인 + 근거 + 조건→행동 2줄) → 「오늘 보고서 뽑기」(인쇄). 기록 하나가 Firestore 문서 하나(주소가 카드 오른쪽에). 결론은 덮어쓰지 않고 versions 에 버전이 쌓임. 참고 자료(축·규칙·지표 사전·보고서 목록)는 참고 서랍"
     }
   },
-  "version": "v 20260907-2300"
+  "version": "v 20260907-2040"
 }
