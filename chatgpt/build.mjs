@@ -5,7 +5,7 @@ import {createHash} from 'node:crypto';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const read=f=>fs.readFileSync(path.join(root,f),'utf8');
 const release=JSON.parse(read('release.json'));
-const modules=['app.js','core.js','catalog.js','chart.js','storage.js','lens.js','ai.js'];
+const modules=['app.js','core.js','catalog.js','chart.js','storage.js','lens.js','ai.js','notebook.js'];
 const hash=createHash('sha256').update(modules.map(read).join('\n')+read('styles.css')).digest('hex').slice(0,12);
 const dir=path.join(root,'assets',hash);fs.mkdirSync(dir,{recursive:true});
 for(const name of modules)fs.writeFileSync(path.join(dir,name),read(name));
