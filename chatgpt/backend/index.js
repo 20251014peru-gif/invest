@@ -12,8 +12,9 @@ export const macroAi=onRequest({region:'asia-northeast3',cors:['https://20251014
  try{if(data.kind==='news'){const c=await cache.get();if(c.exists){res.json({...c.data(),cached:true});return;}}
  const day=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',dateStyle:'short'}).format(new Date()),quota=root.collection('aiUsage').doc(day);
  await db.runTransaction(async tx=>{const snap=await tx.get(quota),n=snap.data()?.requests||0;if(n>=30)throw Error('DAILY_LIMIT');tx.set(quota,{requests:n+1,updatedAt:new Date().toISOString()});});
- const response=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:'Bearer '+key.value(),'Content-Type':'application/json'},body:JSON.stringify(apiRequest(data,m)),signal:AbortSignal.timeout(80000)});
+ const response=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:'Bearer '+key.value().trim(),'Content-Type':'application/json'},body:JSON.stringify(apiRequest(data,m)),signal:AbortSignal.timeout(80000)});
  if(!response.ok){res.status(502).json({error:'OpenAI 응답 실패 · 키·사용 한도·모델 연결을 확인하세요. 자동 재시도하지 않았습니다.'});return;}
  const answer=parseAnswer(await response.json(),data),result={...answer,model:m,generatedAt:new Date().toISOString(),promptVersion:PROMPT_VERSION};if(data.kind==='news')await cache.set(result);res.json({...result,cached:false});
  }catch(e){res.status(e.message==='DAILY_LIMIT'?429:502).json({error:e.message==='DAILY_LIMIT'?'서울 날짜 기준 하루 30회 분석 상한에 도달했습니다.':'분석을 완료하지 못했습니다. 입력은 보존됩니다. 자동 재시도하지 않습니다.'});}
 });
+
