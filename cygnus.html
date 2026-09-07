@@ -1,4 +1,4 @@
-<!-- v 20260907-1900 (레짐 규칙 판정 카드, 지표 3묶음, KOSPI·KOSDAQ, ECOS, 한 판, 전일비 수정)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260907-2100 (기준일·수집시각·주기 표시, 고른 지표 12·수동입력 링크·레짐 규칙 판정 카드, 지표 3묶음, KOSPI·KOSDAQ, ECOS, 한 판, 전일비 수정)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -79,10 +79,14 @@
   <div id="indDetail"></div>
   <div class="grid" id="indGrid"></div>
   <p class="muted" id="macroEmpty" hidden>아직 수집된 값이 없습니다 — GitHub Actions 「Macro Collector」를 한 번 실행하면 채워집니다.</p>
-  <details id="krKey" style="margin-top:14px" hidden><summary style="cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center;gap:8px">🇰🇷 한국 경제 한 판 <span class="tag" id="krKeyTag"></span><span class="tag">한국은행 100대 통계지표 · 판정 없음 · 참고</span></summary>
-    <p class="muted" style="margin:6px 0">한국은행이 고른 100개 핵심 통계를 그대로 보여줍니다. 축 판정에는 안 쓰고, 성장률·경상수지·고용처럼 가끔 확인하는 값을 여기서 봅니다. 값 옆은 기준 시점(월·분기·일).</p>
-    <div id="krKeyBody"></div>
-  </details>
+  <div id="krKey" style="margin-top:16px" hidden>
+    <h2 style="margin-top:0">🇰🇷 한국 경제 — 고른 지표 <span class="tag" id="krKeyTag"></span><span class="tag">한국은행 100대 통계지표에서 고름 · 뜻·변화·때 · 판정 없음</span></h2>
+    <p class="muted" style="margin:-4px 0 8px">새 값이 나온 지표가 <b>위로</b> 오고 <b>NEW</b> 가 붙습니다(14일). 카드의 "오르면 →" 는 투자에서 어떻게 읽는지 한 줄(Claude 초안). 고르는 목록은 data/indicators.json 의 key_stats.pick.</p>
+    <div class="grid" id="krPick" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))"></div>
+    <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center;gap:8px">전부 보기 — 100대 통계지표 <span class="tag" id="krAllTag"></span></summary>
+      <div id="krKeyBody" style="margin-top:8px"></div>
+    </details>
+  </div>
 
   </section>
   <section class="tabpanel" data-tab="sector" hidden>
@@ -170,11 +174,11 @@
   </section>
 
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260907-1900"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260907-2100"></script>
 <script src="js/regime.js"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260907-1900';
+  document.getElementById('ver').textContent='v 20260907-2100';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -212,20 +216,21 @@
     el.innerHTML+='<div class="k" style="border-color:#93c5fd"><div class="n"><span>'+esc(name)+'</span><span style="color:#15803d">실시간</span></div><div class="v">'+(Math.abs(val)>=1000?val.toLocaleString('ko-KR',{maximumFractionDigits:0}):val.toLocaleString('ko-KR',{maximumFractionDigits:2}))+'<small>'+esc(unit)+'</small></div><div class="c">'+c+'</div><div class="src">'+esc(when)+'</div></div>';
   }
   function sma(a,n){ if(!a||a.length<n) return null; var s=0,i; for(i=a.length-n;i<a.length;i++) s+=a[i]; return s/n; }
-  function yahooHist(sym){ return pxJson('https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?range=6mo&interval=1d').then(function(d){ var r=d.chart.result[0], m=r.meta||{}, q=(r.indicators&&r.indicators.quote&&r.indicators.quote[0])||{}; var O=q.open||[],H=q.high||[],L=q.low||[],C=q.close||[]; var cl=[],oh=[]; for(var i=0;i<C.length;i++){ if(C[i]!=null){ cl.push(C[i]); oh.push({o:O[i],h:H[i],l:L[i],c:C[i]}); } } var px=(m.regularMarketPrice!=null?m.regularMarketPrice:(cl.length?cl[cl.length-1]:null)); /* 전일비: 6mo 조회의 chartPreviousClose 는 6개월 전 값이라 쓰면 안 됨(2026-09-07 버그). 마지막 봉이 오늘(=현재가)이면 그 앞 봉, 아니면 마지막 봉이 전일 종가 */ var pv=null; if(cl.length>=2){ pv=(px!=null&&Math.abs(cl[cl.length-1]-px)<1e-9)?cl[cl.length-2]:cl[cl.length-1]; } else if(cl.length===1){ pv=cl[0]; } return {closes:cl, ohlc:oh, price:px, chg:(pv&&px!=null)?(px-pv)/pv*100:null}; }); }
+  function yahooHist(sym){ return pxJson('https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?range=6mo&interval=1d').then(function(d){ var r=d.chart.result[0], m=r.meta||{}, q=(r.indicators&&r.indicators.quote&&r.indicators.quote[0])||{}; var O=q.open||[],H=q.high||[],L=q.low||[],C=q.close||[]; var cl=[],oh=[]; for(var i=0;i<C.length;i++){ if(C[i]!=null){ cl.push(C[i]); oh.push({o:O[i],h:H[i],l:L[i],c:C[i]}); } } var px=(m.regularMarketPrice!=null?m.regularMarketPrice:(cl.length?cl[cl.length-1]:null)); /* 전일비: 6mo 조회의 chartPreviousClose 는 6개월 전 값이라 쓰면 안 됨(2026-09-07 버그). 마지막 봉이 오늘(=현재가)이면 그 앞 봉, 아니면 마지막 봉이 전일 종가 */ var pv=null; if(cl.length>=2){ pv=(px!=null&&Math.abs(cl[cl.length-1]-px)<1e-9)?cl[cl.length-2]:cl[cl.length-1]; } else if(cl.length===1){ pv=cl[0]; } return {closes:cl, ohlc:oh, price:px, time:m.regularMarketTime||null, chg:(pv&&px!=null)?(px-pv)/pv*100:null}; }); }
   function alignEmoji(price,closes){ var m20=sma(closes,20), m50=sma(closes,50); if(m20==null||price==null) return ''; return (m50!=null)?((price>m20&&m20>m50)?'🟢':(price<m20&&m20<m50)?'🔴':'🟡'):'🟡'; }
   function srcLink(it){ if(it.yahoo) return {u:'https://finance.yahoo.com/quote/'+encodeURIComponent(it.yahoo),t:'Yahoo Finance ↗'}; var fid=it.fred||it.fred_fallback||it.symbol; if(it.source==='fred'&&fid) return {u:'https://fred.stlouisfed.org/series/'+encodeURIComponent(fid),t:'FRED ↗'}; if(it.source==='ecos') return {u:'https://ecos.bok.or.kr/',t:'한국은행 ECOS ↗'}; return null; }
-  var IND=[], MV={};
+  var IND=[], MV={}, CYCLES={D:'일간',W:'주간',M:'월간',Q:'분기',A:'연간'};
   function indCardHTML(it,i){
     var m=MV[it.id]||{}; var val=m.value;
     var vstr=(val==null)?'<span style="font-size:14px;color:var(--sub);font-weight:400">'+(it.yahoo?'실시간 대기…':'값 없음')+'</span>':fmt(val)+'<small>'+esc(it.unit||m.unit||'')+'</small>';
-    var badge=it.yahoo?'<span style="color:#15803d">실시간</span>':'<span>'+(it.source==='fred'?'FRED':it.source==='ecos'?'한국은행':it.source==='derived'?'파생':it.source==='manual'?'수동':'')+'</span>';
-    return '<div class="k ind-card" data-i="'+i+'" style="cursor:pointer;border-color:'+(it.yahoo?'#93c5fd':'#e5e7eb')+'" title="누르면 20·50일선 위치·링크"><div class="n"><span>'+esc(it.name)+' <b id="inddot'+i+'" title="🟢 정배열(상승추세) · 🔴 역배열(하락) · 🟡 혼조"></b></span>'+badge+'</div><div class="v" id="indv'+i+'">'+vstr+'</div><div class="c" id="indc'+i+'"></div><div class="src">누르기 ▸ 20·50일선</div></div>';
+    var badge=it.yahoo?'<span style="color:#15803d">실시간</span>':(it.source==='manual'?'<a href="manual.html#'+esc(it.id)+'" style="color:#b45309;font-weight:600" onclick="event.stopPropagation()">수동 입력 →</a>':'<span>'+(it.source==='fred'?'FRED':it.source==='ecos'?'한국은행':it.source==='derived'?'파생':'')+'</span>');
+    var cyc=CYCLES[it.cycle||m.cycle]||'', when=(val==null)?'':('기준 '+esc(m.as_of||'')+(m.collected_at?' · 수집 '+esc(String(m.collected_at).slice(5,16).replace('T',' ')):'')+(cyc?' · '+cyc:''));
+    return '<div class="k ind-card" data-i="'+i+'" style="cursor:pointer;border-color:'+(it.yahoo?'#93c5fd':'#e5e7eb')+'" title="누르면 20·50일선 위치·링크"><div class="n"><span>'+esc(it.name)+' <b id="inddot'+i+'" title="🟢 정배열(상승추세) · 🔴 역배열(하락) · 🟡 혼조"></b></span>'+badge+'</div><div class="v" id="indv'+i+'">'+vstr+'</div><div class="c" id="indc'+i+'"></div><div class="src" id="indw'+i+'">'+(when||(it.yahoo?'실시간 대기…':'값 없음'))+'</div></div>';
   }
   function loadInd(){
     Promise.all([ get('data/indicators.json').catch(function(){return {items:[]};}), get('facts/macro.json').catch(function(){return {items:[]};}) ]).then(function(res){
       // 카드 목록 = indicators.json items + derived(장단기차·신용 스프레드 — macro.json 에만 값이 있음)
-      IND=(res[0].items||[]).concat((res[0].derived||[]).map(function(dv){ return {id:dv.id,name:dv.name,unit:dv.unit,axis:dv.axis,source:'derived',symbol:'',official:true,rule:dv.rule,group:dv.group||'kr'}; }));
+      IND=(res[0].items||[]).concat((res[0].derived||[]).map(function(dv){ return {id:dv.id,name:dv.name,unit:dv.unit,axis:dv.axis,source:'derived',symbol:'',official:true,rule:dv.rule,group:dv.group||'kr',cycle:dv.cycle||'D'}; }));
       var spread=(res[1].items||[]).filter(function(m){return m.id==='spread_10_2'})[0]; if(spread&&!IND.some(function(i){return i.id==='spread_10_2'})) IND.push({id:'spread_10_2',name:spread.name,unit:spread.unit,axis:spread.axis,source:'derived',symbol:'',official:true,rule:spread.rule,group:'us'});
       MV={}; (res[1].items||[]).forEach(function(m){ MV[m.id||m.name]=m; });
       var g=document.getElementById('indGrid'); if(!g)return;
@@ -242,6 +247,7 @@
         if(v&&h.price!=null) v.innerHTML=fmt(h.price)+'<small>'+esc(it.unit||'')+'</small>';
         if(c&&h.chg!=null) c.innerHTML='<span class="'+(h.chg>0?'up':h.chg<0?'down':'')+'">'+(h.chg>0?'▲':h.chg<0?'▼':'')+' '+Math.abs(h.chg).toFixed(2)+'%</span> <small class="muted">전일비</small>';
         if(dt) dt.textContent=alignEmoji(h.price,h.closes);
+        var wEl=document.getElementById('indw'+i); if(wEl){ var ts=h.time?new Date(h.time*1000+9*3600*1000).toISOString().slice(5,16).replace('T',' '):''; wEl.innerHTML='<b style="color:#15803d">실시간</b> '+(ts?esc(ts)+' KST':'시각 없음')+' · 야후 · '+(CYCLES[it.cycle]||'일간')+(MV[it.id]&&MV[it.id].as_of?' <span style="color:var(--sub)">(자동수집 기준 '+esc(MV[it.id].as_of)+')</span>':''); }
       }).catch(function(){}); });
     });
   }
@@ -286,16 +292,30 @@
     return legend+svg+tbl+note;
   }
   loadInd();
-  // 한국 경제 한 판: facts/kr_key.json (ECOS KeyStatisticList). 없으면 접이식 자체를 숨김(노션식)
-  get('facts/kr_key.json').then(function(k){
-    var box=document.getElementById('krKey'), body=document.getElementById('krKeyBody'); if(!box||!k||!(k.items||[]).length) return;
-    var groups={}; (k.items||[]).forEach(function(r){ (groups[r['class']||'기타']=groups[r['class']||'기타']||[]).push(r); });
+  // 한국 경제 — 고른 지표(key_stats.pick) + 전부 보기: facts/kr_key.json (ECOS KeyStatisticList). 파일 없으면 구역 자체를 숨김(노션식)
+  Promise.all([get('facts/kr_key.json'), get('data/indicators.json').catch(function(){return {};})]).then(function(res){
+    var k=res[0], pick=((res[1].key_stats||{}).pick)||[], newDays=(res[1].key_stats||{}).new_days||14;
+    var box=document.getElementById('krKey'), body=document.getElementById('krKeyBody'), pk=document.getElementById('krPick'); if(!box||!k||!(k.items||[]).length) return;
     var fmtv=function(v){ var n=parseFloat(String(v).replace(/,/g,'')); return isNaN(n)?esc(v):n.toLocaleString('ko-KR',{maximumFractionDigits:3}); };
     var asof=function(t){ t=String(t||''); return t.length===8?t.slice(0,4)+'-'+t.slice(4,6)+'-'+t.slice(6):t.length===6?t.slice(0,4)+'-'+t.slice(4):t; };
+    var byName={}; k.items.forEach(function(r){ byName[r.name]=r; });
+    var cycOf=function(t){ t=String(t||''); return t.length===8?'일간':/Q/.test(t)?'분기':t.length===6?'월간':t.length===4?'연간':''; };
+    var today=new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);
+    var isNew=function(r){ if(!r.first_seen) return false; return (Date.parse(today)-Date.parse(r.first_seen))/86400000 < newDays; };
+    var chg=function(r){ var a=parseFloat(String(r.value).replace(/,/g,'')), b=parseFloat(String(r.prev==null?'':r.prev).replace(/,/g,'')); if(isNaN(a)||isNaN(b)||!b) return '<small class="muted">이전 값 없음(다음 발표부터 변화 표시)</small>'; var d=a-b, p=d/Math.abs(b)*100, isPct=/%/.test(r.unit||''); return '<span class="'+(d>0?'up':d<0?'down':'')+'">'+(d>0?'▲':d<0?'▼':'')+' '+fmtv(Math.abs(d))+(isPct?'%p':' ('+(p>0?'+':'')+p.toFixed(1)+'%)')+'</span> <small class="muted">전기 '+esc(asof(r.prev_as_of))+'</small>'; };
+    var cards=pick.map(function(p){ var r=byName[p.name]; if(!r) return {html:'<div class="card" style="border-style:dashed"><div class="n">'+esc(p.name)+'</div><div class="muted" style="font-size:12px">100대 목록에 이 이름이 없음 — pick 의 이름 확인</div></div>',nw:false,miss:true};
+      var nw=isNew(r);
+      return {nw:nw, html:'<div class="card" style="'+(nw?'border-color:#93c5fd;background:#f8fbff':'')+'"><div class="n" style="display:flex;justify-content:space-between;gap:6px;align-items:center"><span><span class="chip2">'+esc(p.axis)+'</span> <b>'+esc(p.name)+'</b></span>'+(nw?'<span class="tag" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">NEW</span>':'')+'</div>'+
+        '<div class="v" style="font-size:22px;margin:4px 0 2px">'+fmtv(r.value)+' <small class="muted" style="font-size:12px">'+esc(r.unit||'')+' · 기준 '+esc(asof(r.as_of))+' · '+cycOf(r.as_of)+'</small></div><div style="font-size:13px">'+chg(r)+'</div>'+
+        '<div style="font-size:13px;margin-top:6px">'+esc(p.meaning)+'</div><div style="font-size:12.5px;color:#374151;margin-top:3px"><b>오르면 →</b> '+esc(p.up)+'</div><div class="muted" style="font-size:12px;margin-top:3px">언제: '+esc(p.when)+'</div></div>'}; });
+    cards.sort(function(a,b){ return (b.nw?1:0)-(a.nw?1:0); });
+    pk.innerHTML=cards.map(function(c){return c.html}).join('');
+    var groups={}; k.items.forEach(function(r){ (groups[r['class']||'기타']=groups[r['class']||'기타']||[]).push(r); });
     body.innerHTML='<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(320px,1fr))">'+Object.keys(groups).map(function(g){
-      return '<div class="card"><b>'+esc(g)+'</b><table>'+groups[g].map(function(r){ return '<tr><td>'+esc(r.name)+'</td><td style="text-align:right;white-space:nowrap"><b>'+fmtv(r.value)+'</b> <small class="muted">'+esc(r.unit||'')+'</small></td><td class="muted" style="white-space:nowrap;font-size:12px">'+esc(asof(r.as_of))+'</td></tr>'; }).join('')+'</table></div>';
+      return '<div class="card"><b>'+esc(g)+'</b><table>'+groups[g].map(function(r){ return '<tr><td>'+esc(r.name)+(isNew(r)?' <span class="tag" style="font-size:10px">NEW</span>':'')+'</td><td style="text-align:right;white-space:nowrap"><b>'+fmtv(r.value)+'</b> <small class="muted">'+esc(r.unit||'')+'</small></td><td class="muted" style="white-space:nowrap;font-size:12px">'+esc(asof(r.as_of))+'</td></tr>'; }).join('')+'</table></div>';
     }).join('')+'</div>';
-    var t=document.getElementById('krKeyTag'); if(t) t.textContent=(k.count||k.items.length)+'개 · 수집 '+window.Status.kstStr(k.collected_at);
+    var t=document.getElementById('krKeyTag'); if(t) t.textContent=cards.filter(function(c){return !c.miss}).length+'개 · 수집 '+window.Status.kstStr(k.collected_at);
+    var ta=document.getElementById('krAllTag'); if(ta) ta.textContent=(k.count||k.items.length)+'개';
     box.hidden=false;
   }).catch(function(){});
 

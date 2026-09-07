@@ -1,4 +1,4 @@
-# v 20260907-1740  macro.py — CYGNUS 정적판의 수집기. data/indicators.json 을 읽어 FRED(공식)·ECOS(공식, ECOS_KEY)·Yahoo(보조) 값을 모은다. derive=yoy 는 12개월 전 대비 %. derived=차이 파생(신용 스프레드). key_stats=ECOS 100대 지표 한 판(facts/kr_key.json).
+# v 20260907-2100  macro.py — CYGNUS 정적판의 수집기. data/indicators.json 을 읽어 FRED(공식)·ECOS(공식, ECOS_KEY)·Yahoo(보조) 값을 모은다. derive=yoy 는 12개월 전 대비 %. derived=차이 파생(신용 스프레드). key_stats=ECOS 100대 지표 한 판(facts/kr_key.json).
 # 쓰기: facts/macro.json(최신), facts/macro_history.json(일별 누적), data/status.json(job macro)
 # 규칙: 시각 3칸(as_of=시장 기준일, published=출처 발표 시각(모르면 빈칸), collected_at=수집 KST). 실패한 지표는 값 대신 error 를 남긴다(조용한 실패 금지).
 import json, os, sys, csv, io, datetime as dt, urllib.request, urllib.parse
@@ -114,7 +114,7 @@ def run(fetch_map=None, manual=None):
     manual = manual if manual is not None else load(P("raw", "manual_macro.json"), {"items": {}}).get("items", {})
     out, errors = [], []
     for ind in cfg["items"]:
-        rec = {"id": ind["id"], "name": ind["name"], "unit": ind["unit"], "axis": ind["axis"], "source": ind["source"],
+        rec = {"id": ind["id"], "name": ind["name"], "unit": ind["unit"], "axis": ind["axis"], "source": ind["source"], "cycle": ind.get("cycle", ""),
                "symbol": ind["symbol"], "official": ind["official"], "rule": ind.get("rule", ""),
                "value": None, "prev": None, "change_pct": None, "as_of": "", "published": "", "collected_at": kst_iso(), "judge": "", "error": "", "pending": False}
         rows = None
@@ -161,7 +161,7 @@ def run(fetch_map=None, manual=None):
     for dv in cfg.get("derived", []):
         a, b = v.get(dv["a"], {}), v.get(dv["b"], {})
         rec = {"id": dv["id"], "name": dv["name"], "unit": dv.get("unit", "%p"), "axis": dv["axis"], "source": "derived", "symbol": f"{dv['a']}-{dv['b']}",
-               "official": dv.get("official", True), "rule": dv.get("rule", ""), "value": None, "prev": None, "change_pct": None, "as_of": "", "published": "",
+               "official": dv.get("official", True), "cycle": dv.get("cycle", "D"), "rule": dv.get("rule", ""), "value": None, "prev": None, "change_pct": None, "as_of": "", "published": "",
                "collected_at": kst_iso(), "judge": "", "error": "", "pending": False}
         if a.get("value") is not None and b.get("value") is not None:
             rec["value"] = round(a["value"] - b["value"], 3); rec["as_of"] = a.get("as_of", "")
@@ -171,7 +171,7 @@ def run(fetch_map=None, manual=None):
             rec["error"] = f"재료 없음({dv['a']} 또는 {dv['b']})"; errors.append(f"{dv['id']}: {rec['error']}")
         out.append(rec)
     if v.get("us10y", {}).get("value") is not None and v.get("us2y", {}).get("value") is not None:
-        out.append({"id": "spread_10_2", "name": "장단기차 10y−2y", "unit": "%p", "axis": "bond_curve", "source": "derived", "symbol": "DGS10-DGS2",
+        out.append({"id": "spread_10_2", "name": "장단기차 10y−2y", "unit": "%p", "axis": "bond_curve", "source": "derived", "cycle": "D", "symbol": "DGS10-DGS2",
                     "official": True, "rule": "0 아래=역전", "value": round(v["us10y"]["value"] - v["us2y"]["value"], 3), "prev": None, "change_pct": None,
                     "as_of": v["us10y"]["as_of"], "published": "", "collected_at": kst_iso(), "judge": "역전" if v["us10y"]["value"] < v["us2y"]["value"] else "정상", "error": ""})
     # 한국 경제 한 판: ECOS 100대 통계지표 1회 호출 → facts/kr_key.json (판정 없음, 참고표). 실패해도 축 수집은 계속
@@ -188,14 +188,25 @@ def run(fetch_map=None, manual=None):
             if "RESULT" in kd: raise RuntimeError("ECOS: " + str(kd["RESULT"].get("MESSAGE", ""))[:120])
             rows = kd.get("KeyStatisticList", {}).get("row", [])
             if not rows: raise RuntimeError("KeyStatisticList 비어 있음")
-            items_k = [{"class": r.get("CLASS_NAME", ""), "name": r.get("KEYSTAT_NAME", ""), "value": r.get("DATA_VALUE", ""), "as_of": r.get("CYCLE", ""), "unit": r.get("UNIT_NAME", "")} for r in rows]
-            save(P(ks.get("file", "facts/kr_key.json").split("/")[0], *ks.get("file", "facts/kr_key.json").split("/")[1:]),
-                 {"schema": "kr_key/1", "source": "ECOS KeyStatisticList(100대 통계지표)", "collected_at": kst_iso(), "count": len(items_k), "items": items_k})
+            kpath = P(*ks.get("file", "facts/kr_key.json").split("/"))
+            old_items = {o.get("name"): o for o in load(kpath, {}).get("items", [])}
+            today = kst_now().date().isoformat()
+            items_k = []
+            for r in rows:
+                it = {"class": r.get("CLASS_NAME", ""), "name": r.get("KEYSTAT_NAME", ""), "value": r.get("DATA_VALUE", ""), "as_of": r.get("CYCLE", ""), "unit": r.get("UNIT_NAME", "") or ""}
+                o = old_items.get(it["name"])
+                if o and o.get("as_of") and o.get("as_of") != it["as_of"]:          # 새 기준일 = 새 발표 → 이전 값 보관, NEW 시작일
+                    it["prev"], it["prev_as_of"], it["first_seen"] = o.get("value"), o.get("as_of"), today
+                elif o:                                                            # 같은 발표 → 이전 값·NEW 시작일 유지
+                    it["prev"], it["prev_as_of"], it["first_seen"] = o.get("prev"), o.get("prev_as_of"), o.get("first_seen", today)
+                else: it["first_seen"] = today
+                items_k.append(it)
+            save(kpath, {"schema": "kr_key/1", "source": "ECOS KeyStatisticList(100대 통계지표)", "collected_at": kst_iso(), "count": len(items_k), "items": items_k})
             print(f"한국 경제 한 판 {len(items_k)}개 저장")
         except Exception as e:
             errors.append(f"kr_key: {type(e).__name__}: {e}"[:200])
     ok = sum(1 for r in out if r["value"] is not None)
-    save(P("facts", "macro.json"), {"schema": "macro/1", "version": "v 20260907-1740", "collected_at": kst_iso(), "ok": ok, "total": len(out), "items": out})
+    save(P("facts", "macro.json"), {"schema": "macro/1", "version": "v 20260907-2100", "collected_at": kst_iso(), "ok": ok, "total": len(out), "items": out})
     # 이력: 날짜(KST) 키로 값만
     hist = load(P("facts", "macro_history.json"), {"schema": "macro_history/1", "days": {}})
     today = kst_now().date().isoformat()

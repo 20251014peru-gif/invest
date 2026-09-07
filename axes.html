@@ -1,4 +1,4 @@
-<!-- v 20260907-1900  axes.html — 대변화 축 8개×6단계 + 레짐 요약 + 전략 카드 5개 보기. 축 이름을 누르면 읽기창(6단계 전문 + 지표 실측 + 30일 추이 + 출처 링크 + 읽는 법). 데이터는 data/axes.json · data/strategies.json · data/features.json · facts/macro.json · facts/macro_history.json · analysis/regime.json(js/regime.js) (전부 읽기 전용) -->
+<!-- v 20260907-2100  axes.html — 대변화 축 8개×6단계 + 레짐 요약 + 전략 카드 5개 보기. 축 이름을 누르면 읽기창(6단계 전문 + 지표 실측 + 30일 추이 + 출처 링크 + 읽는 법). 데이터는 data/axes.json · data/strategies.json · data/features.json · facts/macro.json · facts/macro_history.json · analysis/regime.json(js/regime.js) (전부 읽기 전용) -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -90,11 +90,11 @@
 </main>
 <div id="dim" hidden></div>
 <aside id="reader" hidden aria-label="축 읽기창"></aside>
-<script src="js/status.js" data-app="axes" data-version="v 20260907-1900"></script>
+<script src="js/status.js" data-app="axes" data-version="v 20260907-2100"></script>
 <script src="js/regime.js"></script>
 <script>
 (function(){
-  var VER='v 20260907-1900';
+  var VER='v 20260907-2100';
   document.getElementById('ver').textContent=VER;
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var li=function(a){return Array.isArray(a)?'<ul>'+a.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>':esc(a)};
@@ -131,13 +131,14 @@
     return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+pts.length+'일 추이"><path d="'+d+'" fill="none" stroke="'+(up?'#2563eb':'#dc2626')+'" stroke-width="1.6"/></svg><small class="d">'+pts.length+'일 · 최저 '+fmt(lo)+' · 최고 '+fmt(hi)+'</small>';
   }
 
-  var AX={}, MAC={}, HIST={days:{}}, FEAT={};
+  var AX={}, MAC={}, HIST={days:{}}, FEAT={}, CYC={D:'일간',W:'주간',M:'월간',Q:'분기',A:'연간'};
   var STAGES=[['current','현재(수준·방향)'],['change_condition','변화 조건'],['affected_assets','영향 자산'],['general_response','일반 대응'],['reverse_scenario','반대 시나리오'],['invalidation','무효화 조건']];
   function liveOf(id){ return (MAC.items||[]).filter(function(r){return r.axis===id}) }
   function liveLine(r){
-    if(r.pending) return '<li><b>'+esc(r.name)+'</b> <span class="d">'+(r.source==='ecos'?'미설정(ECOS_KEY 없음)':'미입력')+'</span></li>';
-    if(r.error) return '<li><b>'+esc(r.name)+'</b> <span class="j bad">실패</span> <span class="d">'+esc(r.error.slice(0,60))+'</span></li>';
-    return '<li><b>'+esc(r.name)+'</b> <span class="v">'+fmt(r.value,r.unit)+'</span> '+chg(r)+' '+jtag(r.judge)+' <span class="d">'+esc(r.as_of)+'</span> <span class="off">'+(r.official?'공식':'참고')+'</span></li>';
+    var ml=(r.source==='manual')?' <a href="manual.html#'+esc(r.id)+'" style="color:#b45309;font-weight:600">수동 입력 →</a>':'';
+    if(r.pending) return '<li><b>'+esc(r.name)+'</b> <span class="d">'+(r.source==='ecos'?'미설정(ECOS_KEY 없음)':'미입력')+'</span>'+ml+'</li>';
+    if(r.error) return '<li><b>'+esc(r.name)+'</b> <span class="j bad">실패</span> <span class="d">'+esc(r.error.slice(0,60))+'</span>'+ml+'</li>';
+    return '<li><b>'+esc(r.name)+'</b> <span class="v">'+fmt(r.value,r.unit)+'</span> '+chg(r)+' '+jtag(r.judge)+' <span class="d">기준 '+esc(r.as_of)+(CYC[r.cycle]?' · '+CYC[r.cycle]:'')+'</span> <span class="off">'+(r.official?'공식':'참고')+'</span></li>';
   }
 
   // ---- 표 ----
@@ -179,8 +180,8 @@
       lv.forEach(function(r){
         var s=srcLink(r);
         h+='<tr><td><b>'+esc(r.name)+'</b><br><small class="d">'+esc(r.rule||'규칙 없음(방향만)')+'</small></td>'+
-          '<td class="v">'+(r.pending?'<span class="d">'+(r.source==='ecos'?'미설정':'미입력')+'</span>':r.error?'<span class="j bad">실패</span>':fmt(r.value,r.unit))+'</td>'+
-          '<td>'+(r.prev!=null?'<small class="d">전 '+fmt(r.prev)+'</small><br>':'')+chg(r)+'</td><td>'+jtag(r.judge)+'</td><td><small>'+esc(r.as_of||'')+'</small></td>'+
+          '<td class="v">'+(r.pending?'<span class="d">'+(r.source==='ecos'?'미설정':'미입력')+'</span>':r.error?'<span class="j bad">실패</span>':fmt(r.value,r.unit))+(r.source==='manual'?'<br><a href="manual.html#'+esc(r.id)+'" style="color:#b45309;font-weight:600;font-size:12px">수동 입력 →</a>':'')+'</td>'+
+          '<td>'+(r.prev!=null?'<small class="d">전 '+fmt(r.prev)+'</small><br>':'')+chg(r)+'</td><td>'+jtag(r.judge)+'</td><td><small>'+esc(r.as_of||'')+(CYC[r.cycle]?'<br>'+CYC[r.cycle]:'')+(r.collected_at?'<br><span class="d">수집 '+esc(String(r.collected_at).slice(5,16).replace('T',' '))+'</span>':'')+'</small></td>'+
           '<td>'+spark(HIST.days||{},r.id)+'</td><td>'+(s.u?'<a href="'+s.u+'" target="_blank" rel="noopener">'+esc(s.t)+' ↗</a>':esc(s.t))+'<br><small class="off">'+(r.official?'공식':'참고')+'</small>'+(r.error?'<br><small class="d">'+esc(r.error)+'</small>':'')+'</td></tr>';
       });
       h+='</tbody></table></div>';
