@@ -299,7 +299,8 @@
   // 💬 종목토론실 근거글 — board.py 가 노이즈 걸러 남긴 '근거 있는 주장 후보'(미검증). 강도 상/중/하.
   get('facts/board.json').then(function(d){
     var box=document.getElementById('boardBox'), items=(d.items||[]);
-    document.getElementById('boardTag').textContent = d.updated ? ('갱신 '+window.Status.kstStr(d.updated)+' · '+items.length+'건') : '자동 필터 (첫 실행 대기)';
+    var nHit=(typeof d.hit==='number')?d.hit:items.filter(function(i){return (i.verify&&i.verify.status)==='적중'}).length;
+    document.getElementById('boardTag').textContent = d.updated ? ('갱신 '+window.Status.kstStr(d.updated)+' · '+items.length+'건'+(nHit?' · 적중 '+nHit:'')) : '자동 필터 (첫 실행 대기)';
     if(!items.length){ box.innerHTML='아직 없음 — GitHub Actions 「Board Signals」가 돌면 관심 종목 토론실에서 <b>근거 있는 주장</b>만 뽑아 여기 뜹니다. (ANTHROPIC_API_KEY Secret 필요)<br><small>토론실 글은 검증 안 된 주장입니다. 근거 후보를 모아줄 뿐, 사실 확인·판단은 달님이 합니다.</small>'; return; }
     var SC={'상':'#dcfce7','중':'#fef3c7','하':'#eef'};
     var VC={'적중':'#dcfce7','빗나감':'#fee2e2','무관':'#eef','미검증':'#f3f4f6'};
