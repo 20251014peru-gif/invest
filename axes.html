@@ -1,4 +1,4 @@
-<!-- v 20260907-1600  axes.html — 대변화 축 8개×6단계 + 레짐 요약 + 전략 카드 5개 보기. 축 이름을 누르면 읽기창(6단계 전문 + 지표 실측 + 30일 추이 + 출처 링크 + 읽는 법). 데이터는 data/axes.json · data/strategies.json · data/features.json · facts/macro.json · facts/macro_history.json (전부 읽기 전용) -->
+<!-- v 20260907-1900  axes.html — 대변화 축 8개×6단계 + 레짐 요약 + 전략 카드 5개 보기. 축 이름을 누르면 읽기창(6단계 전문 + 지표 실측 + 30일 추이 + 출처 링크 + 읽는 법). 데이터는 data/axes.json · data/strategies.json · data/features.json · facts/macro.json · facts/macro_history.json · analysis/regime.json(js/regime.js) (전부 읽기 전용) -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -80,7 +80,7 @@
   <a class="btn" href="index.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">허브</a>
 </header>
 <main>
-  <h2>레짐 요약 <span class="tag">성장×물가 4분면 + 유동성</span></h2>
+  <h2>레짐 요약 <span class="tag">성장×물가 4분면 + 유동성</span><span class="tag">규칙 계산 · 근거 지표 · 바뀌는 조건</span><span class="tag est">기준값 추정</span></h2>
   <div class="regime" id="regime"></div>
   <h2>대변화 축 8개 × 6단계 <span class="tag">틀 확인</span><span class="tag est">문장 추정</span><span class="tag" id="liveTag">실측 읽는 중</span><span class="tag" style="border:0;color:var(--sub)">축 이름을 누르면 자세히</span></h2>
   <div class="wrap"><table id="axes"><thead><tr><th>축</th><th>관측 지표 · 실측(자동)</th><th>현재(수준·방향)</th><th>변화 조건</th><th>영향 자산</th><th>일반 대응</th><th>반대 시나리오</th><th>무효화 조건</th></tr></thead><tbody></tbody></table></div>
@@ -90,10 +90,11 @@
 </main>
 <div id="dim" hidden></div>
 <aside id="reader" hidden aria-label="축 읽기창"></aside>
-<script src="js/status.js" data-app="axes" data-version="v 20260907-1600"></script>
+<script src="js/status.js" data-app="axes" data-version="v 20260907-1900"></script>
+<script src="js/regime.js"></script>
 <script>
 (function(){
-  var VER='v 20260907-1600';
+  var VER='v 20260907-1900';
   document.getElementById('ver').textContent=VER;
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var li=function(a){return Array.isArray(a)?'<ul>'+a.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>':esc(a)};
@@ -208,10 +209,7 @@
   var soft=function(p,dflt){ return getJ(p).catch(function(e){ console.error(p+' 읽기 실패: '+e.message); return dflt }) };
   Promise.all([getJ('data/axes.json'), soft('facts/macro.json',{}), soft('facts/macro_history.json',{days:{}}), soft('data/features.json',{features:{}})]).then(function(r){
     AX=r[0]; MAC=r[1]||{}; HIST=r[2]||{days:{}}; FEAT=(r[3]&&r[3].features)||{};
-    var rg=AX.regime||{}, rgEl=document.getElementById('regime'); rgEl.innerHTML='';
-    [['성장',rg.growth],['물가',rg.inflation],['유동성',rg.liquidity],['4분면',rg.quadrant],['기준 시각',rg.as_of||'없음']].forEach(function(p){
-      rgEl.innerHTML+='<div class="k"><b>'+p[0]+'</b>'+esc(p[1]||'미확인')+'</div>';
-    });
+    if(window.Regime) window.Regime.render(document.getElementById('regime'),{compact:false});   // analysis/regime.json — 규칙 계산 판정 + 근거 + 바뀌는 조건
     renderTable();
     var want=location.hash.replace('#',''); if(want) openReader(want);
   }).catch(function(e){ console.error('axes.json 읽기 실패: '+e.message); document.getElementById('liveTag').textContent='axes.json 못 읽음'; });

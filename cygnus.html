@@ -1,4 +1,4 @@
-<!-- v 20260907-1740 (ECOS 지표·한국 경제 100)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260907-1900 (레짐 규칙 판정 카드, 지표 3묶음, KOSPI·KOSDAQ, ECOS, 한 판, 전일비 수정)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -17,6 +17,8 @@
   h2{font-size:16px;margin:18px 0 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .tag{font-size:12px;padding:1px 8px;border-radius:8px;border:1px solid var(--line);color:var(--sub)}
   .grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+  .indgrp{font-size:15px;margin:14px 0 6px;display:flex;align-items:center;gap:8px}
+  .indgrp:first-child{margin-top:0}
   .k{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;min-height:92px}
   .k .n{font-size:13px;color:var(--sub);display:flex;justify-content:space-between;gap:6px}
   .k .v{font-size:22px;font-weight:700;margin:2px 0;font-variant-numeric:tabular-nums}
@@ -168,10 +170,11 @@
   </section>
 
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260907-1740"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260907-1900"></script>
+<script src="js/regime.js"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260906-0300 (탭 UI·사이트맵)';
+  document.getElementById('ver').textContent='v 20260907-1900';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -209,27 +212,35 @@
     el.innerHTML+='<div class="k" style="border-color:#93c5fd"><div class="n"><span>'+esc(name)+'</span><span style="color:#15803d">실시간</span></div><div class="v">'+(Math.abs(val)>=1000?val.toLocaleString('ko-KR',{maximumFractionDigits:0}):val.toLocaleString('ko-KR',{maximumFractionDigits:2}))+'<small>'+esc(unit)+'</small></div><div class="c">'+c+'</div><div class="src">'+esc(when)+'</div></div>';
   }
   function sma(a,n){ if(!a||a.length<n) return null; var s=0,i; for(i=a.length-n;i<a.length;i++) s+=a[i]; return s/n; }
-  function yahooHist(sym){ return pxJson('https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?range=6mo&interval=1d').then(function(d){ var r=d.chart.result[0], m=r.meta||{}, q=(r.indicators&&r.indicators.quote&&r.indicators.quote[0])||{}; var O=q.open||[],H=q.high||[],L=q.low||[],C=q.close||[]; var cl=[],oh=[]; for(var i=0;i<C.length;i++){ if(C[i]!=null){ cl.push(C[i]); oh.push({o:O[i],h:H[i],l:L[i],c:C[i]}); } } var pv=m.chartPreviousClose||m.previousClose; var px=(m.regularMarketPrice!=null?m.regularMarketPrice:(cl.length?cl[cl.length-1]:null)); return {closes:cl, ohlc:oh, price:px, chg:(pv&&px!=null)?(px-pv)/pv*100:null}; }); }
+  function yahooHist(sym){ return pxJson('https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)+'?range=6mo&interval=1d').then(function(d){ var r=d.chart.result[0], m=r.meta||{}, q=(r.indicators&&r.indicators.quote&&r.indicators.quote[0])||{}; var O=q.open||[],H=q.high||[],L=q.low||[],C=q.close||[]; var cl=[],oh=[]; for(var i=0;i<C.length;i++){ if(C[i]!=null){ cl.push(C[i]); oh.push({o:O[i],h:H[i],l:L[i],c:C[i]}); } } var px=(m.regularMarketPrice!=null?m.regularMarketPrice:(cl.length?cl[cl.length-1]:null)); /* 전일비: 6mo 조회의 chartPreviousClose 는 6개월 전 값이라 쓰면 안 됨(2026-09-07 버그). 마지막 봉이 오늘(=현재가)이면 그 앞 봉, 아니면 마지막 봉이 전일 종가 */ var pv=null; if(cl.length>=2){ pv=(px!=null&&Math.abs(cl[cl.length-1]-px)<1e-9)?cl[cl.length-2]:cl[cl.length-1]; } else if(cl.length===1){ pv=cl[0]; } return {closes:cl, ohlc:oh, price:px, chg:(pv&&px!=null)?(px-pv)/pv*100:null}; }); }
   function alignEmoji(price,closes){ var m20=sma(closes,20), m50=sma(closes,50); if(m20==null||price==null) return ''; return (m50!=null)?((price>m20&&m20>m50)?'🟢':(price<m20&&m20<m50)?'🔴':'🟡'):'🟡'; }
   function srcLink(it){ if(it.yahoo) return {u:'https://finance.yahoo.com/quote/'+encodeURIComponent(it.yahoo),t:'Yahoo Finance ↗'}; var fid=it.fred||it.fred_fallback||it.symbol; if(it.source==='fred'&&fid) return {u:'https://fred.stlouisfed.org/series/'+encodeURIComponent(fid),t:'FRED ↗'}; if(it.source==='ecos') return {u:'https://ecos.bok.or.kr/',t:'한국은행 ECOS ↗'}; return null; }
   var IND=[], MV={};
   function indCardHTML(it,i){
     var m=MV[it.id]||{}; var val=m.value;
     var vstr=(val==null)?'<span style="font-size:14px;color:var(--sub);font-weight:400">'+(it.yahoo?'실시간 대기…':'값 없음')+'</span>':fmt(val)+'<small>'+esc(it.unit||m.unit||'')+'</small>';
-    var badge=it.yahoo?'<span style="color:#15803d">실시간</span>':'<span>'+(it.source==='fred'?'FRED':it.source==='ecos'?'한국은행':it.source==='manual'?'수동':'')+'</span>';
+    var badge=it.yahoo?'<span style="color:#15803d">실시간</span>':'<span>'+(it.source==='fred'?'FRED':it.source==='ecos'?'한국은행':it.source==='derived'?'파생':it.source==='manual'?'수동':'')+'</span>';
     return '<div class="k ind-card" data-i="'+i+'" style="cursor:pointer;border-color:'+(it.yahoo?'#93c5fd':'#e5e7eb')+'" title="누르면 20·50일선 위치·링크"><div class="n"><span>'+esc(it.name)+' <b id="inddot'+i+'" title="🟢 정배열(상승추세) · 🔴 역배열(하락) · 🟡 혼조"></b></span>'+badge+'</div><div class="v" id="indv'+i+'">'+vstr+'</div><div class="c" id="indc'+i+'"></div><div class="src">누르기 ▸ 20·50일선</div></div>';
   }
   function loadInd(){
     Promise.all([ get('data/indicators.json').catch(function(){return {items:[]};}), get('facts/macro.json').catch(function(){return {items:[]};}) ]).then(function(res){
-      IND=(res[0].items||[]); MV={}; (res[1].items||[]).forEach(function(m){ MV[m.id||m.name]=m; });
+      // 카드 목록 = indicators.json items + derived(장단기차·신용 스프레드 — macro.json 에만 값이 있음)
+      IND=(res[0].items||[]).concat((res[0].derived||[]).map(function(dv){ return {id:dv.id,name:dv.name,unit:dv.unit,axis:dv.axis,source:'derived',symbol:'',official:true,rule:dv.rule,group:dv.group||'kr'}; }));
+      var spread=(res[1].items||[]).filter(function(m){return m.id==='spread_10_2'})[0]; if(spread&&!IND.some(function(i){return i.id==='spread_10_2'})) IND.push({id:'spread_10_2',name:spread.name,unit:spread.unit,axis:spread.axis,source:'derived',symbol:'',official:true,rule:spread.rule,group:'us'});
+      MV={}; (res[1].items||[]).forEach(function(m){ MV[m.id||m.name]=m; });
       var g=document.getElementById('indGrid'); if(!g)return;
       var mt=document.getElementById('macroTag'); if(mt&&res[1].collected_at) mt.textContent='매크로 수집 '+window.Status.kstStr(res[1].collected_at);
       document.getElementById('macroEmpty').hidden=IND.length>0;
-      g.innerHTML=IND.map(indCardHTML).join('');
+      // 묶음: 한국 → 미국 → 국제 (indicators.json groups 순서). 묶음에 카드 없으면 제목도 안 그림
+      var GR=res[0].groups||{kr:'🇰🇷 한국',us:'🇺🇸 미국',world:'🌍 국제'};
+      g.className=''; g.innerHTML=Object.keys(GR).map(function(key){
+        var cards=IND.map(function(it,i){ return (it.group||'world')===key?indCardHTML(it,i):''; }).join('');
+        return cards?'<h3 class="indgrp">'+esc(GR[key])+' <span class="tag">'+IND.filter(function(it){return (it.group||'world')===key}).length+'개</span></h3><div class="grid">'+cards+'</div>':'';
+      }).join('');
       IND.forEach(function(it,i){ if(!it.yahoo) return; yahooHist(it.yahoo).then(function(h){
         var v=document.getElementById('indv'+i), c=document.getElementById('indc'+i), dt=document.getElementById('inddot'+i);
         if(v&&h.price!=null) v.innerHTML=fmt(h.price)+'<small>'+esc(it.unit||'')+'</small>';
-        if(c&&h.chg!=null) c.innerHTML='<span class="'+(h.chg>0?'up':h.chg<0?'down':'')+'">'+(h.chg>0?'▲':h.chg<0?'▼':'')+' '+Math.abs(h.chg).toFixed(2)+'%</span>';
+        if(c&&h.chg!=null) c.innerHTML='<span class="'+(h.chg>0?'up':h.chg<0?'down':'')+'">'+(h.chg>0?'▲':h.chg<0?'▼':'')+' '+Math.abs(h.chg).toFixed(2)+'%</span> <small class="muted">전일비</small>';
         if(dt) dt.textContent=alignEmoji(h.price,h.closes);
       }).catch(function(){}); });
     });
@@ -288,16 +299,14 @@
     box.hidden=false;
   }).catch(function(){});
 
-  get('data/axes.json').then(function(d){
-    var rg=d.regime||{}, el=document.getElementById('regime');
-    [['성장',rg.growth],['물가',rg.inflation],['유동성',rg.liquidity],['4분면',rg.quadrant],['근거',rg.basis||'없음']].forEach(function(p){
-      el.innerHTML+='<div class="k" style="min-height:0"><div class="n">'+p[0]+'</div><div class="v" style="font-size:16px">'+esc(p[1]||'미확인')+'</div></div>';
-    });
+  // 레짐: analysis/regime.json(규칙 계산) — js/regime.js 공통 카드. 끝에 ⑤ 선행EPS 카드(붙여넣기) 덧붙임
+  (window.Regime?window.Regime.render(document.getElementById('regime'),{compact:true}):Promise.resolve(null)).then(function(){
+    var el=document.getElementById('regime');
     var eps=loadEPS();
     var ev = eps ? esc(eps.verdict) : '미확인';
     var ed = eps ? (' <small style="color:var(--sub)">↑'+eps.up+' ↓'+eps.down+' · '+esc(eps.as_of)+'</small>') : ' <small style="color:var(--sub)">붙여넣기 없음</small>';
     el.innerHTML+='<div class="k" style="min-height:0;background:'+(eps?'#fffef5':'#fafafa')+'"><div class="n">⑤ 선행EPS(실적)</div><div class="v" style="font-size:16px">'+ev+ed+'</div></div>';
-  }).catch(function(e){console.error(e.message)});
+  });
 
   // (매크로 카드는 하단 「지표」 섹션에서 실시간과 합쳐 렌더한다 — loadInd)
 

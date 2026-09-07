@@ -1,4 +1,4 @@
-# v 20260907-1740  macro.yml — CYGNUS 매크로 수집(scripts/macro.py) 하루 2회. 정각 회피 + concurrency + 실패 시 status.json fail + ntfy
+# v 20260907-1900  macro.yml — CYGNUS 매크로 수집(scripts/macro.py) 하루 2회. 정각 회피 + concurrency + 실패 시 status.json fail + ntfy
 name: Macro Collector
 on:
   schedule:
@@ -32,7 +32,8 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             python scripts/macro.py
-            git add facts/macro.json facts/macro_history.json facts/kr_key.json data/status.json 2>/dev/null || true
+            python scripts/regime.py || echo "::warning::레짐 판정 실패(값 없음) — status.json 에 표시됨"
+            git add facts/macro.json facts/macro_history.json facts/kr_key.json analysis/regime.json data/status.json 2>/dev/null || true
             if git diff --cached --quiet; then echo "::notice::변경 없음"; exit 0; fi
             git commit -q -m "auto: macro $(date -u +%Y-%m-%dT%H:%MZ)"
             if git push origin HEAD:main; then echo "::notice::push 성공 (시도 $i 회)"; exit 0; fi

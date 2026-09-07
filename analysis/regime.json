@@ -1,0 +1,239 @@
+{
+  "schema": "regime/1",
+  "version": "v 20260907-1900",
+  "computed_at": "2026-09-07T17:14:12+09:00",
+  "macro_collected_at": "2026-09-07T16:33:23+09:00",
+  "growth": {
+    "name": "성장",
+    "verdict": "혼조",
+    "confidence": "추정",
+    "score": 0,
+    "direction": "",
+    "signals": [
+      {
+        "id": "ism_pmi",
+        "name": "ISM 제조업 PMI",
+        "why": "미국 제조업 확장/수축 기준선 50",
+        "weight": 2,
+        "official": true,
+        "value": null,
+        "as_of": "",
+        "score": null,
+        "read": "값 없음",
+        "unit": "pt"
+      },
+      {
+        "id": "china_pmi",
+        "name": "중국 PMI",
+        "why": "중국 제조업 50 기준",
+        "weight": 1,
+        "official": true,
+        "value": null,
+        "as_of": "",
+        "score": null,
+        "read": "값 없음",
+        "unit": "pt"
+      },
+      {
+        "id": "kospi",
+        "name": "kospi",
+        "why": "코스피 20일 추세(±2%)",
+        "weight": 1,
+        "official": false,
+        "value": null,
+        "as_of": "",
+        "score": null,
+        "read": "값 없음",
+        "unit": ""
+      },
+      {
+        "id": "sp500",
+        "name": "S&P500",
+        "why": "S&P 20일 추세(±2%)",
+        "weight": 1,
+        "official": false,
+        "value": 7718.6,
+        "as_of": "2026-09-07",
+        "score": 0,
+        "read": "3일 +0.0% → 횡보 (이력 3일뿐, 20일 되면 정확)",
+        "unit": "pt"
+      },
+      {
+        "id": "copper",
+        "name": "구리",
+        "why": "구리는 경기 선행(±3%)",
+        "weight": 1,
+        "official": false,
+        "value": 6.6825,
+        "as_of": "2026-09-07",
+        "score": 0,
+        "read": "3일 +0.1% → 횡보 (이력 3일뿐, 20일 되면 정확)",
+        "unit": "$/lb"
+      },
+      {
+        "id": "bdry",
+        "name": "해운 BDRY",
+        "why": "해운 운임(±5%)",
+        "weight": 1,
+        "official": false,
+        "value": 16.56,
+        "as_of": "2026-09-07",
+        "score": 0,
+        "read": "3일 -0.1% → 횡보 (이력 3일뿐, 20일 되면 정확)",
+        "unit": "$"
+      }
+    ],
+    "used": 3,
+    "official_used": 0,
+    "flip": "PMI 가 50 을 넘나들거나, 코스피·S&P 20일 추세가 ±2% 를 벗어나면 판정이 바뀐다",
+    "reason": "S&P500 3일 +0.0% → 횡보 (이력 3일뿐, 20일 되면 정확) · 구리 3일 +0.1% → 횡보 (이력 3일뿐, 20일 되면 정확) · 해운 BDRY 3일 -0.1% → 횡보 (이력 3일뿐, 20일 되면 정확)"
+  },
+  "inflation": {
+    "name": "물가",
+    "verdict": "높음",
+    "confidence": "확인",
+    "score": 4,
+    "direction": "내려오는 중",
+    "signals": [
+      {
+        "id": "cpi_yoy",
+        "name": "미국 CPI 전년비",
+        "why": "미국 CPI 전년비 3%↑ 높음 / 2%↓ 낮음",
+        "weight": 2,
+        "official": true,
+        "value": 3.54,
+        "as_of": "2026-07-01",
+        "score": 1,
+        "read": "3.54% → 기준 위",
+        "unit": "%"
+      },
+      {
+        "id": "core_pce_yoy",
+        "name": "미국 근원 PCE 전년비",
+        "why": "연준이 보는 근원 PCE",
+        "weight": 2,
+        "official": true,
+        "value": 3.34,
+        "as_of": "2026-07-01",
+        "score": 1,
+        "read": "3.34% → 기준 위",
+        "unit": "%"
+      },
+      {
+        "id": "kr_cpi_yoy",
+        "name": "kr_cpi_yoy",
+        "why": "한국 CPI 전년비",
+        "weight": 1,
+        "official": false,
+        "value": null,
+        "as_of": "",
+        "score": null,
+        "read": "값 없음",
+        "unit": ""
+      }
+    ],
+    "used": 2,
+    "official_used": 2,
+    "flip": "CPI·근원 PCE 전년비가 3.0% 아래로 내려오면 중립, 2.0% 아래면 낮음",
+    "reason": "미국 CPI 전년비 3.54% → 기준 위 · 미국 근원 PCE 전년비 3.34% → 기준 위"
+  },
+  "liquidity": {
+    "name": "유동성",
+    "verdict": "중립",
+    "confidence": "확인",
+    "score": 0,
+    "direction": "",
+    "signals": [
+      {
+        "id": "fedfunds",
+        "name": "연준 실효금리 FFR",
+        "why": "연준 금리 방향(오르면 긴축)",
+        "weight": 2,
+        "official": true,
+        "value": 3.63,
+        "as_of": "2026-08-01",
+        "score": 0,
+        "read": "3.63 → 3.63% 동결",
+        "unit": "%"
+      },
+      {
+        "id": "bok_rate",
+        "name": "한은 기준금리",
+        "why": "한은 기준금리 방향",
+        "weight": 2,
+        "official": true,
+        "value": null,
+        "as_of": "",
+        "score": null,
+        "read": "값 없음",
+        "unit": "%"
+      },
+      {
+        "id": "credit_spread",
+        "name": "credit_spread",
+        "why": "신용 스프레드 0.6%p↑ 돈이 마름",
+        "weight": 2,
+        "official": false,
+        "value": null,
+        "as_of": "",
+        "score": null,
+        "read": "값 없음",
+        "unit": ""
+      },
+      {
+        "id": "dxy",
+        "name": "달러지수 DXY",
+        "why": "강달러=신흥국 유동성 빠짐",
+        "weight": 1,
+        "official": false,
+        "value": 99.118,
+        "as_of": "2026-09-07",
+        "score": 0,
+        "read": "99.12pt → 중간",
+        "unit": "pt"
+      },
+      {
+        "id": "m2",
+        "name": "미 M2",
+        "why": "미 M2 늘면 완화",
+        "weight": 1,
+        "official": true,
+        "value": 23218.0,
+        "as_of": "2026-07-01",
+        "score": 0,
+        "read": "3일 +0.0% → 횡보 (이력 3일뿐, 30일 되면 정확)",
+        "unit": "십억$"
+      },
+      {
+        "id": "fed_bs",
+        "name": "연준 자산",
+        "why": "연준 자산 늘면 완화(QT 면 긴축)",
+        "weight": 1,
+        "official": true,
+        "value": 6737204.0,
+        "as_of": "2026-09-02",
+        "score": 0,
+        "read": "3일 +0.0% → 횡보 (이력 3일뿐, 30일 되면 정확)",
+        "unit": "백만$"
+      }
+    ],
+    "used": 4,
+    "official_used": 3,
+    "flip": "연준·한은이 인하로 돌아서거나 신용 스프레드가 0.4%p 아래로 좁혀지면 완화 쪽",
+    "reason": "연준 실효금리 FFR 3.63 → 3.63% 동결 · 달러지수 DXY 99.12pt → 중간 · 미 M2 3일 +0.0% → 횡보 (이력 3일뿐, 30일 되면 정확) · 연준 자산 3일 +0.0% → 횡보 (이력 3일뿐, 30일 되면 정확)"
+  },
+  "quadrant": {
+    "name": "보류",
+    "assets": "",
+    "confidence": "판단 불가",
+    "note": "성장 이 혼조/중립이라 4분면을 정하지 않음. 성장 점수 +0.0(±1.5 넘어야 확정)"
+  },
+  "one_line": "성장 혼조(추정) · 물가 높음·내려오는 중(확인) · 유동성 중립(확인) → 4분면 보류",
+  "memo": {
+    "text": "물가↑·성장 유지 → 원자재·가치·은행 우위(추정)",
+    "basis": "확인: CPI 3.4%·연준 매파·금 기록·유가 $90 / 추정: 성장·유동성 해석",
+    "as_of": "2026-09-04",
+    "_tag": "축 문장(수동, Claude 초안) — 위 자동 판정과 다르면 달님이 판별"
+  },
+  "_정직": "숫자 기준값은 data/regime_rules.json 의 Claude 초안(추정). 신호 값이 없으면 그 신호는 빼고 계산하며, 공식 신호가 하나도 없으면 '추정', 아무 값도 없으면 '판단 불가'"
+}
