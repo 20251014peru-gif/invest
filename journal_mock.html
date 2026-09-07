@@ -1,0 +1,185 @@
+<!-- v 20260907-1930  journal_mock.html — 「투자일지」 목업(정적, 저장 안 됨). 하루 한 장 구조를 눈으로 판별하기 위한 것. 숫자: 2026-09-07 실제 확인값 + '예시' 표시한 칸은 이력 없어 가짜 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>투자일지 목업</title>
+<style>
+  :root{--bg:#f6f7fb;--card:#fff;--line:#e3e6ee;--ink:#1f2430;--sub:#6b7280;--p1:#dbeafe;--p2:#dcfce7;--p3:#fef3c7;--p4:#ede9fe;--p5:#fee2e2;--up:#166534;--dn:#991b1b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+  .mock{background:#fff7ed;border-bottom:1px solid #fed7aa;color:#9a3412;font-size:13px;padding:6px 16px}
+  header{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+  .btn{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);font:inherit;font-size:14px;cursor:pointer;color:inherit;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+  .btn.p{background:var(--p1);border-color:#93c5fd}.btn.g{background:var(--p2);border-color:#bbf7d0}
+  header h1{font-size:20px;margin:0 6px;flex:1;display:flex;align-items:baseline;gap:8px}header h1 small{font-size:13px;color:var(--sub);font-weight:400}
+  main{padding:14px 16px 90px;max-width:1280px;margin:0 auto}
+  .blk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+  .blk h2{margin:0 0 8px;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .blk h2 .id{margin-left:auto;font:12px ui-monospace,Consolas,monospace;color:#9ca3af;background:#f3f4f6;border-radius:6px;padding:1px 6px}
+  .tag{font-size:12px;padding:1px 8px;border-radius:8px;border:1px solid var(--line);color:var(--sub);white-space:nowrap}
+  .tag.auto{background:var(--p2);color:var(--up);border-color:#bbf7d0}.tag.me{background:var(--p3);color:#92400e;border-color:#fde68a}.tag.ex{background:#f3f4f6;color:#6b7280;border-style:dashed}
+  .five{margin:0;padding-left:0;list-style:none}.five li{padding:6px 0;border-top:1px dashed var(--line);display:flex;gap:8px;align-items:baseline}.five li:first-child{border-top:0}.five b{white-space:nowrap;min-width:64px;color:var(--sub);font-weight:600;font-size:13px}
+  table{border-collapse:collapse;width:100%;font-size:13.5px}th{background:var(--p1);padding:6px 8px;text-align:left;white-space:nowrap}td{padding:6px 8px;border-top:1px solid var(--line);white-space:nowrap}
+  td.n{text-align:right;font-variant-numeric:tabular-nums}.u{color:var(--up)}.d{color:var(--dn)}.z{color:var(--sub)}
+  .wrap{overflow-x:auto}
+  .grp td.g{background:#fafbff;font-weight:600;color:var(--sub);font-size:12px}
+  .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+  label{font-size:12px;color:var(--sub);display:block}
+  input,select,textarea{width:100%;min-height:44px;font:inherit;font-size:15px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+  textarea{min-height:70px}
+  .seg{display:flex;gap:6px}.seg button{flex:1;min-height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;font:inherit;font-size:15px;cursor:pointer}.seg button.on{background:var(--p3);border-color:#fde68a;font-weight:700}
+  .rec{border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-top:8px;display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}
+  .rec .k{font-size:12px;color:var(--sub);min-width:120px}.rec .id{font:11px ui-monospace,Consolas,monospace;color:#9ca3af;margin-left:auto}
+  .pill{display:inline-block;padding:2px 10px;border-radius:10px;font-size:13px;font-weight:700}
+  .foot{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;z-index:5}
+  .foot .st{font-size:13px;color:var(--sub);flex:1}
+  #cal,#drawer{position:fixed;inset:0;background:rgba(31,36,48,.35);z-index:20;display:none;align-items:flex-start;justify-content:center;padding:40px 12px}
+  #cal.on,#drawer.on{display:flex}
+  .modal{background:#fff;border-radius:16px;padding:16px;max-width:720px;width:100%;max-height:85vh;overflow:auto}
+  .cg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:13px}.cg div{min-height:56px;border:1px solid var(--line);border-radius:8px;padding:4px 6px}.cg .h{min-height:0;border:0;color:var(--sub);text-align:center}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:5px;margin-right:3px}
+  .dw a{display:block;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;text-decoration:none;color:inherit}.dw a small{display:block;color:var(--sub);font-size:12px}
+  @media (max-width:600px){header h1{font-size:17px}.foot .btn{padding:0 10px}.rec input,.rec select,.rec .seg{min-width:0!important;max-width:none!important;flex-basis:100%}.blk{padding:10px}main{padding:10px 8px 120px}.five li{flex-direction:column;gap:2px}}
+  main,.blk{max-width:100%;min-width:0}.blk{overflow:hidden}
+  @media print{header,.foot,.mock,#cal,#drawer{display:none!important}main{padding:0;max-width:none}.blk{break-inside:avoid;border:1px solid #ccc}body{font-size:12px}textarea,input,select{border:0;padding:0;min-height:0}}
+</style>
+</head>
+<body>
+<div class="mock">🧪 목업 — 저장·계산 안 됨. 숫자는 2026-09-07 실제 확인값, <span class="tag ex">예시</span> 붙은 칸은 이력이 없어 임의값. 문제점을 찾기 위한 그림입니다.</div>
+<header>
+  <button class="btn" type="button">← 9/6 (일)</button>
+  <h1>📔 2026-09-07 (월) <small>투자일지 · 기록 7 · 마지막 저장 19:12</small></h1>
+  <button class="btn" type="button">9/8 (화) →</button>
+  <button class="btn" type="button" onclick="document.getElementById('cal').classList.add('on')">📅 달력</button>
+  <button class="btn" type="button">🔍 검색</button>
+  <button class="btn" type="button" onclick="document.getElementById('drawer').classList.add('on')">📚 참고 서랍</button>
+</header>
+<main>
+
+<div class="blk" style="background:#eff6ff;border-color:#bfdbfe">
+  <h2>① 오늘 5줄 <span class="tag auto">자동 초안 08:00</span><span class="tag me">달님 수정 가능</span><span class="id">2026-09-07/brief</span></h2>
+  <ul class="five">
+    <li><b>레짐</b><span>성장 <b class="u">확장(확인)</b> · 물가 높음·내려오는 중(확인) · 유동성 <b>긴축 쪽</b>(한은 인상) → 4분면 <b>성장↑물가↑ = 원자재·가치·은행</b> (추정, PMI 반영 후)</span></li>
+    <li><b>바뀐 것</b><span>한은 기준금리 2.5→<b>3.0%</b>(9/5 인상) · 신용 스프레드 0.68%p <span class="pill" style="background:var(--p3)">주의</span> · 코스피 6,835→6,562(9/2, −4.0%) <span class="tag ex">예시 이력</span></span></li>
+    <li><b>오늘 발표</b><span>없음 · 다음 9/11 KRX 주간 · <b>9/18 연준 SEP</b> · 9/21 관세청 1~20일 수출</span></li>
+    <li><b>산업·종목</b><span>DART 7일 35건(새 수주 0) · 토론실 근거글 +10(적중 0) · ISM 공급부족 목록에 <b>메모리·반도체·PCB·구리</b></span></li>
+    <li><b>어제 결론</b><span>"관망 — 스프레드·환율 확인 후" <span class="tag ex">예시</span> → 오늘 결론은 ⑤에서</span></li>
+  </ul>
+</div>
+
+<div class="blk">
+  <h2>② 지표 변화 <span class="tag auto">자동 · 매시</span><span class="tag">값 · 1일 · 1주 · 1달 — 색은 방향</span><span class="id">2026-09-07/ind</span></h2>
+  <div class="wrap"><table class="grp">
+    <thead><tr><th>지표</th><th style="text-align:right">값</th><th style="text-align:right">1일</th><th style="text-align:right">1주</th><th style="text-align:right">1달</th><th>판정</th><th>기준</th><th>주기</th></tr></thead>
+    <tbody>
+      <tr><td class="g" colspan="8">🇰🇷 한국</td></tr>
+      <tr><td>KOSPI</td><td class="n">6,579</td><td class="n d">−0.4%</td><td class="n d">−3.9% <span class="tag ex">예시</span></td><td class="n u">+6.1% <span class="tag ex">예시</span></td><td>중립</td><td>09-03</td><td>일</td></tr>
+      <tr><td>한은 기준금리</td><td class="n">3.00%</td><td class="n u">+0.5%p</td><td class="n z">—</td><td class="n z">—</td><td><span class="pill" style="background:var(--p5)">인상</span></td><td>09-05</td><td>월</td></tr>
+      <tr><td>국고채 3년</td><td class="n">3.884%</td><td class="n u">+0.05</td><td class="n u">+0.12 <span class="tag ex">예시</span></td><td class="n z">—</td><td>—</td><td>09-04</td><td>일</td></tr>
+      <tr><td>신용 스프레드 AA-−국고3</td><td class="n">0.68%p</td><td class="n u">+0.02</td><td class="n u">+0.06 <span class="tag ex">예시</span></td><td class="n z">—</td><td><span class="pill" style="background:var(--p3)">주의</span></td><td>09-04</td><td>일</td></tr>
+      <tr><td>원/달러</td><td class="n">1,369.4</td><td class="n u">+0.8%</td><td class="n z">—</td><td class="n z">—</td><td>우호</td><td>09-03</td><td>일</td></tr>
+      <tr><td>선행지수순환변동치</td><td class="n">104.2</td><td class="n u">+0.4</td><td class="n z">—</td><td class="n u">↑ 3개월</td><td><span class="pill" style="background:var(--p2)">확장</span></td><td>07월</td><td>월</td></tr>
+      <tr><td class="g" colspan="8">🇺🇸 미국</td></tr>
+      <tr><td>S&amp;P500</td><td class="n">7,719</td><td class="n d">−0.4%</td><td class="n u">+0.9% <span class="tag ex">예시</span></td><td class="n u">+2.3% <span class="tag ex">예시</span></td><td>중립</td><td>09-07</td><td>일</td></tr>
+      <tr><td>미 10년물</td><td class="n">4.77%</td><td class="n d">−0.02</td><td class="n z">—</td><td class="n z">—</td><td><span class="pill" style="background:var(--p5)">부담</span></td><td>09-03</td><td>일</td></tr>
+      <tr><td>연준 실효금리</td><td class="n">3.63%</td><td class="n z">동결</td><td class="n z">—</td><td class="n z">—</td><td>—</td><td>08월</td><td>월</td></tr>
+      <tr><td>미 CPI 전년비</td><td class="n">3.54%</td><td class="n d">−0.19</td><td class="n z">—</td><td class="n z">—</td><td><span class="pill" style="background:var(--p5)">부담</span></td><td>07월</td><td>월</td></tr>
+      <tr><td>ISM 제조업 PMI</td><td class="n">54.6</td><td class="n d">−1.0</td><td class="n z">—</td><td class="n z">—</td><td><span class="pill" style="background:var(--p2)">확장</span></td><td>08월</td><td>월</td></tr>
+      <tr><td class="g" colspan="8">🌍 국제</td></tr>
+      <tr><td>유가 WTI</td><td class="n">91.48</td><td class="n u">+0.6%</td><td class="n u">+1.4% <span class="tag ex">예시</span></td><td class="n z">—</td><td>—</td><td>09-07</td><td>일</td></tr>
+      <tr><td>금</td><td class="n">4,477</td><td class="n z">0.0%</td><td class="n z">—</td><td class="n z">—</td><td>—</td><td>09-07</td><td>일</td></tr>
+      <tr><td>중국 PMI</td><td class="n">49.8</td><td class="n u">+0.6</td><td class="n z">—</td><td class="n z">—</td><td><span class="pill" style="background:var(--p3)">수축·회복</span></td><td>08월</td><td>월</td></tr>
+    </tbody>
+  </table></div>
+  <p style="margin:6px 0 0;font-size:12.5px;color:var(--sub)">30개 전부 보기 ▸ · 지표 누르면 30일 추이·출처 (참고 서랍 → 지표 사전)</p>
+</div>
+
+<div class="blk">
+  <h2>③ 발표·보고서 <span class="tag auto">달력 자동</span><span class="tag me">판정·메모는 달님</span><span class="id">2026-09-07/rep</span></h2>
+  <table>
+    <thead><tr><th>날짜</th><th>보고서</th><th>실제</th><th>이전</th><th>내 판정</th><th>메모</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>09-01</td><td>ISM 제조업 PMI 8월</td><td class="n">54.6</td><td class="n">55.6</td><td><span class="pill" style="background:var(--p5)">아래</span></td><td>신규주문 −3.0 둔화 · 가격 71.1 · 메모리·구리 부족</td><td style="font:11px monospace;color:#9ca3af">rep/ism_mfg/2026-08</td></tr>
+      <tr><td>08-31</td><td>중국 NBS PMI 8월</td><td class="n">49.8</td><td class="n">49.2</td><td><span class="pill" style="background:var(--p2)">위</span></td><td>수축권이지만 회복, 신규주문 50.6 (원문 미확인)</td><td style="font:11px monospace;color:#9ca3af">rep/china_pmi/2026-08</td></tr>
+      <tr style="background:#fffbeb"><td>09-18</td><td><b>연준 SEP·점도표</b> 3분기</td><td class="n z">—</td><td class="n z">—</td><td><span class="tag">발표 후 입력</span></td><td class="z">읽을 것: 점도표 중앙값 올해·내년 + 성명 문구</td><td></td></tr>
+      <tr style="background:#fffbeb"><td>09-21</td><td>관세청 1~20일 수출 9월</td><td class="n z">—</td><td class="n z">—</td><td><span class="tag">발표 후 입력</span></td><td class="z">총수출·반도체 전년비</td><td></td></tr>
+    </tbody>
+  </table>
+  <div class="rec" style="background:#fafafa"><span class="k">빠른 기록</span>
+    <select style="max-width:220px"><option>보고서 고르기…</option><option>연준 SEP</option><option>관세청 1~20일 수출</option><option>KRX 주간 순매수</option></select>
+    <input placeholder="실제값" style="max-width:120px"><div class="seg" style="max-width:260px"><button type="button">위</button><button type="button" class="on">그대로</button><button type="button">아래</button></div>
+    <input placeholder="한 줄 메모" style="flex:1;min-width:200px"><button class="btn p" type="button">저장</button>
+  </div>
+</div>
+
+<div class="blk">
+  <h2>④ 산업·종목 <span class="tag auto">자동</span><span class="tag me">판단은 달님</span><span class="id">2026-09-07/stock</span></h2>
+  <div class="row">
+    <div><b style="font-size:13px">DART 7일 35건 · 새 수주 0</b><div style="font-size:13px;margin-top:4px">한화오션 — 단일판매공급계약(9/4) · 삼성바이오 — 주요사항보고(9/3) <span class="tag ex">예시</span></div></div>
+    <div><b style="font-size:13px">토론실 근거글 +10 · 적중 0</b><div style="font-size:13px;margin-top:4px">SK하이닉스 "HBM4 공급 확정" 강 · 두산에너빌 "체코 계약" 중 <span class="tag ex">예시</span></div></div>
+    <div><b style="font-size:13px">캡쳐 분석 · 실적 신호</b><div style="font-size:13px;margin-top:4px">삼성전자 🟢 선행EPS 4,800→5,200 · 한미반도체 🟡 <span class="tag ex">예시</span></div></div>
+  </div>
+  <div class="rec"><span class="k">종목 판단 추가</span><input placeholder="종목" style="max-width:160px"><select style="max-width:140px"><option>관심</option><option>매수 후보</option><option>보유</option><option>제외</option></select><input placeholder="이유 · 손절가 · 시나리오" style="flex:1;min-width:220px"><button class="btn p" type="button">저장</button></div>
+  <div class="rec"><span class="k">SK하이닉스</span><span class="pill" style="background:var(--p1)">매수 후보</span><span style="font-size:13.5px">ISM 공급부족 목록 메모리 + HBM 근거글. 손절 −7%. 9/18 SEP 매파면 대기</span><span class="id">stock/000660/2026-09-07 <span class="tag ex">예시</span></span></div>
+</div>
+
+<div class="blk" style="background:#fffbeb;border-color:#fde68a">
+  <h2>⑤ 오늘 결론 <span class="tag me">달님</span><span class="id">2026-09-07/verdict</span></h2>
+  <div class="row">
+    <div><label>시장 결론</label><div class="seg"><button type="button">강세</button><button type="button" class="on">중립</button><button type="button">약세</button><button type="button">관망</button></div></div>
+    <div><label>한 줄</label><input value="한은 인상+스프레드 주의 → 신규 진입 대기, 9/18 SEP 보고 결정"></div>
+  </div>
+  <label style="margin-top:8px">근거 (자동 링크: 위 블록에서 끌어옴)</label>
+  <textarea>레짐 성장 확장(확인)·물가 높음 / 신용 스프레드 0.68 주의 / 코스피 −4% 급락 후 반등 여부 미확인 / ISM 메모리 부족 → 반도체 긍정</textarea>
+  <label style="margin-top:8px">매매 시나리오 (조건 → 행동)</label>
+  <div class="rec"><span class="k">조건</span><input value="SEP 점도표 인하 유지 & 스프레드 0.6 아래" style="flex:1;min-width:200px"><span class="k">행동</span><input value="SK하이닉스 1/3 매수, 손절 −7%" style="flex:1;min-width:180px"></div>
+  <div class="rec"><span class="k">조건</span><input value="스프레드 1.0 위 또는 VIX 30" style="flex:1;min-width:200px"><span class="k">행동</span><input value="신규 없음, 보유 절반 축소" style="flex:1;min-width:180px"></div>
+</div>
+
+<div class="blk" style="border-style:dashed">
+  <h2>⑥ 이 일지의 기록 주소 <span class="tag">노션식 — 기록 하나에 주소 하나</span></h2>
+  <div style="font:12.5px ui-monospace,Consolas,monospace;color:#374151;line-height:1.8">
+    journal/2026-09-07 (하루) ← brief · ind(스냅샷) · rep/ism_mfg/2026-08 · rep/china_pmi/2026-08 · stock/000660/2026-09-07 · verdict<br>
+    각 주소는 Firestore 문서 = 링크로 열 수 있고, 덮어쓰지 않고 새 버전이 붙음(status=중단 가능). 검색·통계는 이 주소들을 모아서.
+  </div>
+</div>
+</main>
+
+<div class="foot">
+  <span class="st">자동 저장(Firestore) · 마지막 19:12 · 오늘 기록 7개</span>
+  <button class="btn" type="button" onclick="print()">🖨 그날 보고서 (A4 1장)</button>
+  <button class="btn" type="button">📤 공유 링크</button>
+  <button class="btn g" type="button">✔ 오늘 마감</button>
+</div>
+
+<div id="cal" onclick="if(event.target===this)this.classList.remove('on')"><div class="modal">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b style="font-size:16px;flex:1">2026년 9월</b><span class="tag"><span class="dot" style="background:#86efac"></span>강세 <span class="dot" style="background:#e5e7eb"></span>중립/관망 <span class="dot" style="background:#fca5a5"></span>약세 <span class="dot" style="background:#fde68a"></span>발표일</span><button class="btn" type="button" onclick="document.getElementById('cal').classList.remove('on')">닫기</button></div>
+  <div class="cg">
+    <div class="h">월</div><div class="h">화</div><div class="h">수</div><div class="h">목</div><div class="h">금</div><div class="h">토</div><div class="h">일</div>
+    <div>31<br><span class="dot" style="background:#fde68a"></span>中PMI</div><div>1<br><span class="dot" style="background:#fde68a"></span>ISM</div><div>2<br><span class="dot" style="background:#fca5a5"></span>−4%</div><div>3<br><span class="dot" style="background:#e5e7eb"></span></div><div>4<br><span class="dot" style="background:#e5e7eb"></span></div><div style="color:#9ca3af">5<br>한은 인상</div><div style="color:#9ca3af">6</div>
+    <div style="background:#eff6ff;border-color:#93c5fd"><b>7</b><br><span class="dot" style="background:#e5e7eb"></span>오늘</div><div>8</div><div>9</div><div>10</div><div>11<br><span class="dot" style="background:#fde68a"></span>KRX</div><div style="color:#9ca3af">12</div><div style="color:#9ca3af">13</div>
+    <div>14</div><div>15</div><div>16</div><div>17</div><div>18<br><span class="dot" style="background:#fde68a"></span>SEP</div><div style="color:#9ca3af">19</div><div style="color:#9ca3af">20</div>
+    <div>21<br><span class="dot" style="background:#fde68a"></span>수출</div><div>22</div><div>23</div><div>24</div><div>25</div><div style="color:#9ca3af">26</div><div style="color:#9ca3af">27</div>
+    <div>28</div><div>29</div><div>30<br><span class="dot" style="background:#fde68a"></span>中PMI</div><div>1<br><span class="dot" style="background:#fde68a"></span>ISM</div><div>2<br><span class="dot" style="background:#fde68a"></span>고용</div><div style="color:#9ca3af">3</div><div style="color:#9ca3af">4</div>
+  </div>
+  <p style="font-size:12.5px;color:var(--sub);margin:8px 0 0">날짜를 누르면 그날 일지. 색 = 그날 ⑤ 결론. 9/2·9/5 는 <span class="tag ex">예시</span></p>
+</div></div>
+
+<div id="drawer" onclick="if(event.target===this)this.classList.remove('on')"><div class="modal dw" style="max-width:520px">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b style="font-size:16px;flex:1">📚 참고 서랍 — 매일 안 보는 것</b><button class="btn" type="button" onclick="document.getElementById('drawer').classList.remove('on')">닫기</button></div>
+  <a href="#">축 8개 × 6단계 <small>왜 그렇고 바뀌면 어떻게 하나 · 읽기창</small></a>
+  <a href="#">레짐 규칙·재검토 <small>판정 계산 근거, 기준값</small></a>
+  <a href="#">지표 사전 <small>30개 지표 뜻·출처·주기·30일 추이</small></a>
+  <a href="#">보고서 목록·달력 <small>분기 4 + 월간, 발표 규칙, 기록 이력</small></a>
+  <a href="#">한국 경제 100 <small>한국은행 100대 통계</small></a>
+  <a href="#">산업 사슬 <small>6산업 33종목</small></a>
+  <a href="#">전략 카드 5 · 리스크 규칙 <small>손절·분산·서킷브레이커</small></a>
+  <a href="#">수동 입력 도구 · 캡쳐 분석 · 자가 점검 <small>도구</small></a>
+</div></div>
+<script>
+document.querySelectorAll('.seg').forEach(function(s){ s.querySelectorAll('button').forEach(function(b){ b.onclick=function(){ s.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b)}); }; }); });
+</script>
+</body>
+</html>

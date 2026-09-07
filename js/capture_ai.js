@@ -1,4 +1,4 @@
-// capture_ai.js — cygnus 「📸 캡쳐 분석」 애드온
+// v 20260907-2330  capture_ai.js — cygnus 「📸 캡쳐 분석」 애드온
 // 캡쳐(스크린샷)를 붙여넣으면 사용자의 Claude API 키로 이미지를 Claude 에게 보내 재무를 자동 추출·분석한다.
 // 키/모델은 이 브라우저 localStorage 에만 저장(중계서버 주소처럼). api.anthropic.com 으로만 전송.
 (function () {
@@ -66,8 +66,8 @@
   function renderAll() { var wrap = document.getElementById('caiResults'); if (!wrap) return; var rs = results(); wrap.innerHTML = rs.length ? rs.map(card).join('') : ''; }
 
   function callClaude(b64, mt, statusEl) {
-    var key = g(LS_KEY, ''), model = g(LS_MODEL, 'claude-sonnet-5');
-    if (!key) { statusEl.innerHTML = '<span style="color:#c00">먼저 ⚙ 에서 API 키를 저장하세요.</span>'; return; }
+    var key = g(LS_KEY, ''), model = g(LS_MODEL, 'claude-sonnet-4-6');
+    if (!key) { statusEl.innerHTML = '<span style="color:#c00">사진은 받았지만 <b>API 키가 없어</b> 읽지 못했습니다 — 위 ⚙ Claude API 설정에서 키를 저장하고 다시 붙여넣으세요. 키 없이 쓰려면 캡쳐를 채팅(Claude)에 보내는 방식.</span>'; var d = document.querySelector('#caiPanel details'); if (d) d.open = true; return; }
     statusEl.textContent = '🔍 Claude 가 캡쳐 읽는 중…';
     fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -87,8 +87,14 @@
     }).catch(function (e) { statusEl.innerHTML = '<span style="color:#c00">호출 실패: ' + esc(e.message) + ' (키·모델·네트워크 확인)</span>'; });
   }
 
+  function reveal() {                                   // 📸 구역이 접혀 있으면 펴고, 패널로 스크롤 — 붙여넣은 뒤 아무 반응이 없어 보이는 문제 방지(2026-09-07)
+    var h = document.getElementById('cap'), body = h && h.nextElementSibling;
+    if (body && body.hidden) h.click();
+    var pnl = document.getElementById('caiPanel'); if (pnl) pnl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
   function handleFile(file, statusEl) {
     if (!file || !/^image\//.test(file.type)) return;
+    reveal();
     var rd = new FileReader();
     rd.onload = function () { var res = rd.result; var b64 = res.split(',')[1]; var mt = (res.match(/^data:(image\/[^;]+)/) || [])[1] || 'image/png'; callClaude(b64, mt, statusEl); };
     rd.readAsDataURL(file);
@@ -105,7 +111,7 @@
       + '<input id="caiKey" type="password" placeholder="Claude API 키 (sk-ant-...)" style="flex:1;min-width:220px;padding:6px;border:1px solid #ccc;border-radius:6px">'
       + '<input id="caiModel" placeholder="모델" style="width:180px;padding:6px;border:1px solid #ccc;border-radius:6px">'
       + '<button class="btn pri" id="caiSave" type="button">저장</button></div>'
-      + '<p class="muted" style="font-size:12px;margin:6px 0 0">키는 <b>이 브라우저에만</b> 저장돼요(중계서버 주소처럼). 다른 곳으로 안 나가고 api.anthropic.com 으로만 갑니다. 모델 기본값 claude-sonnet-5.</p></details>'
+      + '<p class="muted" style="font-size:12px;margin:6px 0 0">키는 <b>이 브라우저에만</b> 저장돼요(중계서버 주소처럼). 다른 곳으로 안 나가고 api.anthropic.com 으로만 갑니다. 모델 기본값 claude-sonnet-4-6(달님 표준).</p></details>'
       + '<div id="caiDrop" tabindex="0" style="border:2px dashed #c4b5fd;border-radius:8px;padding:16px;text-align:center;cursor:pointer;background:#fff">'
       + '📸 여기를 클릭한 뒤 <b>붙여넣기(Ctrl+V)</b> 하거나, <label style="color:#7c3aed;text-decoration:underline;cursor:pointer">파일 선택<input id="caiFile" type="file" accept="image/*" hidden></label><br>'
       + '<span class="muted" style="font-size:13px">네이버 종목 화면(투자정보·기업실적분석)을 캡쳐해 붙여넣으면 Claude 가 읽어 재무요약을 만듭니다</span></div>'
@@ -113,9 +119,9 @@
       + '</div><div id="caiResults"></div>';
     host.parentNode.insertBefore(panel, host);
     document.getElementById('caiKey').value = g(LS_KEY, '');
-    document.getElementById('caiModel').value = g(LS_MODEL, 'claude-sonnet-5');
+    document.getElementById('caiModel').value = g(LS_MODEL, 'claude-sonnet-4-6');
     var statusEl = document.getElementById('caiStatus');
-    document.getElementById('caiSave').onclick = function () { s(LS_KEY, document.getElementById('caiKey').value.trim()); s(LS_MODEL, document.getElementById('caiModel').value.trim() || 'claude-sonnet-5'); statusEl.textContent = '✅ 저장됨'; };
+    document.getElementById('caiSave').onclick = function () { s(LS_KEY, document.getElementById('caiKey').value.trim()); s(LS_MODEL, document.getElementById('caiModel').value.trim() || 'claude-sonnet-4-6'); statusEl.textContent = '✅ 저장됨'; };
     document.getElementById('caiFile').onchange = function (e) { handleFile(e.target.files[0], statusEl); };
     var drop = document.getElementById('caiDrop');
     drop.onclick = function () { drop.focus(); };

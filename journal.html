@@ -1,0 +1,258 @@
+<!-- v 20260907-2040  journal.html — 투자일지(하루 한 장). 위: 오늘의 결론 헤드라인 + 시장 상태 4칸 / 아래: 시간순 기록(자동 회색·달님 초록) / 왼쪽: 달력·최근 결론·종목 상태·다음 발표·참고 서랍.
+     자동 부분: log/YYYY-MM-DD.json(scripts/journal.py 매시) · 달님 기록: Firestore invest_journal/<date>(결론) · invest_records(기록 하나 = 문서 하나 = 주소 하나). 저장 즉시, 덮어쓰지 않고 새 문서/새 버전. -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>투자일지</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700;900&display=swap">
+<style>
+  :root{--bg:#fbfaf6;--card:#fff;--line:#e6e3d9;--ink:#1f2430;--sub:#6b7280;--me:#0f766e;--me-bg:#ecfdf5;--me-line:#99f6e4;--blue:#eef2ff;--yellow:#fff4d6;--red:#fde8e8;--green:#e8f5ec;--up:#15803d;--dn:#b91c1c}
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+  .serif{font-family:"Noto Serif KR","Apple SD Gothic Neo",serif}
+  .app{display:grid;grid-template-columns:280px minmax(0,1fr);min-height:100vh}
+  aside{background:var(--card);border-right:1px solid var(--line);padding:22px 18px;display:flex;flex-direction:column;gap:18px}
+  aside h1{font-size:22px;margin:0}
+  .sec{display:flex;flex-direction:column;gap:6px}.sec .lb{font-size:12px;color:var(--sub);font-weight:500}
+  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;font-size:12px;text-align:center}
+  .cal .h{color:#9ca3af}.cal button{min-height:34px;border:0;border-radius:6px;background:transparent;font:inherit;cursor:pointer;color:inherit}
+  .cal button.dim{color:#9ca3af}.cal button.today{outline:2px solid var(--ink)}.cal button.cur{background:var(--ink);color:#fff;font-weight:700}
+  .cal button.v강세{background:#dcfce7}.cal button.v약세{background:var(--red)}.cal button.v중립,.cal button.v관망{background:#eceef2}.cal button.rel{box-shadow:inset 0 -3px 0 #fde68a}
+  .row{display:flex;justify-content:space-between;padding:7px 10px;border-radius:8px;background:#f3f4f6;font-size:13px;cursor:pointer}
+  .btn{min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);font:inherit;font-size:14px;cursor:pointer;color:inherit;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+  .btn.dark{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}.btn.me{background:var(--me-bg);border-color:var(--me-line);color:var(--me);font-weight:700}
+  main{padding:22px 40px 80px}
+  .top{display:flex;align-items:flex-end;justify-content:space-between;border-bottom:3px solid var(--ink);padding-bottom:10px;gap:12px;flex-wrap:wrap}
+  .top .d{font-size:30px;font-weight:900;letter-spacing:-.5px}.top small{font-size:13px;color:var(--sub);margin-left:10px}
+  .front{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:28px;border-bottom:1px solid #d9d6cc;padding:18px 0 20px}
+  .kicker{display:flex;gap:10px;align-items:center;font-size:13px;font-weight:700;color:var(--me);letter-spacing:2px}
+  .kicker .pill{letter-spacing:0;background:var(--me-bg);border:1px solid var(--me-line);border-radius:8px;padding:2px 10px;color:var(--ink)}
+  .head{font-size:36px;font-weight:900;line-height:1.22;letter-spacing:-1px;margin:8px 0}.head.empty{color:#9ca3af;font-weight:700;font-size:26px}
+  .body{font-size:15px;line-height:1.7;color:#374151;white-space:pre-line}
+  .scen{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.scen div{border-left:3px solid #86efac;padding:2px 10px;font-size:13.5px;line-height:1.6;min-width:240px}.scen div.bad{border-color:#fca5a5}
+  .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .card{border-radius:8px;padding:12px 14px}.card .l{font-size:12px;color:var(--sub)}.card .v{font-size:20px;font-weight:700}.card .s{font-size:12px;color:var(--sub)}
+  .card.blue{background:var(--blue)}.card.yellow{background:var(--yellow)}.card.red{background:var(--red)}.card.green{background:var(--green)}
+  .card.yellow .s{color:#b45309}.card.red .s{color:var(--dn)}
+  h2{font-size:19px;font-weight:700;margin:22px 0 10px;display:flex;align-items:center;gap:12px}h2 small{font-size:13px;color:var(--sub);font-weight:400}
+  .tl{display:grid;grid-template-columns:84px minmax(0,1fr);gap:0 18px}
+  .tl .t{text-align:right;padding-top:12px;font-size:13px;color:var(--sub);font-weight:500}.tl .t small{display:block;font-size:11px;color:#9ca3af}
+  .tl .t.me{color:var(--me);font-weight:700}.tl .t.me small{color:var(--me)}
+  .tl .c{border-left:2px solid #d1d5db;padding:0 0 16px 20px}.tl .c.me{border-color:var(--me)}
+  .e{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px}.e.me{border-color:var(--me-line)}
+  .e .ti{font-size:15px;font-weight:700;margin-bottom:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.e .tx{font-size:13.5px;color:#374151;line-height:1.6;white-space:pre-line}
+  .e .id{margin-left:auto;font:11px ui-monospace,Consolas,monospace;color:#9ca3af}
+  .chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;font-size:13.5px}.chips div{background:#f7f6f1;border-radius:8px;padding:6px 10px}
+  .tag{font-size:12px;padding:1px 8px;border-radius:6px;background:#f3f4f6;color:var(--sub)}.tag.v위{background:#dcfce7;color:var(--up)}.tag.v아래{background:var(--red);color:var(--dn)}
+  .add{min-height:48px;border:1px dashed #c7cbd4;border-radius:12px;display:flex;align-items:center;padding:6px 12px;gap:8px;flex-wrap:wrap;background:#fff}
+  .add button{min-height:36px;border:1px solid var(--line);border-radius:8px;background:#f3f4f6;font:inherit;font-size:13px;cursor:pointer;padding:0 10px}.add button.me{background:var(--me-bg);border-color:var(--me-line);color:var(--me);font-weight:700}
+  .form{background:#fff;border:1px solid var(--me-line);border-radius:12px;padding:14px 16px;margin-top:8px;display:flex;flex-direction:column;gap:8px}
+  .form .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}label{font-size:12px;color:var(--sub);display:block}
+  input,select,textarea{width:100%;min-height:44px;font:inherit;font-size:15px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}textarea{min-height:80px}
+  .seg{display:flex;gap:6px}.seg button{flex:1;min-height:44px;border-radius:10px;border:1px solid var(--line);background:#fff;font:inherit;font-size:15px;cursor:pointer}.seg button.on{background:var(--ink);color:#fff;font-weight:700}
+  .muted{color:var(--sub);font-size:12.5px}
+  #drawer{position:fixed;inset:0;background:rgba(31,36,48,.35);z-index:30;display:none;align-items:flex-start;justify-content:center;padding:40px 12px}#drawer.on{display:flex}
+  .modal{background:#fff;border-radius:16px;padding:16px;max-width:560px;width:100%;max-height:85vh;overflow:auto}.modal a{display:block;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;text-decoration:none;color:inherit}.modal a small{display:block;color:var(--sub);font-size:12px}
+  .st{position:fixed;right:14px;bottom:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:12px;color:var(--sub);z-index:6}
+  @media (max-width:900px){.app{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line);padding:14px 16px}main{padding:14px 16px 80px}.front{grid-template-columns:1fr;gap:14px}.head{font-size:24px}.tl{grid-template-columns:56px minmax(0,1fr);gap:0 10px}.top .d{font-size:22px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media print{aside,.add,.form,.btn,.st,#drawer{display:none!important}.app{display:block}main{padding:0}body{font-size:12px;background:#fff}.head{font-size:26px}.e{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+  <h1 class="serif">달님 투자일보</h1>
+  <div class="sec">
+    <div style="display:flex;justify-content:space-between;align-items:center"><b id="calTitle" style="font-size:14px">—</b><span><button class="btn" style="min-height:32px;padding:0 8px" id="calPrev" type="button">‹</button> <button class="btn" style="min-height:32px;padding:0 8px" id="calNext" type="button">›</button></span></div>
+    <div class="cal" id="cal"></div>
+    <div class="muted">색 = 그날 결론 · 노란 밑줄 = 발표일</div>
+  </div>
+  <div class="sec"><div class="lb">최근 결론</div><div id="recent" class="muted">읽는 중…</div></div>
+  <div class="sec"><div class="lb">종목 상태</div><div id="stocks" class="muted">기록 없음</div></div>
+  <div class="sec"><div class="lb">다음 발표</div><div id="next" class="muted" style="font-size:13px;line-height:1.7">—</div></div>
+  <div style="flex-grow:1"></div>
+  <div class="sec"><a class="btn" href="#" id="drawerBtn">참고 서랍</a><a class="btn" href="index.html">옛 허브(참고)</a></div>
+</aside>
+<main>
+  <div class="top">
+    <div><span class="d serif" id="dateTitle">—</span><small id="dateSub"></small></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn" id="prevDay" type="button">‹ 어제</button><button class="btn" id="todayBtn" type="button">오늘</button><button class="btn" id="nextDay" type="button">내일 ›</button>
+      <button class="btn dark" type="button" onclick="print()">오늘 보고서 뽑기</button>
+    </div>
+  </div>
+  <div class="front">
+    <div>
+      <div class="kicker">오늘의 결론 <span class="pill" id="verdictPill">아직 없음</span><span id="verdictWhen" style="letter-spacing:0;font-weight:400;color:#9ca3af"></span></div>
+      <div class="head serif empty" id="headline">아직 결론을 쓰지 않았습니다 — 아래 기록을 보고 「오늘 결론 쓰기」</div>
+      <div class="body" id="bodyText"></div>
+      <div class="scen" id="scen"></div>
+      <div style="margin-top:10px;display:flex;gap:8px"><button class="btn me" type="button" id="writeVerdict">오늘 결론 쓰기</button><span class="muted" id="verdictAddr" style="align-self:center"></span></div>
+      <div class="form" id="verdictForm" hidden>
+        <div class="seg" id="vseg"><button type="button" data-v="강세">강세</button><button type="button" data-v="중립">중립</button><button type="button" data-v="약세">약세</button><button type="button" data-v="관망">관망</button></div>
+        <div><label>헤드라인 (한 줄 결론)</label><input id="vHead" placeholder="예: 한은 인상에 스프레드 주의 — 신규 진입은 9/18 점도표 뒤로"></div>
+        <div><label>본문 (근거 2~3문장)</label><textarea id="vBody" placeholder="왜 그렇게 봤나 — 위 지표·발표·근거글에서"></textarea></div>
+        <div class="g"><div><label>조건 → 행동 ①</label><input id="vS1" placeholder="SEP 인하 유지 & 스프레드 0.6↓ → 하이닉스 1/3 매수"></div><div><label>조건 → 행동 ② (반대 시나리오)</label><input id="vS2" placeholder="스프레드 1.0↑ 또는 VIX 30 → 신규 없음"></div></div>
+        <div style="display:flex;gap:8px"><button class="btn me" type="button" id="vSave">저장</button><button class="btn" type="button" id="vCancel">닫기</button><span class="muted" id="vMsg" style="align-self:center"></span></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:700;letter-spacing:2px;color:#4b5563;margin-bottom:8px">시장 상태 <span id="cardsWhen" style="font-weight:400;letter-spacing:0;color:#9ca3af"></span></div>
+      <div class="cards" id="cards"></div>
+      <div class="muted" style="margin-top:8px" id="brief"></div>
+    </div>
+  </div>
+  <h2 class="serif">오늘의 기록 <small>시간순 · 자동은 회색, 달님은 초록</small></h2>
+  <div class="tl" id="tl"></div>
+  <div class="tl"><div class="t" style="color:#9ca3af">추가</div><div class="c" style="border-style:dashed">
+    <div class="add"><span>+ 기록</span><button type="button" data-kind="report">보고서 판정</button><button type="button" data-kind="stock">종목 판단</button><button type="button" data-kind="memo">메모</button><button type="button" class="me" id="addVerdict">오늘 결론 쓰기</button></div>
+    <div class="form" id="recForm" hidden>
+      <div class="g" id="recFields"></div>
+      <div style="display:flex;gap:8px"><button class="btn me" type="button" id="rSave">저장</button><button class="btn" type="button" id="rCancel">닫기</button><span class="muted" id="rMsg" style="align-self:center"></span></div>
+    </div>
+  </div></div>
+</main>
+</div>
+<div id="drawer" onclick="if(event.target===this)this.classList.remove('on')"><div class="modal">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b style="font-size:16px;flex:1">참고 서랍 — 매일 안 보는 것</b><button class="btn" type="button" onclick="document.getElementById('drawer').classList.remove('on')">닫기</button></div>
+  <a href="axes.html">축 8개 × 6단계 · 레짐 규칙 · 전략 카드<small>왜 그렇고 바뀌면 어떻게 하나 · 기준값 재검토</small></a>
+  <a href="cygnus.html">지표 전체 · 산업 사슬 · 수급 · 종목분석(캡쳐) · 보고서 함<small>옛 CYGNUS 화면</small></a>
+  <a href="manual.html">수동 입력 도구<small>지표 값 · 보고서 기록(GitHub 경로)</small></a>
+  <a href="index.html">옛 허브 7칸<small>실패한 작업·확인 필요·자가 점검</small></a>
+</div></div>
+<div class="st" id="status">준비 중…</div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/status.js" data-app="journal" data-version="v 20260907-2040"></script>
+<script>
+var firebaseConfig = {
+  apiKey: "AIzaSyAyG1chECYsbO7cSZUuXmNa0_KDYBmahPY",
+  authDomain: "my-system-25497.firebaseapp.com",
+  projectId: "my-system-25497",
+  storageBucket: "my-system-25497.firebasestorage.app",
+};   // worklog 와 같은 프로젝트(my-system-25497). 웹 키는 공개용 — 보안은 Firestore 규칙에서
+(function(){
+  var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' '+r.status);return r.json()})};
+  var kstToday=function(){return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10)};
+  var nowHM=function(){return new Date(Date.now()+9*3600*1000).toISOString().slice(11,16)};
+  var DAYS=['일','월','화','수','목','금','토'];
+  var st=document.getElementById('status'); var setSt=function(t){st.textContent=t};
+  var db=null; try{ firebase.initializeApp(firebaseConfig); db=firebase.firestore(); setSt('Firestore 연결'); }catch(e){ setSt('Firestore 없음: '+e.message); }
+  var COL_J='invest_journal', COL_R='invest_records';
+  var cur=kstToday(), DAY=null, IDX={days:[]}, CAL=null, VER={}, RECS=[], month=cur.slice(0,7);
+
+  function fmtDate(d){ var x=new Date(d+'T00:00:00Z'); return (x.getUTCMonth()+1)+'월 '+x.getUTCDate()+'일 '+DAYS[x.getUTCDay()]+'요일'; }
+  function shift(d,n){ var x=new Date(d+'T00:00:00Z'); x.setUTCDate(x.getUTCDate()+n); return x.toISOString().slice(0,10); }
+
+  // ---- 자동 초안(log/날짜.json) ----
+  function loadDay(){
+    document.getElementById('dateTitle').textContent=fmtDate(cur); document.getElementById('dateSub').textContent=cur===kstToday()?'오늘':'';
+    return get('log/'+cur+'.json').then(function(d){DAY=d;}).catch(function(){DAY=null;}).then(renderAuto);
+  }
+  function renderAuto(){
+    var c=document.getElementById('cards'), tl=document.getElementById('tl'), br=document.getElementById('brief');
+    if(!DAY){ c.innerHTML='<div class="card" style="grid-column:1/-1;background:#f3f4f6">이 날의 자동 초안 없음 (log/'+esc(cur)+'.json) — 수집이 돌면 생깁니다</div>'; br.textContent=''; document.getElementById('cardsWhen').textContent=''; renderTimeline(); return; }
+    c.innerHTML=(DAY.cards||[]).map(function(k){return '<div class="card '+esc(k.tone||'')+'"><div class="l">'+esc(k.label)+'</div><div class="v serif">'+esc(k.value)+'</div><div class="s">'+esc(k.sub||'')+'</div></div>'}).join('');
+    document.getElementById('cardsWhen').textContent='자동 '+String(DAY.generated_at||'').slice(11,16);
+    br.innerHTML=(DAY.brief||[]).map(function(b){return '<div><b style="color:#4b5563">'+esc(b.k)+'</b> '+esc(b.t)+'</div>'}).join('');
+    var nx=document.getElementById('next'); var up=((DAY.releases||{}).upcoming||[]); nx.innerHTML=up.length?up.map(function(x){return esc(x.date.slice(5))+' '+esc(x.name)}).join('<br>'):'없음';
+    renderTimeline();
+  }
+  function renderTimeline(){
+    var tl=document.getElementById('tl'); var items=[];
+    (DAY&&DAY.auto_entries||[]).forEach(function(e){ items.push({time:e.time||'',who:'auto',html:autoEntry(e)}); });
+    RECS.forEach(function(r){ items.push({time:r.time||'',who:'me',html:recEntry(r)}); });
+    items.sort(function(a,b){return (a.time||'').localeCompare(b.time||'')});
+    tl.innerHTML=items.length?items.map(function(i){return '<div class="t '+(i.who==='me'?'me':'')+'">'+esc(i.time)+'<small>'+(i.who==='me'?'달님':'자동')+'</small></div><div class="c '+(i.who==='me'?'me':'')+'">'+i.html+'</div>'}).join(''):'<div class="t"></div><div class="c"><div class="e muted">이 날 기록 없음</div></div>';
+  }
+  function autoEntry(e){
+    var body='';
+    if(e.kind==='brief') body='<div class="chips">'+(e.items||[]).map(function(x){return '<div>'+esc(x.name)+' <b>'+esc(fmtV(x.value,x.unit))+'</b> <span style="color:'+(x.delta>0?'#b91c1c':'#15803d')+'">'+esc(x.delta_text)+'</span>'+(x.judge?' <span class="tag">'+esc(x.judge)+'</span>':'')+'</div>'}).join('')+'</div><div class="muted" style="margin-top:6px"><a href="cygnus.html" style="color:var(--me)">지표 전부 보기 →</a></div>';
+    else body='<div class="tx">'+esc(e.text||'')+'</div>';
+    return '<div class="e"><div class="ti">'+esc(e.title)+'<span class="id">'+esc(e.id)+'</span></div>'+body+'</div>';
+  }
+  function fmtV(v,u){ if(v==null)return '—'; var s=Math.abs(v)>=1000?Number(v).toLocaleString('ko-KR',{maximumFractionDigits:0}):String(Math.round(v*100)/100); return s+(u==='%'||u==='%p'?u:(u?' '+u:'')); }
+  function recEntry(r){
+    var head=r.kind==='report'?('보고서 판정 — '+esc(r.title)+(r.value!=null?' '+esc(r.value):'')+(r.verdict?' <span class="tag v'+esc(r.verdict)+'">'+esc(r.verdict)+'</span>':'')):
+             r.kind==='stock'?('종목 판단 — '+esc(r.title)+(r.state?' <span class="tag">'+esc(r.state)+'</span>':'')):('메모 — '+esc(r.title||''));
+    return '<div class="e me"><div class="ti">'+head+'<span class="id">'+esc(COL_R+'/'+(r._id||''))+'</span></div><div class="tx">'+esc(r.text||'')+'</div></div>';
+  }
+
+  // ---- Firestore: 결론 + 기록 ----
+  function loadMine(){
+    if(!db){ VER={}; RECS=[]; renderVerdict(); renderTimeline(); return Promise.resolve(); }
+    return Promise.all([db.collection(COL_J).doc(cur).get(), db.collection(COL_R).where('date','==',cur).get()]).then(function(r){
+      VER=r[0].exists?r[0].data():{}; RECS=[]; r[1].forEach(function(d){ var x=d.data(); x._id=d.id; if(x.status!=='중단') RECS.push(x); });
+      renderVerdict(); renderTimeline(); setSt('Firestore 연결 · 기록 '+RECS.length);
+    }).catch(function(e){ setSt('읽기 실패: '+e.message); VER={}; RECS=[]; renderVerdict(); renderTimeline(); });
+  }
+  function renderVerdict(){
+    var h=document.getElementById('headline'), b=document.getElementById('bodyText'), s=document.getElementById('scen'), p=document.getElementById('verdictPill');
+    if(VER.verdict){ p.textContent=VER.verdict; h.className='head serif'; h.textContent=VER.headline||'(헤드라인 없음)'; b.textContent=VER.body||''; s.innerHTML=(VER.scenarios||[]).map(function(x,i){return x?'<div class="'+(i?'bad':'')+'">'+esc(x)+'</div>':''}).join(''); document.getElementById('verdictWhen').textContent=(VER.updatedAt?String(VER.updatedAt).slice(11,16):'')+' 달님'; document.getElementById('verdictAddr').textContent=COL_J+'/'+cur; }
+    else { p.textContent='아직 없음'; h.className='head serif empty'; h.textContent='아직 결론을 쓰지 않았습니다 — 아래 기록을 보고 「오늘 결론 쓰기」'; b.textContent=''; s.innerHTML=''; document.getElementById('verdictWhen').textContent=''; document.getElementById('verdictAddr').textContent=''; }
+  }
+  var vsel='';
+  document.querySelectorAll('#vseg button').forEach(function(bt){ bt.onclick=function(){ vsel=bt.getAttribute('data-v'); document.querySelectorAll('#vseg button').forEach(function(x){x.classList.toggle('on',x===bt)}); }; });
+  function openVerdict(){ var f=document.getElementById('verdictForm'); f.hidden=false; vsel=VER.verdict||''; document.querySelectorAll('#vseg button').forEach(function(x){x.classList.toggle('on',x.getAttribute('data-v')===vsel)}); document.getElementById('vHead').value=VER.headline||''; document.getElementById('vBody').value=VER.body||''; document.getElementById('vS1').value=(VER.scenarios||[])[0]||''; document.getElementById('vS2').value=(VER.scenarios||[])[1]||''; f.scrollIntoView({behavior:'smooth',block:'center'}); }
+  document.getElementById('writeVerdict').onclick=openVerdict; document.getElementById('addVerdict').onclick=openVerdict;
+  document.getElementById('vCancel').onclick=function(){document.getElementById('verdictForm').hidden=true};
+  document.getElementById('vSave').onclick=function(){
+    var m=document.getElementById('vMsg'); if(!vsel){ m.textContent='강세/중립/약세/관망 중 하나를 고르세요'; return; } if(!db){ m.textContent='Firestore 없음'; return; }
+    var rec={date:cur,verdict:vsel,headline:document.getElementById('vHead').value.trim(),body:document.getElementById('vBody').value.trim(),scenarios:[document.getElementById('vS1').value.trim(),document.getElementById('vS2').value.trim()],updatedAt:new Date(Date.now()+9*3600*1000).toISOString().slice(0,19)+'+09:00',ver:(VER.ver||0)+1};
+    m.textContent='저장 중…';
+    db.collection(COL_J).doc(cur).set(rec).then(function(){ return db.collection(COL_J).doc(cur).collection('versions').add(rec); }).then(function(){ m.textContent='저장됨'; VER=rec; renderVerdict(); document.getElementById('verdictForm').hidden=true; loadIndex(); }).catch(function(e){ m.textContent='실패: '+e.message; });
+  };
+  var rkind='';
+  var FIELDS={report:[['title','보고서 이름','예: 연준 SEP 3분기'],['value','실제값','예: 3.75'],['verdict','판정(위/그대로/아래)','위'],['text','메모','왜 그렇게 봤나']],
+              stock:[['title','종목','예: SK하이닉스'],['state','상태(관심/매수 후보/보유/제외)','매수 후보'],['text','이유 · 손절가 · 시나리오','ISM 공급부족 메모리 + HBM 근거글, 손절 −7%']],
+              memo:[['title','제목','한 줄'],['text','내용','']]};
+  document.querySelectorAll('.add button[data-kind]').forEach(function(bt){ bt.onclick=function(){ rkind=bt.getAttribute('data-kind'); var f=document.getElementById('recForm'); f.hidden=false; document.getElementById('recFields').innerHTML=FIELDS[rkind].map(function(x){return '<div><label>'+esc(x[1])+'</label>'+(x[0]==='text'?'<textarea data-k="text" placeholder="'+esc(x[2])+'"></textarea>':'<input data-k="'+x[0]+'" placeholder="'+esc(x[2])+'">')+'</div>'}).join(''); f.scrollIntoView({behavior:'smooth',block:'center'}); }; });
+  document.getElementById('rCancel').onclick=function(){document.getElementById('recForm').hidden=true};
+  document.getElementById('rSave').onclick=function(){
+    var m=document.getElementById('rMsg'); if(!db){ m.textContent='Firestore 없음'; return; }
+    var rec={date:cur,time:nowHM(),kind:rkind,createdAt:new Date(Date.now()+9*3600*1000).toISOString().slice(0,19)+'+09:00',status:'유효'};
+    document.querySelectorAll('#recFields [data-k]').forEach(function(i){ var v=i.value.trim(); if(v!=='') rec[i.getAttribute('data-k')]=(i.getAttribute('data-k')==='value'&&!isNaN(parseFloat(v)))?parseFloat(v):v; });
+    if(!rec.title){ m.textContent='첫 칸은 필수'; return; }
+    m.textContent='저장 중…';
+    db.collection(COL_R).add(rec).then(function(ref){ rec._id=ref.id; RECS.push(rec); renderTimeline(); m.textContent='저장됨 · 주소 '+COL_R+'/'+ref.id; document.getElementById('recForm').hidden=true; if(rkind==='stock') loadStocks(); }).catch(function(e){ m.textContent='실패: '+e.message; });
+  };
+
+  // ---- 왼쪽: 달력·최근 결론·종목 상태 ----
+  function loadIndex(){
+    return Promise.all([get('log/index.json').catch(function(){return {days:[]}}), get('analysis/calendar.json').catch(function(){return null}), db?db.collection(COL_J).orderBy('date','desc').limit(60).get().catch(function(){return null}):Promise.resolve(null)]).then(function(r){
+      IDX=r[0]; CAL=r[1]; var verd={}; if(r[2]) r[2].forEach(function(d){ var x=d.data(); verd[x.date]=x.verdict; });
+      renderCal(verd);
+      var rc=document.getElementById('recent'); var list=Object.keys(verd).sort().reverse().slice(0,4);
+      rc.innerHTML=list.length?list.map(function(d){return '<div class="row" data-d="'+d+'"><span>'+esc(d.slice(5))+'</span><span>'+esc(verd[d])+'</span></div>'}).join(''):'아직 결론 없음';
+      rc.querySelectorAll('[data-d]').forEach(function(x){ x.onclick=function(){ go(x.getAttribute('data-d')); }; });
+    });
+  }
+  function renderCal(verd){
+    var el=document.getElementById('cal'); var y=+month.slice(0,4), m=+month.slice(5,7); document.getElementById('calTitle').textContent=y+'년 '+m+'월';
+    var first=new Date(Date.UTC(y,m-1,1)), start=(first.getUTCDay()+6)%7, days=new Date(Date.UTC(y,m,0)).getUTCDate();
+    var rel={}; ((CAL&&CAL.upcoming)||[]).concat((CAL&&CAL.due_today)||[]).forEach(function(x){ rel[x.date]=1; });
+    var have={}; (IDX.days||[]).forEach(function(d){ have[d.date]=1; });
+    var h=['월','화','수','목','금','토','일'].map(function(x){return '<div class="h">'+x+'</div>'}).join('');
+    for(var i=0;i<start;i++) h+='<div></div>';
+    for(var d=1; d<=days; d++){ var ds=y+'-'+(m<10?'0':'')+m+'-'+(d<10?'0':'')+d; var dow=(start+d-1)%7; var cls=(dow>=5?'dim ':'')+(ds===cur?'cur ':'')+(ds===kstToday()?'today ':'')+(verd[ds]?'v'+verd[ds]+' ':'')+(rel[ds]?'rel ':''); h+='<button type="button" class="'+cls+'" data-d="'+ds+'">'+d+'</button>'; }
+    el.innerHTML=h; el.querySelectorAll('button[data-d]').forEach(function(b){ b.onclick=function(){ go(b.getAttribute('data-d')); }; });
+  }
+  function loadStocks(){
+    var el=document.getElementById('stocks'); if(!db){ el.textContent='—'; return; }
+    db.collection(COL_R).where('kind','==','stock').orderBy('createdAt','desc').limit(30).get().then(function(s){ var seen={}, out=[]; s.forEach(function(d){ var x=d.data(); if(seen[x.title]||x.status==='중단') return; seen[x.title]=1; out.push(x); }); el.innerHTML=out.length?out.slice(0,6).map(function(x){return '<div class="row" style="background:'+(x.state==='보유'?'#dcfce7':x.state==='매수 후보'?'#eef2ff':'#f3f4f6')+'"><span><b>'+esc(x.title)+'</b></span><span>'+esc(x.state||'')+'</span></div>'}).join(''):'기록 없음'; }).catch(function(e){ el.textContent='읽기 실패(색인 필요할 수 있음): '+e.message.slice(0,60); });
+  }
+  function go(d){ cur=d; month=d.slice(0,7); document.getElementById('verdictForm').hidden=true; document.getElementById('recForm').hidden=true; history.replaceState(null,'','#'+d); loadDay().then(loadMine).then(function(){ loadIndex(); }); }
+  document.getElementById('prevDay').onclick=function(){go(shift(cur,-1))}; document.getElementById('nextDay').onclick=function(){go(shift(cur,1))}; document.getElementById('todayBtn').onclick=function(){go(kstToday())};
+  document.getElementById('calPrev').onclick=function(){ var y=+month.slice(0,4), m=+month.slice(5,7)-1; if(m<1){m=12;y--;} month=y+'-'+(m<10?'0':'')+m; loadIndex(); };
+  document.getElementById('calNext').onclick=function(){ var y=+month.slice(0,4), m=+month.slice(5,7)+1; if(m>12){m=1;y++;} month=y+'-'+(m<10?'0':'')+m; loadIndex(); };
+  document.getElementById('drawerBtn').onclick=function(e){ e.preventDefault(); document.getElementById('drawer').classList.add('on'); };
+  var want=location.hash.replace('#',''); if(/^\d{4}-\d{2}-\d{2}$/.test(want)) { cur=want; month=want.slice(0,7); }
+  loadDay().then(loadMine).then(function(){ loadIndex(); loadStocks(); });
+})();
+</script>
+</body>
+</html>
