@@ -1,7 +1,7 @@
 {
   "schema": "status/1",
   "_설명": "워크플로가 쓰는 파일. jobs[] 한 줄 = 작업 하나. status: ok | fail | stale | stopped. due 가 지나면 앱이 '늦음' 경고. 시각은 KST(+09:00) ISO.",
-  "updated": "2026-09-07T16:23:19+09:00",
+  "updated": "2026-09-07T16:33:23+09:00",
   "jobs": [
     {
       "id": "hub",
@@ -25,17 +25,6 @@
       "note": "훑음 34종목 · 새 글 120 · 근거글 +10(누적 10)"
     },
     {
-      "id": "macro",
-      "name": "매크로 수집",
-      "status": "ok",
-      "ran": "2026-09-07T12:37:48+09:00",
-      "due": "2026-09-08T18:37:48+09:00",
-      "cause": "",
-      "fix": "",
-      "link": "cygnus.html",
-      "note": "16/18 지표"
-    },
-    {
       "id": "dart",
       "name": "공시 수집",
       "status": "ok",
@@ -56,6 +45,17 @@
       "fix": "",
       "link": "predict.html",
       "note": "새로 채점 0건 · 대기 0건"
+    },
+    {
+      "id": "macro",
+      "name": "매크로 수집",
+      "status": "ok",
+      "ran": "2026-09-07T16:33:23+09:00",
+      "due": "2026-09-08T22:33:23+09:00",
+      "cause": "bok_rate: URLError: <urlopen error timed out>; kr3y: URLError: <urlopen error timed out>",
+      "fix": "출처 주소·심볼(data/indicators.json) 확인. 전부 실패면 FRED/Yahoo 접속 문제",
+      "link": "cygnus.html",
+      "note": "20/24 지표"
     }
   ]
 }
