@@ -96,18 +96,21 @@ PROMPT = (
     '반드시 JSON 만: {"keep":[{"i":정수인덱스,"topic":"...","why":"...","strength":"상|중|하","when":"..."}]}. 고를 게 없으면 keep:[].\n'
     "글 목록(인덱스: [종목] 제목):\n")
 
-def call_claude(posts):
-    """posts: [{i, code, company, title, nid}] → LLM 이 고른 인덱스 집합 dict{i: {topic,why,strength}}."""
-    if not posts: return {}
-    lines = "\n".join(f'{p["i"]}: [{p["company"]}] {p["title"]}' for p in posts)
-    body = json.dumps({
-        "model": MODEL, "max_tokens": 2000, "temperature": 0,
-        "messages": [{"role": "user", "content": PROMPT + lines}]}).encode("utf-8")
+def _ask(user_text, max_tokens=2000):
+    """Claude 에 한 번 물어보고 텍스트만 반환. board 필터·검증 루프가 공용으로 씀."""
+    body = json.dumps({"model": MODEL, "max_tokens": max_tokens, "temperature": 0,
+        "messages": [{"role": "user", "content": user_text}]}).encode("utf-8")
     req = urllib.request.Request("https://api.anthropic.com/v1/messages", data=body, headers={
         "content-type": "application/json", "x-api-key": KEY, "anthropic-version": "2023-06-01"})
     with urllib.request.urlopen(req, timeout=90) as r:
         resp = json.loads(r.read().decode("utf-8"))
-    txt = "".join(b.get("text", "") for b in resp.get("content", []) if b.get("type") == "text")
+    return "".join(b.get("text", "") for b in resp.get("content", []) if b.get("type") == "text")
+
+def call_claude(posts):
+    """posts: [{i, code, company, title, nid}] → LLM 이 고른 인덱스 집합 dict{i: {topic,why,strength,when}}."""
+    if not posts: return {}
+    lines = "\n".join(f'{p["i"]}: [{p["company"]}] {p["title"]}' for p in posts)
+    txt = _ask(PROMPT + lines)
     mo = re.search(r"\{.*\}", txt, re.S)
     if not mo: return {}
     try:
@@ -123,6 +126,55 @@ def call_claude(posts):
         except (ValueError, TypeError, KeyError): pass
     return out
 
+
+PROMPT_VERIFY = (
+    "너는 종목토론실 '주장'이 실제 DART 공시로 확인됐는지 판정한다. 각 주장에 같은 회사의 최근 공시 제목이 딸려 있다.\n"
+    "공시가 주장의 핵심 내용을 실제로 뒷받침하면 '적중', 그 공시들과 무관하거나 애매하면 '관련없음'. 확신 없으면 '관련없음'.\n"
+    "공시 없음을 '거짓'으로 판정하지 마라 — 오직 '적중' 또는 '관련없음' 둘 중 하나.\n"
+    '반드시 JSON 만: {"v":[{"i":정수인덱스,"r":"적중|관련없음","note":"근거 공시 한 줄(관련없음이면 빈칸)"}]}.\n'
+    "판정 목록(인덱스: 주장 | 최근 공시):\n")
+
+def verify_claims(items):
+    """미검증 board 항목을 같은 회사 최근 공시(dart.json)와 대조 → 공시가 뒷받침하면 '적중'으로 채움.
+    공시 없음은 '빗나감' 자동판정 안 함(달님 몫). 후보(같은 회사 공시 있는 미검증)만 LLM 에 보냄=저비용."""
+    darts = load(P("facts", "dart.json"), {"items": []}).get("items", [])
+    if not darts: return 0
+    by_co = {}
+    for d in darts:
+        by_co.setdefault(d.get("company", ""), []).append(d)
+    cands = []   # (item, [dart...])
+    for it in items:
+        if (it.get("verify") or {}).get("status") != "미검증": continue
+        ds = by_co.get(it["company"])
+        if not ds: continue
+        cands.append((it, ds[:5]))
+        if len(cands) >= 60: break     # 한 번에 검증할 상한(비용)
+    if not cands: return 0
+    lines = "\n".join(
+        f'{idx}: [{it["company"]}] {it.get("topic","")} (시점 {it.get("when") or "-"}) | 공시: '
+        + " / ".join(d.get("report_nm", "") for d in ds)
+        for idx, (it, ds) in enumerate(cands))
+    try:
+        txt = _ask(PROMPT_VERIFY + lines)
+    except Exception as e:
+        print(f"검증 LLM 실패(수집은 유지): {type(e).__name__}"); return 0
+    mo = re.search(r"\{.*\}", txt, re.S)
+    if not mo: return 0
+    try:
+        vs = json.loads(mo.group(0)).get("v", [])
+    except (json.JSONDecodeError, ValueError):
+        return 0
+    today = kst_iso()[:10]; hit = 0
+    for v in vs:
+        try:
+            i = int(v["i"])
+            if v.get("r") == "적중" and 0 <= i < len(cands):
+                cands[i][0]["verify"] = {"status": "적중", "note": str(v.get("note", ""))[:100], "date": today}
+                hit += 1
+        except (ValueError, TypeError, KeyError):
+            pass
+    if hit: print(f"검증: 적중 {hit}건 채움")
+    return hit
 
 def set_status(status, note="", cause="", fix=""):
     stj = load(P("data", "status.json"), {"schema": "status/1", "jobs": []})
@@ -197,17 +249,25 @@ def run():
         keep_nid.add(it["nid"]); merged.append(it)
     merged.sort(key=lambda x: x.get("found", ""), reverse=True)
 
+    # 3.5) 검증 루프 — 미검증 주장을 최근 공시와 대조해 '적중' 채움(빗나감은 달님 몫)
+    try:
+        verify_claims(merged)
+    except Exception as e:
+        print(f"검증 건너뜀(수집은 유지): {type(e).__name__}: {e}")
+    n_hit = sum(1 for it in merged if (it.get("verify") or {}).get("status") == "적중")
+
     # seen 정리(오래된 nid 는 잊어 파일 비대화 방지)
     seen_cut = (kst_now() - dt.timedelta(days=SEEN_DAYS)).isoformat()
     seen = {n: t for n, t in seen.items() if t >= seen_cut}
 
     save(P("facts", "board.json"), {
-        "schema": "board/1", "version": "v 20260906-0100", "updated": now_iso,
+        "schema": "board/1", "version": "v 20260907-0200", "updated": now_iso,
         "_정직": "검증 안 된 '주장 후보'. LLM 은 근거를 대려는 글인지만 걸렀을 뿐, 사실 여부는 판단 못 함. 판단은 달님.",
+        "_검증": "verify.status: 미검증→적중(공시로 확인)만 자동. '빗나감'은 공시 없음≠거짓이라 자동판정 안 함(달님).",
         "scanned_companies": len(cos), "new_posts": len(fresh), "new_kept": len(kept_new),
-        "count": len(merged), "items": merged, "seen": seen})
-    set_status("ok", note=f"훑음 {len(cos)}종목 · 새 글 {len(fresh)} · 근거글 +{len(kept_new)}(누적 {len(merged)})")
-    print(f"토론실: {len(cos)}종목 훑음, 새 글 {len(fresh)}건, 근거글 +{len(kept_new)}(누적 {len(merged)})")
+        "count": len(merged), "hit": n_hit, "items": merged, "seen": seen})
+    set_status("ok", note=f"훑음 {len(cos)}종목 · 새 글 {len(fresh)} · 근거글 +{len(kept_new)}(누적 {len(merged)}) · 적중 {n_hit}")
+    print(f"토론실: {len(cos)}종목 훑음, 새 글 {len(fresh)}건, 근거글 +{len(kept_new)}(누적 {len(merged)}), 적중 {n_hit}")
 
     # 4) 하루 한 통 — 그날 새로 걸러진 근거글을 강도순(상>중>하)으로 묶어 한 번만 알림.
     rank = {"상": 0, "중": 1, "하": 2}
