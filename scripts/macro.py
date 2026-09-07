@@ -1,4 +1,4 @@
-# v 20260904-2230  macro.py — CYGNUS 정적판의 수집기. data/indicators.json 을 읽어 FRED(공식)·Yahoo(보조) 값을 모은다.
+# v 20260907-1540  macro.py — CYGNUS 정적판의 수집기. data/indicators.json 을 읽어 FRED(공식)·ECOS(공식, ECOS_KEY)·Yahoo(보조) 값을 모은다. derive=yoy 는 12개월 전 대비 %.
 # 쓰기: facts/macro.json(최신), facts/macro_history.json(일별 누적), data/status.json(job macro)
 # 규칙: 시각 3칸(as_of=시장 기준일, published=출처 발표 시각(모르면 빈칸), collected_at=수집 KST). 실패한 지표는 값 대신 error 를 남긴다(조용한 실패 금지).
 import json, os, sys, csv, io, datetime as dt, urllib.request, urllib.parse
@@ -28,7 +28,7 @@ def fetch_fred(series):
         v = r.get(series) or r.get("VALUE") or ""
         if v.strip() in ("", "."): continue
         rows.append((r["observation_date"] if "observation_date" in r else r["DATE"], float(v)))
-    return rows[-5:]
+    return rows[-20:]                                                    # yoy 파생(13개월)에 충분히
 
 def fetch_yahoo(symbol):
     import yfinance as yf
@@ -63,6 +63,32 @@ def fetch_yahoo_relay(symbol, relay):
         rows.append(((kst_now().date() - dt.timedelta(days=1)).isoformat(), float(pv)))
     rows.append((today, float(price)))
     return rows
+
+def fetch_ecos(ecos):
+    """한국은행 ECOS OpenAPI(무료 키, GitHub Secret ECOS_KEY). ecos={stat,item,cycle(M|D|A)}. 응답 row[].TIME/DATA_VALUE.
+    반환 [(YYYY-MM-DD|YYYY-MM, value)] 최근 20개. 키 없거나 코드 틀리면 예외(조용한 실패 금지)."""
+    key = os.environ.get("ECOS_KEY", "").strip()
+    if not key: raise RuntimeError("ECOS_KEY 없음(GitHub Secret)")
+    cyc = ecos.get("cycle", "M"); now = kst_now()
+    fmt = {"D": "%Y%m%d", "M": "%Y%m", "A": "%Y"}[cyc]
+    start = (now - dt.timedelta(days={"D": 60, "M": 800, "A": 3650}[cyc])).strftime(fmt); end = now.strftime(fmt)
+    url = f"https://ecos.bok.or.kr/api/StatisticSearch/{key}/json/kr/1/100/{ecos['stat']}/{cyc}/{start}/{end}/{ecos['item']}"
+    d = json.loads(urllib.request.urlopen(url, timeout=25).read().decode("utf-8", "replace"))
+    if "RESULT" in d: raise RuntimeError("ECOS: " + str(d["RESULT"].get("MESSAGE", d["RESULT"]))[:120])
+    rows = []
+    for r in d.get("StatisticSearch", {}).get("row", []):
+        t, v = str(r.get("TIME", "")), str(r.get("DATA_VALUE", "")).strip()
+        if not v: continue
+        t = t[:4] + "-" + t[4:6] + ("-" + t[6:8] if len(t) >= 8 else "")
+        rows.append((t, float(v)))
+    if not rows: raise RuntimeError("ECOS 응답 비어 있음(통계표·항목 코드 확인)")
+    return rows[-20:]
+
+def derive_yoy(rows):
+    """월간 지수 → 전년동월비 %. rows 오름차순, 13개 이상 필요. 반환 [(전월, 전월yoy), (최신, yoy)]"""
+    if len(rows) < 14: raise RuntimeError(f"yoy 계산에 14개월 필요, {len(rows)}개")
+    yoy = lambda i: round((rows[i][1] / rows[i - 12][1] - 1) * 100, 2)
+    return [(rows[-2][0], yoy(-2)), (rows[-1][0], yoy(-1))]
 
 FETCH = {"fred": fetch_fred, "yahoo": fetch_yahoo, "stooq": fetch_stooq}
 
@@ -107,9 +133,16 @@ def run(fetch_map=None, manual=None):
                     rows = fetch_fred(fbc)
                     if len(rows) < 1: raise RuntimeError(f"중계 {e1} / FRED 예비도 없음")
                     rec["source"] = "fred(예비)"; rec["symbol"] = fbc
+            elif ind["source"] == "ecos":
+                if not os.environ.get("ECOS_KEY", "").strip() and ind.get("optional"):
+                    rec["pending"] = True                                 # 키 없음 = 미설정(경고 띠 아님, 화면엔 '미설정')
+                else:
+                    rows = fetch_ecos(ind["ecos"])
             else:
                 rows = fetch_map[ind["source"]](ind["symbol"])
                 if len(rows) < 1: raise RuntimeError("데이터 없음")
+            if rows is not None and ind.get("derive") == "yoy":
+                rows = derive_yoy(rows)
             if rows is not None:                                          # yahoo_relay·else 공통: 받아온 값을 rec 에 넣는다
                 rec["as_of"], rec["value"] = rows[-1]
                 if len(rows) >= 2:
@@ -127,7 +160,7 @@ def run(fetch_map=None, manual=None):
                     "official": True, "rule": "0 아래=역전", "value": round(v["us10y"]["value"] - v["us2y"]["value"], 3), "prev": None, "change_pct": None,
                     "as_of": v["us10y"]["as_of"], "published": "", "collected_at": kst_iso(), "judge": "역전" if v["us10y"]["value"] < v["us2y"]["value"] else "정상", "error": ""})
     ok = sum(1 for r in out if r["value"] is not None)
-    save(P("facts", "macro.json"), {"schema": "macro/1", "version": "v 20260904-2230", "collected_at": kst_iso(), "ok": ok, "total": len(out), "items": out})
+    save(P("facts", "macro.json"), {"schema": "macro/1", "version": "v 20260907-1540", "collected_at": kst_iso(), "ok": ok, "total": len(out), "items": out})
     # 이력: 날짜(KST) 키로 값만
     hist = load(P("facts", "macro_history.json"), {"schema": "macro_history/1", "days": {}})
     today = kst_now().date().isoformat()

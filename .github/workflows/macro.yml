@@ -1,4 +1,4 @@
-# v 20260904-3610  macro.yml — CYGNUS 매크로 수집(scripts/macro.py) 하루 2회. 정각 회피 + concurrency + 실패 시 status.json fail + ntfy
+# v 20260907-1540  macro.yml — CYGNUS 매크로 수집(scripts/macro.py) 하루 2회. 정각 회피 + concurrency + 실패 시 status.json fail + ntfy
 name: Macro Collector
 on:
   schedule:
@@ -20,6 +20,8 @@ jobs:
       - name: 패키지 설치
         run: pip install yfinance==0.2.54
       - name: 실행하고 커밋·push (충돌 나면 최신으로 다시 실행)
+        env:
+          ECOS_KEY: ${{ secrets.ECOS_KEY }}     # 한은 ECOS 키(선택). 없으면 bok_rate·kr3y 는 '미설정'
         run: |
           set -e
           git config user.name "macro-bot"
