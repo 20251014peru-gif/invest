@@ -1,0 +1,8 @@
+import {fmt,esc} from './core.js';
+export function chart(pts,unit,id='main'){
+ if(!pts.length)return '<div class="empty">아직 누적 이력이 없습니다.<br>값을 임의로 보충하지 않습니다. 원출처의 전체 이력을 확인하세요.</div>';
+ if(pts.length===1)return `<div class="empty"><div class="big-number">${fmt(pts[0].value,unit)}</div>${pts[0].date} · 관측 1건<br>두 번째 관측부터 선이 이어집니다.</div>`;
+ const values=pts.map(p=>p.value),lo=Math.min(...values),hi=Math.max(...values),span=hi-lo||1,start=Date.parse(pts[0].date),time=Date.parse(pts.at(-1).date)-start||1;
+ const xy=pts.map(p=>[12+(Date.parse(p.date)-start)/time*876,hi===lo?115:210-(p.value-lo)/span*190]);const path=xy.map(([x,y],i)=>(i?'L':'M')+x.toFixed(2)+','+y.toFixed(2)).join(' ');
+ return `<div class="chart-meta"><span>최저 ${fmt(lo,unit)}</span><span>최고 ${fmt(hi,unit)}</span></div><svg class="main-chart" viewBox="0 0 900 232" role="img" aria-label="${esc(pts[0].date)}부터 ${esc(pts.at(-1).date)}까지 ${pts.length}건"><defs><linearGradient id="fill-${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b9ccef" stop-opacity=".55"/><stop offset="100%" stop-color="#b9ccef" stop-opacity=".04"/></linearGradient></defs>${[20,115,210].map(y=>`<line x1="12" x2="888" y1="${y}" y2="${y}" stroke="#e5eaf2"/>`).join('')}<path d="${path} L888,226 L12,226 Z" fill="url(#fill-${id})"/><path d="${path}" fill="none" stroke="#5276af" stroke-width="3"/>${xy.map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${pts.length>100?2:4}" fill="#5276af"><title>${pts[i].date}: ${fmt(pts[i].value,unit)}</title></circle>`).join('')}</svg><div class="chart-meta"><span>${pts[0].date}</span><span>${pts.length}건 · ${pts.at(-1).date}</span></div>`;
+}
