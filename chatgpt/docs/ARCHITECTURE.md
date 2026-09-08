@@ -60,3 +60,6 @@ notebook.js는 기사별 작성기와 독립 노트 팝업을 관리. 기존 pri
 - live-chart.js: 국내 2개 네이버 원격 이미지(기간 선택·1분 갱신), 시장 11개 TradingView 공식 위젯, FRED 11개 공식 graph-landing iframe. 월간 발표를 실시간으로 표시하지 않는다.
 - page에서 mount, route 전환·dialog close에서 dispose. 네이버 타이머 해제, 이전 차트 DOM 제거. 외부 차트 실패시 웹 차트 링크 유지.
 - 수집 그래프·비교는 누적 데이터·출처 확인 안에 보존. 카드와 제목은 내부 상세 유지.
+
+## v011 국내 차트
+국내 지수는 external 유형으로 네이버 fchart/domestic/index/KOSPI 또는 KOSDAQ 연결. 확대 PNG와 이미지 갱신 타이머 제거. 카드 내부 상세 동작 유지.
