@@ -26,8 +26,9 @@ test('ECOS 홈 대신 개별 그래프를 열고 예외를 숨기지 않는다',
   assert.equal(chartSource('kr_bbb3').kind,'selection');
   assert.match(chartPanel({id:'kr_bbb3'}),/010320000/);
 });
-test('직접 차트는 외부 링크, 지원 안 되는 항목은 설명 화면으로 이동한다',()=>{
-  assert.match(chartTitle({id:'usdkrw',name:'원달러'}),/data-external/);
+test('카드 제목은 항상 내부 상세로 이동하고 외부 차트는 전용 링크로 분리한다',()=>{
+  for(const r of items){assert.match(chartTitle(r),/#\/indicators\//);assert.doesNotMatch(chartTitle(r),/data-external|target=/);}
+  assert.match(chartPanel({id:'usdkrw'}),/data-external/);
   assert.match(chartTitle({id:'kr_bbb3',name:'BBB'}),/#\/indicators\/kr_bbb3/);
   assert.ok(!chartTitle({id:'usdkrw',name:'<script>'}).includes('<script>'));
 });

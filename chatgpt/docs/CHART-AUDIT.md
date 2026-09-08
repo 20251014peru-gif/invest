@@ -2,14 +2,14 @@
 
 2026-09-08. 정의·종목·변환·경로를 전수 대조. 모든 외부 사이트를 실제 브라우저에서 35회 열어 검증한 것은 아님. Yahoo 원달러와 ECOS 회사채·금리/물가/수출/선행지수 목록, FRED 변환 그래프를 대표 화면으로 확인. 외부 제공처의 지역·로그인·팝업·서비스 장애 제한은 별도.
 
-- 기존 카드 제목은 수집 이력 모달을 열었음. 이제 직접 차트가 있는 제목과 웹 차트 버튼은 외부 그래프를 열고, 설명·뉴스·내 기록은 기존 상세로 이동.
+- 기존 카드 제목은 수집 이력 모달을 열었음. v009에서 카드·제목은 내부 상세를 열고 웹 차트 버튼만 외부 그래프를 열며, 설명·뉴스·내 기록은 기존 상세로 이동.
 - 기존 자체 차트의 전체/1개월/1년은 원출처 전체 이력이 아닌 짧은 수집 스냅샷만 필터링했음. 보조 접힘으로 이동하고 수집 전체로 명칭 변경.
 - BBB- 회사채: 공식 조회 절차 확인, 공유 가능한 개별 링크 미확보. AA-로 대체하지 않음. 한국 신용 스프레드: 구성 금리 두 차트 제공, 단일 스프레드 그래프라고 표시하지 않음.
 
 | ID | 지표 | 제공처 | 연결 상태 | 차트 | 정의·제약 |
 |---|---|---|---|---|---|
-| kospi | KOSPI | Yahoo Finance | 직접 차트 | [Yahoo Finance](https://finance.yahoo.com/quote/%5EKS11/chart/) | 웹 차트의 시세와 카드의 수집 기준 시각은 다를 수 있습니다. |
-| kosdaq | KOSDAQ | Yahoo Finance | 직접 차트 | [Yahoo Finance](https://finance.yahoo.com/quote/%5EKQ11/chart/) | 웹 차트의 시세와 카드의 수집 기준 시각은 다를 수 있습니다. |
+| kospi | KOSPI | 네이버 금융 | 직접 차트 | [네이버 금융](https://finance.naver.com/sise/sise_index.naver?code=KOSPI) | 웹 차트의 시세와 카드의 수집 기준 시각은 다를 수 있습니다. |
+| kosdaq | KOSDAQ | 네이버 금융 | 직접 차트 | [네이버 금융](https://finance.naver.com/sise/sise_index.naver?code=KOSDAQ) | 웹 차트의 시세와 카드의 수집 기준 시각은 다를 수 있습니다. |
 | usdkrw | 원달러 환율 | Yahoo Finance | 직접 차트 | [Yahoo Finance](https://finance.yahoo.com/quote/KRW%3DX/chart/) | 시장 환율 차트입니다. 카드의 ECOS 매매기준율과 시각·값이 다를 수 있습니다. |
 | bok_rate | 한은 기준금리 | 한국은행 ECOS | 직접 차트 | [한국은행 ECOS](https://ecos.bok.or.kr/#/StatisticsByTheme/KoreanStat100/K051) | 결정일 기준 금리 이력입니다. 카드의 월간 집계와 구분해 보세요. |
 | kr3y | 한국 국고채 3년 | 한국은행 ECOS | 직접 차트 | [한국은행 ECOS](https://ecos.bok.or.kr/#/StatisticsByTheme/KoreanStat100/K056) | 선택한 지표의 공식 차트·기간 조절 화면입니다. |
