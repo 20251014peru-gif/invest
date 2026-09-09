@@ -1,7 +1,7 @@
 {
   "schema": "status/1",
   "_설명": "워크플로가 쓰는 파일. jobs[] 한 줄 = 작업 하나. status: ok | fail | stale | stopped. due 가 지나면 앱이 '늦음' 경고. 시각은 KST(+09:00) ISO.",
-  "updated": "2026-09-10T00:16:51+09:00",
+  "updated": "2026-09-10T02:41:26+09:00",
   "jobs": [
     {
       "id": "hub",
@@ -25,39 +25,6 @@
       "note": "새로 채점 0건 · 대기 0건"
     },
     {
-      "id": "macro",
-      "name": "매크로 수집",
-      "status": "ok",
-      "ran": "2026-09-09T22:34:06+09:00",
-      "due": "2026-09-11T04:34:06+09:00",
-      "cause": "kr_cpi_yoy: HTTPError: HTTP Error 522: <none>",
-      "fix": "출처 주소·심볼(data/indicators.json) 확인. 전부 실패면 FRED/Yahoo 접속 문제",
-      "link": "cygnus.html",
-      "note": "34/35 지표"
-    },
-    {
-      "id": "regime",
-      "name": "레짐 판정",
-      "status": "ok",
-      "ran": "2026-09-09T22:34:06+09:00",
-      "due": "2026-09-11T04:34:06+09:00",
-      "cause": "",
-      "fix": "",
-      "link": "axes.html",
-      "note": "성장 확장(확인) · 물가 높음·내려오는 중(확인) · 유동성 긴축적(확인) → 4분면 성장↑물가↑ → 원자재·가치·은행 우위"
-    },
-    {
-      "id": "calendar",
-      "name": "발표 달력",
-      "status": "ok",
-      "ran": "2026-09-09T22:34:06+09:00",
-      "due": "2026-09-11T04:34:06+09:00",
-      "cause": "",
-      "fix": "",
-      "link": "manual.html#reports",
-      "note": "오늘 0건 · 14일 내 4건 · 미입력 0건"
-    },
-    {
       "id": "board",
       "name": "토론실 근거",
       "status": "ok",
@@ -78,6 +45,39 @@
       "fix": "",
       "link": "cygnus.html#sectors",
       "note": "37건(7일) · 새 수주 0건"
+    },
+    {
+      "id": "macro",
+      "name": "매크로 수집",
+      "status": "ok",
+      "ran": "2026-09-10T02:41:25+09:00",
+      "due": "2026-09-11T08:41:25+09:00",
+      "cause": "",
+      "fix": "",
+      "link": "cygnus.html",
+      "note": "35/35 지표"
+    },
+    {
+      "id": "regime",
+      "name": "레짐 판정",
+      "status": "ok",
+      "ran": "2026-09-10T02:41:25+09:00",
+      "due": "2026-09-11T08:41:25+09:00",
+      "cause": "",
+      "fix": "",
+      "link": "axes.html",
+      "note": "성장 확장(확인) · 물가 높음·내려오는 중(확인) · 유동성 긴축적(확인) → 4분면 성장↑물가↑ → 원자재·가치·은행 우위"
+    },
+    {
+      "id": "calendar",
+      "name": "발표 달력",
+      "status": "ok",
+      "ran": "2026-09-10T02:41:26+09:00",
+      "due": "2026-09-11T08:41:26+09:00",
+      "cause": "",
+      "fix": "",
+      "link": "manual.html#reports",
+      "note": "오늘 0건 · 14일 내 4건 · 미입력 0건"
     }
   ]
 }
