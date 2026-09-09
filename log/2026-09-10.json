@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-09-10",
-  "generated_at": "2026-09-10T02:41:26+09:00",
+  "generated_at": "2026-09-10T05:40:41+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 64.2%(-10.40%p) · KOSDAQ 830.37 pt(+2.3%) · KOSPI 7,052 pt(+1.4%)"
+      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 64.2%(-10.40%p) · KOSDAQ 830.37 pt(+2.3%) · VIX 16.46 pt(+1.9%)"
     },
     {
       "k": "오늘 발표",
@@ -50,8 +50,8 @@
     {
       "key": "us10y",
       "label": "미 10년물",
-      "value": "4.78%",
-      "sub": "부담 · 2026-09-04",
+      "value": "4.8%",
+      "sub": "부담 · 2026-09-08",
       "tone": "green"
     }
   ],
@@ -99,6 +99,20 @@
       "group": "kr"
     },
     {
+      "id": "vix",
+      "name": "VIX",
+      "value": 16.46,
+      "unit": "pt",
+      "prev": 16.16,
+      "delta": 0.3,
+      "delta_text": "+1.9%",
+      "judge": "안정",
+      "as_of": "2026-09-10",
+      "cycle": "D",
+      "score": 1.8564356435643607,
+      "group": "us"
+    },
+    {
       "id": "kospi",
       "name": "KOSPI",
       "value": 7051.64,
@@ -113,59 +127,45 @@
       "group": "kr"
     },
     {
-      "id": "copper",
-      "name": "구리",
-      "value": 6.8835,
-      "unit": "$/lb",
-      "prev": 6.825,
-      "delta": 0.058,
-      "delta_text": "+0.9%",
+      "id": "bdry",
+      "name": "해운 BDRY",
+      "value": 16.1,
+      "unit": "$",
+      "prev": 16.3,
+      "delta": -0.2,
+      "delta_text": "-1.2%",
       "judge": "",
       "as_of": "2026-09-10",
       "cycle": "D",
-      "score": 0.8571428571428505,
+      "score": 1.2269938650306704,
       "group": "world"
     },
     {
-      "id": "vix",
-      "name": "VIX",
-      "value": 16.24,
-      "unit": "pt",
-      "prev": 16.16,
-      "delta": 0.08,
-      "delta_text": "+0.5%",
-      "judge": "안정",
-      "as_of": "2026-09-10",
-      "cycle": "D",
-      "score": 0.4950495049504845,
-      "group": "us"
-    },
-    {
-      "id": "m2",
-      "name": "미 M2",
-      "value": 23218.0,
-      "unit": "십억$",
-      "prev": 23115.2,
-      "delta": 102.8,
-      "delta_text": "+0.4%",
-      "judge": "",
-      "as_of": "2026-07-01",
-      "cycle": "M",
-      "score": 0.4447290094829344,
-      "group": "us"
-    },
-    {
-      "id": "bdry",
-      "name": "해운 BDRY",
-      "value": 16.235,
+      "id": "wti",
+      "name": "유가 WTI",
+      "value": 96.67,
       "unit": "$",
-      "prev": 16.3,
-      "delta": -0.065,
-      "delta_text": "-0.4%",
+      "prev": 95.95,
+      "delta": 0.72,
+      "delta_text": "+0.8%",
       "judge": "",
       "as_of": "2026-09-10",
       "cycle": "D",
-      "score": 0.3987730061349772,
+      "score": 0.7503908285565386,
+      "group": "world"
+    },
+    {
+      "id": "gold",
+      "name": "금",
+      "value": 4440.9,
+      "unit": "$/oz",
+      "prev": 4467.6,
+      "delta": -26.7,
+      "delta_text": "-0.6%",
+      "judge": "",
+      "as_of": "2026-09-10",
+      "cycle": "D",
+      "score": 0.5976363147999088,
       "group": "world"
     }
   ],
@@ -277,6 +277,20 @@
           "group": "kr"
         },
         {
+          "id": "vix",
+          "name": "VIX",
+          "value": 16.46,
+          "unit": "pt",
+          "prev": 16.16,
+          "delta": 0.3,
+          "delta_text": "+1.9%",
+          "judge": "안정",
+          "as_of": "2026-09-10",
+          "cycle": "D",
+          "score": 1.8564356435643607,
+          "group": "us"
+        },
+        {
           "id": "kospi",
           "name": "KOSPI",
           "value": 7051.64,
@@ -291,59 +305,45 @@
           "group": "kr"
         },
         {
-          "id": "copper",
-          "name": "구리",
-          "value": 6.8835,
-          "unit": "$/lb",
-          "prev": 6.825,
-          "delta": 0.058,
-          "delta_text": "+0.9%",
+          "id": "bdry",
+          "name": "해운 BDRY",
+          "value": 16.1,
+          "unit": "$",
+          "prev": 16.3,
+          "delta": -0.2,
+          "delta_text": "-1.2%",
           "judge": "",
           "as_of": "2026-09-10",
           "cycle": "D",
-          "score": 0.8571428571428505,
+          "score": 1.2269938650306704,
           "group": "world"
         },
         {
-          "id": "vix",
-          "name": "VIX",
-          "value": 16.24,
-          "unit": "pt",
-          "prev": 16.16,
-          "delta": 0.08,
-          "delta_text": "+0.5%",
-          "judge": "안정",
-          "as_of": "2026-09-10",
-          "cycle": "D",
-          "score": 0.4950495049504845,
-          "group": "us"
-        },
-        {
-          "id": "m2",
-          "name": "미 M2",
-          "value": 23218.0,
-          "unit": "십억$",
-          "prev": 23115.2,
-          "delta": 102.8,
-          "delta_text": "+0.4%",
-          "judge": "",
-          "as_of": "2026-07-01",
-          "cycle": "M",
-          "score": 0.4447290094829344,
-          "group": "us"
-        },
-        {
-          "id": "bdry",
-          "name": "해운 BDRY",
-          "value": 16.235,
+          "id": "wti",
+          "name": "유가 WTI",
+          "value": 96.67,
           "unit": "$",
-          "prev": 16.3,
-          "delta": -0.065,
-          "delta_text": "-0.4%",
+          "prev": 95.95,
+          "delta": 0.72,
+          "delta_text": "+0.8%",
           "judge": "",
           "as_of": "2026-09-10",
           "cycle": "D",
-          "score": 0.3987730061349772,
+          "score": 0.7503908285565386,
+          "group": "world"
+        },
+        {
+          "id": "gold",
+          "name": "금",
+          "value": 4440.9,
+          "unit": "$/oz",
+          "prev": 4467.6,
+          "delta": -26.7,
+          "delta_text": "-0.6%",
+          "judge": "",
+          "as_of": "2026-09-10",
+          "cycle": "D",
+          "score": 0.5976363147999088,
           "group": "world"
         }
       ]
@@ -358,7 +358,7 @@
     },
     {
       "id": "2026-09-10/auto/macro",
-      "time": "02:41",
+      "time": "05:40",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 35/35 수집",
