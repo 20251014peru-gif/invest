@@ -10,7 +10,7 @@
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 /* ══════════════════════════════════════════════════════════
-   🗂 투자 기록보관실  v7.14-0911-0849
+   🗂 투자 기록보관실  v7.15-0911-0854
    업무일지(worklog)와 한눈에 구분되도록 네이비×골드 테마로 짰다.
    업무일지의 8뷰 엔진(카드·표·보드·달력)을 새 창고(records)에
    맞게 다시 짠 것 — worklog_entries 와는 완전히 분리된 컬렉션.
@@ -151,7 +151,7 @@ a{color:inherit}
    #ktabs·#stockPicker·#verifyPicker는 display:contents로 "껍데기"를 없애서 안에 든 칩들이
    .toolbar 의 같은 flex 줄에 직접 놓이게 한다(칩 하나하나가 이 줄의 flex 아이템이 됨) */
 .toolbar{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 10px;margin-bottom:16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-.toolbar #ktabs,.toolbar #stockPicker,.toolbar #verifyPicker{display:contents}
+.toolbar #ktabs,.toolbar #stockPicker,.toolbar #verifyPicker,.toolbar #topicPicker{display:contents}
 .toolbar #cntLabel{margin-left:auto}
 .viewicons{display:flex;gap:4px;background:#f1efe6;border-radius:8px;padding:3px}
 .vicon{width:36px;height:31px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14.5px;color:var(--sub);border:0;background:none;cursor:pointer}
@@ -458,7 +458,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1>
-  <span class="ver">v7.14-0911-0849 · 서희타워</span>
+  <span class="ver">v7.15-0911-0854 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -519,6 +519,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
     <button class="addbtn" id="btnAdd">＋ 기록 추가</button>
     <div class="stockPicker" id="stockPicker"></div>
     <div class="stockPicker" id="verifyPicker"></div>
+    <div class="stockPicker" id="topicPicker"></div>
   </div>
 
   <div id="content"></div>
@@ -997,6 +998,7 @@ var curStock = '';
 var stockMode = false;
 var curStockTab = ''; // 종목모드 안에서 특정 종목 하나를 골라 그 기록들을 보는 중이면 그 이름(빈 값=종목 목록 자체)
 var curVerify = ''; // v5: 검증상태 필터
+var curTopic = ''; // v7.15: Topic 필터 (stocks와 별개)
 var curQ = '';
 var calYM = todayStr().slice(0,7);
 var EDIT = null; // 지금 수정 중인 기록 id (null이면 새로 추가)
@@ -1008,7 +1010,7 @@ function startListeners(){
   if(!db) return;
   db.collection('records').orderBy('date','desc').onSnapshot(function(snap){
     records = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
-    render(); renderDue(); renderKtabs(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
+    render(); renderDue(); renderKtabs(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker(); renderTopicChips();
   }, function(e){ logBug('records 구독 실패: '+e.message); });
 
   db.collection('records_todos').where('date','>=', histCutoffStr()).orderBy('date').onSnapshot(function(snap){
@@ -1508,6 +1510,30 @@ function renderStockDatalist(){
     allStockNames().map(function(n){ return '<option value="'+esc(n)+'">'; }).join('');
 }
 /* v5: 검증상태 필터 칩 — records.html이 있는 그대로 가진 값만 보여준다(값 없는 상태는 칩도 안 뜸) */
+function topicCounts(){
+  var m = {};
+  records.forEach(function(r){ (r.topics||[]).forEach(function(t){
+    var key=String(t||'').toLowerCase(); if(!key) return;
+    if(!m[key]) m[key]={label:t, n:0};
+    m[key].n++;
+  }); });
+  return Object.keys(m).map(function(k){ return m[k]; })
+    .sort(function(a,b){ return b.n-a.n || String(a.label).localeCompare(String(b.label)); });
+}
+function renderTopicChips(){
+  var host = document.getElementById('topicPicker'); if(!host) return;
+  var list = topicCounts();
+  if(!list.length){ host.innerHTML=''; return; }
+  var html = '<span class="fchip'+(curTopic===''?' on':'')+'" data-tp="">🧩 전체주제</span>';
+  list.forEach(function(o){
+    var on = curTopic && curTopic.toLowerCase()===String(o.label).toLowerCase();
+    html += '<span class="fchip'+(on?' on':'')+'" data-tp="'+esc(o.label)+'">'+esc(o.label)+'<span style="color:#aaa;margin-left:3px">'+o.n+'</span></span>';
+  });
+  host.innerHTML = html;
+  host.querySelectorAll('.fchip').forEach(function(el){
+    el.addEventListener('click', function(){ curTopic = el.getAttribute('data-tp'); render(); renderTopicChips(); });
+  });
+}
 function renderVerifyPicker(){
   var host = document.getElementById('verifyPicker');
   if(!host) return;
@@ -1526,8 +1552,8 @@ function renderVerifyPicker(){
   });
 }
 document.getElementById('btnClearFlt').addEventListener('click', function(){
-  curKind='전체'; curStock=''; curVerify=''; curQ=''; document.getElementById('searchBar').value='';
-  render(); renderKtabs(); renderStockPicker(); renderVerifyPicker();
+  curKind='전체'; curStock=''; curVerify=''; curTopic=''; curQ=''; document.getElementById('searchBar').value='';
+  render(); renderKtabs(); renderStockPicker(); renderVerifyPicker(); renderTopicChips();
 });
 document.getElementById('searchBar').addEventListener('input', function(e){
   curQ = e.target.value.trim();
@@ -1542,10 +1568,11 @@ function filtered(){
   if(curKind!=='전체') arr = arr.filter(function(r){ return r.kind===curKind; });
   if(curStock) arr = arr.filter(function(r){ return (r.stocks||[]).indexOf(curStock)>=0; });
   if(curVerify) arr = arr.filter(function(r){ return r.verifyState===curVerify; });
+  if(curTopic){ var _tp = curTopic.toLowerCase(); arr = arr.filter(function(r){ return (r.topics||[]).some(function(t){ return String(t).toLowerCase()===_tp; }); }); }
   if(curQ){
     var q = curQ.toLowerCase();
     arr = arr.filter(function(r){
-      var hay = [r.title,r.oneLiner,r.body,r.action,r.channel,(r.stocks||[]).join(' ')].join(' ').toLowerCase();
+      var hay = [r.title,r.oneLiner,r.body,r.action,r.channel,(r.stocks||[]).join(' '),(r.topics||[]).join(' '),r.aiInterpretation,r.userJudgment].join(' ').toLowerCase();
       return hay.indexOf(q)>=0;
     });
   }
@@ -2731,7 +2758,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.14-0911-0849 준비됨 — records / records_todos / records_meta 컬렉션 사용');
+console.log('[기록보관실] v7.15-0911-0854 준비됨 — records / records_todos / records_meta 컬렉션 사용');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
