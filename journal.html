@@ -1,5 +1,6 @@
-<!-- v 20260907-2040  journal.html — 투자일지(하루 한 장). 위: 오늘의 결론 헤드라인 + 시장 상태 4칸 / 아래: 시간순 기록(자동 회색·달님 초록) / 왼쪽: 달력·최근 결론·종목 상태·다음 발표·참고 서랍.
-     자동 부분: log/YYYY-MM-DD.json(scripts/journal.py 매시) · 달님 기록: Firestore invest_journal/<date>(결론) · invest_records(기록 하나 = 문서 하나 = 주소 하나). 저장 즉시, 덮어쓰지 않고 새 문서/새 버전. -->
+<!-- v 20260910-0938  journal.html — 투자일지(하루 한 장). 위: 오늘의 결론 헤드라인 + 시장 상태 4칸 / 아래: 시간순 기록(자동 회색·달님 초록) / 왼쪽: 달력·최근 결론·종목 상태·다음 발표·참고 서랍.
+     자동 부분: log/YYYY-MM-DD.json(scripts/journal.py 매시) · 달님 기록: Firestore invest_journal/<date>(결론, basedOn=그날 records id 배열) · records(투자 기록보관실 = 몸통, 읽기 전용으로 끌어옴 — 새 기록은 records.html 에서만 씀). 저장 즉시, 덮어쓰지 않고 새 문서/새 버전.
+     2026-09-10: invest_records 전용 컬렉션을 폐지하고 records.html 이 쓰는 records 컬렉션을 그대로 읽도록 통합(투자두뇌-구조원칙.md 12~15번 절차로 진행). -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -107,12 +108,8 @@
   </div>
   <h2 class="serif">오늘의 기록 <small>시간순 · 자동은 회색, 달님은 초록</small></h2>
   <div class="tl" id="tl"></div>
-  <div class="tl"><div class="t" style="color:#9ca3af">추가</div><div class="c" style="border-style:dashed">
-    <div class="add"><span>+ 기록</span><button type="button" data-kind="report">보고서 판정</button><button type="button" data-kind="stock">종목 판단</button><button type="button" data-kind="memo">메모</button><button type="button" class="me" id="addVerdict">오늘 결론 쓰기</button></div>
-    <div class="form" id="recForm" hidden>
-      <div class="g" id="recFields"></div>
-      <div style="display:flex;gap:8px"><button class="btn me" type="button" id="rSave">저장</button><button class="btn" type="button" id="rCancel">닫기</button><span class="muted" id="rMsg" style="align-self:center"></span></div>
-    </div>
+  <div class="tl"><div class="t" style="color:#9ca3af">안내</div><div class="c" style="border-style:dashed">
+    <div class="add"><span class="muted">새 기록은 "투자 기록보관실"에서 남깁니다 — 여기서는 자동으로 보여주기만 합니다.</span><button type="button" class="me" id="addVerdict">오늘 결론 쓰기</button></div>
   </div></div>
 </main>
 </div>
@@ -126,7 +123,7 @@
 <div class="st" id="status">준비 중…</div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="js/status.js" data-app="journal" data-version="v 20260907-2040"></script>
+<script src="js/status.js" data-app="journal" data-version="v 20260910-0938"></script>
 <script>
 var firebaseConfig = {
   apiKey: "AIzaSyAyG1chECYsbO7cSZUuXmNa0_KDYBmahPY",
@@ -142,7 +139,7 @@ var firebaseConfig = {
   var DAYS=['일','월','화','수','목','금','토'];
   var st=document.getElementById('status'); var setSt=function(t){st.textContent=t};
   var db=null; try{ firebase.initializeApp(firebaseConfig); db=firebase.firestore(); setSt('Firestore 연결'); }catch(e){ setSt('Firestore 없음: '+e.message); }
-  var COL_J='invest_journal', COL_R='invest_records';
+  var COL_J='invest_journal', COL_R='records'; // 2026-09-10: records.html 이 쓰는 몸통을 그대로 읽음(읽기 전용)
   var cur=kstToday(), DAY=null, IDX={days:[]}, CAL=null, VER={}, RECS=[], month=cur.slice(0,7);
 
   function fmtDate(d){ var x=new Date(d+'T00:00:00Z'); return (x.getUTCMonth()+1)+'월 '+x.getUTCDate()+'일 '+DAYS[x.getUTCDay()]+'요일'; }
@@ -165,7 +162,7 @@ var firebaseConfig = {
   function renderTimeline(){
     var tl=document.getElementById('tl'); var items=[];
     (DAY&&DAY.auto_entries||[]).forEach(function(e){ items.push({time:e.time||'',who:'auto',html:autoEntry(e)}); });
-    RECS.forEach(function(r){ items.push({time:r.time||'',who:'me',html:recEntry(r)}); });
+    RECS.forEach(function(r){ var t=r.createdAt?new Date(r.createdAt+9*3600*1000).toISOString().slice(11,16):''; items.push({time:t,who:'me',html:recEntry(r)}); });
     items.sort(function(a,b){return (a.time||'').localeCompare(b.time||'')});
     tl.innerHTML=items.length?items.map(function(i){return '<div class="t '+(i.who==='me'?'me':'')+'">'+esc(i.time)+'<small>'+(i.who==='me'?'달님':'자동')+'</small></div><div class="c '+(i.who==='me'?'me':'')+'">'+i.html+'</div>'}).join(''):'<div class="t"></div><div class="c"><div class="e muted">이 날 기록 없음</div></div>';
   }
@@ -176,23 +173,32 @@ var firebaseConfig = {
     return '<div class="e"><div class="ti">'+esc(e.title)+'<span class="id">'+esc(e.id)+'</span></div>'+body+'</div>';
   }
   function fmtV(v,u){ if(v==null)return '—'; var s=Math.abs(v)>=1000?Number(v).toLocaleString('ko-KR',{maximumFractionDigits:0}):String(Math.round(v*100)/100); return s+(u==='%'||u==='%p'?u:(u?' '+u:'')); }
+  var REC_KINDS={youtube:['📺','유튜브'],news:['📰','뉴스'],idea:['💡','아이디어'],chart:['📈','차트'],memo:['📝','메모']};
   function recEntry(r){
-    var head=r.kind==='report'?('보고서 판정 — '+esc(r.title)+(r.value!=null?' '+esc(r.value):'')+(r.verdict?' <span class="tag v'+esc(r.verdict)+'">'+esc(r.verdict)+'</span>':'')):
-             r.kind==='stock'?('종목 판단 — '+esc(r.title)+(r.state?' <span class="tag">'+esc(r.state)+'</span>':'')):('메모 — '+esc(r.title||''));
-    return '<div class="e me"><div class="ti">'+head+'<span class="id">'+esc(COL_R+'/'+(r._id||''))+'</span></div><div class="tx">'+esc(r.text||'')+'</div></div>';
+    try{
+      var k=REC_KINDS[r.kind]||['📄',String(r.kind||'기록')];
+      var stocks=(r.stocks||[]).map(function(s){return '<span class="tag">'+esc(s)+'</span>';}).join(' ');
+      var action=r.action?(' <span class="tag">'+esc(r.action)+'</span>'):'';
+      var star=r.star?(' '+new Array(Math.max(0,Math.min(5,+r.star||0))+1).join('⭐')):'';
+      var head=esc(k[0]+' '+k[1])+' — '+esc(r.title||'(제목 없음)')+action+star;
+      var sub=esc(r.oneLiner||'');
+      return '<div class="e me"><div class="ti">'+head+'<span class="id">'+esc(COL_R+'/'+(r._id||''))+'</span></div>'+(sub?'<div class="tx">'+sub+'</div>':'')+(stocks?'<div class="chips" style="margin-top:6px">'+stocks+'</div>':'')+'</div>';
+    }catch(e){
+      return '<div class="e me"><div class="ti">기록 표시 실패<span class="id">'+esc((r&&r._id)||'')+'</span></div><div class="tx muted">'+esc(e.message)+'</div></div>';
+    }
   }
 
   // ---- Firestore: 결론 + 기록 ----
   function loadMine(){
     if(!db){ VER={}; RECS=[]; renderVerdict(); renderTimeline(); return Promise.resolve(); }
     return Promise.all([db.collection(COL_J).doc(cur).get(), db.collection(COL_R).where('date','==',cur).get()]).then(function(r){
-      VER=r[0].exists?r[0].data():{}; RECS=[]; r[1].forEach(function(d){ var x=d.data(); x._id=d.id; if(x.status!=='중단') RECS.push(x); });
+      VER=r[0].exists?r[0].data():{}; RECS=[]; r[1].forEach(function(d){ var x=d.data(); x._id=d.id; RECS.push(x); });
       renderVerdict(); renderTimeline(); setSt('Firestore 연결 · 기록 '+RECS.length);
     }).catch(function(e){ setSt('읽기 실패: '+e.message); VER={}; RECS=[]; renderVerdict(); renderTimeline(); });
   }
   function renderVerdict(){
     var h=document.getElementById('headline'), b=document.getElementById('bodyText'), s=document.getElementById('scen'), p=document.getElementById('verdictPill');
-    if(VER.verdict){ p.textContent=VER.verdict; h.className='head serif'; h.textContent=VER.headline||'(헤드라인 없음)'; b.textContent=VER.body||''; s.innerHTML=(VER.scenarios||[]).map(function(x,i){return x?'<div class="'+(i?'bad':'')+'">'+esc(x)+'</div>':''}).join(''); document.getElementById('verdictWhen').textContent=(VER.updatedAt?String(VER.updatedAt).slice(11,16):'')+' 달님'; document.getElementById('verdictAddr').textContent=COL_J+'/'+cur; }
+    if(VER.verdict){ p.textContent=VER.verdict; h.className='head serif'; h.textContent=VER.headline||'(헤드라인 없음)'; b.textContent=VER.body||''; s.innerHTML=(VER.scenarios||[]).map(function(x,i){return x?'<div class="'+(i?'bad':'')+'">'+esc(x)+'</div>':''}).join(''); document.getElementById('verdictWhen').textContent=(VER.updatedAt?String(VER.updatedAt).slice(11,16):'')+' 달님'; document.getElementById('verdictAddr').textContent=COL_J+'/'+cur+((VER.basedOn&&VER.basedOn.length)?' · 근거 '+VER.basedOn.length+'건':''); }
     else { p.textContent='아직 없음'; h.className='head serif empty'; h.textContent='아직 결론을 쓰지 않았습니다 — 아래 기록을 보고 「오늘 결론 쓰기」'; b.textContent=''; s.innerHTML=''; document.getElementById('verdictWhen').textContent=''; document.getElementById('verdictAddr').textContent=''; }
   }
   var vsel='';
@@ -202,24 +208,11 @@ var firebaseConfig = {
   document.getElementById('vCancel').onclick=function(){document.getElementById('verdictForm').hidden=true};
   document.getElementById('vSave').onclick=function(){
     var m=document.getElementById('vMsg'); if(!vsel){ m.textContent='강세/중립/약세/관망 중 하나를 고르세요'; return; } if(!db){ m.textContent='Firestore 없음'; return; }
-    var rec={date:cur,verdict:vsel,headline:document.getElementById('vHead').value.trim(),body:document.getElementById('vBody').value.trim(),scenarios:[document.getElementById('vS1').value.trim(),document.getElementById('vS2').value.trim()],updatedAt:new Date(Date.now()+9*3600*1000).toISOString().slice(0,19)+'+09:00',ver:(VER.ver||0)+1};
+    var rec={date:cur,verdict:vsel,headline:document.getElementById('vHead').value.trim(),body:document.getElementById('vBody').value.trim(),scenarios:[document.getElementById('vS1').value.trim(),document.getElementById('vS2').value.trim()],basedOn:RECS.map(function(r){return COL_R+'/'+(r._id||'');}),updatedAt:new Date(Date.now()+9*3600*1000).toISOString().slice(0,19)+'+09:00',ver:(VER.ver||0)+1};
     m.textContent='저장 중…';
     db.collection(COL_J).doc(cur).set(rec).then(function(){ return db.collection(COL_J).doc(cur).collection('versions').add(rec); }).then(function(){ m.textContent='저장됨'; VER=rec; renderVerdict(); document.getElementById('verdictForm').hidden=true; loadIndex(); }).catch(function(e){ m.textContent='실패: '+e.message; });
   };
-  var rkind='';
-  var FIELDS={report:[['title','보고서 이름','예: 연준 SEP 3분기'],['value','실제값','예: 3.75'],['verdict','판정(위/그대로/아래)','위'],['text','메모','왜 그렇게 봤나']],
-              stock:[['title','종목','예: SK하이닉스'],['state','상태(관심/매수 후보/보유/제외)','매수 후보'],['text','이유 · 손절가 · 시나리오','ISM 공급부족 메모리 + HBM 근거글, 손절 −7%']],
-              memo:[['title','제목','한 줄'],['text','내용','']]};
-  document.querySelectorAll('.add button[data-kind]').forEach(function(bt){ bt.onclick=function(){ rkind=bt.getAttribute('data-kind'); var f=document.getElementById('recForm'); f.hidden=false; document.getElementById('recFields').innerHTML=FIELDS[rkind].map(function(x){return '<div><label>'+esc(x[1])+'</label>'+(x[0]==='text'?'<textarea data-k="text" placeholder="'+esc(x[2])+'"></textarea>':'<input data-k="'+x[0]+'" placeholder="'+esc(x[2])+'">')+'</div>'}).join(''); f.scrollIntoView({behavior:'smooth',block:'center'}); }; });
-  document.getElementById('rCancel').onclick=function(){document.getElementById('recForm').hidden=true};
-  document.getElementById('rSave').onclick=function(){
-    var m=document.getElementById('rMsg'); if(!db){ m.textContent='Firestore 없음'; return; }
-    var rec={date:cur,time:nowHM(),kind:rkind,createdAt:new Date(Date.now()+9*3600*1000).toISOString().slice(0,19)+'+09:00',status:'유효'};
-    document.querySelectorAll('#recFields [data-k]').forEach(function(i){ var v=i.value.trim(); if(v!=='') rec[i.getAttribute('data-k')]=(i.getAttribute('data-k')==='value'&&!isNaN(parseFloat(v)))?parseFloat(v):v; });
-    if(!rec.title){ m.textContent='첫 칸은 필수'; return; }
-    m.textContent='저장 중…';
-    db.collection(COL_R).add(rec).then(function(ref){ rec._id=ref.id; RECS.push(rec); renderTimeline(); m.textContent='저장됨 · 주소 '+COL_R+'/'+ref.id; document.getElementById('recForm').hidden=true; if(rkind==='stock') loadStocks(); }).catch(function(e){ m.textContent='실패: '+e.message; });
-  };
+  // 2026-09-10: 기록 추가 폼 제거 — 새 기록은 records.html 에서만 쓰고, 여기서는 records 컬렉션을 읽기 전용으로 보여주기만 한다
 
   // ---- 왼쪽: 달력·최근 결론·종목 상태 ----
   function loadIndex(){
@@ -242,10 +235,24 @@ var firebaseConfig = {
     el.innerHTML=h; el.querySelectorAll('button[data-d]').forEach(function(b){ b.onclick=function(){ go(b.getAttribute('data-d')); }; });
   }
   function loadStocks(){
+    // 2026-09-10: records.html 의 records 컬렉션에서 최근 종목 태그를 모아온다.
+    // records.html 엔 "상태(보유/매수후보)" 필드가 없으므로, 가장 최근 기록의 action(관망/매수검토 등) 문구를 대신 보여준다 — 없으면 건수.
     var el=document.getElementById('stocks'); if(!db){ el.textContent='—'; return; }
-    db.collection(COL_R).where('kind','==','stock').orderBy('createdAt','desc').limit(30).get().then(function(s){ var seen={}, out=[]; s.forEach(function(d){ var x=d.data(); if(seen[x.title]||x.status==='중단') return; seen[x.title]=1; out.push(x); }); el.innerHTML=out.length?out.slice(0,6).map(function(x){return '<div class="row" style="background:'+(x.state==='보유'?'#dcfce7':x.state==='매수 후보'?'#eef2ff':'#f3f4f6')+'"><span><b>'+esc(x.title)+'</b></span><span>'+esc(x.state||'')+'</span></div>'}).join(''):'기록 없음'; }).catch(function(e){ el.textContent='읽기 실패(색인 필요할 수 있음): '+e.message.slice(0,60); });
+    db.collection(COL_R).orderBy('date','desc').limit(60).get().then(function(s){
+      var byStock={};
+      s.forEach(function(d){
+        var x=d.data();
+        (x.stocks||[]).forEach(function(name){
+          if(!byStock[name]) byStock[name]={name:name,count:0,action:'',date:''};
+          byStock[name].count++;
+          if((x.date||'')>byStock[name].date){ byStock[name].date=x.date||''; byStock[name].action=x.action||''; }
+        });
+      });
+      var out=Object.keys(byStock).map(function(k){return byStock[k];}).sort(function(a,b){return b.date.localeCompare(a.date);});
+      el.innerHTML=out.length?out.slice(0,6).map(function(x){return '<div class="row"><span><b>'+esc(x.name)+'</b></span><span>'+esc(x.action||(x.count+'건'))+'</span></div>';}).join(''):'기록 없음';
+    }).catch(function(e){ el.textContent='읽기 실패(색인 필요할 수 있음): '+e.message.slice(0,60); });
   }
-  function go(d){ cur=d; month=d.slice(0,7); document.getElementById('verdictForm').hidden=true; document.getElementById('recForm').hidden=true; history.replaceState(null,'','#'+d); loadDay().then(loadMine).then(function(){ loadIndex(); }); }
+  function go(d){ cur=d; month=d.slice(0,7); document.getElementById('verdictForm').hidden=true; history.replaceState(null,'','#'+d); loadDay().then(loadMine).then(function(){ loadIndex(); }); }
   document.getElementById('prevDay').onclick=function(){go(shift(cur,-1))}; document.getElementById('nextDay').onclick=function(){go(shift(cur,1))}; document.getElementById('todayBtn').onclick=function(){go(kstToday())};
   document.getElementById('calPrev').onclick=function(){ var y=+month.slice(0,4), m=+month.slice(5,7)-1; if(m<1){m=12;y--;} month=y+'-'+(m<10?'0':'')+m; loadIndex(); };
   document.getElementById('calNext').onclick=function(){ var y=+month.slice(0,4), m=+month.slice(5,7)+1; if(m>12){m=1;y++;} month=y+'-'+(m<10?'0':'')+m; loadIndex(); };
