@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-09-11",
-  "generated_at": "2026-09-11T03:12:44+09:00",
+  "generated_at": "2026-09-11T06:29:02+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 64.2%(-10.40%p) · 유가 WTI 102.07 $(+2.4%) · KOSDAQ 836.92 pt(+0.8%)"
+      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 64.2%(-10.40%p) · 유가 WTI 103.93 $(+4.2%) · VIX 17.84 pt(+2.8%)"
     },
     {
       "k": "오늘 발표",
@@ -50,8 +50,8 @@
     {
       "key": "us10y",
       "label": "미 10년물",
-      "value": "4.8%",
-      "sub": "부담 · 2026-09-08",
+      "value": "4.83%",
+      "sub": "부담 · 2026-09-09",
       "tone": "green"
     }
   ],
@@ -87,15 +87,43 @@
     {
       "id": "wti",
       "name": "유가 WTI",
-      "value": 102.07,
+      "value": 103.93,
       "unit": "$",
       "prev": 99.72,
-      "delta": 2.35,
-      "delta_text": "+2.4%",
+      "delta": 4.21,
+      "delta_text": "+4.2%",
       "judge": "",
       "as_of": "2026-09-11",
       "cycle": "D",
-      "score": 2.356598475732044,
+      "score": 4.221821099077425,
+      "group": "world"
+    },
+    {
+      "id": "vix",
+      "name": "VIX",
+      "value": 17.84,
+      "unit": "pt",
+      "prev": 17.35,
+      "delta": 0.49,
+      "delta_text": "+2.8%",
+      "judge": "중립",
+      "as_of": "2026-09-11",
+      "cycle": "D",
+      "score": 2.82420749279538,
+      "group": "us"
+    },
+    {
+      "id": "gold",
+      "name": "금",
+      "value": 4358.5,
+      "unit": "$/oz",
+      "prev": 4398.1,
+      "delta": -39.6,
+      "delta_text": "-0.9%",
+      "judge": "",
+      "as_of": "2026-09-11",
+      "cycle": "D",
+      "score": 0.9003888042563916,
       "group": "world"
     },
     {
@@ -113,31 +141,17 @@
       "group": "kr"
     },
     {
-      "id": "bdry",
-      "name": "해운 BDRY",
-      "value": 16.0,
-      "unit": "$",
-      "prev": 15.885,
-      "delta": 0.115,
-      "delta_text": "+0.7%",
-      "judge": "",
-      "as_of": "2026-09-11",
-      "cycle": "D",
-      "score": 0.7239534151715468,
-      "group": "world"
-    },
-    {
-      "id": "vix",
-      "name": "VIX",
-      "value": 17.46,
+      "id": "sox",
+      "name": "SOX 반도체",
+      "value": 11614.167,
       "unit": "pt",
-      "prev": 17.35,
-      "delta": 0.11,
-      "delta_text": "+0.6%",
-      "judge": "중립",
+      "prev": 11703.183,
+      "delta": -89.016,
+      "delta_text": "-0.8%",
+      "judge": "약",
       "as_of": "2026-09-11",
       "cycle": "D",
-      "score": 0.6340057636887575,
+      "score": 0.7606135869190581,
       "group": "us"
     },
     {
@@ -153,20 +167,6 @@
       "cycle": "M",
       "score": 0.4447290094829344,
       "group": "us"
-    },
-    {
-      "id": "kr_lead",
-      "name": "선행지수순환변동치",
-      "value": 104.2,
-      "unit": "pt",
-      "prev": 103.8,
-      "delta": 0.4,
-      "delta_text": "+0.4%",
-      "judge": "",
-      "as_of": "2026-07",
-      "cycle": "M",
-      "score": 0.3853564547206221,
-      "group": "kr"
     }
   ],
   "releases": {
@@ -277,15 +277,43 @@
         {
           "id": "wti",
           "name": "유가 WTI",
-          "value": 102.07,
+          "value": 103.93,
           "unit": "$",
           "prev": 99.72,
-          "delta": 2.35,
-          "delta_text": "+2.4%",
+          "delta": 4.21,
+          "delta_text": "+4.2%",
           "judge": "",
           "as_of": "2026-09-11",
           "cycle": "D",
-          "score": 2.356598475732044,
+          "score": 4.221821099077425,
+          "group": "world"
+        },
+        {
+          "id": "vix",
+          "name": "VIX",
+          "value": 17.84,
+          "unit": "pt",
+          "prev": 17.35,
+          "delta": 0.49,
+          "delta_text": "+2.8%",
+          "judge": "중립",
+          "as_of": "2026-09-11",
+          "cycle": "D",
+          "score": 2.82420749279538,
+          "group": "us"
+        },
+        {
+          "id": "gold",
+          "name": "금",
+          "value": 4358.5,
+          "unit": "$/oz",
+          "prev": 4398.1,
+          "delta": -39.6,
+          "delta_text": "-0.9%",
+          "judge": "",
+          "as_of": "2026-09-11",
+          "cycle": "D",
+          "score": 0.9003888042563916,
           "group": "world"
         },
         {
@@ -303,31 +331,17 @@
           "group": "kr"
         },
         {
-          "id": "bdry",
-          "name": "해운 BDRY",
-          "value": 16.0,
-          "unit": "$",
-          "prev": 15.885,
-          "delta": 0.115,
-          "delta_text": "+0.7%",
-          "judge": "",
-          "as_of": "2026-09-11",
-          "cycle": "D",
-          "score": 0.7239534151715468,
-          "group": "world"
-        },
-        {
-          "id": "vix",
-          "name": "VIX",
-          "value": 17.46,
+          "id": "sox",
+          "name": "SOX 반도체",
+          "value": 11614.167,
           "unit": "pt",
-          "prev": 17.35,
-          "delta": 0.11,
-          "delta_text": "+0.6%",
-          "judge": "중립",
+          "prev": 11703.183,
+          "delta": -89.016,
+          "delta_text": "-0.8%",
+          "judge": "약",
           "as_of": "2026-09-11",
           "cycle": "D",
-          "score": 0.6340057636887575,
+          "score": 0.7606135869190581,
           "group": "us"
         },
         {
@@ -343,20 +357,6 @@
           "cycle": "M",
           "score": 0.4447290094829344,
           "group": "us"
-        },
-        {
-          "id": "kr_lead",
-          "name": "선행지수순환변동치",
-          "value": 104.2,
-          "unit": "pt",
-          "prev": 103.8,
-          "delta": 0.4,
-          "delta_text": "+0.4%",
-          "judge": "",
-          "as_of": "2026-07",
-          "cycle": "M",
-          "score": 0.3853564547206221,
-          "group": "kr"
         }
       ]
     },
@@ -370,7 +370,7 @@
     },
     {
       "id": "2026-09-11/auto/macro",
-      "time": "03:12",
+      "time": "06:29",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 35/35 수집",
