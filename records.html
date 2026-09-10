@@ -10,7 +10,7 @@
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 /* ══════════════════════════════════════════════════════════
-   🗂 투자 기록보관실  v7.13-0911-0719
+   🗂 투자 기록보관실  v7.14-0911-0849
    업무일지(worklog)와 한눈에 구분되도록 네이비×골드 테마로 짰다.
    업무일지의 8뷰 엔진(카드·표·보드·달력)을 새 창고(records)에
    맞게 다시 짠 것 — worklog_entries 와는 완전히 분리된 컬렉션.
@@ -458,7 +458,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1>
-  <span class="ver">v7.13-0911-0719 · 서희타워</span>
+  <span class="ver">v7.14-0911-0849 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -1406,6 +1406,20 @@ function renderTodoHistory(){
   box.innerHTML = html;
 }
 document.getElementById('todayDate').textContent = kstNow().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
+/* v7.14 항목2: 자정(KST) 넘김 감지 — snapshot이 안 와도 오늘 체크리스트를 새 날짜로 갱신.
+   1분 간격 todayStr() 비교(매초 아님·AI 아님). 어제 todos는 수정/삭제하지 않음(날짜 필터로만 분리, 이력 보존). */
+var _shownDate = todayStr();
+function checkDayRollover(){
+  var t = todayStr();
+  if(t === _shownDate) return;
+  _shownDate = t;
+  var el = document.getElementById('todayDate');
+  if(el) el.textContent = kstNow().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
+  ensureTodayInstances();
+  renderTodos();
+  renderDue();
+}
+setInterval(checkDayRollover, 60000);
 
 /* ══════════════════════════════════════════════════════════
    kind 탭 · 보기 아이콘 · 종목칩
@@ -2717,7 +2731,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.13-0911-0719 준비됨 — records / records_todos / records_meta 컬렉션 사용');
+console.log('[기록보관실] v7.14-0911-0849 준비됨 — records / records_todos / records_meta 컬렉션 사용');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
