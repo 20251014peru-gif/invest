@@ -10,55 +10,10 @@
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 /* ══════════════════════════════════════════════════════════
-   🗂 투자 기록보관실  v7.11-0910-1846
+   🗂 투자 기록보관실  v4-0909-2136
    업무일지(worklog)와 한눈에 구분되도록 네이비×골드 테마로 짰다.
    업무일지의 8뷰 엔진(카드·표·보드·달력)을 새 창고(records)에
    맞게 다시 짠 것 — worklog_entries 와는 완전히 분리된 컬렉션.
-   v5: 투자두뇌 구조 원칙 12~15번 절차로 추가 — ① 검증상태(verifyState) 필드+배지+필터
-   ② idea 기록에 시나리오(상승/중립/하락 + 공통사실, scenariosSetAt로 최초저장시각 보존)
-   v6: ① 반복 체크리스트(records_meta/checklist_templates) — 항목관리(순서·이름수정·일시중지·삽입)
-   + 매일 자동생성(중복방지) + 최근14일 이력표 ② 액션 필드 자유텍스트→단일선택 칩+기타입력
-   ③ 달력에 체크예정일(🔔) 표시 ④ 필터해제 버튼 — 필터 없을 땐 숨김
-   v7: ① 반복 체크리스트 월~금만 자동생성(주말 제외) ② 종목/상태 필터 칩 세로쌓임 버그 수정
-   + 종목 6개 넘으면 더보기/접기 토글 ③ 툴바를 아이콘줄/필터칩줄 2줄로 분리(중간에 걸치던 문제)
-   ④ 달력 🔔 — 제목을 칸 안에 바로 표시, 클릭 시 전체기록 대신 그날 요약(기록+확인할 것) 팝업
-   v7.1: 투자두뇌 구조 원칙 12~15번 절차로 추가 — ① 종목 상세(정보 누적) — 종목관리에서 이름 클릭 →
-   목표가·보유수량·매수단가·상태 + 투자논지 이력(날짜별로 쌓임, 값 바뀌면 자동으로 한 줄 기록) + 관련
-   기록 목록 ② 뉴스레이더 등 다른 앱에서 "?import=news&title=..." 로 넘어오면 + 기록 추가 모달에
-   미리 채워서 엶(자동저장 없음 — 반드시 확인 후 직접 저장)
-   v7.2: 실사용(모바일) 피드백 반영 — ① 달력 기록제목(.evt) 줄바꿈 안 돼 옆칸까지 침범하던 문제
-   수정(가로로 안 넘치고 세로로 늘어남) ② 팝업 텍스트가 세로 한 글자씩 쌓이는 문제 방어— 모달 중앙정렬을
-   flex 대신 block+margin auto 방식으로 교체(iOS 사파리 flex+overflow 크기계산 버그 회피) + 텍스트에
-   overflow-wrap 안전장치 추가 ③ kind탭·보기아이콘·종목칩 3줄을 하나의 흐르는 줄로 통합(공간 있으면
-   한 줄, 좁으면 자연스럽게 다음 줄로) ④ 체크리스트를 세로 목록 대신 가로 4열 그리드로 ⑤ 종목 필터칩에
-   ⓘ 버튼 추가 — 눌러야 정보 누적 모달(v7.1)이 열림(칩 클릭은 필터링 유지, 서로 안 섞이게 분리)
-   v7.3: v7.2의 "팝업 세로 텍스트" 재발 확인 후 진짜 원인 발견 — .checkItem 안의 .kk(아이콘+원본
-   기록제목)에 폭 제한이 없어서, 기록 제목이 길면 .kk가 거의 모든 폭을 차지하고 .tt가 0px로 눌려
-   그 안 글자가 세로로 쌓였음(v7.2의 overflow-wrap 안전장치가 오히려 이 증상을 드러냄).
-   .kk를 줄바꿈 허용+최대폭 38%로 묶어서 .tt가 항상 넉넉한 폭을 갖도록 수정 — 실제 데이터(긴 유튜브
-   제목)로 재현 후 확인함
-   v7.4: ① 달력 🔔 확인예정 칩(.chkEvt)도 .evt처럼 줄바꿈되게 — nowrap+ellipsis라 셀 폭이
-   내용에 맞춰 억지로 넓어지던 문제(grid 1fr에 minmax(0,1fr) 추가로 근본 차단) ② 종목칩의 ⓘ 버튼을
-   원형 배지로 키움 — 있는지도 몰랐다는 피드백 반영 ③ 종목 상세에 "추가 정보" 섹션 신설 — 목표가·
-   보유수량·매수단가 외에 원하는 항목(PER, 섹터, 손절가 등)을 이름 붙여 자유롭게 추가/삭제, 값이
-   바뀌면 투자논지 이력에 자동 기록
-   v7.5: "정보 넣는 창" 역할을 더 분명하게 — ① 종목 상세: "추가 정보"를 맨 위·항상 보이는 자리로
-   옮기고, 상태·목표가·보유수량·매수단가는 details(기본 접힘)로 내림 — 다 채우는 항목이 아니므로
-   ② 자주 쓰는 항목명을 칩으로 눌러서 바로 채워지게(타이핑 없이) — 이미 추가한 이름은 칩에서 빠짐
-   ③ 종목별 보드 위에 종류탭과 같은 방식의 탭 줄 추가 시도 — **v7.6에서 "보드 안 말고 새 탭으로"
-   피드백 받아 이 부분만 되돌리고 v7.6의 독립 탭으로 재구현**
-   v7.6: ① "🏷 종목" 을 독립된 보기 탭으로 신설(v7.5의 보드 안 탭 시도는 되돌림) — "전체"에서는
-   등록된 종목 이름만 카드로 나열(정보 유무 배지만 표시), 종목 하나를 고르면 그 종목 기록 리스트 +
-   "📋 정보 보기/입력" 버튼(종목상세 모달로 바로 진입) ② 추가정보 프리셋 칩을 배당수익률·동종업계
-   비교 같은 "지표성" 항목에서 매수사유·핵심가정·반증조건·촉매·확신도·매도조건·재평가시점 등
-   "나중에 판단을 복기할 때 도움되는" 항목으로 전면 교체
-   v7.7: v7.6에서 만든 "🏷" 아이콘이 실제로는 너무 작고 색도 없어서(윈도우 크롬에서 얇은 회색
-   윤곽선으로만 보임) "종목탭이 없는데?"라는 피드백 받음 — 다른 보기 아이콘(카드/리스트/표…)은
-   그대로 정사각형 아이콘만 쓰되, 이 버튼만 "🏷 종목" 글자를 같이 보여줘서 확실히 눈에 띄게 수정
-   v7.8: "종목"의 자리를 다시 옮김 — 보기 아이콘 줄이 아니라 **종류탭(#ktabs)에 뉴스와 아이디어
-   사이 하나의 탭으로**(전체·유튜브·뉴스·🏷종목·아이디어·차트·메모, 총 7개 탭). 실제 kind 값은
-   아니고 누르면 curView가 'stock'으로 바뀌는 특수 탭 — 다시 누르거나 다른 탭을 누르면 누르기
-   직전 보기로 돌아감(v7.7의 보기아이콘 줄 버튼은 제거)
    ══════════════════════════════════════════════════════════ */
 :root{
   --navy-900:#0b1d33; --navy-800:#122942; --navy-700:#1c3b5e; --navy-600:#2c5f8a;
@@ -97,29 +52,13 @@ a{color:inherit}
 .today .hd .dd{font-size:12px;color:var(--sub)}
 .today .hd .sp{flex:1}
 .today .hd .streak{font-size:12px;color:var(--gold-dk);font-weight:700;background:var(--gold-lt);border-radius:999px;padding:3px 10px}
-/* v7.11: 카드 헤더의 ✏️(항목편집)/⋯(더보기) 버튼 — 참고 이미지의 날짜카드 우상단 버튼 자리를 재현.
-   기존에 .col h4 안에 있던 "⚙ 항목관리"/"🗂 지난 기록"이 여기로 옮겨온 것(id는 그대로라 동작 그대로) */
-.today .hd .iconbtn{border:0;background:#f4f2ea;color:var(--sub);width:28px;height:28px;border-radius:8px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
-.today .hd .iconbtn:hover{background:#ece9dc;color:var(--navy-700)}
-.today .hd .menuWrap{position:relative}
-.today .hd .menuPop{display:none;position:absolute;right:0;top:34px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 18px rgba(11,29,51,.14);padding:6px;min-width:130px;z-index:20}
-.today .hd .menuPop.on{display:block}
-.today .hd .menuPop button{width:100%;text-align:left;border:0;background:none;padding:8px 9px;font-size:12.5px;border-radius:7px;cursor:pointer;color:var(--txt)}
-.today .hd .menuPop button:hover{background:#f5f3ec}
 .today .cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 @media(max-width:820px){.today .cols{grid-template-columns:1fr}}
 .today .col h4{font-size:12px;color:var(--sub);font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-/* v7.2: 세로 목록 대신 가로 4열 그리드로 — 화면이 좁아지면 2열→1열로 자동 축소 */
-#todoList{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 10px}
-@media(max-width:1100px){#todoList{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:820px){#todoList{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:420px){#todoList{grid-template-columns:1fr}}
-.todoRow{display:flex;align-items:center;gap:7px;padding:7px 8px;border:1px solid #f2f0e7;border-radius:9px;min-width:0}
+.todoRow{display:flex;align-items:center;gap:9px;padding:7px 2px;border-bottom:1px solid #f2f0e7}
+.todoRow:last-child{border-bottom:0}
 .todoRow input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy-600);flex:0 0 auto;cursor:pointer}
-/* v7.11: 반복 항목에 지정된 아이콘을 색 배지로 — 참고 이미지의 체크박스 옆 아이콘 배지 자리.
-   반복이 아닌(일회성) 오늘 할 일은 배지 없이 기존 그대로(빨리 적고 끝내는 흐름을 방해하지 않으려 배지 강제 안 함) */
-.todoRow .badge2{width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;flex:0 0 auto}
-.todoRow .t{flex:1;font-size:13.5px;min-width:0;overflow-wrap:anywhere}
+.todoRow .t{flex:1;font-size:13.5px}
 .todoRow.done .t{color:var(--sub2);text-decoration:line-through}
 .todoRow .x{border:0;background:none;color:#c9b8b8;font-size:12px;cursor:pointer;padding:2px 6px;flex:0 0 auto}
 .todoRow .x:hover{color:var(--warn)}
@@ -127,98 +66,34 @@ a{color:inherit}
 .todoAdd input{flex:1;border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-size:13px;outline:0}
 .todoAdd input:focus{border-color:var(--navy-600)}
 .todoAdd button{background:var(--navy-700);color:#fff;border:0;border-radius:8px;padding:0 14px;font-size:13px;font-weight:700;cursor:pointer}
-.checkItem{display:flex;align-items:flex-start;gap:9px;padding:7px 2px;border-bottom:1px solid #f2f0e7;cursor:pointer;min-width:0}
+.checkItem{display:flex;align-items:center;gap:9px;padding:7px 2px;border-bottom:1px solid #f2f0e7;cursor:pointer}
 .checkItem:last-child{border-bottom:0}
-.checkItem .dot{width:8px;height:8px;border-radius:999px;flex:0 0 auto;margin-top:5px}
-/* v7.2: 글자가 세로로 한 자씩 쌓이는 걸 방지 — min-width:0으로 flex가 억지로 안 줄어드는 문제 차단 +
-   overflow-wrap으로 한 줄이 너무 길면 정상적으로 줄바꿈되게(칸이 극단적으로 좁아져도 안전) */
-.checkItem .tt{flex:1;font-size:13.5px;min-width:0;overflow-wrap:anywhere}
-/* v7.2.1: 진짜 원인 발견 — .kk(아이콘+원본기록 제목)에 폭 제한이 없어서 제목이 길면 .kk가
-   거의 모든 공간을 차지하고 .tt가 0px로 눌려서 그 안의 글자가 세로로 한 자씩 쌓였던 것.
-   .kk를 접이식(줄바꿈 허용 + 최대폭 38%)으로 묶어서 .tt가 항상 넉넉한 공간을 갖게 함 */
-.checkItem .kk{font-size:10.5px;color:var(--sub2);flex:0 1 auto;max-width:38%;text-align:right;overflow-wrap:anywhere}
+.checkItem .dot{width:8px;height:8px;border-radius:999px;flex:0 0 auto}
+.checkItem .tt{flex:1;font-size:13.5px}
+.checkItem .kk{font-size:10.5px;color:var(--sub2)}
 .emptyMini{font-size:12.5px;color:var(--sub2);padding:8px 2px}
 
 /* ── kind 탭 ── */
+.ktabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .ktab{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 15px;font-size:13.5px;font-weight:700;color:#5b5646;display:flex;align-items:center;gap:7px;cursor:pointer}
 .ktab .n{font-weight:800;color:var(--sub2)}
 .ktab.on{background:var(--navy-800);color:#fff;border-color:var(--navy-800)}
 .ktab.on .n{color:#c7d0dc}
 
-/* ── v7.2: kind탭 · 보기아이콘 · 개수 · 버튼 · 종목/상태 칩을 하나의 흐르는 줄로 통합 ──
-   예전엔 3줄(ktabs / viewbarRow1 / viewbarRow2)로 억지로 나눠져 있었는데, 화면이 넓으면 한 줄에
-   다 들어가고 좁으면 자연스럽게 다음 줄로 넘어가도록 flex-wrap 하나로 합침.
-   #ktabs·#stockPicker·#verifyPicker는 display:contents로 "껍데기"를 없애서 안에 든 칩들이
-   .toolbar 의 같은 flex 줄에 직접 놓이게 한다(칩 하나하나가 이 줄의 flex 아이템이 됨) */
-.toolbar{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 10px;margin-bottom:16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-.toolbar #ktabs,.toolbar #stockPicker,.toolbar #verifyPicker{display:contents}
-.toolbar #cntLabel{margin-left:auto}
+/* ── 보기 전환 + 필터 바 ── */
+.viewbar{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-bottom:16px;flex-wrap:wrap}
 .viewicons{display:flex;gap:4px;background:#f1efe6;border-radius:8px;padding:3px}
 .vicon{width:36px;height:31px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14.5px;color:var(--sub);border:0;background:none;cursor:pointer}
 .vicon.on{background:#fff;color:var(--navy-700);box-shadow:0 1px 3px rgba(0,0,0,.12)}
-.fchip{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12.5px;color:#555;background:#fff;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+.viewbar .divider{width:1px;height:22px;background:var(--line)}
+.fchip{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12.5px;color:#555;background:#fff;cursor:pointer;white-space:nowrap}
 .fchip.on{background:var(--navy-700);color:#fff;border-color:var(--navy-700)}
-.fchip.moreBtn{background:#f7f6f0;color:var(--sub);border-style:dashed}
-/* v7.2: 종목 필터칩 안의 ⓘ — 누르면 정보 누적(종목 상세) 모달이 열림. 칩 클릭(필터링)과 안 섞이게
-   클릭 시 stopPropagation 처리(JS 쪽) */
-/* v7.4: 있는지도 모르겠다는 피드백 반영 — 작은 글자가 아니라 눈에 띄는 원형 배지 버튼으로 */
-.fchipInfo{border:0;background:#eef1f5;color:var(--navy-700);font-size:12px;cursor:pointer;line-height:1;font-weight:800;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:1px}
-.fchip.on .fchipInfo{background:rgba(255,255,255,.3);color:#fff}
-.fchipInfo:hover{background:var(--gold-lt);color:var(--gold-dk)}
+.stockPicker{position:relative}
+.stockPicker .fchip{display:flex;align-items:center;gap:5px}
+.viewbar .sp{flex:1}
 .addbtn{background:var(--gold);color:var(--navy-900);border:0;border-radius:9px;padding:9px 17px;font-size:13.5px;font-weight:800;cursor:pointer}
 .mgrbtn{background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 13px;font-size:12.5px;font-weight:700;color:var(--sub);cursor:pointer}
 .cnt{font-size:12.5px;color:var(--sub);font-weight:700}
-
-/* ── v5: 검증상태 배지·필터 / 시나리오 3분기 (투자두뇌 구조 4·5번 원칙) ── */
-.vbadge{display:inline-block;padding:1px 8px;border-radius:20px;font-size:10px;font-weight:800;color:#fff;white-space:nowrap}
-.scenGrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
-@media(max-width:700px){.scenGrid{grid-template-columns:1fr}}
-.scenCol{border:1px solid var(--line);border-radius:10px;padding:9px;background:#fbfaf5}
-.scenCol b{display:block;margin-bottom:6px;font-size:12px}
-.scenCol textarea{width:100%;min-height:56px;margin-bottom:6px;border:1.5px solid var(--line);border-radius:8px;padding:7px 9px;font-size:12.5px;font-family:inherit;outline:0;resize:vertical}
-.scenCol input{width:100%;margin-bottom:6px;border:1.5px solid var(--line);border-radius:8px;padding:7px 9px;font-size:12.5px;font-family:inherit;outline:0}
-.pg-scen{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0}
-.pg-scen .commonFacts{font-size:12.5px;color:var(--sub);margin-bottom:8px;white-space:pre-wrap}
-
-/* ── v6: 체크리스트 항목관리 / 액션 칩 / 이력표 / 달력 체크마커 ── */
-.mgrbtn.tiny{padding:3px 9px;font-size:10.5px;border-radius:7px;margin-left:6px;font-weight:700}
-.col h4{display:flex;align-items:center;flex-wrap:wrap;gap:0}
-.actionPick{display:flex;gap:6px;flex-wrap:wrap}
-.actionChip{border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:700;color:#555;cursor:pointer}
-.actionChip.on{background:var(--navy-800);color:#fff;border-color:var(--navy-800)}
-.tmplList{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
-.tmplRow{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:9px;padding:7px 9px;background:#fff}
-.tmplRow.paused{opacity:.5}
-.tmplRow.dragOver{border-color:var(--navy-600);border-style:dashed}
-.tmplRow .drag{cursor:grab;color:var(--sub2);font-size:14px;flex:0 0 auto}
-/* v7.11: 항목마다 아이콘+색 배지 — 눌러서 아래 .tmplIconEdit 펼침(이모지 직접 입력 + 색 6가지 중 선택) */
-.tmplRow .iconPick{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex:0 0 auto;cursor:pointer;border:1px solid transparent}
-.tmplRow .iconPick:hover{border-color:var(--navy-600)}
-.tmplIconEdit{display:none;align-items:center;gap:7px;padding:6px 0 6px 34px;flex-wrap:wrap}
-.tmplIconEdit.on{display:flex}
-.tmplIconEdit input{width:52px;text-align:center;border:1.5px solid var(--navy-600);border-radius:7px;padding:4px;font-size:15px;font-family:inherit;outline:0}
-.tmplColorDot{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent}
-.tmplColorDot.on{border-color:var(--navy-800)}
-.tmplRow .tmplText{flex:1;font-size:13px;cursor:text;padding:3px 4px;border-radius:5px}
-.tmplRow .tmplText:hover{background:#f5f3ec}
-.tmplRow .tmplText input{width:100%;border:1.5px solid var(--navy-600);border-radius:5px;padding:4px 6px;font-size:13px;font-family:inherit;outline:0}
-.tmplRow button{border:0;background:none;cursor:pointer;font-size:13px;padding:3px 6px;border-radius:6px;flex:0 0 auto}
-.tmplRow button:hover{background:#f0eee4}
-.tmplRow .rm:hover{color:var(--warn)}
-.tmplInsertRow{display:none;gap:6px;padding:4px 0 4px 22px}
-.tmplInsertRow.on{display:flex}
-.tmplInsertRow input{flex:1;border:1.5px solid var(--line);border-radius:7px;padding:6px 8px;font-size:12.5px;font-family:inherit;outline:0}
-.histTable{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px}
-.histTable th,.histTable td{border:1px solid var(--line2);padding:5px 6px;text-align:center;white-space:nowrap}
-.histTable th{background:#f7f5ef;font-weight:700;color:var(--sub)}
-.histTable td.dateCol{text-align:left;color:var(--sub);font-weight:700}
-.calChk{display:inline-block;font-size:10px;margin-left:3px;cursor:pointer}
-/* v6.1: 달력 확인예정 칩 — .evt(기록 제목 칩)와 같은 자리에, 다른 색으로 제목까지 바로 보이게 */
-/* v7.4: .evt와 똑같이 줄바꿈 — nowrap+ellipsis였을 때 셀이 내용 길이에 맞춰 옆으로 넓어지던 문제 수정 */
-.chkEvt{display:block;font-size:10.3px;font-weight:700;border-radius:5px;padding:2px 5px;margin-bottom:3px;line-height:1.35;cursor:pointer;color:#7a5b00;background:#fff3cc;border:1px solid #f0dc93;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
-.dayPopSec{margin-bottom:14px}
-.dayPopSec:last-child{margin-bottom:0}
-.dayPopSec h5{font-size:12px;color:var(--sub);margin:0 0 6px;font-weight:800}
 
 /* ── 날짜 그룹 ── */
 .day{display:flex;align-items:baseline;gap:10px;margin:18px 2px 10px}
@@ -274,37 +149,20 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 .bcard .tt{font-size:12.5px;font-weight:700;line-height:1.4}
 .bcard .dd{font-size:10.5px;color:var(--sub2);margin-top:5px}
 
-/* ── 종목보기(v7.10) — "🏷 종목" 탭이 켜지면 #viewicons(카드/리스트/표/보드/채널별/달력/타임라인/갤러리)가
-   레코드 대신 "종목 목록 자체"를 그 방식으로 보여줌(stockCardHTML 등, records2 참고). 카드가 기본형 */
-.stockDirGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
-.stockDirCard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.03)}
-.stockDirCard:hover{box-shadow:0 4px 10px rgba(11,29,51,.09);border-color:var(--navy-600)}
-.stockDirCard .nm{display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:800;margin-bottom:8px}
-.stockDirCard .nm .n{font-size:11px;background:#f4f2ea;border-radius:999px;padding:2px 9px;color:var(--sub);font-weight:700}
-.stockDirCard .badge{font-size:11px;font-weight:700;border-radius:6px;padding:3px 9px;display:inline-block}
-.stockDirCard .badge.관심{background:#eef3f8;color:var(--navy-700)}
-.stockDirCard .badge.보유{background:var(--gold-lt);color:var(--gold-dk)}
-.stockDirCard .badge.청산{background:#f2f0e7;color:var(--sub)}
-.stockFocusHd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
-.stockFocusHd .infoBtn{background:var(--navy-800);color:#fff;border:0;border-radius:9px;padding:9px 15px;font-size:12.5px;font-weight:700;cursor:pointer}
-
 /* ── 캘린더보기 ── */
 .cal{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}
 .calhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .calhd b{font-size:17px}
 .calhd .nav{display:flex;gap:6px}
 .calhd .nav button{border:1px solid var(--line);border-radius:8px;width:30px;height:30px;background:#fff;font-size:13px;color:var(--sub);cursor:pointer}
-/* v7.4: 1fr만 쓰면 칸 안의 줄바꿈 안 되는 내용이 있을 때 그 칸의 최소폭이 내용 크기로 벌어져
-   그리드 전체가 삐뚤어짐(minmax(0,1fr)로 각 칸의 최소폭을 0으로 고정해서 항상 균등하게 유지) */
-.calgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 .calgrid .dow{text-align:center;font-size:11.5px;color:var(--sub2);font-weight:800;padding-bottom:6px}
 .calgrid .cell{min-height:98px;border-radius:9px;padding:6px 7px;font-size:12px;background:#fbfaf6;border:1px solid #f2f0e7}
 .calgrid .cell.dim{background:transparent;border-color:transparent;color:#ccc}
 .calgrid .cell.today{border-color:var(--navy-600);background:#eef3f8}
 .calgrid .cell .num{font-weight:800;font-size:12.5px;margin-bottom:4px;display:block}
 .calgrid .cell.today .num{color:var(--navy-700)}
-/* v7.2: 제목이 안 끊기고 옆 칸까지 침범하던 문제 — 강제로 줄바꿈해서 칸 안에서 세로로만 늘어나게 */
-.evt{display:block;font-size:10.3px;font-weight:700;border-radius:5px;padding:2px 5px;margin-bottom:3px;line-height:1.35;cursor:pointer;color:#fff;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+.evt{display:block;font-size:10.3px;font-weight:700;border-radius:5px;padding:2px 5px;margin-bottom:3px;line-height:1.35;cursor:pointer;color:#fff}
 
 /* ── 리스트(줄)보기 ── */
 .rlist{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
@@ -347,12 +205,9 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 .emptyState .ei{font-size:34px;margin-bottom:10px}
 
 /* ── 모달 ── */
-/* v7.2: 센터 정렬을 flex justify-content 대신 block+margin auto로 — 일부 모바일 브라우저에서
-   overflow-y:auto가 있는 flex 컨테이너 + justify-content:center 조합이 자식 너비를 잘못
-   계산해(내용 기준 최소폭으로 쪼그라듦) 글자가 세로로 한 자씩 쌓이는 현상이 보고돼 회피 처리 */
-.ovwrap{position:fixed;inset:0;background:rgba(11,20,33,.5);z-index:9000;display:none;overflow-y:auto;padding:40px 16px}
-.ovwrap.on{display:block}
-.modal{background:#fff;border-radius:18px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);margin:0 auto}
+.ovwrap{position:fixed;inset:0;background:rgba(11,20,33,.5);z-index:9000;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+.ovwrap.on{display:flex}
+.modal{background:#fff;border-radius:18px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
 .modal .mhd{background:var(--navy-800);color:#fff;padding:16px 20px;border-radius:18px 18px 0 0;display:flex;align-items:center;gap:10px;cursor:move;user-select:none}
 .modal.dragged{margin:0 !important;position:fixed !important}
 .modal .mhd b{font-size:15px}
@@ -383,43 +238,10 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 /* ── 종목관리 모달 ── */
 .stockMgrList{max-height:320px;overflow-y:auto;margin-bottom:12px}
 .smRow{display:flex;align-items:center;gap:9px;padding:8px 4px;border-bottom:1px solid #f2f0e7}
-.smRow .nm{flex:1;font-size:13.5px;font-weight:600;cursor:pointer}
-.smRow .nm:hover{color:var(--navy-700);text-decoration:underline}
+.smRow .nm{flex:1;font-size:13.5px;font-weight:600}
 .smRow .cnt2{font-size:11px;color:var(--sub2)}
 .smRow .rm{border:0;background:none;color:#c9b8b8;cursor:pointer;font-size:12px}
 .smRow .rm:hover{color:var(--warn)}
-/* v7.1: 종목 상세 모달(정보 누적) */
-.sdMetaRow{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub);margin-bottom:10px}
-.sdField label{font-size:11.5px;color:var(--sub);font-weight:700;display:block;margin-bottom:3px}
-.sdField input,.sdField select{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:8px 9px;font-size:13px;font-family:inherit;outline:0}
-.thesisLogItem{padding:8px 2px;border-bottom:1px solid #f2f0e7;font-size:12.5px}
-.thesisLogItem:last-child{border-bottom:0}
-.thesisLogItem .d{font-size:10.5px;color:var(--sub2);font-weight:700;margin-right:6px}
-.thesisLogItem.auto{color:var(--sub)}
-.saveBtn{background:var(--navy-800);color:#fff;border:0;border-radius:9px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer}
-/* v7.4: 종목 상세 "추가 정보" — 목표가·보유수량·매수단가 외에 자유롭게 이름 붙여 넣는 항목들 */
-.cfRow{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f2f0e7}
-.cfRow label{font-size:11.5px;color:var(--sub);font-weight:700;flex:0 0 auto;min-width:64px;max-width:110px;overflow-wrap:anywhere}
-.cfRow input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12.5px;font-family:inherit;outline:0}
-.cfRow .cfDel{border:0;background:none;color:#c9b8b8;cursor:pointer;font-size:12px;flex:0 0 auto;padding:2px 4px}
-.cfRow .cfDel:hover{color:var(--warn)}
-.cfAddRow{display:flex;gap:6px;margin-top:8px}
-.cfAddRow input{border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0}
-.cfAddRow input.cfLabelInp{flex:0 0 110px}
-.cfAddRow input.cfValInp{flex:1;min-width:0}
-.cfAddRow button{background:var(--navy-700);color:#fff;border:0;border-radius:8px;padding:0 14px;font-size:13px;font-weight:700;cursor:pointer;flex:0 0 auto}
-/* v7.5: 항목명을 매번 타이핑 안 해도 되게 자주 쓰는 이름을 칩으로 — 이미 추가한 이름은 목록에서 빠짐 */
-.cfPresets{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px}
-.cfPreset{background:#f4f2ea;border:1px solid var(--line);border-radius:20px;padding:5px 11px;font-size:11.5px;color:#5b5646;cursor:pointer;font-weight:700}
-.cfPreset:hover{background:var(--gold-lt);color:var(--gold-dk);border-color:var(--gold-dk)}
-/* v7.5: 상태·목표가·보유수량·매수단가는 다 채우는 게 아니라서 기본은 접어두고, 필요할 때만 펼침 */
-.sdTradeInfo{margin-top:16px;border:1px solid var(--line);border-radius:10px;padding:0 12px}
-.sdTradeInfo summary{cursor:pointer;padding:11px 0;font-size:12.5px;font-weight:700;color:var(--sub);list-style:none;display:flex;align-items:center;gap:5px}
-.sdTradeInfo summary::-webkit-details-marker{display:none}
-.sdTradeInfo summary::before{content:'▸';color:var(--sub2);font-size:11px}
-.sdTradeInfo[open] summary::before{content:'▾'}
-.sdTradeInfo[open]{padding-bottom:14px}
-.sdTradeInfo .frow2{margin-top:10px}
 
 /* ── 체크 캘린더 편집 줄 ── */
 .checkRow{display:grid;grid-template-columns:130px 1fr 1fr auto;gap:7px;margin-bottom:7px;align-items:center}
@@ -458,7 +280,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1>
-  <span class="ver">v7.11-0910-1846 · 서희타워</span>
+  <span class="ver">v4-0909-2136 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -476,13 +298,6 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
       <span class="dd" id="todayDate"></span>
       <span class="sp"></span>
       <span class="streak" id="streakBadge" style="display:none"></span>
-      <button type="button" class="iconbtn" id="btnTmplMgr" title="체크리스트 항목 편집">✏️</button>
-      <div class="menuWrap">
-        <button type="button" class="iconbtn" id="btnTodayMenu" title="더보기">⋯</button>
-        <div class="menuPop" id="todayMenuPop">
-          <button type="button" id="btnHistToggle">🗂 지난 기록</button>
-        </div>
-      </div>
     </div>
     <div class="cols">
       <div class="col">
@@ -496,14 +311,13 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
           <input type="text" id="todoInput" placeholder="할 일을 적고 Enter…">
           <button id="todoAddBtn">추가</button>
         </div>
-        <div id="todoHistoryBox" style="display:none"></div>
       </div>
     </div>
   </div>
 
-  <!-- v7.2: kind탭·보기아이콘·개수·버튼·종목/상태칩을 한 줄(넓으면 1줄, 좁으면 자동 다음줄)로 통합 -->
-  <div class="toolbar" id="toolbar">
-    <div class="ktabs" id="ktabs"></div>
+  <div class="ktabs" id="ktabs"></div>
+
+  <div class="viewbar">
     <div class="viewicons" id="viewicons">
       <button type="button" class="vicon" data-v="card" title="카드">▦</button>
       <button type="button" class="vicon" data-v="list" title="리스트">☰</button>
@@ -514,11 +328,12 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
       <button type="button" class="vicon" data-v="time" title="타임라인">⏱</button>
       <button type="button" class="vicon" data-v="gal" title="갤러리">🖼</button>
     </div>
+    <div class="divider"></div>
+    <div class="stockPicker" id="stockPicker"></div>
+    <span class="sp"></span>
     <span class="cnt" id="cntLabel"></span>
     <button class="mgrbtn" id="btnClearFlt">✕ 필터해제</button>
     <button class="addbtn" id="btnAdd">＋ 기록 추가</button>
-    <div class="stockPicker" id="stockPicker"></div>
-    <div class="stockPicker" id="verifyPicker"></div>
   </div>
 
   <div id="content"></div>
@@ -561,38 +376,10 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
         </div>
       </div>
       <div class="frow2">
-        <div class="frow" id="rowAction"><label id="lblAction">🎯 액션</label>
-          <div class="actionPick" id="actionPick"></div>
-          <input type="text" id="fActionOther" placeholder="직접 입력…" style="display:none;margin-top:6px">
-        </div>
+        <div class="frow" id="rowAction"><label id="lblAction">🎯 액션</label><input type="text" id="fAction" placeholder="관망 / 매수검토 / 비중축소…"></div>
         <div class="frow"><label id="lblStar">⭐ 볼 가치</label>
           <div class="starRow" id="starRow">
           <span data-s="1">★</span><span data-s="2">★</span><span data-s="3">★</span><span data-s="4">★</span><span data-s="5">★</span>
-          </div>
-        </div>
-      </div>
-      <div class="frow">
-        <label>🔍 검증 상태 (선택)</label>
-        <select id="fVerify"></select>
-      </div>
-      <div class="frow" id="scenarioBox" style="display:none">
-        <label>🧭 시나리오 — 상승·중립·하락 (아이디어 기록 전용)</label>
-        <textarea id="fScenCommon" placeholder="세 시나리오가 공통으로 보는 전제 (공통 사실)" style="min-height:50px"></textarea>
-        <div class="scenGrid">
-          <div class="scenCol"><b>📈 상승</b>
-            <textarea id="fScenUpDesc" placeholder="상승 시나리오 내용"></textarea>
-            <input type="text" id="fScenUpStrengthen" placeholder="강화 조건">
-            <input type="text" id="fScenUpInvalidate" placeholder="무효화 조건">
-          </div>
-          <div class="scenCol"><b>◾ 중립</b>
-            <textarea id="fScenNeutralDesc" placeholder="중립 시나리오 내용"></textarea>
-            <input type="text" id="fScenNeutralStrengthen" placeholder="강화 조건">
-            <input type="text" id="fScenNeutralInvalidate" placeholder="무효화 조건">
-          </div>
-          <div class="scenCol"><b>📉 하락</b>
-            <textarea id="fScenDownDesc" placeholder="하락 시나리오 내용"></textarea>
-            <input type="text" id="fScenDownStrengthen" placeholder="강화 조건">
-            <input type="text" id="fScenDownInvalidate" placeholder="무효화 조건">
           </div>
         </div>
       </div>
@@ -633,82 +420,6 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
         <button type="button" class="go" id="stockMgrAddBtn">추가</button>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- v7.1: 종목 상세(정보 누적) — 종목 관리 목록에서 이름 클릭하면 열림 -->
-<div class="ovwrap" id="stockDetailModal">
-  <div class="modal" style="max-width:560px">
-    <div class="mhd"><b id="sdName">종목명</b><button class="x" id="sdClose">✕</button></div>
-    <div class="mbody">
-      <div class="sdMetaRow"><span id="sdCount">0건 기록됨</span></div>
-
-      <!-- v7.5: 이 창의 중심을 "정해진 4칸 채우기"에서 "종목마다 원하는 정보를 쌓는 곳"으로 —
-           추가 정보를 맨 위 · 항상 보이게, 상태/목표가/보유수량/매수단가는 아래로 접어둠 -->
-      <div class="frow">
-        <label>🗂 핵심 정보 — 이름 붙여 자유롭게 추가하세요 (예: PER, 섹터, 손절가…)</label>
-        <div id="sdCustomFields"></div>
-        <div class="cfPresets" id="sdCfPresets"></div>
-        <div class="cfAddRow">
-          <input type="text" class="cfLabelInp" id="sdCfLabel" placeholder="항목명 (예: PER)">
-          <input type="text" class="cfValInp" id="sdCfValue" placeholder="값">
-          <button type="button" id="sdCfAddBtn">추가</button>
-        </div>
-      </div>
-
-      <!-- v7.5: 전부 채우는 게 아닌 항목이라 기본은 접어둠(details 기본 동작 그대로 사용) -->
-      <details class="sdTradeInfo" id="sdTradeInfo">
-        <summary>📊 매매 정보 (상태 · 목표가 · 보유수량 · 매수단가)</summary>
-        <div class="frow2">
-          <div class="frow sdField"><label>상태</label>
-            <select id="sdStatus"><option value="">(선택 안 함)</option><option value="관심">관심</option><option value="보유">보유</option><option value="청산">청산</option></select>
-          </div>
-          <div class="frow sdField"><label>목표가</label><input type="text" id="sdTarget" placeholder="예: 13000"></div>
-        </div>
-        <div class="frow2">
-          <div class="frow sdField"><label>보유수량</label><input type="text" id="sdQty" placeholder="예: 10"></div>
-          <div class="frow sdField"><label>매수단가</label><input type="text" id="sdAvgCost" placeholder="예: 11500"></div>
-        </div>
-      </details>
-      <button type="button" class="saveBtn" id="sdSaveFields" style="margin-top:12px">💾 저장</button>
-
-      <div class="frow" style="margin-top:16px">
-        <label>📝 투자논지 이력 — 날짜별로 쌓여요(지우거나 덮어쓰지 않음)</label>
-        <div id="sdThesisLog"></div>
-        <div class="stockAdd">
-          <input type="text" id="sdThesisInput" placeholder="오늘 생각을 적어주세요…">
-          <button type="button" class="go" id="sdThesisAddBtn">추가</button>
-        </div>
-      </div>
-
-      <div class="frow" style="margin-top:16px">
-        <label>📌 관련 기록</label>
-        <div id="sdRelatedRecords"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- v6: 반복 체크리스트 항목관리 -->
-<div class="ovwrap" id="tmplModal">
-  <div class="modal" style="max-width:480px">
-    <div class="mhd"><b>⚙ 체크리스트 항목관리</b><button class="x" id="tmClose">✕</button></div>
-    <div class="mbody">
-      <div style="font-size:12px;color:var(--sub);margin-bottom:8px">⠿ 드래그로 순서 바꾸기 · 글자 클릭해서 이름 수정 · ⏸ 일시중지(이력은 남고 내일부터 안 생김) · + 로 바로 아래에 새 항목 끼워넣기</div>
-      <div class="tmplList" id="tmplList"></div>
-      <div class="stockAdd">
-        <input type="text" id="tmplAddInput" placeholder="새 항목 추가 (예: 유튜브 요약, 뉴스 확인)…">
-        <button type="button" class="go" id="tmplAddBtn">추가</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- v6.1: 달력 🔔 클릭 시 — 전체 기록 대신 그날 요약(기록+확인할 것)만 가볍게 -->
-<div class="ovwrap" id="dayModal">
-  <div class="modal" style="max-width:420px">
-    <div class="mhd"><b id="dayModalTitle">9월 10일</b><button class="x" id="dayModalClose">✕</button></div>
-    <div class="mbody" id="dayModalBody"></div>
   </div>
 </div>
 
@@ -763,14 +474,6 @@ function kstNow(){
   return new Date(utc + 9*3600000);
 }
 function todayStr(){ return kstNow().toISOString().slice(0,10); }
-/* v6: 오늘로부터 n일 전 날짜 문자열 — Date.UTC 고정 연산(KST에서 하루 밀리는 사고 방지) */
-function daysAgoStr(n){
-  var p = todayStr().split('-');
-  var d = new Date(Date.UTC(+p[0], +p[1]-1, +p[2]));
-  d.setUTCDate(d.getUTCDate() - n);
-  return d.toISOString().slice(0,10);
-}
-function histCutoffStr(){ return daysAgoStr(HIST_DAYS-1); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function toast(msg){
@@ -881,70 +584,6 @@ const KIND_FIELDS = {
     bodyPh:'자유롭게 적어주세요'
   }
 };
-
-/* ══════════════════════════════════════════════════════════
-   v5: 검증 상태 — 투자두뇌 구조 4번 원칙(확인된 사실~검증 필요)
-   ══════════════════════════════════════════════════════════ */
-const VERIFY_STATES = {
-  fact:        {n:'확인된 사실',   c:'#2f7d5c'},
-  official:    {n:'공식 발표',     c:'#2c5f8a'},
-  numeric:     {n:'수치 확인가능', c:'#1c3b5e'},
-  claim:       {n:'기관 주장',     c:'#9c7c17'},
-  outlook:     {n:'전망',          c:'#8a6d1f'},
-  opinion:     {n:'의견',          c:'#767162'},
-  unconfirmed: {n:'미확인',        c:'#b23b3b'},
-  conflict:    {n:'상충 정보',     c:'#8a3a3a'},
-  needcheck:   {n:'검증 필요',     c:'#b23b3b'}
-};
-const VERIFY_ORDER = ['fact','official','numeric','claim','outlook','opinion','unconfirmed','conflict','needcheck'];
-(function fillVerifySelect(){
-  var sel = document.getElementById('fVerify');
-  if(!sel) return;
-  sel.innerHTML = '<option value="">(선택 안 함)</option>' +
-    VERIFY_ORDER.map(function(k){ return '<option value="'+k+'">'+VERIFY_STATES[k].n+'</option>'; }).join('');
-})();
-
-/* v6: 액션 필드 — 자유텍스트 대신 종류별 정해진 선택지 중 하나 + 기타(직접입력) */
-const ACTION_OPTIONS = {
-  youtube: ['관망','매수검토','비중축소'],
-  news:    ['호재','악재','중립'],
-  idea:    ['분할매수','스크리닝','관망'],
-  chart:   ['수급 전환','패턴 완성','저항 돌파']
-};
-var _curEditingAction = ''; // openAdd/openEdit에서 세팅 — applyKindFields가 이 값 기준으로 칩을 그림
-function renderActionPick(kind, currentValue){
-  var host = document.getElementById('actionPick');
-  if(!host) return;
-  var opts = ACTION_OPTIONS[kind] || [];
-  var matched = opts.indexOf(currentValue) >= 0;
-  var html = opts.map(function(o){
-    return '<span class="actionChip'+(currentValue===o?' on':'')+'" data-a="'+esc(o)+'">'+esc(o)+'</span>';
-  }).join('') + '<span class="actionChip'+((!matched && currentValue) ? ' on' : '')+'" data-a="__other__">기타</span>';
-  host.innerHTML = html;
-  var otherInp = document.getElementById('fActionOther');
-  if(!matched && currentValue){ otherInp.style.display=''; otherInp.value = currentValue; }
-  else { otherInp.style.display='none'; otherInp.value=''; }
-  host.querySelectorAll('[data-a]').forEach(function(el){
-    el.addEventListener('click', function(){
-      host.querySelectorAll('.actionChip').forEach(function(c){ c.classList.remove('on'); });
-      el.classList.add('on');
-      var v = el.getAttribute('data-a');
-      if(v==='__other__'){ otherInp.style.display=''; otherInp.value=''; otherInp.focus(); }
-      else { otherInp.style.display='none'; otherInp.value=''; }
-      _curEditingAction = readActionValue();
-    });
-  });
-}
-function readActionValue(){
-  var host = document.getElementById('actionPick');
-  var on = host ? host.querySelector('.actionChip.on') : null;
-  if(!on) return '';
-  var v = on.getAttribute('data-a');
-  if(v==='__other__') return document.getElementById('fActionOther').value.trim();
-  return v;
-}
-document.getElementById('fActionOther').addEventListener('input', function(){ _curEditingAction = readActionValue(); });
-
 function applyKindFields(kind){
   var f = KIND_FIELDS[kind] || KIND_FIELDS.memo;
   document.getElementById('lblOneLiner').textContent = f.oneLinerLbl;
@@ -955,36 +594,21 @@ function applyKindFields(kind){
   document.getElementById('lblLink').textContent = f.linkLbl;
   document.getElementById('rowAction').style.display = f.showAction ? '' : 'none';
   document.getElementById('lblAction').textContent = f.actionLbl;
+  document.getElementById('fAction').placeholder = f.actionPh;
   document.getElementById('lblStar').textContent = f.starLbl;
   document.getElementById('lblBody').textContent = f.bodyLbl;
   document.getElementById('fBody').placeholder = f.bodyPh;
-  renderActionPick(kind, _curEditingAction);
-  var scenBox = document.getElementById('scenarioBox');
-  if(scenBox) scenBox.style.display = (kind==='idea') ? '' : 'none';
 }
 
 /* ══════════════════════════════════════════════════════════
    상태
    ══════════════════════════════════════════════════════════ */
 var records = [];      // records 컬렉션 (kind: youtube/news/idea/chart/memo)
-var todos = [];        // records_todos 컬렉션 (최근 HIST_DAYS일치 — 오늘 체크리스트 + 이력표에 같이 씀)
+var todos = [];        // records_todos 컬렉션 (오늘 체크리스트)
 var stockMaster = [];  // 종목 마스터 목록 (records_meta/stocks 문서)
-var checklistTemplates = []; // v6: 반복 체크리스트 항목 (records_meta/checklist_templates 문서)
-var _pendingTemplateAdds = {}; // v6: 같은 (날짜+항목) 중복 생성 방지용 클라이언트측 가드
-var HIST_DAYS = 14; // v6: 이력표에 보여줄 최근 일수
-var STOCK_PICKER_COLLAPSED_N = 6; // v6.1: 종목이 이보다 많으면 접어두고 "더보기"로 펼침
-var stockPickerExpanded = false; // v6.1: 종목칩 더보기/접기 상태
 var curKind = '전체';
 var curView = (function(){ try{ return localStorage.getItem('rec_view')||'card'; }catch(e){ return 'card'; } })();
 var curStock = '';
-/* v7.10: "🏷 종목"은 이제 curView를 건드리지 않는 완전히 별도의 모드 스위치 —
-   curView(카드/리스트/표/보드/채널별/달력/타임라인/갤러리)는 그대로 두고,
-   stockMode가 켜지면 그 8개 보기를 레코드가 아니라 "종목 목록 자체"에 적용한다.
-   이렇게 분리해두면 #viewicons를 눌러도 #ktabs 쪽 상태를 되돌려줄 필요가 없어져서
-   v7.9에서 고친 "하이라이트 잔류" 버그의 근본 원인(두 상태가 한 변수에 얽혀 있던 것) 자체가 사라진다. */
-var stockMode = false;
-var curStockTab = ''; // 종목모드 안에서 특정 종목 하나를 골라 그 기록들을 보는 중이면 그 이름(빈 값=종목 목록 자체)
-var curVerify = ''; // v5: 검증상태 필터
 var curQ = '';
 var calYM = todayStr().slice(0,7);
 var EDIT = null; // 지금 수정 중인 기록 id (null이면 새로 추가)
@@ -996,42 +620,26 @@ function startListeners(){
   if(!db) return;
   db.collection('records').orderBy('date','desc').onSnapshot(function(snap){
     records = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
-    render(); renderDue(); renderKtabs(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
+    render(); renderDue(); renderKtabs(); renderStockPicker(); renderStockDatalist();
   }, function(e){ logBug('records 구독 실패: '+e.message); });
 
-  db.collection('records_todos').where('date','>=', histCutoffStr()).orderBy('date').onSnapshot(function(snap){
+  db.collection('records_todos').where('date','==', todayStr()).onSnapshot(function(snap){
     todos = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
-    ensureTodayInstances();
     renderTodos();
-    renderTodoHistory();
   }, function(e){ logBug('todos 구독 실패: '+e.message); });
 
   db.collection('records_meta').doc('stocks').onSnapshot(function(doc){
     stockMaster = (doc.exists && doc.data().list) ? doc.data().list : [];
     renderStockPicker(); renderStockDatalist();
   }, function(e){ logBug('종목마스터 구독 실패: '+e.message); });
-
-  db.collection('records_meta').doc('checklist_templates').onSnapshot(function(doc){
-    checklistTemplates = (doc.exists && doc.data().list) ? doc.data().list : [];
-    ensureTodayInstances();
-    renderTodos();
-    renderTodoHistory();
-  }, function(e){ logBug('체크리스트 항목 구독 실패: '+e.message); });
 }
 
 /* ══════════════════════════════════════════════════════════
    종목 마스터 — 자동수집(기록에 쓰인 종목) + 수동목록 합치기
    ══════════════════════════════════════════════════════════ */
-/* v7.1: stockMaster 항목은 원래 순수 문자열이었는데, 종목 상세(목표가 등)를 위해 객체도 섞일 수 있게 확장.
-   기존 문자열 데이터를 절대 깨뜨리지 않도록 항상 이 헬퍼로만 이름/객체를 꺼내 쓴다 */
-function stockName(item){ return (item && typeof item === 'object') ? String(item.name||'') : String(item||''); }
-function stockItemOf(name){
-  for(var i=0;i<stockMaster.length;i++){ if(stockName(stockMaster[i])===name) return stockMaster[i]; }
-  return null; // 상세 정보가 아직 없으면 null(= 이름만 있는 상태)
-}
 function allStockNames(){
   var set = {};
-  stockMaster.forEach(function(s){ var n=stockName(s); if(n) set[n]=1; });
+  stockMaster.forEach(function(s){ set[s]=1; });
   records.forEach(function(r){ (r.stocks||[]).forEach(function(s){ set[s]=1; }); });
   return Object.keys(set).sort(function(a,b){ return a.localeCompare(b,'ko'); });
 }
@@ -1050,42 +658,10 @@ function addStockToMaster(name){
   var list = stockMaster.slice(); list.push(name);
   saveStockMaster(list);
 }
-/* v7.1: stockMaster 안의 종목 하나를 안전하게 고쳐서 한 번에 저장 — 같은 클릭 안에서 필드저장+이력추가를
-   따로따로 저장하면(각자 옛 stockMaster 스냅샷에서 시작해) 서로 덮어쓰는 경합이 생기므로, 반드시 이 함수로
-   한 번의 mutatorFn 안에서 필요한 변경을 전부 적용한 뒤 한 번만 저장한다 */
-function mutateStockItem(name, mutatorFn){
-  var list = stockMaster.map(function(s){ return s; });
-  var idx = -1;
-  for(var i=0;i<list.length;i++){ if(stockName(list[i])===name){ idx=i; break; } }
-  var base = (idx>=0 && typeof list[idx]==='object' && list[idx]) ? Object.assign({}, list[idx]) : {name:name};
-  mutatorFn(base);
-  if(idx>=0) list[idx] = base; else list.push(base);
-  saveStockMaster(list);
-}
-/* v7.1: 투자논지 이력에 한 줄 추가(항상 append만 — 기존 줄은 절대 지우거나 고치지 않음) */
-function appendThesisLog(name, text, auto){
-  if(!text) return;
-  mutateStockItem(name, function(base){
-    var log = (base.thesisLog||[]).slice();
-    log.push({date: todayStr(), text: text, auto: !!auto});
-    base.thesisLog = log;
-  });
-}
 
 /* ══════════════════════════════════════════════════════════
    오늘의 체크리스트
    ══════════════════════════════════════════════════════════ */
-/* v7.11: 반복 체크리스트 항목의 아이콘 배지 색 — 파스텔 6종 고정 팔레트(달님이 항목마다 골라서 씀) */
-var TMPL_COLORS = {
-  gray:  {bg:'#eef0f2', fg:'#4b5563'},
-  green: {bg:'#e6f4ea', fg:'#1e7a3d'},
-  red:   {bg:'#fbe7e7', fg:'#b3352c'},
-  gold:  {bg:'var(--gold-lt)', fg:'var(--gold-dk)'},
-  blue:  {bg:'#eaf1fb', fg:'var(--navy-700)'},
-  purple:{bg:'#f1eafb', fg:'#6b3fa0'}
-};
-var TMPL_COLOR_ORDER = ['gray','green','red','gold','blue','purple'];
-function tmplColorOf(tpl){ return TMPL_COLORS[(tpl && tpl.color) || 'gray']; }
 function renderDue(){
   var t = todayStr();
   var due = [];
@@ -1108,26 +684,14 @@ function renderDue(){
     el.addEventListener('click', function(){ openPage(el.getAttribute('data-open')); });
   });
 }
-function todayTodos(){
-  var t = todayStr();
-  return todos.filter(function(x){ return x.date===t; })
-    .sort(function(a,b){ return (a.templateId?0:1)-(b.templateId?0:1) || (a.createdAt||0)-(b.createdAt||0); });
-}
 function renderTodos(){
   var host = document.getElementById('todoList');
-  var list = todayTodos();
-  if(!list.length){ host.innerHTML = '<div class="emptyMini">오늘 할 일을 적어보세요</div>'; }
+  if(!todos.length){ host.innerHTML = '<div class="emptyMini">오늘 할 일을 적어보세요</div>'; }
   else{
-    host.innerHTML = list.map(function(t){
-      /* v7.11: 반복 항목이면 그 항목에 지정된 아이콘 배지를 표시(🔁 글자 표시는 배지가 대신하므로 제거).
-         일회성으로 그때그때 적은 항목은 템플릿이 없어 배지 없이 기존 그대로(빠르게 적는 흐름 유지) */
-      var tpl = t.templateId ? checklistTemplates.find(function(x){ return x.id===t.templateId; }) : null;
-      var col = tmplColorOf(tpl);
-      var badge = tpl ? '<span class="badge2" style="background:'+col.bg+';color:'+col.fg+'">'+esc(tpl.icon||'📌')+'</span>' : '';
+    host.innerHTML = todos.map(function(t){
       return '<div class="todoRow'+(t.done?' done':'')+'" data-id="'+esc(t.id)+'">'
         + '<input type="checkbox"'+(t.done?' checked':'')+'>'
-        + badge
-        + '<span class="t" data-editable="1">'+esc(t.text||'')+'</span>'
+        + '<span class="t">'+esc(t.text||'')+'</span>'
         + '<button class="x">✕</button>'
         + '</div>';
     }).join('');
@@ -1142,23 +706,6 @@ function renderTodos(){
       db.collection('records_todos').doc(id).delete()
         .catch(function(e){ logBug('todo 삭제 실패: '+e.message); });
     });
-    /* v6: 글자 클릭하면 바로 수정 */
-    row.querySelector('.t').addEventListener('click', function(){
-      var span = row.querySelector('.t');
-      var cur = todos.find(function(x){ return x.id===id; });
-      if(!cur) return;
-      var inp = document.createElement('input');
-      inp.type = 'text'; inp.value = cur.text||''; inp.style.cssText='width:100%;font-size:13.5px;border:1.5px solid var(--navy-600);border-radius:5px;padding:2px 5px';
-      span.replaceWith(inp);
-      inp.focus(); inp.select();
-      function commit(){
-        var v = inp.value.trim();
-        if(v && v!==cur.text) db.collection('records_todos').doc(id).update({text:v}).catch(function(e){ logBug('todo 수정 실패: '+e.message); });
-        else renderTodos();
-      }
-      inp.addEventListener('blur', commit);
-      inp.addEventListener('keydown', function(e){ if(e.key==='Enter') inp.blur(); if(e.key==='Escape'){ inp.value=cur.text||''; inp.blur(); } });
-    });
   });
 }
 document.getElementById('todoAddBtn').addEventListener('click', addTodo);
@@ -1171,269 +718,24 @@ function addTodo(){
     .then(function(){ inp.value=''; })
     .catch(function(e){ logBug('todo 추가 실패: '+e.message); toast('저장 실패 — 콘솔을 확인해 주세요'); });
 }
-
-/* ══════════════════════════════════════════════════════════
-   v6: 반복 체크리스트 템플릿 — records_meta/checklist_templates
-   ══════════════════════════════════════════════════════════ */
-function saveTemplates(list){
-  if(!db) return;
-  db.collection('records_meta').doc('checklist_templates').set({list:list}, {merge:true})
-    .catch(function(e){ logBug('체크리스트 항목 저장 실패: '+e.message); });
-}
-/* 오늘 것이 아직 없는 활성 템플릿만 골라 하루치를 만든다. _pendingTemplateAdds로 같은 세션 안 중복 발사 방지,
-   todos 스냅샷의 실제 존재 여부로 새로고침/재접속 시 중복 방지 — 이중 안전장치 */
-/* v6.1: 날짜문자열(YYYY-MM-DD)이 토·일인지 — Date.UTC 고정 연산(KST에서 하루 밀리는 사고 방지, 프로젝트 표준 패턴) */
-function isWeekendStr(dateStr){
-  var p = dateStr.split('-');
-  var day = new Date(Date.UTC(+p[0], +p[1]-1, +p[2])).getUTCDay(); // 0=일 6=토
-  return day===0 || day===6;
-}
-function ensureTodayInstances(){
-  if(!db || !checklistTemplates.length) return;
-  var t = todayStr();
-  if(isWeekendStr(t)) return; // v6.1: 반복 체크리스트는 월~금만 자동생성
-  checklistTemplates.forEach(function(tpl){
-    if(tpl.paused) return;
-    var key = t+'|'+tpl.id;
-    if(_pendingTemplateAdds[key]) return;
-    var exists = todos.some(function(x){ return x.templateId===tpl.id && x.date===t; });
-    if(exists) return;
-    _pendingTemplateAdds[key] = true;
-    db.collection('records_todos').add({text:tpl.text, done:false, date:t, createdAt:Date.now(), templateId:tpl.id})
-      .catch(function(e){ logBug('반복항목 생성 실패: '+e.message); delete _pendingTemplateAdds[key]; });
-  });
-}
-/* ── 항목관리 모달 ── */
-document.getElementById('btnTmplMgr').addEventListener('click', function(){
-  renderTmplMgr();
-  resetModalPos(document.querySelector('#tmplModal .modal'));
-  document.getElementById('tmplModal').classList.add('on');
-});
-document.getElementById('tmClose').addEventListener('click', function(){
-  document.getElementById('tmplModal').classList.remove('on');
-});
-var _tmplDragFrom = null;
-function renderTmplMgr(){
-  var host = document.getElementById('tmplList');
-  if(!checklistTemplates.length){ host.innerHTML = '<div class="emptyMini">아직 항목이 없어요 — 아래에서 추가해보세요</div>'; return; }
-  host.innerHTML = checklistTemplates.map(function(tpl, i){
-    var col = tmplColorOf(tpl);
-    return '<div class="tmplRow'+(tpl.paused?' paused':'')+'" draggable="true" data-idx="'+i+'">'
-      + '<span class="drag">⠿</span>'
-      + '<span class="iconPick" data-idx="'+i+'" style="background:'+col.bg+';color:'+col.fg+'" title="아이콘·색 바꾸기">'+esc(tpl.icon||'📌')+'</span>'
-      + '<span class="tmplText" data-idx="'+i+'">'+esc(tpl.text)+'</span>'
-      + '<button type="button" class="pauseBtn" data-idx="'+i+'" title="'+(tpl.paused?'다시 시작':'일시중지')+'">'+(tpl.paused?'▶':'⏸')+'</button>'
-      + '<button type="button" class="insBtn" data-idx="'+i+'" title="바로 아래에 끼워넣기">+</button>'
-      + '<button type="button" class="rm" data-idx="'+i+'" title="삭제">✕</button>'
-      + '</div>'
-      + '<div class="tmplIconEdit" data-iconedit="'+i+'">'
-        + '<input type="text" maxlength="4" value="'+esc(tpl.icon||'📌')+'">'
-        + TMPL_COLOR_ORDER.map(function(c){
-            return '<span class="tmplColorDot'+(((tpl.color||'gray')===c)?' on':'')+'" data-color="'+c+'" data-idx="'+i+'" style="background:'+TMPL_COLORS[c].bg+'" title="'+c+'"></span>';
-          }).join('')
-      + '</div>'
-      + '<div class="tmplInsertRow" data-ins="'+i+'"><input type="text" placeholder="여기 끼워넣을 항목…"><button type="button" class="go">추가</button></div>';
-  }).join('');
-  bindTmplMgrEvents(host);
-}
-function bindTmplMgrEvents(host){
-  /* v7.11: 아이콘 배지 클릭 -> 바로 아래 이모지 입력칸+색상 6종이 펼쳐짐 */
-  host.querySelectorAll('.iconPick').forEach(function(b){
-    b.addEventListener('click', function(){
-      var i = +b.getAttribute('data-idx');
-      var row = host.querySelector('.tmplIconEdit[data-iconedit="'+i+'"]');
-      row.classList.toggle('on');
-      if(row.classList.contains('on')) row.querySelector('input').focus();
-    });
-  });
-  host.querySelectorAll('.tmplIconEdit').forEach(function(row){
-    var i = +row.getAttribute('data-iconedit');
-    var inp = row.querySelector('input');
-    /* v7.11 버그수정: 배지를 열면 입력칸에 자동 포커스가 가는데, 바로 옆 색상점(비포커스 요소)을
-       클릭하면 브라우저가 포커스를 body로 옮기며 이 입력칸에 blur가 먼저 발생 — 그때 commitIcon이
-       매번 renderTmplMgr()로 줄 전체를 통째로 다시 그리면, 지금 막 클릭하려던 색상점 DOM이
-       그 사이 사라져서 클릭이 허공에 떨어짐(paused 버튼 등 같은 줄의 다른 컨트롤도 전부 같은 이유로
-       먹통이 됨 — 재현 확인함). 근본 원인은 "값이 안 바뀌었는데도 매번 통째로 재렌더한 것"이라
-       값이 실제로 바뀔 때만 저장하고, 재렌더 대신 배지 글자만 바꿔서 같은 줄의 다른 요소를 안 건드림 */
-    function commitIcon(){
-      var v = inp.value.trim() || '📌';
-      if(v === (checklistTemplates[i].icon||'📌')) return;
-      checklistTemplates[i].icon = v;
-      saveTemplates(checklistTemplates);
-      var badge = host.querySelector('.iconPick[data-idx="'+i+'"]');
-      if(badge) badge.textContent = v;
-    }
-    inp.addEventListener('blur', commitIcon);
-    inp.addEventListener('keydown', function(e){ if(e.key==='Enter') inp.blur(); });
-    row.querySelectorAll('.tmplColorDot').forEach(function(dot){
-      dot.addEventListener('click', function(){
-        checklistTemplates[i].color = dot.getAttribute('data-color');
-        saveTemplates(checklistTemplates);
-        renderTmplMgr();
-      });
-    });
-  });
-  host.querySelectorAll('.tmplText').forEach(function(span){
-    span.addEventListener('click', function(){
-      var i = +span.getAttribute('data-idx');
-      var cur = checklistTemplates[i];
-      var inp = document.createElement('input');
-      inp.type='text'; inp.value = cur.text;
-      span.innerHTML=''; span.appendChild(inp); inp.focus(); inp.select();
-      function commit(){
-        var v = inp.value.trim();
-        if(v){ checklistTemplates[i].text = v; saveTemplates(checklistTemplates); }
-        renderTmplMgr();
-      }
-      inp.addEventListener('blur', commit);
-      inp.addEventListener('keydown', function(e){ if(e.key==='Enter') inp.blur(); if(e.key==='Escape') renderTmplMgr(); });
-    });
-  });
-  host.querySelectorAll('.pauseBtn').forEach(function(b){
-    b.addEventListener('click', function(){
-      var i = +b.getAttribute('data-idx');
-      checklistTemplates[i].paused = !checklistTemplates[i].paused;
-      saveTemplates(checklistTemplates);
-      renderTmplMgr();
-    });
-  });
-  host.querySelectorAll('.rm').forEach(function(b){
-    b.addEventListener('click', function(){
-      var i = +b.getAttribute('data-idx');
-      if(!confirm('"'+checklistTemplates[i].text+'" 항목을 삭제할까요? (지난 이력은 남습니다)')) return;
-      checklistTemplates.splice(i,1);
-      saveTemplates(checklistTemplates);
-      renderTmplMgr();
-    });
-  });
-  host.querySelectorAll('.insBtn').forEach(function(b){
-    b.addEventListener('click', function(){
-      var i = +b.getAttribute('data-idx');
-      var row = host.querySelector('.tmplInsertRow[data-ins="'+i+'"]');
-      row.classList.toggle('on');
-      if(row.classList.contains('on')) row.querySelector('input').focus();
-    });
-  });
-  host.querySelectorAll('.tmplInsertRow').forEach(function(row){
-    var i = +row.getAttribute('data-ins');
-    function doInsert(){
-      var inp = row.querySelector('input');
-      var v = inp.value.trim();
-      if(!v) return;
-      checklistTemplates.splice(i+1, 0, {id:'t'+Date.now()+Math.random().toString(36).slice(2,6), text:v, paused:false});
-      saveTemplates(checklistTemplates);
-      renderTmplMgr();
-    }
-    row.querySelector('.go').addEventListener('click', doInsert);
-    row.querySelector('input').addEventListener('keydown', function(e){ if(e.key==='Enter') doInsert(); });
-  });
-  /* 드래그 순서 변경 */
-  host.querySelectorAll('.tmplRow').forEach(function(row){
-    row.addEventListener('dragstart', function(){ _tmplDragFrom = +row.getAttribute('data-idx'); });
-    row.addEventListener('dragover', function(e){ e.preventDefault(); row.classList.add('dragOver'); });
-    row.addEventListener('dragleave', function(){ row.classList.remove('dragOver'); });
-    row.addEventListener('drop', function(e){
-      e.preventDefault(); row.classList.remove('dragOver');
-      var to = +row.getAttribute('data-idx');
-      if(_tmplDragFrom===null || _tmplDragFrom===to) return;
-      var moved = checklistTemplates.splice(_tmplDragFrom,1)[0];
-      checklistTemplates.splice(to,0,moved);
-      _tmplDragFrom = null;
-      saveTemplates(checklistTemplates);
-      renderTmplMgr();
-    });
-  });
-}
-document.getElementById('tmplAddBtn').addEventListener('click', addTemplate);
-document.getElementById('tmplAddInput').addEventListener('keydown', function(e){ if(e.key==='Enter') addTemplate(); });
-function addTemplate(){
-  var inp = document.getElementById('tmplAddInput');
-  var v = inp.value.trim();
-  if(!v) return;
-  checklistTemplates.push({id:'t'+Date.now()+Math.random().toString(36).slice(2,6), text:v, paused:false});
-  saveTemplates(checklistTemplates);
-  inp.value='';
-  renderTmplMgr();
-}
-
-/* v7.11: 카드 헤더 ⋯ 더보기 메뉴 — 열기/닫기 + 바깥 클릭하면 닫힘 */
-document.getElementById('btnTodayMenu').addEventListener('click', function(ev){
-  ev.stopPropagation();
-  document.getElementById('todayMenuPop').classList.toggle('on');
-});
-document.addEventListener('click', function(){
-  document.getElementById('todayMenuPop').classList.remove('on');
-});
-
-/* ── 최근 14일 이력표 ── */
-document.getElementById('btnHistToggle').addEventListener('click', function(){
-  document.getElementById('todayMenuPop').classList.remove('on'); // v7.11: 메뉴 안 버튼이라 클릭하면 메뉴도 같이 닫음
-  var box = document.getElementById('todoHistoryBox');
-  box.style.display = (box.style.display==='none') ? '' : 'none';
-  if(box.style.display!=='none') renderTodoHistory();
-});
-function renderTodoHistory(){
-  var box = document.getElementById('todoHistoryBox');
-  if(!box || box.style.display==='none') return;
-  if(!checklistTemplates.length){ box.innerHTML = '<div class="emptyMini">반복 항목을 추가하면 여기에 최근 '+HIST_DAYS+'일 기록이 보여요</div>'; return; }
-  var dates = [];
-  for(var i=0;i<HIST_DAYS;i++) dates.push(daysAgoStr(i)); // 오늘부터 과거로
-  var html = '<div style="overflow-x:auto"><table class="histTable"><tr><th>날짜</th>'
-    + checklistTemplates.map(function(tpl){ return '<th>'+esc(tpl.text)+'</th>'; }).join('')
-    + '</tr>'
-    + dates.map(function(d){
-        return '<tr><td class="dateCol">'+fmtDate(d)+'</td>'
-          + checklistTemplates.map(function(tpl){
-              var found = todos.find(function(x){ return x.date===d && x.templateId===tpl.id; });
-              if(!found) return '<td style="color:var(--sub2)">—</td>';
-              return '<td>'+(found.done?'✅':'⬜')+'</td>';
-            }).join('')
-          + '</tr>';
-      }).join('')
-    + '</table></div>';
-  box.innerHTML = html;
-}
 document.getElementById('todayDate').textContent = kstNow().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
 
 /* ══════════════════════════════════════════════════════════
    kind 탭 · 보기 아이콘 · 종목칩
    ══════════════════════════════════════════════════════════ */
-/* v7.10: "🏷 종목"은 뉴스와 아이디어 사이 탭 그대로 두고(v7.8), curView는 이제 절대 안 건드림 —
-   stockMode(on/off)만 토글하는 탭. #viewicons(카드/리스트/표/보드/채널별/달력/타임라인/갤러리)는
-   curView만 그대로 바꾸고 그 값을 render()가 stockMode 여부에 따라 "레코드"에 적용할지
-   "종목 목록"에 적용할지 고를 뿐이라, 두 UI(탭 줄/아이콘 줄)가 서로 다른 상태를 각자 책임져서
-   v7.9의 버그(한 값이 두 UI에 걸쳐 있어 한쪽 갱신을 빠뜨리면 하이라이트가 어긋나던 것) 자체가 구조적으로 없어짐 */
-var KTAB_ORDER = ['youtube','news','__stock__','idea','chart','memo'];
 function renderKtabs(){
   var total = records.length;
-  var html = '<span class="ktab'+(curKind==='전체'&&!stockMode?' on':'')+'" data-k="전체">전체<span class="n">'+total+'</span></span>';
-  KTAB_ORDER.forEach(function(k){
-    if(k==='__stock__'){
-      var sn = allStockNames().length;
-      html += '<span class="ktab'+(stockMode?' on':'')+'" data-stocktabbtn="1">🏷 종목<span class="n">'+sn+'</span></span>';
-      return;
-    }
+  var html = '<span class="ktab'+(curKind==='전체'?' on':'')+'" data-k="전체">전체<span class="n">'+total+'</span></span>';
+  KIND_ORDER.forEach(function(k){
     var meta = KINDS[k];
     var n = records.filter(function(r){ return r.kind===k; }).length;
-    html += '<span class="ktab'+(curKind===k&&!stockMode?' on':'')+'" data-k="'+k+'">'+meta.i+' '+meta.n+'<span class="n">'+n+'</span></span>';
+    html += '<span class="ktab'+(curKind===k?' on':'')+'" data-k="'+k+'">'+meta.i+' '+meta.n+'<span class="n">'+n+'</span></span>';
   });
   var host = document.getElementById('ktabs');
   host.innerHTML = html;
   host.querySelectorAll('[data-k]').forEach(function(el){
-    el.addEventListener('click', function(){
-      curKind = el.getAttribute('data-k');
-      stockMode = false;
-      render(); renderKtabs();
-    });
+    el.addEventListener('click', function(){ curKind = el.getAttribute('data-k'); render(); renderKtabs(); });
   });
-  var stockBtn = host.querySelector('[data-stocktabbtn]');
-  if(stockBtn){
-    stockBtn.addEventListener('click', function(){
-      stockMode = !stockMode;
-      if(!stockMode) curStockTab = ''; // 종목모드를 완전히 나갈 땐 드릴다운 상태도 같이 리셋
-      render(); renderKtabs();
-    });
-  }
 }
 document.getElementById('viewicons').querySelectorAll('.vicon').forEach(function(b){
   b.addEventListener('click', function(){
@@ -1448,60 +750,24 @@ function syncViewIcons(){
   });
 }
 function renderStockPicker(){
-  var names = allStockNames().slice(0,10);
+  var names = allStockNames();
   var host = document.getElementById('stockPicker');
-  var showN = stockPickerExpanded ? names.length : STOCK_PICKER_COLLAPSED_N;
-  var shown = names.slice(0, showN);
-  var hiddenCount = names.length - shown.length;
   var html = '<span class="fchip'+(curStock===''?' on':'')+'" data-s="">전체종목</span>';
-  shown.forEach(function(n){
-    /* v7.2: 칩 클릭=필터링 그대로, ⓘ 버튼만 눌러야 정보 누적(종목 상세) 모달이 열림 */
-    html += '<span class="fchip'+(curStock===n?' on':'')+'" data-s="'+esc(n)+'">'+esc(n)
-      + '<span style="color:#aaa;margin-left:3px">'+stockCount(n)+'</span>'
-      + '<button type="button" class="fchipInfo" data-detail="'+esc(n)+'" title="'+esc(n)+' 상세정보">ⓘ</button>'
-      + '</span>';
+  names.slice(0,10).forEach(function(n){
+    html += '<span class="fchip'+(curStock===n?' on':'')+'" data-s="'+esc(n)+'">'+esc(n)+'<span style="color:#aaa;margin-left:3px">'+stockCount(n)+'</span></span>';
   });
-  /* v6.1: 종목이 많아지면(6개 초과) 접어두고 더보기/접기 토글로 펼침 */
-  if(hiddenCount>0){
-    html += '<span class="fchip moreBtn" id="stockMoreBtn">▾ 더보기 '+hiddenCount+'</span>';
-  } else if(stockPickerExpanded && names.length>STOCK_PICKER_COLLAPSED_N){
-    html += '<span class="fchip moreBtn" id="stockMoreBtn">▴ 접기</span>';
-  }
   host.innerHTML = html;
   host.querySelectorAll('[data-s]').forEach(function(el){
     el.addEventListener('click', function(){ curStock = el.getAttribute('data-s'); render(); renderStockPicker(); });
   });
-  host.querySelectorAll('[data-detail]').forEach(function(el){
-    el.addEventListener('click', function(ev){ ev.stopPropagation(); openStockDetail(el.getAttribute('data-detail')); });
-  });
-  var moreBtn = document.getElementById('stockMoreBtn');
-  if(moreBtn) moreBtn.addEventListener('click', function(){ stockPickerExpanded = !stockPickerExpanded; renderStockPicker(); });
 }
 function renderStockDatalist(){
   document.getElementById('stockDatalist').innerHTML =
     allStockNames().map(function(n){ return '<option value="'+esc(n)+'">'; }).join('');
 }
-/* v5: 검증상태 필터 칩 — records.html이 있는 그대로 가진 값만 보여준다(값 없는 상태는 칩도 안 뜸) */
-function renderVerifyPicker(){
-  var host = document.getElementById('verifyPicker');
-  if(!host) return;
-  var present = VERIFY_ORDER.filter(function(k){
-    return records.some(function(r){ return r.verifyState===k; });
-  });
-  if(!present.length){ host.innerHTML=''; return; }
-  var html = '<span class="fchip'+(curVerify===''?' on':'')+'" data-vf="">전체상태</span>';
-  present.forEach(function(k){
-    var n = records.filter(function(r){ return r.verifyState===k; }).length;
-    html += '<span class="fchip'+(curVerify===k?' on':'')+'" data-vf="'+k+'" style="border-left:3px solid '+VERIFY_STATES[k].c+'">'+VERIFY_STATES[k].n+'<span style="color:#aaa;margin-left:3px">'+n+'</span></span>';
-  });
-  host.innerHTML = html;
-  host.querySelectorAll('[data-vf]').forEach(function(el){
-    el.addEventListener('click', function(){ curVerify = el.getAttribute('data-vf'); render(); renderVerifyPicker(); });
-  });
-}
 document.getElementById('btnClearFlt').addEventListener('click', function(){
-  curKind='전체'; curStock=''; curVerify=''; curQ=''; document.getElementById('searchBar').value='';
-  render(); renderKtabs(); renderStockPicker(); renderVerifyPicker();
+  curKind='전체'; curStock=''; curQ=''; document.getElementById('searchBar').value='';
+  render(); renderKtabs(); renderStockPicker();
 });
 document.getElementById('searchBar').addEventListener('input', function(e){
   curQ = e.target.value.trim();
@@ -1515,7 +781,6 @@ function filtered(){
   var arr = records.slice();
   if(curKind!=='전체') arr = arr.filter(function(r){ return r.kind===curKind; });
   if(curStock) arr = arr.filter(function(r){ return (r.stocks||[]).indexOf(curStock)>=0; });
-  if(curVerify) arr = arr.filter(function(r){ return r.verifyState===curVerify; });
   if(curQ){
     var q = curQ.toLowerCase();
     arr = arr.filter(function(r){
@@ -1531,13 +796,7 @@ function filtered(){
    렌더 스위치
    ══════════════════════════════════════════════════════════ */
 function render(){
-  /* v7.10: "🏷 종목" 모드는 curKind 필터·레코드 빈 상태 가드와 완전히 무관한 별도 화면이라
-     맨 앞에서 분기 — 기존 레코드 렌더 경로는 한 줄도 안 바뀜(아래 그대로) */
-  if(stockMode){ renderStockMode(); return; }
   var arr = filtered();
-  /* v6: 필터가 하나도 안 걸려있으면 필터해제 버튼을 숨김(눌러도 아무 일 안 일어나는 혼란 방지) */
-  var hasFilter = (curKind!=='전체' || !!curStock || !!curVerify || !!curQ);
-  document.getElementById('btnClearFlt').style.display = hasFilter ? '' : 'none';
   document.getElementById('cntLabel').textContent = arr.length+'건';
   document.getElementById('topStat').textContent = records.length+'건 기록됨';
   var host = document.getElementById('content');
@@ -1553,55 +812,6 @@ function render(){
   else if(curView==='cal') host.innerHTML = calHTML(arr);
   else if(curView==='time') host.innerHTML = timeHTML(arr);
   else if(curView==='gal') host.innerHTML = galHTML(arr);
-  bindContentClicks();
-}
-/* v7.10: 종목모드 렌더 — curStockTab이 비어있으면(레벨1) "종목 목록 자체"를 curView 방식으로,
-   특정 종목이 골라져 있으면(레벨2) 그 종목의 기록들을 "기존 레코드 렌더 함수 그대로" curView 방식으로.
-   레벨2는 새 함수가 하나도 없다 — records를 그 종목으로만 filter해서 cardHTML/listHTML/...에 그대로 넘긴다 */
-function renderStockMode(){
-  var host = document.getElementById('content');
-  document.getElementById('btnClearFlt').style.display = 'none'; // 종목모드엔 kind 필터 개념이 없음
-  var names = allStockNames();
-  if(curStockTab && names.indexOf(curStockTab)>=0){
-    var name = curStockTab;
-    var recs = stockRecords(name);
-    document.getElementById('cntLabel').textContent = recs.length+'건';
-    document.getElementById('topStat').textContent = records.length+'건 기록됨';
-    var head = '<div class="stockFocusHd"><b style="font-size:15px">🏷 '+esc(name)+'</b>'
-      + '<span><button type="button" class="infoBtn" data-stockopen="'+esc(name)+'">📋 정보 보기/입력</button> '
-      + '<button type="button" class="infoBtn" data-stockback="1" style="background:var(--sub2)">← 종목 목록으로</button></span></div>';
-    if(!recs.length){
-      host.innerHTML = head + '<div class="emptyState"><div class="ei">🗂</div>아직 이 종목과 연결된 기록이 없어요 — 위 버튼으로 정보만 먼저 넣어둘 수 있어요</div>';
-      bindContentClicks();
-      return;
-    }
-    var body;
-    if(curView==='card') body = cardHTML(recs);
-    else if(curView==='list') body = listHTML(recs);
-    else if(curView==='table') body = tableHTML(recs);
-    else if(curView==='board') body = boardHTML(recs);
-    else if(curView==='ch') body = chHTML(recs);
-    else if(curView==='cal') body = calHTML(recs);
-    else if(curView==='time') body = timeHTML(recs);
-    else if(curView==='gal') body = galHTML(recs);
-    host.innerHTML = head + body;
-    bindContentClicks();
-    return;
-  }
-  document.getElementById('cntLabel').textContent = names.length+'개 종목';
-  document.getElementById('topStat').textContent = records.length+'건 기록됨';
-  if(!names.length){
-    host.innerHTML = '<div class="emptyState"><div class="ei">🏷</div>아직 등록된 종목이 없어요. "종목 관리"에서 추가해보세요</div>';
-    return;
-  }
-  if(curView==='card') host.innerHTML = stockCardHTML(names);
-  else if(curView==='list') host.innerHTML = stockListHTML(names);
-  else if(curView==='table') host.innerHTML = stockTableHTML(names);
-  else if(curView==='board') host.innerHTML = stockBoardHTML(names);
-  else if(curView==='ch') host.innerHTML = stockChHTML(names);
-  else if(curView==='cal') host.innerHTML = stockCalHTML(names);
-  else if(curView==='time') host.innerHTML = stockTimeHTML(names);
-  else if(curView==='gal') host.innerHTML = stockGalHTML(names);
   bindContentClicks();
 }
 syncViewIcons();
@@ -1640,18 +850,14 @@ function cardOne(r){
   var re = nc ? ('<div class="re">🔔 '+esc(fmtDate(nc))+' 확인'+((r.checks||[]).length>1?(' 외 '+((r.checks.length)-1)+'건'):'')+'</div>') : '';
   var lk = r.link ? '<a class="lk" href="'+esc(r.link)+'" target="_blank" rel="noopener" data-noopen="1">🔗 열기</a>' : '';
   var sub = r.oneLiner ? '<div class="oneLine">'+esc(r.oneLiner)+'</div>' : '';
-  var vs = (r.verifyState && VERIFY_STATES[r.verifyState]) ? VERIFY_STATES[r.verifyState] : null;
-  var vbadge = vs ? (' <span class="vbadge" style="background:'+vs.c+'">'+vs.n+'</span>') : '';
-  var scenTag = (r.scenarios && r.scenarios.commonFacts) ? ' <span class="dt" style="background:#fff;border:1px solid var(--k-idea);color:var(--k-idea)">🧭 시나리오</span>' : '';
   return '<div class="rcard '+r.kind+'" data-open="'+esc(r.id)+'">'
     + '<button class="del" data-del="'+esc(r.id)+'">🗑</button>'
-    + '<div class="kind">'+k.i+' '+k.n+(r.channel?(' · '+esc(r.channel)):'')+' '+stars+vbadge+'</div>'
+    + '<div class="kind">'+k.i+' '+k.n+(r.channel?(' · '+esc(r.channel)):'')+' '+stars+'</div>'
     + '<div class="title">'+esc(r.title||'')+'</div>'
     + sub
     + '<div class="stocks">'+stocks+'</div>'
     + '<span class="dt">📅 '+fmtDate(r.date)+'</span>'
     + (r.action ? ' <span class="dt" style="background:var(--navy-800);color:#fff">🎯 '+esc(r.action)+'</span>' : '')
-    + scenTag
     + re + lk
     + '</div>';
 }
@@ -1700,177 +906,6 @@ function boardHTML(arr){
   }).join('') + '</div>';
 }
 
-/* ── 종목모드(v7.10) 전용 헬퍼 — 전부 기존에 이미 있던 필드(records/stockMaster)에서만 계산,
-   새로 지어낸 값 없음. stockRecords는 v7.6의 stockDirHTML 안에 있던 필터링을 재사용 가능하게 뺀 것뿐 */
-function stockRecords(name){
-  return records.filter(function(r){ return (r.stocks||[]).indexOf(name)>=0; })
-    .sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
-}
-/* 이 종목과 관련된 활동 중 가장 최근 날짜 — 관련기록 날짜 + 투자논지 이력 날짜(thesisLog) 중 최댓값.
-   원래 있던 날짜 필드들을 모아 max만 취하는 것이라 새 필드가 필요 없다 */
-function stockLastActivity(name){
-  var dates = stockRecords(name).map(function(r){ return r.date||''; });
-  var item = stockItemOf(name);
-  if(item && item.thesisLog) item.thesisLog.forEach(function(t){ if(t && t.date) dates.push(t.date); });
-  dates = dates.filter(Boolean).sort();
-  return dates.length ? dates[dates.length-1] : '';
-}
-/* 이 종목의 관련기록 중 가장 많이 나온 channel(record.channel) — "종목 채널별보기"용 그룹 기준 */
-function stockMainChannel(name){
-  var counts = {}, best = '', bestN = 0;
-  stockRecords(name).forEach(function(r){
-    var c = r.channel || ''; if(!c) return;
-    counts[c] = (counts[c]||0)+1;
-    if(counts[c] > bestN){ best = c; bestN = counts[c]; }
-  });
-  return best;
-}
-/* 이 종목의 관련기록 중 이미지(record.image)가 있는 가장 최근 것 — "종목 갤러리보기"용 커버 */
-function stockCoverImage(name){
-  var recs = stockRecords(name);
-  for(var i=0;i<recs.length;i++){ if(recs[i].image) return recs[i].image; }
-  return '';
-}
-
-/* ── 종목모드(v7.10) — "🏷 종목" 탭이 켜져 있고 특정 종목을 아직 안 골랐을 때(레벨1),
-   "종목 목록 자체"를 #viewicons가 고른 curView 방식으로 보여주는 8개 렌더 함수.
-   하나를 고른 뒤(레벨2)는 이 함수들을 안 쓰고 기존 레코드용 8개 함수를 그대로 재사용(render() 참고) */
-function stockCardHTML(names){
-  return '<div class="stockDirGrid">' + names.map(function(n){
-    var item = stockItemOf(n);
-    var badge = (item && item.status) ? '<span class="badge '+esc(item.status)+'">'+esc(item.status)+'</span>' : '<span class="emptyMini" style="padding:0">정보 없음</span>';
-    return '<div class="stockDirCard" data-stocktab="'+esc(n)+'">'
-      + '<div class="nm"><span>🏷 '+esc(n)+'</span><span class="n">'+stockCount(n)+'건</span></div>'
-      + badge
-      + '</div>';
-  }).join('') + '</div>';
-}
-function stockListHTML(names){
-  return '<div class="rlist">' + names.map(function(n){
-    var item = stockItemOf(n);
-    var last = stockLastActivity(n);
-    return '<div class="lrow" data-stocktab="'+esc(n)+'">'
-      + '<span class="dot2" style="background:var(--gold-dk)"></span>'
-      + '<span class="tt3">🏷 '+esc(n)+'</span>'
-      + '<span class="ol3">'+((item&&item.status)?esc(item.status):'')+'</span>'
-      + '<span class="st3">'+stockCount(n)+'건</span>'
-      + (last ? '<span class="re3">🕒 '+esc(fmtDate(last))+'</span>' : '')
-      + '</div>';
-  }).join('') + '</div>';
-}
-function stockTableHTML(names){
-  var rows = names.map(function(n){
-    var item = stockItemOf(n) || {};
-    var last = stockLastActivity(n);
-    return '<tr data-stocktab="'+esc(n)+'">'
-      + '<td>🏷 '+esc(n)+'</td>'
-      + '<td>'+(item.status?esc(item.status):'-')+'</td>'
-      + '<td>'+(item.quantity!=null&&item.quantity!==''?esc(String(item.quantity)):'')+'</td>'
-      + '<td>'+(item.avgCost!=null&&item.avgCost!==''?esc(String(item.avgCost)):'')+'</td>'
-      + '<td>'+(item.targetPrice!=null&&item.targetPrice!==''?esc(String(item.targetPrice)):'')+'</td>'
-      + '<td>'+stockCount(n)+'건</td>'
-      + '<td>'+(last?esc(last):'-')+'</td>'
-      + '</tr>';
-  }).join('');
-  return '<div style="overflow-x:auto"><table class="rt"><tr><th>종목</th><th>상태</th><th>보유수량</th><th>매수단가</th><th>목표가</th><th>기록수</th><th>최근 활동일</th></tr>'+rows+'</table></div>';
-}
-function stockBoardHTML(names){
-  var order = ['보유','관심','청산','미설정'];
-  var cols = {'보유':[], '관심':[], '청산':[], '미설정':[]};
-  names.forEach(function(n){
-    var item = stockItemOf(n);
-    var st = (item && item.status) ? item.status : '미설정';
-    if(!cols[st]) cols[st] = [];
-    cols[st].push(n);
-  });
-  return '<div class="board">' + order.filter(function(s){ return cols[s].length; }).map(function(s){
-    return '<div class="bcol"><div class="bhd"><b>'+esc(s)+'</b><span class="n">'+cols[s].length+'</span></div>'
-      + cols[s].map(function(n){
-          var last = stockLastActivity(n);
-          return '<div class="bcard" data-stocktab="'+esc(n)+'">'
-            + '<div class="kk" style="color:var(--gold-dk)">🏷 '+esc(n)+'</div>'
-            + '<div class="tt">'+stockCount(n)+'건</div>'
-            + '<div class="dd">'+(last?('최근 '+fmtDate(last)):'활동 없음')+'</div>'
-            + '</div>';
-        }).join('')
-      + '</div>';
-  }).join('') + '</div>';
-}
-function stockChHTML(names){
-  var cols = {}, order = [];
-  names.forEach(function(n){
-    var ch = stockMainChannel(n) || '연결된 채널 없음';
-    if(!cols[ch]){ cols[ch]=[]; order.push(ch); }
-    cols[ch].push(n);
-  });
-  order.sort(function(a,b){ if(a==='연결된 채널 없음') return 1; if(b==='연결된 채널 없음') return -1; return cols[b].length-cols[a].length; });
-  return '<div class="board">' + order.map(function(ch){
-    return '<div class="bcol"><div class="bhd"><b>'+esc(ch)+'</b><span class="n">'+cols[ch].length+'</span></div>'
-      + cols[ch].map(function(n){
-          return '<div class="chcard" data-stocktab="'+esc(n)+'">'
-            + '<div class="kk" style="color:var(--gold-dk)">🏷 '+esc(n)+'</div>'
-            + '<div class="tt">'+stockCount(n)+'건</div>'
-            + '</div>';
-        }).join('')
-      + '</div>';
-  }).join('') + '</div>';
-}
-function stockCalHTML(names){
-  var y=+calYM.slice(0,4), m=+calYM.slice(5,7);
-  var first=new Date(y,m-1,1), start=first.getDay();
-  var days=new Date(y,m,0).getDate();
-  var byDay={};
-  names.forEach(function(n){
-    var last = stockLastActivity(n);
-    if(last && last.slice(0,7)===calYM){ var dd=+last.slice(8,10); (byDay[dd]=byDay[dd]||[]).push(n); }
-  });
-  var t = todayStr();
-  var h = '<div class="cal"><div class="calhd"><div class="nav"><button id="calPrev">‹</button></div><b>'+y+'년 '+m+'월</b><div class="nav"><button id="calNext">›</button></div></div>'
-    + '<div class="calgrid">';
-  ['일','월','화','수','목','금','토'].forEach(function(d){ h+='<div class="dow">'+d+'</div>'; });
-  for(var i=0;i<start;i++) h+='<div class="cell dim"></div>';
-  for(var d=1; d<=days; d++){
-    var list = byDay[d]||[];
-    var dateStr = calYM+'-'+String(d).padStart(2,'0');
-    var isT = dateStr===t;
-    h += '<div class="cell'+(isT?' today':'')+'"><span class="num">'+d+'</span>'
-      + list.slice(0,3).map(function(n){
-          return '<span class="evt" style="background:var(--gold-dk)" data-stocktab="'+esc(n)+'">🏷 '+esc(n)+'</span>';
-        }).join('')
-      + (list.length>3 ? '<span style="font-size:10px;color:var(--sub2)">+'+(list.length-3)+'건 더</span>' : '')
-      + '</div>';
-  }
-  return h + '</div></div>';
-}
-function stockTimeHTML(names){
-  var withDate = names.map(function(n){ return {n:n, last: stockLastActivity(n)}; });
-  withDate.sort(function(a,b){ return (b.last||'').localeCompare(a.last||''); });
-  return '<div class="tl">' + withDate.map(function(x){
-    var item = stockItemOf(x.n);
-    return '<div class="tlItem" data-stocktab="'+esc(x.n)+'">'
-      + '<div class="tlHd">'+(x.last?fmtDate(x.last):'활동 없음')+((item&&item.status)?(' · '+esc(item.status)):'')+'</div>'
-      + '<div class="tlTitle">🏷 '+esc(x.n)+'</div>'
-      + '<div class="tlSub">'+stockCount(x.n)+'건의 관련 기록</div>'
-      + '</div>';
-  }).join('') + '</div>';
-}
-function stockGalHTML(names){
-  return '<div class="galgrid">' + names.map(function(n){
-    var cover = stockCoverImage(n);
-    var item = stockItemOf(n);
-    var coverHtml = cover
-      ? '<div class="cover" style="background:var(--gold-dk)"><img src="'+esc(cover)+'" alt="" loading="lazy"></div>'
-      : '<div class="cover" style="background:var(--gold-dk)">🏷</div>';
-    return '<div class="galcard" data-stocktab="'+esc(n)+'">'
-      + coverHtml
-      + '<div class="gb">'
-      + '<div class="gk" style="color:var(--gold-dk)">'+((item&&item.status)?esc(item.status):'정보 없음')+'</div>'
-      + '<div class="gt">🏷 '+esc(n)+'</div>'
-      + '<div class="go2">'+stockCount(n)+'건</div>'
-      + '</div></div>';
-  }).join('') + '</div>';
-}
-
 /* ── 캘린더보기 (날짜 칸 안에 실제 제목 텍스트) ── */
 function calHTML(arr){
   var y=+calYM.slice(0,4), m=+calYM.slice(5,7);
@@ -1878,11 +913,6 @@ function calHTML(arr){
   var days=new Date(y,m,0).getDate();
   var byDay={};
   arr.forEach(function(r){ var d=String(r.date||''); if(d.slice(0,7)===calYM){ var dd=+d.slice(8,10); (byDay[dd]=byDay[dd]||[]).push(r); } });
-  /* v6: 체크 캘린더(checks[].date)도 같이 표시 — 필터된 arr 기준 */
-  var chkByDay={};
-  arr.forEach(function(r){ (r.checks||[]).forEach(function(c){
-    var d=String(c.date||''); if(d.slice(0,7)===calYM){ var dd=+d.slice(8,10); (chkByDay[dd]=chkByDay[dd]||[]).push({r:r,c:c}); }
-  }); });
   var t = todayStr();
   var h = '<div class="cal"><div class="calhd"><div class="nav"><button id="calPrev">‹</button></div><b>'+y+'년 '+m+'월</b><div class="nav"><button id="calNext">›</button></div></div>'
     + '<div class="calgrid">';
@@ -1890,67 +920,17 @@ function calHTML(arr){
   for(var i=0;i<start;i++) h+='<div class="cell dim"></div>';
   for(var d=1; d<=days; d++){
     var list = byDay[d]||[];
-    var chks = chkByDay[d]||[];
-    var dateStr = calYM+'-'+String(d).padStart(2,'0');
-    var isT = dateStr===t;
-    /* v6.1: 🔔는 .evt처럼 제목을 칸 안에 바로 보여줌(2개까지+더보기). 클릭하면 전체기록이 아니라
-       그날 요약 팝업(그날 기록+확인할 것)이 뜨게 — 기록 제목(.evt) 클릭은 기존대로 바로 전체기록 열림 */
+    var isT = (calYM+'-'+String(d).padStart(2,'0'))===t;
     h += '<div class="cell'+(isT?' today':'')+'"><span class="num">'+d+'</span>'
       + list.slice(0,3).map(function(r){
           var k = KINDS[r.kind] || KINDS.memo;
           return '<span class="evt" style="background:'+k.c+'" data-open="'+esc(r.id)+'">'+esc(r.title||'')+'</span>';
         }).join('')
       + (list.length>3 ? '<span style="font-size:10px;color:var(--sub2)">+'+(list.length-3)+'건 더</span>' : '')
-      + chks.slice(0,2).map(function(x){
-          return '<span class="chkEvt" data-daypop="'+dateStr+'">🔔 '+esc(x.c.what||x.r.title||'')+'</span>';
-        }).join('')
-      + (chks.length>2 ? '<span class="calChk" data-daypop="'+dateStr+'">+'+(chks.length-2)+'건 더</span>' : '')
       + '</div>';
   }
   return h + '</div></div>';
 }
-/* v6.1: 달력 🔔 클릭 → 전체기록 대신 그날 요약(기록+확인할 것)만 가볍게 보여주는 팝업 */
-function openDayPopup(dateStr){
-  var arr = filtered();
-  var dayRecords = arr.filter(function(r){ return r.date===dateStr; });
-  var dayChecks = [];
-  arr.forEach(function(r){ (r.checks||[]).forEach(function(c){ if(c.date===dateStr) dayChecks.push({r:r, c:c}); }); });
-  var p = dateStr.split('-');
-  var wd = ['일','월','화','수','목','금','토'][new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).getUTCDay()];
-  document.getElementById('dayModalTitle').textContent = (+p[1])+'월 '+(+p[2])+'일 ('+wd+')';
-  var html = '<div class="dayPopSec"><h5>📌 이날 기록</h5>'
-    + (dayRecords.length ? dayRecords.map(function(r){
-        var k = KINDS[r.kind] || KINDS.memo;
-        return '<div class="checkItem" data-open="'+esc(r.id)+'">'
-          + '<span class="dot" style="background:'+k.c+'"></span>'
-          + '<span class="tt">'+esc(r.title||'')+'</span>'
-          + '<span class="kk">'+k.i+' '+k.n+'</span>'
-          + '</div>';
-      }).join('') : '<div class="emptyMini">이날 기록은 없어요</div>')
-    + '</div><div class="dayPopSec"><h5>🔔 확인할 것</h5>'
-    + (dayChecks.length ? dayChecks.map(function(x){
-        var k = KINDS[x.r.kind] || KINDS.memo;
-        return '<div class="checkItem" data-open="'+esc(x.r.id)+'">'
-          + '<span class="dot" style="background:'+k.c+'"></span>'
-          + '<span class="tt">'+esc(x.c.what||x.r.title||'')+(x.c.action?(' <span style="color:var(--sub2)">— '+esc(x.c.action)+'</span>'):'')+'</span>'
-          + '<span class="kk">'+k.i+' '+esc(x.r.title||'')+'</span>'
-          + '</div>';
-      }).join('') : '<div class="emptyMini">확인할 예정은 없어요</div>')
-    + '</div>';
-  var body = document.getElementById('dayModalBody');
-  body.innerHTML = html;
-  body.querySelectorAll('[data-open]').forEach(function(el){
-    el.addEventListener('click', function(){
-      document.getElementById('dayModal').classList.remove('on');
-      openPage(el.getAttribute('data-open'));
-    });
-  });
-  resetModalPos(document.querySelector('#dayModal .modal'));
-  document.getElementById('dayModal').classList.add('on');
-}
-document.getElementById('dayModalClose').addEventListener('click', function(){
-  document.getElementById('dayModal').classList.remove('on');
-});
 
 /* ── 리스트(줄)보기 — 한 줄에 압축해서 훑어보기 ── */
 function listHTML(arr){
@@ -2037,37 +1017,6 @@ function bindContentClicks(){
       ev.stopPropagation();
       var id = el.getAttribute('data-del');
       if(confirm('이 기록을 지울까요?')) removeRecord(id);
-    });
-  });
-  /* v6.1: 달력 🔔 클릭 → 그날 요약 팝업 */
-  document.querySelectorAll('#content [data-daypop]').forEach(function(el){
-    el.addEventListener('click', function(ev){
-      ev.stopPropagation();
-      openDayPopup(el.getAttribute('data-daypop'));
-    });
-  });
-  /* v7.10: 종목모드 레벨1(종목 목록 자체를 카드/리스트/표/보드/채널별/달력/타임라인/갤러리로 보는 화면)
-     안의 종목 항목을 누르면 그 종목의 기록들로 들어감(레벨2) */
-  document.querySelectorAll('#content [data-stocktab]').forEach(function(el){
-    el.addEventListener('click', function(ev){
-      ev.stopPropagation();
-      curStockTab = el.getAttribute('data-stocktab');
-      render();
-    });
-  });
-  /* v7.10: 종목모드 레벨2 헤더의 "← 종목 목록으로" — 그 종목만 벗어나고 종목모드 자체는 유지 */
-  document.querySelectorAll('#content [data-stockback]').forEach(function(el){
-    el.addEventListener('click', function(ev){
-      ev.stopPropagation();
-      curStockTab = '';
-      render();
-    });
-  });
-  /* v7.6: 종목 목록 카드 — 누르면 바로 종목 상세(정보 누적 창)로 */
-  document.querySelectorAll('#content [data-stockopen]').forEach(function(el){
-    el.addEventListener('click', function(ev){
-      ev.stopPropagation();
-      openStockDetail(el.getAttribute('data-stockopen'));
     });
   });
   var pv = document.getElementById('calPrev'), nx = document.getElementById('calNext');
@@ -2176,38 +1125,10 @@ document.getElementById('imgRemoveBtn').addEventListener('click', function(){
   if(oldPath && storage) storage.ref(oldPath).delete().catch(function(e){ logBug('이미지 정리 실패(무시): '+e.message); });
 });
 
-/* v5: 시나리오 폼 채우기/읽기 — idea 전용, 값 없으면 빈 칸으로 */
-function fillScenarioForm(scen){
-  scen = scen || {};
-  var up = scen.up||{}, neutral = scen.neutral||{}, down = scen.down||{};
-  document.getElementById('fScenCommon').value = scen.commonFacts||'';
-  document.getElementById('fScenUpDesc').value = up.desc||'';
-  document.getElementById('fScenUpStrengthen').value = up.strengthen||'';
-  document.getElementById('fScenUpInvalidate').value = up.invalidate||'';
-  document.getElementById('fScenNeutralDesc').value = neutral.desc||'';
-  document.getElementById('fScenNeutralStrengthen').value = neutral.strengthen||'';
-  document.getElementById('fScenNeutralInvalidate').value = neutral.invalidate||'';
-  document.getElementById('fScenDownDesc').value = down.desc||'';
-  document.getElementById('fScenDownStrengthen').value = down.strengthen||'';
-  document.getElementById('fScenDownInvalidate').value = down.invalidate||'';
-}
-function readScenarioForm(){
-  return {
-    commonFacts: document.getElementById('fScenCommon').value.trim(),
-    up:      {desc: document.getElementById('fScenUpDesc').value.trim(),      strengthen: document.getElementById('fScenUpStrengthen').value.trim(),      invalidate: document.getElementById('fScenUpInvalidate').value.trim()},
-    neutral: {desc: document.getElementById('fScenNeutralDesc').value.trim(), strengthen: document.getElementById('fScenNeutralStrengthen').value.trim(), invalidate: document.getElementById('fScenNeutralInvalidate').value.trim()},
-    down:    {desc: document.getElementById('fScenDownDesc').value.trim(),    strengthen: document.getElementById('fScenDownStrengthen').value.trim(),    invalidate: document.getElementById('fScenDownInvalidate').value.trim()}
-  };
-}
-function scenarioHasContent(s){
-  return !!(s.commonFacts || ['up','neutral','down'].some(function(k){ return s[k].desc || s[k].strengthen || s[k].invalidate; }));
-}
-
 function openAdd(){
   EDIT = null; pickedStocks = [];
   document.getElementById('mTitle').textContent = '＋ 기록 추가';
   document.getElementById('mDel').style.display = 'none';
-  _curEditingAction = '';
   renderKindPick('youtube');
   applyKindFields('youtube');
   document.getElementById('fDate').value = todayStr();
@@ -2215,9 +1136,8 @@ function openAdd(){
   document.getElementById('fOneLiner').value = '';
   document.getElementById('fChannel').value = '';
   document.getElementById('fLink').value = '';
+  document.getElementById('fAction').value = '';
   document.getElementById('fBody').value = '';
-  document.getElementById('fVerify').value = '';
-  fillScenarioForm(null);
   renderChecksBox([]);
   setStar(0);
   renderStockTags();
@@ -2234,7 +1154,6 @@ function openEdit(id){
   EDIT = id; pickedStocks = (r.stocks||[]).slice();
   document.getElementById('mTitle').textContent = '기록 수정';
   document.getElementById('mDel').style.display = '';
-  _curEditingAction = r.action||'';
   renderKindPick(r.kind);
   applyKindFields(r.kind);
   document.getElementById('fDate').value = r.date||todayStr();
@@ -2242,9 +1161,8 @@ function openEdit(id){
   document.getElementById('fOneLiner').value = r.oneLiner||'';
   document.getElementById('fChannel').value = r.channel||'';
   document.getElementById('fLink').value = r.link||'';
+  document.getElementById('fAction').value = r.action||'';
   document.getElementById('fBody').value = r.body || r.summary || '';
-  document.getElementById('fVerify').value = r.verifyState||'';
-  fillScenarioForm(r.scenarios||null);
   renderChecksBox(r.checks && r.checks.length ? r.checks : (r.checkDate ? [{date:r.checkDate, what:'', action:''}] : []));
   setStar(r.star||0);
   renderStockTags();
@@ -2301,23 +1219,13 @@ document.getElementById('mSave').addEventListener('click', function(){
     channel: document.getElementById('fChannel').value.trim(),
     link: document.getElementById('fLink').value.trim(),
     stocks: pickedStocks.slice(),
-    action: readActionValue(),
+    action: document.getElementById('fAction').value.trim(),
     body: document.getElementById('fBody').value,
     checks: collectChecks(),
     star: +(document.getElementById('starRow').getAttribute('data-val')||0),
     image: pickedImage.url || '',
-    imagePath: pickedImage.path || '',
-    verifyState: document.getElementById('fVerify').value || ''
+    imagePath: pickedImage.path || ''
   };
-  /* v5: 시나리오는 idea 기록에서 내용이 있을 때만 저장 — 최초 저장 시각(scenariosSetAt)은 수정해도 안 바뀜(9번 원칙: 판단 당시 기록 보존) */
-  if(data.kind==='idea'){
-    var scen = readScenarioForm();
-    if(scenarioHasContent(scen)){
-      data.scenarios = scen;
-      var existing = EDIT ? records.find(function(x){ return x.id===EDIT; }) : null;
-      data.scenariosSetAt = (existing && existing.scenariosSetAt) ? existing.scenariosSetAt : (kstNow().toISOString().slice(0,19)+'+09:00');
-    }
-  }
   pickedStocks.forEach(function(s){ addStockToMaster(s); });
   if(EDIT){
     db.collection('records').doc(EDIT).update(data)
@@ -2365,28 +1273,8 @@ function openPage(id){
   if(r.action) meta += '<span class="m1 action">'+esc(f.actionLbl)+': '+esc(r.action)+'</span>';
   if(r.star) meta += '<span class="m1 stars">'+esc(f.starLbl)+' '+'★'.repeat(r.star)+'</span>';
   if(r.link) meta += '<a class="m1" href="'+esc(r.link)+'" target="_blank" rel="noopener">🔗 원본 열기</a>';
-  if(r.verifyState && VERIFY_STATES[r.verifyState]) meta += '<span class="vbadge" style="background:'+VERIFY_STATES[r.verifyState].c+'">🔍 '+VERIFY_STATES[r.verifyState].n+'</span>';
 
   var stocks = (r.stocks||[]).map(function(s){ return '<span class="stag">'+esc(s)+'</span>'; }).join('');
-
-  var scenHtml = '';
-  if(r.scenarios && (r.scenarios.commonFacts || ['up','neutral','down'].some(function(k){ var s=r.scenarios[k]||{}; return s.desc||s.strengthen||s.invalidate; }))){
-    var sc = r.scenarios;
-    var scenCol = function(label, s){
-      s = s||{};
-      if(!s.desc && !s.strengthen && !s.invalidate) return '';
-      return '<div class="scenCol"><b>'+label+'</b>'
-        + (s.desc?'<div style="font-size:12.5px;margin-bottom:5px;white-space:pre-wrap">'+esc(s.desc)+'</div>':'')
-        + (s.strengthen?'<div style="font-size:11.5px;color:var(--good)">💪 강화: '+esc(s.strengthen)+'</div>':'')
-        + (s.invalidate?'<div style="font-size:11.5px;color:var(--warn)">⛔ 무효화: '+esc(s.invalidate)+'</div>':'')
-        + '</div>';
-    };
-    scenHtml = '<div class="pg-h4">🧭 시나리오'+(r.scenariosSetAt?(' <span style="font-weight:400;color:var(--sub2);font-size:11px">· 최초 저장 '+esc(r.scenariosSetAt.slice(0,16).replace('T',' '))+'</span>'):'')+'</div>'
-      + '<div class="pg-scen">'
-      + (sc.commonFacts?'<div class="commonFacts">📌 공통 사실: '+esc(sc.commonFacts)+'</div>':'')
-      + '<div class="scenGrid">'+scenCol('📈 상승',sc.up)+scenCol('◾ 중립',sc.neutral)+scenCol('📉 하락',sc.down)+'</div>'
-      + '</div>';
-  }
 
   var checks = (r.checks||[]).slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
   var checkTbl = '';
@@ -2403,7 +1291,6 @@ function openPage(id){
     + (r.oneLiner ? '<div class="pg-oneliner">'+esc(f.oneLinerLbl)+': '+esc(r.oneLiner)+'</div>' : '')
     + '<div class="pg-meta">'+meta+'</div>'
     + (stocks ? '<div class="pg-stocks">'+stocks+'</div>' : '')
-    + scenHtml
     + '<div class="pg-h4">'+esc(f.bodyLbl.replace(/^📄 ?/,'📄 '))+'</div>'
     + '<div class="pg-body">'+esc(r.body||(r.summary||''))+'</div>'
     + checkTbl;
@@ -2469,22 +1356,17 @@ function renderStockMgr(){
   if(!names.length){ host.innerHTML = '<div class="emptyMini">아직 등록된 종목이 없어요</div>'; return; }
   host.innerHTML = names.map(function(n){
     var c = stockCount(n);
-    return '<div class="smRow"><span class="nm" data-detail="'+esc(n)+'">'+esc(n)+'</span><span class="cnt2">'+c+'건</span>'
+    return '<div class="smRow"><span class="nm">'+esc(n)+'</span><span class="cnt2">'+c+'건</span>'
       + (c===0 ? '<button class="rm" data-rm="'+esc(n)+'">✕ 삭제</button>' : '')
       + '</div>';
   }).join('');
   host.querySelectorAll('[data-rm]').forEach(function(b){
-    b.addEventListener('click', function(ev){
-      ev.stopPropagation();
+    b.addEventListener('click', function(){
       var name = b.getAttribute('data-rm');
-      var list = stockMaster.filter(function(s){ return stockName(s)!==name; });
+      var list = stockMaster.filter(function(s){ return s!==name; });
       saveStockMaster(list);
       setTimeout(renderStockMgr, 300);
     });
-  });
-  /* v7.1: 이름을 누르면 종목 상세(정보 누적) 모달 */
-  host.querySelectorAll('[data-detail]').forEach(function(el){
-    el.addEventListener('click', function(){ openStockDetail(el.getAttribute('data-detail')); });
   });
 }
 document.getElementById('stockMgrAddBtn').addEventListener('click', function(){
@@ -2497,167 +1379,6 @@ document.getElementById('stockMgrAddBtn').addEventListener('click', function(){
 });
 
 /* ══════════════════════════════════════════════════════════
-   v7.1: 종목 상세(정보 누적) — 목표가·보유수량·매수단가·상태 + 투자논지 이력 + 관련 기록
-   ══════════════════════════════════════════════════════════ */
-var _sdCurName = null;
-function openStockDetail(name){
-  _sdCurName = name;
-  document.getElementById('sdName').textContent = '🏷 '+name;
-  document.getElementById('sdCount').textContent = stockCount(name)+'건 기록됨';
-  var item = stockItemOf(name) || {};
-  document.getElementById('sdStatus').value = item.status || '';
-  document.getElementById('sdTarget').value = item.targetPrice != null ? item.targetPrice : '';
-  document.getElementById('sdQty').value = item.quantity != null ? item.quantity : '';
-  document.getElementById('sdAvgCost').value = item.avgCost != null ? item.avgCost : '';
-  renderCustomFields(item.customFields || []);
-  renderCfPresets(item.customFields || []);
-  renderThesisLog(item.thesisLog || []);
-  renderRelatedRecords(name);
-  resetModalPos(document.querySelector('#stockDetailModal .modal'));
-  document.getElementById('stockDetailModal').classList.add('on');
-}
-/* v7.4: 목표가·보유수량·매수단가처럼 미리 정해둔 항목 말고, 종목마다 원하는 항목을 이름 붙여
-   자유롭게 추가하는 "추가 정보". 값 수정은 💾 저장 버튼으로 한번에(자동이력 diff 포함),
-   추가/삭제는 그 자리에서 바로(각각 mutateStockItem 한 번씩 — 경합 걱정 없음) */
-function renderCustomFields(fields){
-  var host = document.getElementById('sdCustomFields');
-  if(!fields || !fields.length){ host.innerHTML = '<div class="emptyMini">아직 추가한 항목이 없어요</div>'; return; }
-  host.innerHTML = fields.map(function(f, i){
-    return '<div class="cfRow"><label>'+esc(f.label)+'</label>'
-      + '<input type="text" class="cfVal" data-idx="'+i+'" value="'+esc(f.value||'')+'">'
-      + '<button type="button" class="cfDel" data-idx="'+i+'" title="삭제">✕</button></div>';
-  }).join('');
-  host.querySelectorAll('.cfDel').forEach(function(b){
-    b.addEventListener('click', function(){
-      if(!_sdCurName) return;
-      var idx = +b.getAttribute('data-idx');
-      mutateStockItem(_sdCurName, function(base){
-        var list = (base.customFields||[]).slice();
-        var removed = list.splice(idx,1)[0];
-        base.customFields = list;
-        if(removed){
-          var log = (base.thesisLog||[]).slice();
-          log.push({date: todayStr(), text: '항목 삭제: '+removed.label+(removed.value?('('+removed.value+')'):''), auto:true});
-          base.thesisLog = log;
-        }
-      });
-      setTimeout(function(){ openStockDetail(_sdCurName); }, 300);
-    });
-  });
-}
-/* v7.5: 항목명 타이핑 없이 자주 쓰는 이름을 칩으로 눌러서 채우기 — 이미 추가한 이름은 빼서
-   같은 항목이 중복으로 쌓이지 않게. 종목마다 필요한 게 다르므로 강제로 채우지 않음(눌러야만 생김)
-   v7.6: 배당수익률·동종업계 비교 같은 "지표성" 항목 대신, 나중에 판단을 다시 복기할 때(추론) 도움이
-   되는 항목으로 교체 — 왜 샀는지/뭐가 틀리면 틀린 건지/다음에 뭘 봐야 하는지가 남아야 나중에 도움됨 */
-var CF_PRESETS = ['매수사유','핵심가정','반증조건','촉매','확신도','리스크','손절가','매도조건','목표비중','진입전략','재평가시점','메모'];
-function renderCfPresets(fields){
-  var host = document.getElementById('sdCfPresets');
-  if(!host) return;
-  var used = (fields||[]).map(function(f){ return f.label; });
-  var avail = CF_PRESETS.filter(function(p){ return used.indexOf(p)<0; });
-  if(!avail.length){ host.innerHTML=''; return; }
-  host.innerHTML = avail.map(function(p){ return '<span class="cfPreset" data-preset="'+esc(p)+'">+ '+esc(p)+'</span>'; }).join('');
-  host.querySelectorAll('[data-preset]').forEach(function(el){
-    el.addEventListener('click', function(){
-      document.getElementById('sdCfLabel').value = el.getAttribute('data-preset');
-      document.getElementById('sdCfValue').focus();
-    });
-  });
-}
-function renderThesisLog(log){
-  var host = document.getElementById('sdThesisLog');
-  if(!log.length){ host.innerHTML = '<div class="emptyMini">아직 남긴 논지가 없어요</div>'; return; }
-  var sorted = log.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); }); // 최신이 위로(13번 원칙)
-  host.innerHTML = sorted.map(function(x){
-    return '<div class="thesisLogItem'+(x.auto?' auto':'')+'"><span class="d">'+esc(fmtDate(x.date))+'</span>'+esc(x.text)+'</div>';
-  }).join('');
-}
-function renderRelatedRecords(name){
-  var host = document.getElementById('sdRelatedRecords');
-  var recs = records.filter(function(r){ return (r.stocks||[]).indexOf(name)>=0; })
-    .sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
-  if(!recs.length){ host.innerHTML = '<div class="emptyMini">아직 관련 기록이 없어요</div>'; return; }
-  host.innerHTML = recs.slice(0,20).map(function(r){
-    var k = KINDS[r.kind] || KINDS.memo;
-    return '<div class="checkItem" data-open="'+esc(r.id)+'">'
-      + '<span class="dot" style="background:'+k.c+'"></span>'
-      + '<span class="tt">'+esc(r.title||'')+'</span>'
-      + '<span class="kk">'+fmtDate(r.date)+' · '+k.i+'</span>'
-      + '</div>';
-  }).join('') + (recs.length>20 ? '<div class="emptyMini">+'+(recs.length-20)+'건 더 있어요(종목칩으로 필터해서 보세요)</div>' : '');
-  host.querySelectorAll('[data-open]').forEach(function(el){
-    el.addEventListener('click', function(){
-      document.getElementById('stockDetailModal').classList.remove('on');
-      openPage(el.getAttribute('data-open'));
-    });
-  });
-}
-document.getElementById('sdClose').addEventListener('click', function(){
-  document.getElementById('stockDetailModal').classList.remove('on');
-});
-document.getElementById('sdSaveFields').addEventListener('click', function(){
-  if(!_sdCurName) return;
-  var item = stockItemOf(_sdCurName) || {};
-  var newTarget = document.getElementById('sdTarget').value.trim();
-  var newQty = document.getElementById('sdQty').value.trim();
-  var newAvg = document.getElementById('sdAvgCost').value.trim();
-  var newStatus = document.getElementById('sdStatus').value;
-  /* v7.1 레드팀 대응: 값이 바뀌면 지우지 않고 투자논지 이력에 "무엇이 얼마→얼마로 바뀜"을 자동으로 한 줄 남김 */
-  var changes = [];
-  if(newTarget !== String(item.targetPrice==null?'':item.targetPrice)) changes.push('목표가 '+(item.targetPrice||'-')+' → '+(newTarget||'-'));
-  if(newQty !== String(item.quantity==null?'':item.quantity)) changes.push('보유수량 '+(item.quantity||'-')+' → '+(newQty||'-'));
-  if(newAvg !== String(item.avgCost==null?'':item.avgCost)) changes.push('매수단가 '+(item.avgCost||'-')+' → '+(newAvg||'-'));
-  if(newStatus !== (item.status||'')) changes.push('상태 '+(item.status||'-')+' → '+(newStatus||'-'));
-  /* v7.4: 추가정보(커스텀 필드) 값도 같이 diff — 항목 이름/순서는 안 바꾸고 값만 반영 */
-  var oldCf = item.customFields || [];
-  var cfInputs = document.querySelectorAll('#sdCustomFields .cfVal');
-  var newCf = oldCf.map(function(f, i){
-    var inp = cfInputs[i];
-    var newVal = inp ? inp.value.trim() : (f.value||'');
-    if(newVal !== (f.value||'')) changes.push(f.label+' '+(f.value||'-')+' → '+(newVal||'-'));
-    return {label: f.label, value: newVal};
-  });
-  mutateStockItem(_sdCurName, function(base){
-    base.targetPrice = newTarget; base.quantity = newQty; base.avgCost = newAvg; base.status = newStatus;
-    base.customFields = newCf;
-    if(changes.length){
-      var log = (base.thesisLog||[]).slice();
-      log.push({date: todayStr(), text: changes.join(' · '), auto:true});
-      base.thesisLog = log;
-    }
-  });
-  toast('저장했습니다');
-  setTimeout(function(){ openStockDetail(_sdCurName); }, 300);
-});
-document.getElementById('sdCfAddBtn').addEventListener('click', function(){
-  if(!_sdCurName) return;
-  var labelInp = document.getElementById('sdCfLabel');
-  var valInp = document.getElementById('sdCfValue');
-  var label = labelInp.value.trim();
-  var value = valInp.value.trim();
-  if(!label){ toast('항목 이름을 먼저 적어주세요'); return; }
-  mutateStockItem(_sdCurName, function(base){
-    var list = (base.customFields||[]).slice();
-    list.push({label:label, value:value});
-    base.customFields = list;
-    var log = (base.thesisLog||[]).slice();
-    log.push({date: todayStr(), text: '항목 추가: '+label+(value?(' = '+value):''), auto:true});
-    base.thesisLog = log;
-  });
-  labelInp.value=''; valInp.value='';
-  setTimeout(function(){ openStockDetail(_sdCurName); }, 300);
-});
-document.getElementById('sdThesisAddBtn').addEventListener('click', function(){
-  if(!_sdCurName) return;
-  var inp = document.getElementById('sdThesisInput');
-  var v = inp.value.trim();
-  if(!v) return;
-  appendThesisLog(_sdCurName, v, false);
-  inp.value = '';
-  setTimeout(function(){ openStockDetail(_sdCurName); }, 300);
-});
-
-/* ══════════════════════════════════════════════════════════
    전역 오류 — 조용히 삼키지 않는다
    ══════════════════════════════════════════════════════════ */
 window.onerror = function(msg, src, line){ logBug('오류: '+msg+' ('+line+'줄)'); };
@@ -2666,46 +1387,9 @@ window.addEventListener('unhandledrejection', function(e){ logBug('처리안된 
 makeDraggable(document.querySelector('#recModal .modal'));
 makeDraggable(document.querySelector('#pageModal .modal'));
 makeDraggable(document.querySelector('#stockModal .modal'));
-makeDraggable(document.querySelector('#tmplModal .modal'));
-makeDraggable(document.querySelector('#dayModal .modal'));
-makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.11-0910-1846 준비됨 — records / records_todos / records_meta 컬렉션 사용');
-render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
-
-/* ══════════════════════════════════════════════════════════
-   v7.1: 다른 앱(뉴스레이더 등)에서 "?import=news&title=..." 형태로 넘어온 자료를
-   + 기록 추가 모달에 미리 채워서 열어줌. 절대 자동 저장하지 않음 — 반드시 눈으로 확인하고
-   직접 [저장]을 눌러야 실제로 들어감(잘못된 자료가 조용히 쌓이는 것 방지)
-   ══════════════════════════════════════════════════════════ */
-function handleImportParams(){
-  var qs = new URLSearchParams(location.search);
-  if(qs.get('import') !== 'news') return;
-  var title = qs.get('title') || '';
-  var channel = qs.get('channel') || '';
-  var link = qs.get('link') || '';
-  var oneLiner = qs.get('oneLiner') || '';
-  var body = qs.get('body') || '';
-  var date = qs.get('date') || '';
-  var kw = (qs.get('kw') || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
-
-  openAdd();
-  renderKindPick('news');
-  applyKindFields('news');
-  document.getElementById('fTitle').value = title;
-  document.getElementById('fChannel').value = channel;
-  document.getElementById('fLink').value = link;
-  document.getElementById('fOneLiner').value = oneLiner || title;
-  document.getElementById('fBody').value = body;
-  if(date) document.getElementById('fDate').value = date;
-  /* 키워드가 이미 등록된 종목명과 정확히 같을 때만 자동 태그(추측 태그로 잘못 붙는 것 방지) */
-  var known = allStockNames();
-  kw.forEach(function(k){ if(known.indexOf(k)>=0 && pickedStocks.indexOf(k)<0) pickedStocks.push(k); });
-  renderStockTags();
-  toast('뉴스레이더에서 가져왔어요 — 확인하고 저장해 주세요');
-  history.replaceState(null, '', location.pathname); // 새로고침해도 다시 안 열리게 주소 정리
-}
-setTimeout(handleImportParams, 800); // records/stockMaster 첫 로딩(비동기) 이후에 종목 자동태그가 정확해지도록 약간 대기
+console.log('[기록보관실] v4-0909-2136 준비됨 — records / records_todos / records_meta 컬렉션 사용');
+render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist();
 </script>
 </body>
 </html>
