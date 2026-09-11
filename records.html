@@ -10,7 +10,7 @@
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 /* ══════════════════════════════════════════════════════════
-   🗂 투자 기록보관실  v7.22-0911-1053
+   🗂 투자 기록보관실  v7.23-0911-1143
    업무일지(worklog)와 한눈에 구분되도록 네이비×골드 테마로 짰다.
    업무일지의 8뷰 엔진(카드·표·보드·달력)을 새 창고(records)에
    맞게 다시 짠 것 — worklog_entries 와는 완전히 분리된 컬렉션.
@@ -61,10 +61,10 @@
    직전 보기로 돌아감(v7.7의 보기아이콘 줄 버튼은 제거)
    ══════════════════════════════════════════════════════════ */
 :root{
-  --navy-900:#332d20; --navy-800:#41392a; --navy-700:#524731; --navy-600:#6e5f40;
-  --gold:#c9a227; --gold-dk:#9c7c17; --gold-lt:#f6ecd0;
-  --bg:#f8f6ef; --card:#fff; --line:#e7e0cf; --line2:#efe9db;
-  --txt:#1b2430; --sub:#767162; --sub2:#9a9484;
+  --navy-900:#514936; --navy-800:#5c5340; --navy-700:#6b6049; --navy-600:#8a7d5e;
+  --gold:#d4ad32; --gold-dk:#b59022; --gold-lt:#f8efd0; --gold-soft:#fff8e5; --champagne:#f4ead0;
+  --bg:#fbfaf5; --card:#fff; --line:#ebe4d3; --line2:#f1ecdf;
+  --txt:#2f2f2c; --sub:#77736a; --sub2:#a49c88;
   --k-youtube:#2c5f8a; --k-news:#0f766e; --k-idea:#9c7c17; --k-chart:#8a3a3a; --k-memo:#64748b;
   --good:#2f7d5c; --warn:#b23b3b;
 }
@@ -76,17 +76,17 @@ a{color:inherit}
 ::selection{background:var(--gold-lt)}
 
 /* ── 헤더 ── */
-.topbar{background:linear-gradient(135deg,#3b3426,#5b4f36);color:#fff;padding:12px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 2px 10px rgba(11,29,51,.18)}
+.topbar{background:linear-gradient(90deg,#fffaf0,#f5e8bf);color:#3c3527;padding:11px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid #e5d7af}
 .topbar h1{font-family:'Gowun Batang',serif;font-size:21px;font-weight:700;letter-spacing:.3px;display:flex;align-items:center;gap:8px}
-.topbar .ver{font-size:11px;color:#d8cdae;font-weight:600}
+.topbar .ver{font-size:11px;color:#9a8a5c;font-weight:600}
 .topbar .sp{flex:1}
-.topbar .search{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:8px 14px;font-size:13px;color:#dfe6ee;min-width:240px}
-.topbar .search input{background:transparent;border:0;outline:0;color:#fff;font-size:13px;width:100%}
-.topbar .search input::placeholder{color:#a9b6c6}
-.topbar .navbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:9px;padding:8px 13px;font-size:12.5px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
-.topbar .navbtn:hover{background:rgba(255,255,255,.16)}
-.topbar .navbtn.gold{background:var(--gold);color:var(--navy-900);border-color:var(--gold)}
-.topbar .stat{font-size:11.5px;color:#c7d0dc}
+.topbar .search{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.65);border:1px solid #e0d3a6;border-radius:10px;padding:7px 14px;font-size:13px;color:#6b6049;min-width:240px}
+.topbar .search input{background:transparent;border:0;outline:0;color:#3c3527;font-size:13px;width:100%}
+.topbar .search input::placeholder{color:#a89a6e}
+.topbar .navbtn{background:#fffdf8;border:1px solid #e5d7af;color:#5c5340;border-radius:9px;padding:7px 13px;font-size:12.5px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.topbar .navbtn:hover{background:#f8efd0}
+.topbar .navbtn.gold{background:var(--gold);color:#3c3527;border-color:var(--gold)}
+.topbar .stat{font-size:11.5px;color:#8a7d5e}
 
 .wrap{max-width:1920px;margin:0 auto;padding:16px 22px 70px}
 
@@ -142,7 +142,7 @@ a{color:inherit}
 /* ── kind 탭 ── */
 .ktab{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 15px;font-size:13.5px;font-weight:700;color:#5b5646;display:flex;align-items:center;gap:7px;cursor:pointer}
 .ktab .n{font-weight:800;color:var(--sub2)}
-.ktab.on{background:var(--gold);color:#2b2b2b;border-color:var(--gold)}
+.ktab.on{background:#f2df9c;color:#463c24;border-color:#d7b442}
 .ktab.on .n{color:#6b5a1e}
 
 /* ── v7.2: kind탭 · 보기아이콘 · 개수 · 버튼 · 종목/상태 칩을 하나의 흐르는 줄로 통합 ──
@@ -157,7 +157,7 @@ a{color:inherit}
 .vicon{width:36px;height:31px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14.5px;color:var(--sub);border:0;background:none;cursor:pointer}
 .vicon.on{background:#fff;color:var(--navy-700);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .fchip{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12.5px;color:#555;background:#fff;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
-.fchip.on{background:var(--gold);color:#2b2b2b;border-color:var(--gold)}
+.fchip.on{background:#f2df9c;color:#463c24;border-color:#d7b442}
 .fchip.moreBtn{background:#f7f6f0;color:var(--sub);border-style:dashed}
 /* v7.2: 종목 필터칩 안의 ⓘ — 누르면 정보 누적(종목 상세) 모달이 열림. 칩 클릭(필터링)과 안 섞이게
    클릭 시 stopPropagation 처리(JS 쪽) */
@@ -253,9 +253,12 @@ a{color:inherit}
 
 /* ── 표보기 ── */
 table.rt{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-table.rt th{text-align:left;font-size:11.5px;color:var(--sub);font-weight:800;padding:10px 12px;background:#f4f2ea;border-bottom:1px solid var(--line)}
+table.rt th{text-align:left;font-size:11.5px;color:#8a6f22;font-weight:800;padding:9px 12px;background:#faf4df;border-bottom:1px solid #e6d6a8}
 table.rt td{padding:9px 12px;font-size:13px;border-bottom:1px solid #f2f0e7;vertical-align:top;cursor:pointer}
-table.rt tr:hover td{background:#fbfaf6}
+table.rt tr:hover td{background:#fffaf0}
+.colrz{position:absolute;top:0;right:-5px;width:11px;height:100%;cursor:col-resize;user-select:none;z-index:2}
+.colrz::after{content:"";position:absolute;top:18%;right:5px;width:2px;height:64%;background:#e6d6a8;border-radius:2px}
+.colrz:hover::after{background:var(--gold);width:4px;right:4px}
 table.rt tr:last-child td{border-bottom:0}
 table.rt .k{display:inline-block;font-size:10.5px;font-weight:800;border-radius:6px;padding:2px 8px;color:#fff}
 .k.youtube{background:var(--k-youtube)} .k.news{background:var(--k-news)} .k.idea{background:var(--k-idea)} .k.chart{background:var(--k-chart)} .k.memo{background:var(--k-memo)}
@@ -458,7 +461,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1>
-  <span class="ver">v7.22-0911-1053 · 서희타워</span>
+  <span class="ver">v7.23-0911-1143 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -1764,14 +1767,14 @@ function cardOne(r){
 }
 
 /* ── 표보기 ── */
-var TBL_COLS=[['date','날짜',80],['title','제목 / 출처',220],['core','핵심 내용',220],['stock','종목',90],['topic','주제',90],['star','⭐',60],['verify','검증',85],['judge','판단',190]];
-var TBL_MIN={date:64,title:150,core:140,stock:70,topic:70,star:48,verify:66,judge:120};
+var TBL_COLS=[['date','날짜',92],['title','제목 / 출처',260],['core','핵심 내용',260],['judge','판단',220],['stock','종목',96],['topic','주제',96],['star','⭐',72],['verify','검증',100]];
+var TBL_MIN={date:85,title:220,core:220,judge:200,stock:90,topic:90,star:70,verify:95};
 function tblWidths(){ try{ return JSON.parse(localStorage.getItem('records_table_widths')||'{}'); }catch(e){ return {}; } }
 function tableHTML(arr){
   function stack(list){ var a=(list||[]).slice(0,2), extra=(list||[]).length-2; return a.map(esc).join('<br>')+(extra>0?('<br><span style="color:var(--sub2)">+'+extra+'</span>'):''); }
   var W=tblWidths();
   var colg='<colgroup>'+TBL_COLS.map(function(c){ return '<col data-c="'+c[0]+'" style="width:'+(W[c[0]]||c[2])+'px">'; }).join('')+'</colgroup>';
-  var head='<tr>'+TBL_COLS.map(function(c){ return '<th style="position:relative">'+c[1]+'<span class="colrz" data-c="'+c[0]+'" style="position:absolute;top:0;right:-1px;width:7px;height:100%;cursor:col-resize;user-select:none"></span></th>'; }).join('')+'</tr>';
+  var head='<tr>'+TBL_COLS.map(function(c){ return '<th style="position:relative">'+c[1]+'<span class="colrz" data-c="'+c[0]+'"></span></th>'; }).join('')+'</tr>';
   var rows = arr.map(function(r){
     var k = KINDS[r.kind] || KINDS.memo;
     var core = r.oneLiner || (r.body ? String(r.body).replace(/\s+/g,' ').trim().slice(0,90) : '');
@@ -1782,15 +1785,16 @@ function tableHTML(arr){
       + '<td style="white-space:nowrap;color:var(--sub2);font-size:11.5px">'+esc(r.date||'')+'</td>'
       + '<td><span style="color:'+k.c+'">'+k.i+'</span> <b>'+esc(r.title||'')+'</b>'+(r.channel?('<br><span style="color:var(--sub2);font-size:11px">'+esc(r.channel)+'</span>'):'')+'</td>'
       + '<td style="font-size:12px;color:#555"><div style="'+clamp+'">'+esc(core)+'</div></td>'
+      + '<td style="font-size:11.5px;color:#444"><div style="'+clamp+'">'+judge+'</div></td>'
       + '<td style="font-size:11px">'+stack(r.stocks||[])+'</td>'
       + '<td style="font-size:11px;color:#7a5a12">'+((r.topics||[]).length?stack((r.topics||[]).map(function(x){return '#'+x;})):'')+'</td>'
       + '<td style="white-space:nowrap;color:var(--gold-dk);font-size:11px;text-align:center">'+(r.star?('★'.repeat(r.star)):'—')+'</td>'
       + '<td style="font-size:10.5px">'+(vs?('<span class="vbadge" style="background:'+vs.c+'">'+vs.n+'</span>'):'')+'</td>'
-      + '<td style="font-size:11.5px;color:#444"><div style="'+clamp+'">'+judge+'</div></td>'
       + '</tr>';
   }).join('');
-  return '<div style="overflow-x:auto"><table class="rt" style="table-layout:fixed">'+colg+head+rows+'</table></div>';
+  return '<div style="text-align:right;margin-bottom:4px"><button type="button" id="tblWreset" style="font-size:10.5px;border:1px solid var(--line);background:#fffdf8;color:var(--sub);border-radius:6px;padding:2px 8px;cursor:pointer">⚙ 열 너비 초기화</button></div><div style="overflow-x:auto"><table class="rt" style="table-layout:fixed">'+colg+head+rows+'</table></div>';
 }
+if(!window._tblWResetInit){ window._tblWResetInit=1; document.addEventListener('click', function(e){ if(e.target && e.target.id==='tblWreset'){ try{ localStorage.removeItem('records_table_widths'); }catch(_){} render(); } }); }
 if(!window._tblResizeInit){ window._tblResizeInit=1;
   document.addEventListener('mousedown', function(e){
     var h=e.target.closest?e.target.closest('.colrz'):null; if(!h) return;
@@ -2893,7 +2897,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.22-0911-1053 준비됨 — records / records_todos / records_meta 컬렉션 사용');
+console.log('[기록보관실] v7.23-0911-1143 준비됨 — records / records_todos / records_meta 컬렉션 사용');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
