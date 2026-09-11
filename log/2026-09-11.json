@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-09-11",
-  "generated_at": "2026-09-11T12:43:25+09:00",
+  "generated_at": "2026-09-11T17:45:03+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 64.2%(-10.40%p) · 유가 WTI 103.21 $(+3.5%) · VIX 17.84 pt(+2.8%)"
+      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 64.2%(-10.40%p) · VIX 17.54 pt(+1.1%) · KOSDAQ 836.92 pt(+0.8%)"
     },
     {
       "k": "오늘 발표",
@@ -18,7 +18,7 @@
     },
     {
       "k": "산업·종목",
-      "t": "DART 34건(수주·공급계약 4) · 토론실 근거글 +0(적중 6) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
+      "t": "DART 33건(수주·공급계약 4) · 토론실 근거글 +0(적중 6) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
     },
     {
       "k": "미입력",
@@ -37,7 +37,7 @@
       "key": "credit_spread",
       "label": "신용 스프레드",
       "value": "0.67%p",
-      "sub": "주의 · 2026-09-10",
+      "sub": "주의 · 2026-09-11",
       "tone": "yellow"
     },
     {
@@ -85,60 +85,18 @@
       "group": "kr"
     },
     {
-      "id": "wti",
-      "name": "유가 WTI",
-      "value": 103.21,
-      "unit": "$",
-      "prev": 99.72,
-      "delta": 3.49,
-      "delta_text": "+3.5%",
-      "judge": "",
-      "as_of": "2026-09-11",
-      "cycle": "D",
-      "score": 3.4997994384275923,
-      "group": "world"
-    },
-    {
       "id": "vix",
       "name": "VIX",
-      "value": 17.84,
+      "value": 17.54,
       "unit": "pt",
       "prev": 17.35,
-      "delta": 0.49,
-      "delta_text": "+2.8%",
+      "delta": 0.19,
+      "delta_text": "+1.1%",
       "judge": "중립",
       "as_of": "2026-09-11",
       "cycle": "D",
-      "score": 2.82420749279538,
+      "score": 1.095100864553301,
       "group": "us"
-    },
-    {
-      "id": "gold",
-      "name": "금",
-      "value": 4348.9,
-      "unit": "$/oz",
-      "prev": 4398.1,
-      "delta": -49.2,
-      "delta_text": "-1.1%",
-      "judge": "",
-      "as_of": "2026-09-11",
-      "cycle": "D",
-      "score": 1.118664878015523,
-      "group": "world"
-    },
-    {
-      "id": "hsi",
-      "name": "항셍지수",
-      "value": 24695.39,
-      "unit": "pt",
-      "prev": 24954.47,
-      "delta": -259.08,
-      "delta_text": "-1.0%",
-      "judge": "약",
-      "as_of": "2026-09-11",
-      "cycle": "D",
-      "score": 1.0382107894898258,
-      "group": "world"
     },
     {
       "id": "kosdaq",
@@ -167,6 +125,48 @@
       "cycle": "D",
       "score": 0.7606135869190581,
       "group": "us"
+    },
+    {
+      "id": "hsi",
+      "name": "항셍지수",
+      "value": 24805.63,
+      "unit": "pt",
+      "prev": 24954.47,
+      "delta": -148.84,
+      "delta_text": "-0.6%",
+      "judge": "약",
+      "as_of": "2026-09-11",
+      "cycle": "D",
+      "score": 0.5964462479066882,
+      "group": "world"
+    },
+    {
+      "id": "m2",
+      "name": "미 M2",
+      "value": 23218.0,
+      "unit": "십억$",
+      "prev": 23115.2,
+      "delta": 102.8,
+      "delta_text": "+0.4%",
+      "judge": "",
+      "as_of": "2026-07-01",
+      "cycle": "M",
+      "score": 0.4447290094829344,
+      "group": "us"
+    },
+    {
+      "id": "kr_lead",
+      "name": "선행지수순환변동치",
+      "value": 104.2,
+      "unit": "pt",
+      "prev": 103.8,
+      "delta": 0.4,
+      "delta_text": "+0.4%",
+      "judge": "",
+      "as_of": "2026-07",
+      "cycle": "M",
+      "score": 0.3853564547206221,
+      "group": "kr"
     }
   ],
   "releases": {
@@ -275,60 +275,18 @@
           "group": "kr"
         },
         {
-          "id": "wti",
-          "name": "유가 WTI",
-          "value": 103.21,
-          "unit": "$",
-          "prev": 99.72,
-          "delta": 3.49,
-          "delta_text": "+3.5%",
-          "judge": "",
-          "as_of": "2026-09-11",
-          "cycle": "D",
-          "score": 3.4997994384275923,
-          "group": "world"
-        },
-        {
           "id": "vix",
           "name": "VIX",
-          "value": 17.84,
+          "value": 17.54,
           "unit": "pt",
           "prev": 17.35,
-          "delta": 0.49,
-          "delta_text": "+2.8%",
+          "delta": 0.19,
+          "delta_text": "+1.1%",
           "judge": "중립",
           "as_of": "2026-09-11",
           "cycle": "D",
-          "score": 2.82420749279538,
+          "score": 1.095100864553301,
           "group": "us"
-        },
-        {
-          "id": "gold",
-          "name": "금",
-          "value": 4348.9,
-          "unit": "$/oz",
-          "prev": 4398.1,
-          "delta": -49.2,
-          "delta_text": "-1.1%",
-          "judge": "",
-          "as_of": "2026-09-11",
-          "cycle": "D",
-          "score": 1.118664878015523,
-          "group": "world"
-        },
-        {
-          "id": "hsi",
-          "name": "항셍지수",
-          "value": 24695.39,
-          "unit": "pt",
-          "prev": 24954.47,
-          "delta": -259.08,
-          "delta_text": "-1.0%",
-          "judge": "약",
-          "as_of": "2026-09-11",
-          "cycle": "D",
-          "score": 1.0382107894898258,
-          "group": "world"
         },
         {
           "id": "kosdaq",
@@ -357,12 +315,54 @@
           "cycle": "D",
           "score": 0.7606135869190581,
           "group": "us"
+        },
+        {
+          "id": "hsi",
+          "name": "항셍지수",
+          "value": 24805.63,
+          "unit": "pt",
+          "prev": 24954.47,
+          "delta": -148.84,
+          "delta_text": "-0.6%",
+          "judge": "약",
+          "as_of": "2026-09-11",
+          "cycle": "D",
+          "score": 0.5964462479066882,
+          "group": "world"
+        },
+        {
+          "id": "m2",
+          "name": "미 M2",
+          "value": 23218.0,
+          "unit": "십억$",
+          "prev": 23115.2,
+          "delta": 102.8,
+          "delta_text": "+0.4%",
+          "judge": "",
+          "as_of": "2026-07-01",
+          "cycle": "M",
+          "score": 0.4447290094829344,
+          "group": "us"
+        },
+        {
+          "id": "kr_lead",
+          "name": "선행지수순환변동치",
+          "value": 104.2,
+          "unit": "pt",
+          "prev": 103.8,
+          "delta": 0.4,
+          "delta_text": "+0.4%",
+          "judge": "",
+          "as_of": "2026-07",
+          "cycle": "M",
+          "score": 0.3853564547206221,
+          "group": "kr"
         }
       ]
     },
     {
       "id": "2026-09-11/auto/flow",
-      "time": "10:24",
+      "time": "17:14",
       "who": "auto",
       "kind": "flow",
       "title": "공시·토론실 — 근거글 +0, 수주·공급계약 4",
@@ -370,7 +370,7 @@
     },
     {
       "id": "2026-09-11/auto/macro",
-      "time": "12:43",
+      "time": "17:45",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 35/35 수집",
