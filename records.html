@@ -10,7 +10,7 @@
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 /* ══════════════════════════════════════════════════════════
-   🗂 투자 기록보관실  v7.23-0911-1143
+   🗂 투자 기록보관실  v7.24-0911-1216
    업무일지(worklog)와 한눈에 구분되도록 네이비×골드 테마로 짰다.
    업무일지의 8뷰 엔진(카드·표·보드·달력)을 새 창고(records)에
    맞게 다시 짠 것 — worklog_entries 와는 완전히 분리된 컬렉션.
@@ -461,7 +461,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1>
-  <span class="ver">v7.23-0911-1143 · 서희타워</span>
+  <span class="ver">v7.24-0911-1216 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -480,6 +480,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
       <span class="sp"></span>
       <span class="streak" id="streakBadge" style="display:none"></span>
       <button type="button" id="btnAddTodo" style="font-size:11.5px;border:1px solid var(--gold);background:var(--gold-lt);color:var(--gold-dk);border-radius:8px;padding:3px 9px;cursor:pointer;font-weight:700;margin-right:3px">＋ 할 일</button>
+      <button type="button" id="btnTodayFold" title="접기/펴기" style="font-size:12px;border:1px solid var(--line);background:#fff;color:var(--sub);border-radius:8px;padding:3px 9px;cursor:pointer;margin-right:3px">∨</button>
       <button type="button" class="iconbtn" id="btnTmplMgr" title="체크리스트 항목 편집">✏️</button>
       <div class="menuWrap">
         <button type="button" class="iconbtn" id="btnTodayMenu" title="더보기">⋯</button>
@@ -513,13 +514,18 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
     </div>
     <span class="cnt" id="cntLabel"></span>
     <button class="mgrbtn" id="btnClearFlt">✕ 필터해제</button>
+    <button id="btnFilter" style="background:#fffdf8;border:1px solid #e0d3a6;color:#8a6f22;border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:700;cursor:pointer">🔽 필터</button>
+    <span id="activeFilters" style="font-size:11.5px;color:var(--sub);display:inline-flex;gap:5px;align-items:center;flex-wrap:wrap"></span>
     <button class="addbtn" id="btnAdd">＋ 기록 추가</button>
+    <div id="oldPickers" style="display:none">
     <div class="stockPicker" id="stockPicker"></div>
     <div class="stockPicker" id="verifyPicker"></div>
     <div class="stockPicker" id="topicPicker"></div>
     <div class="stockPicker" id="starPicker"></div>
     <div class="stockPicker" id="channelPicker"></div>
+    </div>
   </div>
+  <div id="filterPop" style="display:none;position:absolute;z-index:200;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 28px rgba(60,50,20,.15);padding:9px;min-width:190px;max-height:340px;overflow:auto"></div>
 
   <div id="content"></div>
 
@@ -1022,7 +1028,7 @@ var DUE_SHOW=3, TODO_SHOW=4, dueExpanded=false, todoExpanded=false; // v7.16: �
 var hideDone = (function(){ try{ return localStorage.getItem('rec_hide_done')!=='0'; }catch(e){ return true; } })(); // v7.18 완료 숨김(기본 ON)
 var REL_SRC=''; var REL_TYPE_LBL={supports:'뒷받침',contradicts:'반박/상충',same_event:'같은 사건',same_topic:'같은 주제',related:'관련'};
 var todayExpanded=false, TODAY_SHOW=5; // v7.19 오늘 할 일 통합 목록
-var curStar='', curChannel=''; // v7.20~21 별표·출처 필터(기존 데이터만 사용)
+var curStar='', curChannel='', curDateRange=''; // v7.20~24 별표·출처·날짜 필터(기존 데이터만)
 var calYM = todayStr().slice(0,7);
 var EDIT = null; // 지금 수정 중인 기록 id (null이면 새로 추가)
 var pickedStocks = []; // 모달 안에서 고르는 중인 종목들
@@ -1033,7 +1039,7 @@ function startListeners(){
   if(!db) return;
   db.collection('records').orderBy('date','desc').onSnapshot(function(snap){
     records = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
-    render(); renderTodos(); renderKtabs(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker(); renderTopicChips(); renderStarPicker(); renderChannelSel(); renderMiniSummary();
+    render(); renderTodos(); renderKtabs(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker(); renderTopicChips(); renderStarPicker(); renderChannelSel(); renderMiniSummary(); renderActiveFilters();
   }, function(e){ logBug('records 구독 실패: '+e.message); });
 
   db.collection('records_todos').where('date','>=', histCutoffStr()).orderBy('date').onSnapshot(function(snap){
@@ -1218,6 +1224,7 @@ function renderTodos(){
 }
 document.getElementById('todoAddBtn').addEventListener('click', addTodo);
 (function(){ var b=document.getElementById('btnAddTodo'); if(b) b.addEventListener('click', function(){ var w=document.getElementById('todoAddWrap'); if(!w) return; var show=w.style.display==='none'; w.style.display=show?'':'none'; if(show){ var i=document.getElementById('todoInput'); if(i) i.focus(); } }); })();
+(function(){ var b=document.getElementById('btnTodayFold'); if(b) b.addEventListener('click', function(){ var l=document.getElementById('todoList'); if(!l) return; var hide=l.style.display!=='none'; l.style.display=hide?'none':''; b.textContent=hide?'∧':'∨'; }); })();
 document.getElementById('todoInput').addEventListener('keydown', function(e){ if(e.key==='Enter') addTodo(); });
 function addTodo(){
   var inp = document.getElementById('todoInput');
@@ -1590,6 +1597,47 @@ function renderChannelSel(){
   host.innerHTML='<select id="channelSel" style="padding:5px 10px;border:1px solid '+(curChannel?'var(--navy-700)':'var(--line)')+';border-radius:999px;font-size:12px;color:'+(curChannel?'var(--navy-700)':'#555')+';font-weight:'+(curChannel?'700':'400')+';background:#fff;cursor:pointer"><option value="">📡 출처 전체</option>'+list.map(function(c){ return '<option value="'+esc(c)+'"'+(curChannel===c?' selected':'')+'>'+esc(c)+' ('+chs[c]+')</option>'; }).join('')+'</select>';
   var sel=document.getElementById('channelSel'); if(sel) sel.addEventListener('change', function(){ curChannel=sel.value; render(); renderChannelSel(); });
 }
+var FKLABEL={stock:'종목',topic:'주제',star:'별점',verify:'검증',channel:'출처',date:'날짜'};
+function _uniqVals(field){ var m={}; records.forEach(function(r){ if(field==='stocks'||field==='topics'){ (r[field]||[]).forEach(function(x){ if(x) m[x]=(m[x]||0)+1; }); } else if(r[field]){ m[r[field]]=(m[r[field]]||0)+1; } }); return Object.keys(m).sort(function(a,b){ return m[b]-m[a]; }); }
+function filterOptions(kind){
+  var o=[];
+  if(kind==='star'){ [['','전체'],['5','★5'],['4','4★ 이상'],['3','3★ 이상'],['none','미평가']].forEach(function(x){ o.push({label:x[1],on:curStar===x[0],apply:function(){curStar=x[0];}}); }); }
+  else if(kind==='date'){ [['','전체'],['today','오늘'],['7','최근 7일'],['30','최근 30일']].forEach(function(x){ o.push({label:x[1],on:curDateRange===x[0],apply:function(){curDateRange=x[0];}}); }); }
+  else if(kind==='verify'){ o.push({label:'전체',on:!curVerify,apply:function(){curVerify='';}}); VERIFY_ORDER.forEach(function(k){ if(records.some(function(r){return r.verifyState===k;})) o.push({label:VERIFY_STATES[k].n,on:curVerify===k,apply:function(){curVerify=k;}}); }); }
+  else if(kind==='channel'){ o.push({label:'전체',on:!curChannel,apply:function(){curChannel='';}}); _uniqVals('channel').forEach(function(c){ o.push({label:c,on:curChannel===c,apply:function(){curChannel=c;}}); }); }
+  else if(kind==='stock'){ o.push({label:'전체',on:!curStock,apply:function(){curStock='';}}); _uniqVals('stocks').forEach(function(c){ o.push({label:c,on:curStock===c,apply:function(){curStock=c;}}); }); }
+  else if(kind==='topic'){ o.push({label:'전체',on:!curTopic,apply:function(){curTopic='';}}); _uniqVals('topics').forEach(function(c){ o.push({label:c,on:curTopic&&curTopic.toLowerCase()===String(c).toLowerCase(),apply:function(){curTopic=c;}}); }); }
+  return o;
+}
+function openFilterPop(kind, anchor){
+  var pop=document.getElementById('filterPop'); if(!pop) return; pop._mode='opts';
+  var opts=filterOptions(kind), searchable=(kind==='stock'||kind==='topic'||kind==='channel');
+  pop.innerHTML='<div style="font-size:11px;font-weight:800;color:var(--gold-dk);margin-bottom:5px">'+FKLABEL[kind]+'</div>'
+    +(searchable?'<input id="fpSearch" placeholder="검색..." style="width:100%;padding:4px 7px;border:1px solid var(--line);border-radius:6px;font-size:12px;margin-bottom:5px;box-sizing:border-box">':'')
+    +'<div>'+opts.map(function(o,i){ return '<div class="fpItem" data-i="'+i+'" style="padding:5px 8px;font-size:12.5px;cursor:pointer;border-radius:6px;'+(o.on?'background:#f2df9c;font-weight:700':'')+'">'+esc(o.label)+'</div>'; }).join('')+'</div>';
+  pop._opts=opts;
+  var r=anchor.getBoundingClientRect();
+  pop.style.left=Math.min(r.left,window.innerWidth-215)+'px'; pop.style.top=(r.bottom+window.scrollY+5)+'px'; pop.style.display='block';
+  pop.querySelectorAll('.fpItem').forEach(function(el){ el.addEventListener('click', function(ev){ ev.stopPropagation(); pop._opts[+el.getAttribute('data-i')].apply(); pop.style.display='none'; render(); renderActiveFilters(); renderKtabs(); }); });
+  var srch=document.getElementById('fpSearch');
+  if(srch){ srch.focus(); srch.addEventListener('input', function(){ var q=srch.value.toLowerCase(); pop.querySelectorAll('.fpItem').forEach(function(el){ el.style.display=(!q||pop._opts[+el.getAttribute('data-i')].label.toLowerCase().indexOf(q)>=0)?'':'none'; }); }); }
+}
+function renderActiveFilters(){
+  var host=document.getElementById('activeFilters'); if(!host) return;
+  var act=[];
+  if(curStock) act.push([curStock,function(){curStock='';}]);
+  if(curTopic) act.push([curTopic,function(){curTopic='';}]);
+  if(curStar) act.push([curStar==='none'?'미평가':curStar+'★',function(){curStar='';}]);
+  if(curVerify) act.push([(VERIFY_STATES[curVerify]||{}).n||curVerify,function(){curVerify='';}]);
+  if(curChannel) act.push([curChannel,function(){curChannel='';}]);
+  if(curDateRange) act.push([curDateRange==='today'?'오늘':'최근'+curDateRange+'일',function(){curDateRange='';}]);
+  if(!act.length){ host.innerHTML=''; return; }
+  host._act=act;
+  host.innerHTML='<b style="color:var(--gold-dk)">필터 '+act.length+'</b>'
+    +act.slice(0,2).map(function(a,i){ return '<span class="afChip" data-i="'+i+'" style="background:#f8efd0;border:1px solid #e0d3a6;border-radius:999px;padding:2px 8px;cursor:pointer">'+esc(a[0])+' ×</span>'; }).join('')
+    +(act.length>2?'<span style="color:var(--sub2)">+'+(act.length-2)+'</span>':'');
+  host.querySelectorAll('.afChip').forEach(function(el){ el.addEventListener('click', function(){ host._act[+el.getAttribute('data-i')][1](); render(); renderActiveFilters(); renderKtabs(); }); });
+}
 function renderVerifyPicker(){
   var host = document.getElementById('verifyPicker');
   if(!host) return;
@@ -1608,9 +1656,19 @@ function renderVerifyPicker(){
   });
 }
 document.getElementById('btnClearFlt').addEventListener('click', function(){
-  curKind='전체'; curStock=''; curVerify=''; curTopic=''; curStar=''; curChannel=''; curQ=''; document.getElementById('searchBar').value='';
-  render(); renderKtabs(); renderStockPicker(); renderVerifyPicker(); renderTopicChips(); renderStarPicker(); renderChannelSel();
+  curKind='전체'; curStock=''; curVerify=''; curTopic=''; curStar=''; curChannel=''; curDateRange=''; curQ=''; document.getElementById('searchBar').value='';
+  render(); renderKtabs(); renderStockPicker(); renderVerifyPicker(); renderTopicChips(); renderStarPicker(); renderChannelSel(); renderActiveFilters();
 });
+document.getElementById('btnFilter').addEventListener('click', function(){
+  var pop=document.getElementById('filterPop'); if(!pop) return;
+  if(pop.style.display==='block' && pop._mode==='menu'){ pop.style.display='none'; return; }
+  pop._mode='menu';
+  pop.innerHTML=['stock','topic','star','verify','channel','date'].map(function(k){ return '<div class="fkItem" data-k="'+k+'" style="padding:6px 10px;font-size:12.5px;cursor:pointer;border-radius:6px">'+FKLABEL[k]+' ▸</div>'; }).join('');
+  var r=this.getBoundingClientRect(); pop.style.left=Math.min(r.left,window.innerWidth-215)+'px'; pop.style.top=(r.bottom+window.scrollY+5)+'px'; pop.style.display='block';
+  pop.querySelectorAll('.fkItem').forEach(function(el){ el.addEventListener('click', function(ev){ ev.stopPropagation(); openFilterPop(el.getAttribute('data-k'), document.getElementById('btnFilter')); }); });
+});
+document.addEventListener('click', function(e){ var t=e.target.closest?e.target.closest('.thfilt'):null; if(!t) return; e.stopPropagation(); openFilterPop(t.getAttribute('data-fk'), t); });
+document.addEventListener('click', function(e){ var pop=document.getElementById('filterPop'); if(!pop||pop.style.display!=='block') return; if(pop.contains(e.target)) return; if(e.target.closest && (e.target.closest('.thfilt')||e.target.closest('#btnFilter'))) return; pop.style.display='none'; });
 document.getElementById('searchBar').addEventListener('input', function(e){
   curQ = e.target.value.trim();
   render();
@@ -1627,6 +1685,7 @@ function filtered(){
   if(curTopic){ var _tp = curTopic.toLowerCase(); arr = arr.filter(function(r){ return (r.topics||[]).some(function(t){ return String(t).toLowerCase()===_tp; }); }); }
   if(curStar){ arr = arr.filter(function(r){ return curStar==='none' ? !((r.star||0)>0) : (r.star||0)>=(+curStar); }); }
   if(curChannel){ arr = arr.filter(function(r){ return (r.channel||'')===curChannel; }); }
+  if(curDateRange){ if(curDateRange==='today'){ var _t=todayStr(); arr=arr.filter(function(r){ return r.date===_t; }); } else { var _d=kstNow(); _d.setDate(_d.getDate()-(curDateRange==='7'?7:30)); var _lim=_d.toISOString().slice(0,10); arr=arr.filter(function(r){ return (r.date||'')>=_lim; }); } }
   if(curQ){
     var q = curQ.toLowerCase();
     arr = arr.filter(function(r){
@@ -1774,7 +1833,7 @@ function tableHTML(arr){
   function stack(list){ var a=(list||[]).slice(0,2), extra=(list||[]).length-2; return a.map(esc).join('<br>')+(extra>0?('<br><span style="color:var(--sub2)">+'+extra+'</span>'):''); }
   var W=tblWidths();
   var colg='<colgroup>'+TBL_COLS.map(function(c){ return '<col data-c="'+c[0]+'" style="width:'+(W[c[0]]||c[2])+'px">'; }).join('')+'</colgroup>';
-  var head='<tr>'+TBL_COLS.map(function(c){ return '<th style="position:relative">'+c[1]+'<span class="colrz" data-c="'+c[0]+'"></span></th>'; }).join('')+'</tr>';
+  var head='<tr>'+TBL_COLS.map(function(c){ var ff=({date:1,stock:1,topic:1,star:1,verify:1})[c[0]]?'<span class="thfilt" data-fk="'+c[0]+'" style="cursor:pointer;color:#b59022;margin-left:3px;font-size:9px">▼</span>':''; return '<th style="position:relative">'+c[1]+ff+'<span class="colrz" data-c="'+c[0]+'"></span></th>'; }).join('')+'</tr>';
   var rows = arr.map(function(r){
     var k = KINDS[r.kind] || KINDS.memo;
     var core = r.oneLiner || (r.body ? String(r.body).replace(/\s+/g,' ').trim().slice(0,90) : '');
@@ -2897,7 +2956,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.23-0911-1143 준비됨 — records / records_todos / records_meta 컬렉션 사용');
+console.log('[기록보관실] v7.24-0911-1216 준비됨 — records / records_todos / records_meta 컬렉션 사용');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
