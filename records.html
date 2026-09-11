@@ -10,7 +10,7 @@
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 /* ══════════════════════════════════════════════════════════
-   🗂 투자 기록보관실  v7.19-0911-0950
+   🗂 투자 기록보관실  v7.20-0911-1012
    업무일지(worklog)와 한눈에 구분되도록 네이비×골드 테마로 짰다.
    업무일지의 8뷰 엔진(카드·표·보드·달력)을 새 창고(records)에
    맞게 다시 짠 것 — worklog_entries 와는 완전히 분리된 컬렉션.
@@ -458,7 +458,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1>
-  <span class="ver">v7.19-0911-0950 · 서희타워</span>
+  <span class="ver">v7.20-0911-1012 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -498,14 +498,14 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
   <div class="toolbar" id="toolbar">
     <div class="ktabs" id="ktabs"></div>
     <div class="viewicons" id="viewicons">
-      <button type="button" class="vicon" data-v="card" title="카드">▦</button>
-      <button type="button" class="vicon" data-v="list" title="리스트">☰</button>
-      <button type="button" class="vicon" data-v="table" title="표">≣</button>
-      <button type="button" class="vicon" data-v="board" title="종목별 보드">▥</button>
-      <button type="button" class="vicon" data-v="ch" title="채널별">📡</button>
-      <button type="button" class="vicon" data-v="cal" title="달력">📅</button>
-      <button type="button" class="vicon" data-v="time" title="타임라인">⏱</button>
-      <button type="button" class="vicon" data-v="gal" title="갤러리">🖼</button>
+      <button type="button" class="vicon" data-v="card" title="카드 — 핵심 파악">▦</button>
+      <button type="button" class="vicon" data-v="list" title="리스트 — 빠른 탐색">☰</button>
+      <button type="button" class="vicon" data-v="table" title="표 — 비교">≣</button>
+      <button type="button" class="vicon" data-v="board" title="보드 — 종목별">▥</button>
+      <button type="button" class="vicon" data-v="ch" title="채널 — 출처 비교">📡</button>
+      <button type="button" class="vicon" data-v="cal" title="달력 — 날짜">📅</button>
+      <button type="button" class="vicon" data-v="time" title="타임라인 — 변화 흐름">⏱</button>
+      <button type="button" class="vicon" data-v="gal" title="갤러리 — 이미지">🖼</button>
     </div>
     <span class="cnt" id="cntLabel"></span>
     <button class="mgrbtn" id="btnClearFlt">✕ 필터해제</button>
@@ -1734,24 +1734,23 @@ function nextCheck(r){
 function cardOne(r){
   var k = KINDS[r.kind] || KINDS.memo;
   var stars = r.star ? ('<span class="star">'+'★'.repeat(r.star)+'</span>') : '';
+  var topics = (r.topics||[]).slice(0,2).map(function(x){ return '<span class="stag" style="background:#eef3fb;color:#456">#'+esc(x)+'</span>'; }).join('');
   var stocks = (r.stocks||[]).slice(0,3).map(function(s){ return '<span class="stag">'+esc(s)+'</span>'; }).join('');
-  var nc = nextCheck(r);
-  var re = nc ? ('<div class="re">🔔 '+esc(fmtDate(nc))+' 확인'+((r.checks||[]).length>1?(' 외 '+((r.checks.length)-1)+'건'):'')+'</div>') : '';
   var lk = r.link ? '<a class="lk" href="'+esc(r.link)+'" target="_blank" rel="noopener" data-noopen="1">🔗 열기</a>' : '';
   var sub = r.oneLiner ? '<div class="oneLine">'+esc(r.oneLiner)+'</div>' : '';
   var vs = (r.verifyState && VERIFY_STATES[r.verifyState]) ? VERIFY_STATES[r.verifyState] : null;
   var vbadge = vs ? (' <span class="vbadge" style="background:'+vs.c+'">'+vs.n+'</span>') : '';
   var scenTag = (r.scenarios && r.scenarios.commonFacts) ? ' <span class="dt" style="background:#fff;border:1px solid var(--k-idea);color:var(--k-idea)">🧭 시나리오</span>' : '';
+  var judge = r.userJudgment ? ('<div class="oneLine" style="color:var(--navy-700);font-size:11.5px">🙋 '+esc(String(r.userJudgment).slice(0,50))+'</div>') : '';
   return '<div class="rcard '+r.kind+'" data-open="'+esc(r.id)+'">'
     + '<button class="del" data-del="'+esc(r.id)+'">🗑</button>'
     + '<div class="kind">'+k.i+' '+k.n+(r.channel?(' · '+esc(r.channel)):'')+' '+stars+vbadge+'</div>'
     + '<div class="title">'+esc(r.title||'')+'</div>'
     + sub
-    + '<div class="stocks">'+stocks+'</div>'
+    + judge
+    + '<div class="stocks">'+topics+stocks+'</div>'
     + '<span class="dt">📅 '+fmtDate(r.date)+'</span>'
-    + (r.action ? ' <span class="dt" style="background:var(--navy-800);color:#fff">🎯 '+esc(r.action)+'</span>' : '')
-    + scenTag
-    + re + lk
+    + scenTag + lk
     + '</div>';
 }
 
@@ -1759,18 +1758,20 @@ function cardOne(r){
 function tableHTML(arr){
   var rows = arr.map(function(r){
     var k = KINDS[r.kind] || KINDS.memo;
-    var stocks = (r.stocks||[]).map(function(s){ return '<span class="stag2">'+esc(s)+'</span>'; }).join('');
-    var nc = nextCheck(r);
+    var core = r.oneLiner || (r.body ? String(r.body).replace(/\s+/g,' ').trim().slice(0,70) : '');
+    var tt = (r.topics||[]).slice(0,3).map(function(x){ return '<span class="stag" style="background:#eef3fb;color:#456">#'+esc(x)+'</span>'; }).join('');
+    var ss = (r.stocks||[]).slice(0,3).map(function(x){ return '<span class="stag2">'+esc(x)+'</span>'; }).join('');
+    var judge = r.userJudgment ? ('🙋 '+esc(String(r.userJudgment).slice(0,70))) : (r.aiInterpretation ? ('🤖 '+esc(String(r.aiInterpretation).slice(0,70))) : '');
+    var vs = (r.verifyState && VERIFY_STATES[r.verifyState]) ? VERIFY_STATES[r.verifyState] : null;
     return '<tr data-open="'+esc(r.id)+'">'
-      + '<td>'+esc(r.date||'')+'</td>'
-      + '<td><span class="k '+r.kind+'">'+k.n+'</span></td>'
-      + '<td>'+stocks+'</td>'
-      + '<td>'+esc(r.title||'')+(r.oneLiner?('<br><span style="color:var(--sub2);font-size:11.5px">'+esc(r.oneLiner)+'</span>'):'')+'</td>'
-      + '<td>'+esc(r.channel||'')+'</td>'
-      + '<td>'+(nc? '<span class="re2">🔔 '+esc(nc)+'</span>' : '-')+'</td>'
+      + '<td style="white-space:nowrap;color:var(--sub2);font-size:12px">'+esc(r.date||'')+'</td>'
+      + '<td><span style="color:'+k.c+'">'+k.i+'</span> <b>'+esc(r.title||'')+'</b>'+(r.star?(' <span style="color:var(--gold-dk)">'+'★'.repeat(r.star)+'</span>'):'')+(r.channel?('<br><span style="color:var(--sub2);font-size:11px">'+esc(r.channel)+'</span>'):'')+'</td>'
+      + '<td style="font-size:12px;color:#555;max-width:300px">'+esc(core)+'</td>'
+      + '<td style="font-size:11px">'+tt+(tt&&ss?'<br>':'')+ss+'</td>'
+      + '<td style="font-size:11.5px;color:#444;max-width:240px">'+judge+(vs?(' <span class="vbadge" style="background:'+vs.c+'">'+vs.n+'</span>'):'')+'</td>'
       + '</tr>';
   }).join('');
-  return '<div style="overflow-x:auto"><table class="rt"><tr><th>날짜</th><th>종류</th><th>종목</th><th>제목</th><th>채널/출처</th><th>다음 확인일</th></tr>'+rows+'</table></div>';
+  return '<div style="overflow-x:auto"><table class="rt"><tr><th>날짜</th><th>제목 / 출처</th><th>핵심 내용</th><th>주제 · 종목</th><th>판단</th></tr>'+rows+'</table></div>';
 }
 
 /* ── 보드(종목별)보기 ── */
@@ -1785,7 +1786,10 @@ function boardHTML(arr){
   });
   order.sort(function(a,b){ if(a==='미분류') return 1; if(b==='미분류') return -1; return cols[b].length-cols[a].length; });
   return '<div class="board">' + order.map(function(s){
+    var recent = cols[s].map(function(r){return r.date||'';}).filter(Boolean).sort().pop()||'';
+    var maxStar = cols[s].reduce(function(m,r){ return Math.max(m, r.star||0); },0);
     return '<div class="bcol"><div class="bhd"><b>'+esc(s)+'</b><span class="n">'+cols[s].length+'</span></div>'
+      + '<div style="font-size:10.5px;color:var(--sub2);padding:0 2px 6px">'+(recent?('최근 '+fmtDate(recent)):'')+(maxStar?(' · 최고 '+'★'.repeat(maxStar)):'')+'</div>'
       + cols[s].map(function(r){
           var k = KINDS[r.kind] || KINDS.memo;
           var nc = nextCheck(r);
@@ -1997,7 +2001,7 @@ function calHTML(arr){
     h += '<div class="cell'+(isT?' today':'')+'"><span class="num">'+d+'</span>'
       + list.slice(0,3).map(function(r){
           var k = KINDS[r.kind] || KINDS.memo;
-          return '<span class="evt" style="background:'+k.c+'" data-open="'+esc(r.id)+'">'+esc(r.title||'')+'</span>';
+          return '<span class="evt" style="background:'+k.c+'" data-open="'+esc(r.id)+'">'+((r.star||0)>=4?'⭐':'')+esc(r.title||'')+'</span>';
         }).join('')
       + (list.length>3 ? '<span style="font-size:10px;color:var(--sub2)">+'+(list.length-3)+'건 더</span>' : '')
       + chks.slice(0,2).map(function(x){
@@ -2053,19 +2057,23 @@ document.getElementById('dayModalClose').addEventListener('click', function(){
 
 /* ── 리스트(줄)보기 — 한 줄에 압축해서 훑어보기 ── */
 function listHTML(arr){
-  return '<div class="rlist">' + arr.map(function(r){
-    var k = KINDS[r.kind] || KINDS.memo;
-    var stocks = (r.stocks||[]).slice(0,2).map(function(s){ return '<span class="stag">'+esc(s)+'</span>'; }).join('');
-    var nc = nextCheck(r);
-    return '<div class="lrow" data-open="'+esc(r.id)+'">'
-      + '<span class="dot2" style="background:'+k.c+'"></span>'
-      + '<span class="dt3">'+fmtDate(r.date)+'</span>'
-      + '<span class="tt3">'+esc(r.title||'')+'</span>'
-      + '<span class="ol3">'+esc(r.oneLiner||'')+'</span>'
-      + '<span class="st3">'+stocks+'</span>'
-      + (nc ? '<span class="re3">🔔 '+esc(fmtDate(nc))+'</span>' : '')
+  var groups = {}, order = [];
+  arr.forEach(function(r){ var d=r.date||'미정'; if(!groups[d]){ groups[d]=[]; order.push(d); } groups[d].push(r); });
+  var t = todayStr();
+  var y = kstNow(); y.setDate(y.getDate()-1); var yStr = y.toISOString().slice(0,10);
+  return order.map(function(d){
+    var label = d===t?('오늘 '+d):(d===yStr?('어제 '+d):d);
+    return '<div class="day"><h2>'+esc(label)+'</h2><span>'+groups[d].length+'건</span></div>'
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:2px 12px;margin-bottom:12px">'
+      + groups[d].map(function(r){
+          var k = KINDS[r.kind] || KINDS.memo;
+          return '<div data-open="'+esc(r.id)+'" style="padding:5px 8px;border-bottom:1px solid var(--line);cursor:pointer;min-width:0">'
+            + '<span style="color:'+k.c+'">'+k.i+'</span> <b style="font-size:13px">'+esc(r.title||'')+'</b>'
+            + (r.oneLiner?('<div style="font-size:11px;color:var(--sub2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.oneLiner)+'</div>'):'')
+            + '</div>';
+        }).join('')
       + '</div>';
-  }).join('') + '</div>';
+  }).join('');
 }
 
 /* ── 채널별보기 (보드와 같은 틀, 그룹 기준만 채널/출처) ── */
@@ -2077,15 +2085,20 @@ function chHTML(arr){
     cols[s].push(r);
   });
   order.sort(function(a,b){ if(a==='미상') return 1; if(b==='미상') return -1; return cols[b].length-cols[a].length; });
+  function topOf(recs, field){ var m={}; recs.forEach(function(r){ (r[field]||[]).forEach(function(v){ if(v) m[v]=(m[v]||0)+1; }); }); return Object.keys(m).sort(function(a,b){ return m[b]-m[a]; }).slice(0,3); }
   return '<div class="board">' + order.map(function(s){
-    return '<div class="bcol"><div class="bhd"><b>'+esc(s)+'</b><span class="n">'+cols[s].length+'</span></div>'
-      + cols[s].map(function(r){
+    var recs = cols[s], tps = topOf(recs,'topics'), sts = topOf(recs,'stocks');
+    return '<div class="bcol"><div class="bhd"><b>'+esc(s)+'</b><span class="n">'+recs.length+'</span></div>'
+      + '<div style="font-size:11px;color:var(--sub2);padding:0 2px 6px;line-height:1.6">'
+        + (tps.length?('주제: '+tps.map(esc).join(' · ')+'<br>'):'')
+        + (sts.length?('종목: '+sts.map(esc).join(' · ')):'')
+      + '</div>'
+      + recs.map(function(r){
           var k = KINDS[r.kind] || KINDS.memo;
-          var nc = nextCheck(r);
           return '<div class="chcard" data-open="'+esc(r.id)+'">'
             + '<div class="kk" style="color:'+k.c+'">'+k.i+' '+k.n+'</div>'
             + '<div class="tt">'+esc(r.title||'')+'</div>'
-            + '<div class="dd">'+fmtDate(r.date)+(nc?(' · 🔔'+fmtDate(nc)):'')+'</div>'
+            + '<div class="dd">'+fmtDate(r.date)+'</div>'
             + '</div>';
         }).join('')
       + '</div>';
@@ -2096,12 +2109,13 @@ function chHTML(arr){
 function timeHTML(arr){
   return '<div class="tl">' + arr.map(function(r){
     var k = KINDS[r.kind] || KINDS.memo;
-    var nc = nextCheck(r);
     var stocks = (r.stocks||[]).slice(0,4).map(function(s){ return '<span class="stag">'+esc(s)+'</span>'; }).join('');
+    var judge = r.userJudgment ? ('<div style="font-size:12px;color:var(--navy-700);margin-top:5px">🙋 '+esc(r.userJudgment)+'</div>') : (r.aiInterpretation ? ('<div style="font-size:12px;color:var(--sub);margin-top:5px">🤖 '+esc(r.aiInterpretation)+'</div>') : '');
     return '<div class="tlItem" data-open="'+esc(r.id)+'">'
-      + '<div class="tlHd">'+fmtDate(r.date)+' · '+k.i+' '+k.n+(r.channel?(' · '+esc(r.channel)):'')+(nc?(' · 🔔 '+esc(fmtDate(nc))+' 확인예정'):'')+'</div>'
+      + '<div class="tlHd">'+fmtDate(r.date)+' · '+k.i+' '+k.n+(r.channel?(' · '+esc(r.channel)):'')+'</div>'
       + '<div class="tlTitle">'+esc(r.title||'')+'</div>'
       + (r.oneLiner ? '<div class="tlSub">'+esc(r.oneLiner)+'</div>' : '')
+      + judge
       + (stocks ? '<div class="stocks" style="margin-top:6px">'+stocks+'</div>' : '')
       + '</div>';
   }).join('') + '</div>';
@@ -2848,7 +2862,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.19-0911-0950 준비됨 — records / records_todos / records_meta 컬렉션 사용');
+console.log('[기록보관실] v7.20-0911-1012 준비됨 — records / records_todos / records_meta 컬렉션 사용');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
