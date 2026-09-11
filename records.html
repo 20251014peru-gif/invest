@@ -10,7 +10,7 @@
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 /* ══════════════════════════════════════════════════════════
-   🗂 투자 기록보관실  v7.18-0911-0930
+   🗂 투자 기록보관실  v7.19-0911-0950
    업무일지(worklog)와 한눈에 구분되도록 네이비×골드 테마로 짰다.
    업무일지의 8뷰 엔진(카드·표·보드·달력)을 새 창고(records)에
    맞게 다시 짠 것 — worklog_entries 와는 완전히 분리된 컬렉션.
@@ -458,7 +458,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1>
-  <span class="ver">v7.18-0911-0930 · 서희타워</span>
+  <span class="ver">v7.19-0911-0950 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -476,7 +476,6 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
       <span class="dd" id="todayDate"></span>
       <span class="sp"></span>
       <span class="streak" id="streakBadge" style="display:none"></span>
-      <label style="font-size:11.5px;color:var(--sub);display:inline-flex;align-items:center;gap:3px;cursor:pointer;margin-right:2px"><input type="checkbox" id="hideDoneChk" style="cursor:pointer"> 완료 숨김</label>
       <button type="button" class="iconbtn" id="btnTmplMgr" title="체크리스트 항목 편집">✏️</button>
       <div class="menuWrap">
         <button type="button" class="iconbtn" id="btnTodayMenu" title="더보기">⋯</button>
@@ -485,21 +484,12 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
         </div>
       </div>
     </div>
-    <div class="cols">
-      <div class="col">
-        <div style="font-size:11px;font-weight:800;color:var(--sub);margin:0 0 4px">🔔 확인예정</div>
-        <div id="dueList"></div>
-      </div>
-      <div class="col">
-        <div style="font-size:11px;font-weight:800;color:var(--sub);margin:0 0 4px">✅ 체크리스트</div>
-        <div id="todoList"></div>
-        <div class="todoAdd">
-          <input type="text" id="todoInput" placeholder="할 일을 적고 Enter…">
-          <button id="todoAddBtn">추가</button>
-        </div>
-        <div id="todoHistoryBox" style="display:none"></div>
-      </div>
+    <div id="todoList"></div>
+    <div class="todoAdd">
+      <input type="text" id="todoInput" placeholder="할 일을 적고 Enter…">
+      <button id="todoAddBtn">추가</button>
     </div>
+    <div id="todoHistoryBox" style="display:none"></div>
   </div>
 
   <div id="miniSummary"></div>
@@ -1025,6 +1015,7 @@ var curQ = '';
 var DUE_SHOW=3, TODO_SHOW=4, dueExpanded=false, todoExpanded=false; // v7.16: 오늘 할 일 더보기/접기
 var hideDone = (function(){ try{ return localStorage.getItem('rec_hide_done')!=='0'; }catch(e){ return true; } })(); // v7.18 완료 숨김(기본 ON)
 var REL_SRC=''; var REL_TYPE_LBL={supports:'뒷받침',contradicts:'반박/상충',same_event:'같은 사건',same_topic:'같은 주제',related:'관련'};
+var todayExpanded=false, TODAY_SHOW=5; // v7.19 오늘 할 일 통합 목록
 var calYM = todayStr().slice(0,7);
 var EDIT = null; // 지금 수정 중인 기록 id (null이면 새로 추가)
 var pickedStocks = []; // 모달 안에서 고르는 중인 종목들
@@ -1035,7 +1026,7 @@ function startListeners(){
   if(!db) return;
   db.collection('records').orderBy('date','desc').onSnapshot(function(snap){
     records = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
-    render(); renderDue(); renderKtabs(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker(); renderTopicChips(); renderMiniSummary();
+    render(); renderTodos(); renderKtabs(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker(); renderTopicChips(); renderMiniSummary();
   }, function(e){ logBug('records 구독 실패: '+e.message); });
 
   db.collection('records_todos').where('date','>=', histCutoffStr()).orderBy('date').onSnapshot(function(snap){
@@ -1156,93 +1147,81 @@ function renderMiniSummary(){
   host.querySelectorAll('.msImp').forEach(function(el){ el.addEventListener('click', function(){ openPage(el.getAttribute('data-open')); }); });
   host.querySelectorAll('.msTopic').forEach(function(el){ el.addEventListener('click', function(){ curTopic=el.getAttribute('data-tp'); render(); renderTopicChips(); }); });
   host.querySelectorAll('.msVerify').forEach(function(el){ el.addEventListener('click', function(){ curVerify=el.getAttribute('data-vf'); render(); renderVerifyPicker(); }); });
-  host.querySelectorAll('.msDue').forEach(function(el){ el.addEventListener('click', function(){ dueExpanded=true; renderDue(); var c=document.querySelector('.today'); if(c) c.scrollIntoView({behavior:'smooth',block:'start'}); }); });
+  host.querySelectorAll('.msDue').forEach(function(el){ el.addEventListener('click', function(){ todayExpanded=true; renderTodos(); var c=document.querySelector('.today'); if(c) c.scrollIntoView({behavior:'smooth',block:'start'}); }); });
 }
-function renderDue(){
-  var t = todayStr();
-  var due = [];
-  records.forEach(function(r){
-    (r.checks||[]).forEach(function(c){
-      if(c.date === t) due.push({r:r, c:c});
-    });
-  });
-  var host = document.getElementById('dueList');
-  if(!due.length){ host.innerHTML = '<div class="emptyMini">오늘 확인할 예정은 없어요</div>'; return; }
-  var shown = dueExpanded ? due : due.slice(0, DUE_SHOW);
-  host.innerHTML = shown.map(function(x){
-    var k = KINDS[x.r.kind] || KINDS.memo;
-    return '<div class="checkItem">'
-      + '<span class="dot" style="background:'+k.c+'"></span>'
-      + '<span class="tt">'+esc(x.c.what||x.r.title||'')+(x.c.action?(' <span style="color:var(--sub2)">— '+esc(x.c.action)+'</span>'):'')+'</span>'
-      + '<span class="kk">'+k.i+' '+esc(x.r.title||'')+'</span>'
-      + '<button type="button" class="miniView" data-open="'+esc(x.r.id)+'" style="margin-left:auto;flex:0 0 auto;border:1px solid var(--line);background:#fff;color:var(--navy-700);border-radius:6px;padding:2px 9px;font-size:11.5px;cursor:pointer">보기</button>'
-      + '</div>';
-  }).join('')
-   + (due.length>DUE_SHOW ? '<button type="button" id="dueMore" style="display:block;width:100%;margin-top:5px;border:1px dashed var(--line);background:#f7f6f0;color:var(--sub);border-radius:6px;padding:4px;font-size:11.5px;cursor:pointer">'+(dueExpanded?'∧ 접기':'∨ '+(due.length-DUE_SHOW)+'개 더 보기')+'</button>' : '');
-  host.querySelectorAll('.miniView').forEach(function(el){
-    el.addEventListener('click', function(){ openPage(el.getAttribute('data-open')); });
-  });
-  var mb=document.getElementById('dueMore'); if(mb) mb.addEventListener('click', function(){ dueExpanded=!dueExpanded; renderDue(); });
-}
+function renderDue(){}  // v7.19: 확인예정은 renderTodos 통합 목록으로 이동
 function todayTodos(){
   var t = todayStr();
   return todos.filter(function(x){ return x.date===t; })
     .sort(function(a,b){ return (a.templateId?0:1)-(b.templateId?0:1) || (a.createdAt||0)-(b.createdAt||0); });
 }
 function renderTodos(){
-  var host = document.getElementById('todoList');
-  var list = todayTodos().slice().sort(function(a,b){ return (a.done?1:0)-(b.done?1:0); }); // v7.16: 미완료 우선
-  if(hideDone) list = list.filter(function(t){ return !t.done; }); // v7.18: 완료 숨김(데이터는 유지, 화면만)
-  if(!list.length){ host.innerHTML = '<div class="emptyMini">오늘 할 일을 적어보세요</div>'; }
-  else{
-    var shown = todoExpanded ? list : list.slice(0, TODO_SHOW);
-    host.innerHTML = shown.map(function(t){
-      /* v7.11: 반복 항목이면 그 항목에 지정된 아이콘 배지를 표시(🔁 글자 표시는 배지가 대신하므로 제거).
-         일회성으로 그때그때 적은 항목은 템플릿이 없어 배지 없이 기존 그대로(빠르게 적는 흐름 유지) */
-      var tpl = t.templateId ? checklistTemplates.find(function(x){ return x.id===t.templateId; }) : null;
-      var col = tmplColorOf(tpl);
-      var badge = tpl ? '<span class="badge2" style="background:'+col.bg+';color:'+col.fg+'">'+esc(tpl.icon||'📌')+'</span>' : '';
-      return '<div class="todoRow'+(t.done?' done':'')+'" data-id="'+esc(t.id)+'">'
-        + '<input type="checkbox"'+(t.done?' checked':'')+'>'
-        + badge
-        + '<span class="t" data-editable="1">'+esc(t.text||'')+'</span>'
-        + '<button class="x">✕</button>'
+  var host = document.getElementById('todoList'); if(!host) return;
+  var t = todayStr();
+  var items = [];
+  /* v7.19: 확인예정(record.checks 오늘) + 사용자 할 일을 하나의 목록으로. 완료는 화면에서 사라짐(데이터·이력 보존) */
+  records.forEach(function(r){
+    (r.checks||[]).forEach(function(c,i){
+      if(c.date !== t) return;
+      var key = r.id+'#'+i;
+      if(todos.some(function(x){ return x.dueKey===key && x.done; })) return; // 오늘 확인 완료 마커 있으면 숨김
+      items.push({due:1, title:(c.what||r.title||''), recId:r.id, dueKey:key});
+    });
+  });
+  todayTodos().forEach(function(td){
+    if(td.dueKey) return;   // 확인예정 완료 마커는 일반 항목으로 안 보임
+    if(td.done) return;     // 완료한 할 일은 화면에서 사라짐
+    items.push({due:0, id:td.id, title:(td.text||''), templateId:td.templateId});
+  });
+  if(!items.length){ host.innerHTML = '<div class="emptyMini">오늘 할 일이 없어요 — 아래에 적어보세요</div>'; return; }
+  var shown = todayExpanded ? items : items.slice(0, TODAY_SHOW);
+  host.innerHTML = shown.map(function(it){
+    if(it.due){
+      return '<div class="todoRow" data-due="'+esc(it.dueKey)+'" data-rec="'+esc(it.recId)+'">'
+        + '<input type="checkbox" class="dueChk">'
+        + '<span class="dueTitle" style="cursor:pointer;flex:1 1 auto" data-open="'+esc(it.recId)+'">'+esc(it.title)+'</span>'
         + '</div>';
-    }).join('')
-     + (list.length>TODO_SHOW ? '<button type="button" id="todoMore" style="display:block;width:100%;margin-top:5px;border:1px dashed var(--line);background:#f7f6f0;color:var(--sub);border-radius:6px;padding:4px;font-size:11.5px;cursor:pointer">'+(todoExpanded?'∧ 접기':'∨ '+(list.length-TODO_SHOW)+'개 더 보기')+'</button>' : '');
-  }
-  host.querySelectorAll('.todoRow').forEach(function(row){
+    }
+    var tpl = it.templateId ? checklistTemplates.find(function(x){ return x.id===it.templateId; }) : null;
+    var col = tmplColorOf(tpl);
+    var badge = tpl ? '<span class="badge2" style="background:'+col.bg+';color:'+col.fg+'">'+esc(tpl.icon||'📌')+'</span>' : '';
+    return '<div class="todoRow" data-id="'+esc(it.id)+'">'
+      + '<input type="checkbox">'
+      + badge
+      + '<span class="t" data-editable="1">'+esc(it.title)+'</span>'
+      + '<button class="x">✕</button>'
+      + '</div>';
+  }).join('')
+   + (items.length>TODAY_SHOW ? '<button type="button" id="todoMore" style="display:block;width:100%;margin-top:5px;border:1px dashed var(--line);background:#f7f6f0;color:var(--sub);border-radius:6px;padding:4px;font-size:11.5px;cursor:pointer">'+(todayExpanded?'∧ 접기':'∨ '+(items.length-TODAY_SHOW)+'개 더 보기')+'</button>' : '');
+  host.querySelectorAll('[data-due]').forEach(function(row){
+    var key=row.getAttribute('data-due'), rec=row.getAttribute('data-rec');
+    row.querySelector('.dueChk').addEventListener('change', function(){
+      if(!db) return;
+      db.collection('records_todos').add({date:t, done:true, text:row.querySelector('.dueTitle').textContent, dueKey:key, createdAt:Date.now()})
+        .catch(function(e){ logBug('확인예정 완료 저장 실패: '+e.message); });
+    });
+    row.querySelector('.dueTitle').addEventListener('click', function(){ openPage(rec); });
+  });
+  host.querySelectorAll('[data-id]').forEach(function(row){
     var id = row.getAttribute('data-id');
     row.querySelector('input').addEventListener('change', function(ev){
-      db.collection('records_todos').doc(id).update({done: ev.target.checked})
-        .catch(function(e){ logBug('todo 갱신 실패: '+e.message); });
+      db.collection('records_todos').doc(id).update({done: ev.target.checked}).catch(function(e){ logBug('todo 갱신 실패: '+e.message); });
     });
     row.querySelector('.x').addEventListener('click', function(){
-      db.collection('records_todos').doc(id).delete()
-        .catch(function(e){ logBug('todo 삭제 실패: '+e.message); });
+      db.collection('records_todos').doc(id).delete().catch(function(e){ logBug('todo 삭제 실패: '+e.message); });
     });
-    /* v6: 글자 클릭하면 바로 수정 */
     row.querySelector('.t').addEventListener('click', function(){
-      var span = row.querySelector('.t');
-      var cur = todos.find(function(x){ return x.id===id; });
-      if(!cur) return;
-      var inp = document.createElement('input');
-      inp.type = 'text'; inp.value = cur.text||''; inp.style.cssText='width:100%;font-size:13.5px;border:1.5px solid var(--navy-600);border-radius:5px;padding:2px 5px';
-      span.replaceWith(inp);
-      inp.focus(); inp.select();
-      function commit(){
-        var v = inp.value.trim();
-        if(v && v!==cur.text) db.collection('records_todos').doc(id).update({text:v}).catch(function(e){ logBug('todo 수정 실패: '+e.message); });
-        else renderTodos();
-      }
+      var span = row.querySelector('.t'); var cur = todos.find(function(x){ return x.id===id; }); if(!cur) return;
+      var inp = document.createElement('input'); inp.type='text'; inp.value=cur.text||''; inp.style.cssText='width:100%;font-size:13.5px;border:1.5px solid var(--navy-600);border-radius:5px;padding:2px 5px';
+      span.replaceWith(inp); inp.focus(); inp.select();
+      function commit(){ var v=inp.value.trim(); if(v && v!==cur.text) db.collection('records_todos').doc(id).update({text:v}).catch(function(e){ logBug('todo 수정 실패: '+e.message); }); else renderTodos(); }
       inp.addEventListener('blur', commit);
       inp.addEventListener('keydown', function(e){ if(e.key==='Enter') inp.blur(); if(e.key==='Escape'){ inp.value=cur.text||''; inp.blur(); } });
     });
   });
-  var tm=document.getElementById('todoMore'); if(tm) tm.addEventListener('click', function(){ todoExpanded=!todoExpanded; renderTodos(); });
+  var tm=document.getElementById('todoMore'); if(tm) tm.addEventListener('click', function(){ todayExpanded=!todayExpanded; renderTodos(); });
 }
 document.getElementById('todoAddBtn').addEventListener('click', addTodo);
-(function(){ var c=document.getElementById('hideDoneChk'); if(c){ c.checked=hideDone; c.addEventListener('change', function(){ hideDone=c.checked; try{ localStorage.setItem('rec_hide_done', hideDone?'1':'0'); }catch(e){} renderTodos(); }); } })();
 document.getElementById('todoInput').addEventListener('keydown', function(e){ if(e.key==='Enter') addTodo(); });
 function addTodo(){
   var inp = document.getElementById('todoInput');
@@ -2869,7 +2848,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.18-0911-0930 준비됨 — records / records_todos / records_meta 컬렉션 사용');
+console.log('[기록보관실] v7.19-0911-0950 준비됨 — records / records_todos / records_meta 컬렉션 사용');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
