@@ -10,7 +10,7 @@
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 /* ══════════════════════════════════════════════════════════
-   🗂 투자 기록보관실  v7.25-0911-1228
+   🗂 투자 기록보관실  v7.26-0911-1250
    업무일지(worklog)와 한눈에 구분되도록 네이비×골드 테마로 짰다.
    업무일지의 8뷰 엔진(카드·표·보드·달력)을 새 창고(records)에
    맞게 다시 짠 것 — worklog_entries 와는 완전히 분리된 컬렉션.
@@ -461,13 +461,12 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1>
-  <span class="ver">v7.25-0911-1228 · 서희타워</span>
+  <span class="ver">v7.26-0911-1250 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
   <button class="navbtn" id="btnStockMgr">🏷 종목 관리</button>
-  <a class="navbtn" href="https://claude.ai" target="_blank" rel="noopener">💬 클로드 열기</a>
-  <a class="navbtn gold" href="worklog.html">📋 업무일지로</a>
+  <button class="navbtn" id="btnSysCheck">⚙ 시스템 점검 <span id="sysBadge" style="display:none;background:var(--warn);color:#fff;border-radius:999px;padding:0 6px;font-size:10.5px;margin-left:2px">0</span></button>
 </div>
 
 <div class="wrap">
@@ -532,6 +531,12 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 </div>
 
 <!-- 기록 추가/수정 모달 -->
+<div class="ovwrap" id="sysModal">
+  <div class="modal" style="max-width:640px">
+    <div class="mhd"><b>⚙ 시스템 점검</b><button class="x" id="sysClose">✕</button></div>
+    <div class="mbody" id="sysBody"></div>
+  </div>
+</div>
 <div class="ovwrap" id="recModal">
   <div class="modal">
     <div class="mhd"><b id="mTitle">＋ 기록 추가</b><button class="x" id="mClose">✕</button></div>
@@ -773,7 +778,15 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
    설정 · 초기화
    ══════════════════════════════════════════════════════════ */
 var bugLog=[];
-function logBug(m){ bugLog.push(m); console.warn('[기록보관실]', m); }
+var _diag={errors:[], recv:{}, auth:null, save:null, lastAction:'', checkedAt:null};
+function _diagAdd(msg){
+  var now=Date.now(), hit=null;
+  for(var i=_diag.errors.length-1;i>=0 && i>_diag.errors.length-40;i--){ if(_diag.errors[i].msg===msg){ hit=_diag.errors[i]; break; } }
+  if(hit){ hit.count++; hit.last=now; }
+  else { _diag.errors.push({t:now,last:now,msg:msg,count:1}); if(_diag.errors.length>100) _diag.errors.shift(); }
+  try{ var b=document.getElementById('sysBadge'); if(b){ var n=_diag.errors.reduce(function(a,e){return a+e.count;},0); b.textContent=n; b.style.display=n>0?'':'none'; } }catch(_){}
+}
+function logBug(m){ bugLog.push(m); console.warn('[기록보관실]', m); try{ _diagAdd(String(m)); }catch(_){} }
 
 const firebaseConfig = {
   apiKey: "AIzaSyAyG1chECYsbO7cSZUuXmNa0_KDYBmahPY",
@@ -789,6 +802,7 @@ try{
   firebase.auth().signInAnonymously().catch(function(e){ logBug('익명로그인 실패: '+e.message); });
   firebase.auth().onAuthStateChanged(function(u){
     uid = u ? u.uid : null;
+    _diag.auth={at:Date.now(),signedIn:!!u};
     if(u){ startListeners(); }
   });
 }catch(e){ logBug('firebase 초기화 실패: '+e.message); }
@@ -1039,11 +1053,13 @@ function startListeners(){
   if(!db) return;
   db.collection('records').orderBy('date','desc').onSnapshot(function(snap){
     records = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    _diag.recv.records={at:Date.now(),n:records.length,cache:!!(snap.metadata&&snap.metadata.fromCache),pending:!!(snap.metadata&&snap.metadata.hasPendingWrites)};
     render(); renderTodos(); renderKtabs(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker(); renderTopicChips(); renderStarPicker(); renderChannelSel(); renderMiniSummary(); renderActiveFilters();
   }, function(e){ logBug('records 구독 실패: '+e.message); });
 
   db.collection('records_todos').where('date','>=', histCutoffStr()).orderBy('date').onSnapshot(function(snap){
     todos = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    _diag.recv.todos={at:Date.now(),n:todos.length,cache:!!(snap.metadata&&snap.metadata.fromCache)};
     ensureTodayInstances();
     renderTodos();
     renderTodoHistory();
@@ -1051,11 +1067,13 @@ function startListeners(){
 
   db.collection('records_meta').doc('stocks').onSnapshot(function(doc){
     stockMaster = (doc.exists && doc.data().list) ? doc.data().list : [];
+    _diag.recv.stocks={at:Date.now(),n:stockMaster.length,cache:!!(doc.metadata&&doc.metadata.fromCache)};
     renderStockPicker(); renderStockDatalist();
   }, function(e){ logBug('종목마스터 구독 실패: '+e.message); });
 
   db.collection('records_meta').doc('checklist_templates').onSnapshot(function(doc){
     checklistTemplates = (doc.exists && doc.data().list) ? doc.data().list : [];
+    _diag.recv.checklist={at:Date.now(),n:checklistTemplates.length,cache:!!(doc.metadata&&doc.metadata.fromCache)};
     ensureTodayInstances();
     renderTodos();
     renderTodoHistory();
@@ -1618,7 +1636,7 @@ function openFilterPop(kind, anchor){
   pop._opts=opts;
   var r=anchor.getBoundingClientRect();
   pop.style.left=Math.min(r.left,window.innerWidth-215)+'px'; pop.style.top=(r.bottom+window.scrollY+5)+'px'; pop.style.display='block';
-  pop.querySelectorAll('.fpItem').forEach(function(el){ el.addEventListener('click', function(ev){ ev.stopPropagation(); pop._opts[+el.getAttribute('data-i')].apply(); pop.style.display='none'; render(); renderActiveFilters(); renderKtabs(); }); });
+  pop.querySelectorAll('.fpItem').forEach(function(el){ el.addEventListener('click', function(ev){ ev.stopPropagation(); pop._opts[+el.getAttribute('data-i')].apply(); _diag.lastAction='필터 변경'; pop.style.display='none'; render(); renderActiveFilters(); renderKtabs(); }); });
   var srch=document.getElementById('fpSearch');
   if(srch){ srch.focus(); srch.addEventListener('input', function(){ var q=srch.value.toLowerCase(); pop.querySelectorAll('.fpItem').forEach(function(el){ el.style.display=(!q||pop._opts[+el.getAttribute('data-i')].label.toLowerCase().indexOf(q)>=0)?'':'none'; }); }); }
 }
@@ -2624,6 +2642,74 @@ function delRelation(srcId,targetId){
   db.collection('records').doc(srcId).update({relations:rels}).catch(function(e){ logBug('관계 삭제 실패: '+e.message); });
   openPage(srcId);
 }
+function _sysRow(k,v){ return '<tr><td style="color:var(--sub);font-size:11.5px;padding:3px 10px 3px 0;white-space:nowrap;vertical-align:top">'+k+'</td><td style="font-size:12.5px;padding:3px 0">'+v+'</td></tr>'; }
+function _sysBadge(t,c){ var col={ok:'#2f7d5c',wait:'#b59022',warn:'#b59022',err:'#b23b3b',na:'#9a9484'}[c]||'#777'; return '<span style="color:'+col+';font-weight:700">'+t+'</span>'; }
+function _kstShort(ms){ return new Date(ms+9*3600*1000).toISOString().slice(5,19).replace('T',' '); }
+function _kstFull(){ return kstNow().toISOString().replace('T',' ').slice(0,19)+' KST'; }
+function _sanitize(x){ return String(x).replace(/https?:\/\/\S+/g,'[url]').replace(/[A-Za-z0-9_\-]{24,}/g,'[token]'); }
+function _sysSec(title, inner){ return '<div style="margin-bottom:14px"><div style="margin:0 0 6px;font-size:12px;color:var(--gold-dk);font-weight:800">'+title+'</div>'+inner+'</div>'; }
+function openSysCheck(){
+  _diag.checkedAt=Date.now();
+  var v=((document.querySelector('.topbar .ver')||{}).textContent||'?').split('·')[0].trim();
+  var A=_sysSec('A. 실행 정보','<table style="width:100%;border-collapse:collapse">'
+    +_sysRow('버전', esc(v))
+    +_sysRow('화면 크기', window.innerWidth+'×'+window.innerHeight)
+    +_sysRow('현재 KST', _kstFull())
+    +_sysRow('점검 시각', _kstFull())
+    +_sysRow('불러온 기록 수', records.length+'건')
+    +'</table>');
+  function recvLine(k,label){ var r=_diag.recv[k]; if(!r) return _sysRow(label,_sysBadge('대기 중/미검증','wait')); return _sysRow(label,_sysBadge('확인됨','ok')+' <span style="color:var(--sub2);font-size:11px">'+_kstShort(r.at)+' · '+r.n+'건'+(r.cache?' · 캐시':'')+(r.pending?' · 쓰기대기':'')+'</span>'); }
+  var B=_sysSec('B. 연결·저장 상태','<table style="width:100%;border-collapse:collapse">'
+    +_sysRow('Firebase 초기화', db?_sysBadge('확인됨','ok'):_sysBadge('오류','err'))
+    +_sysRow('로그인(익명)', (typeof uid!=='undefined'&&uid)?_sysBadge('확인됨','ok'):_sysBadge('대기 중/미검증','wait'))
+    +recvLine('records','records 수신')+recvLine('todos','records_todos 수신')
+    +recvLine('stocks','records_meta/stocks 수신')+recvLine('checklist','records_meta/checklist 수신')
+    +_sysRow('저장 상태', _diag.save?esc(_diag.save):_sysBadge('해당 없음','na')+' <span style="color:var(--sub2);font-size:11px">(이 세션 관찰 범위)</span>')
+    +'</table><div style="font-size:10.5px;color:var(--sub2);margin-top:5px">※ 마지막 수신 시각은 그때 수신을 확인했다는 의미이며 현재 연결을 보장하지 않습니다. · 쓰기 권한·이미지 업로드는 미검증.</div>');
+  var errN=_diag.errors.reduce(function(a,e){return a+e.count;},0);
+  var C=_sysSec('C. 오류·주의 ('+errN+'건)', !_diag.errors.length ? '<div style="font-size:12.5px;color:var(--good)">이번 세션에서 감지된 오류 없음</div>'
+    : '<div style="max-height:180px;overflow:auto">'+_diag.errors.slice().reverse().map(function(e){ return '<div style="font-size:11.5px;border-bottom:1px solid var(--line);padding:4px 0"><span style="color:var(--sub2)">'+_kstShort(e.t)+'</span> '+(e.count>1?'<b style="color:var(--warn)">×'+e.count+'</b> ':'')+esc(_sanitize(e.msg))+'</div>'; }).join('')+'</div>');
+  var D='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button type="button" id="sysRun" class="navbtn">현재 상태 점검</button><button type="button" id="sysCopy" class="navbtn gold" style="color:#3c3527">진단보고 복사</button></div><div id="sysCheckOut"></div><div id="sysReportOut"></div>';
+  document.getElementById('sysBody').innerHTML=A+B+C+D;
+  document.getElementById('sysRun').addEventListener('click', runSysCheck);
+  document.getElementById('sysCopy').addEventListener('click', showSysReport);
+  resetModalPos(document.querySelector('#sysModal .modal'));
+  document.getElementById('sysModal').classList.add('on');
+}
+function runSysCheck(){
+  var out=[];
+  ['content','todoList','toolbar','searchBar','sysModal'].forEach(function(id){ out.push(['요소 #'+id, document.getElementById(id)?'확인됨':'오류','']); });
+  out.push(['현재 보기(curView)', ['card','list','table','board','ch','cal','time','gal'].indexOf(curView)>=0?'확인됨':'주의', curView]);
+  try{ var w=localStorage.getItem('records_table_widths'); if(w) JSON.parse(w); out.push(['열 너비 설정 읽기','확인됨', w?'있음':'없음(기본)']); }catch(e){ out.push(['열 너비 설정 읽기','주의','파싱 실패 — 초기화 권장']); }
+  out.push(['KST 오늘 기준','확인됨', todayStr()]);
+  var bad=0; records.forEach(function(r){ ['stocks','topics','checks','relations'].forEach(function(f){ if(r[f]!==undefined && !Array.isArray(r[f])) bad++; }); });
+  out.push(['records 자료형', bad===0?'확인됨':'오류', bad?bad+'건 비정상':'정상(옛 기록 빈 값 정상)']);
+  var tl=document.getElementById('todoList');
+  if(!tl || tl.style.display==='none' || tl.children.length<2){ out.push(['오늘 할 일 2행 배치','미검증/해당 없음','접힘/요소 부족으로 측정 불가']); }
+  else { var a=tl.children[0].getBoundingClientRect(), bb=tl.children[1].getBoundingClientRect(); out.push(['오늘 할 일 2행 배치', bb.top>=a.bottom-3?'확인됨':'오류', bb.top>=a.bottom-3?'위아래 2행':'좌우로 놓임']); }
+  document.getElementById('sysCheckOut').innerHTML='<table style="width:100%;border-collapse:collapse;margin-top:6px">'+out.map(function(o){ var c=o[1]==='확인됨'?'ok':(o[1]==='오류'?'err':(o[1]==='주의'?'warn':'na')); return _sysRow(esc(o[0]), _sysBadge(o[1],c)+(o[2]?' <span style="color:var(--sub2);font-size:11px">'+esc(o[2])+'</span>':'')); }).join('')+'</table>';
+}
+function buildSysReport(){
+  var v=((document.querySelector('.topbar .ver')||{}).textContent||'?').split('·')[0].trim();
+  var af=[]; if(curStock)af.push('종목'); if(curTopic)af.push('주제'); if(curStar)af.push('별점'); if(curVerify)af.push('검증'); if(curChannel)af.push('출처'); if(curDateRange)af.push('날짜'); if(curKind!=='전체')af.push('종류'); if(curQ)af.push('검색');
+  var L=['[기록보관실 진단보고]','버전: '+v,'점검시각: '+_kstFull(),
+    '화면: '+window.innerWidth+'×'+window.innerHeight+' · '+_sanitize((navigator.userAgent||'').slice(0,50)),
+    '현재 View: '+curView+(stockMode?'(종목모드)':''),'활성 필터: '+af.length+'개'+(af.length?' ('+af.join(', ')+')':''),
+    'Firebase: '+(db?'초기화됨':'오류')+' / 로그인: '+((typeof uid!=='undefined'&&uid)?'됨':'대기·미검증')];
+  ['records','todos','stocks','checklist'].forEach(function(k){ var r=_diag.recv[k]; L.push('  '+k+' 수신: '+(r?('확인 '+_kstShort(r.at)+' · '+r.n+'건'+(r.cache?' 캐시':'')):'대기·미검증')); });
+  L.push('저장 상태: '+(_diag.save||'해당 없음(관찰 범위)'),'불러온 기록 수: '+records.length,'최근 조작: '+(_diag.lastAction||'-'));
+  var errN=_diag.errors.reduce(function(a,e){return a+e.count;},0);
+  L.push('오류('+errN+'건):');
+  if(!_diag.errors.length) L.push('  이번 세션 감지 오류 없음');
+  else _diag.errors.slice(-30).forEach(function(e){ L.push('  ['+_kstShort(e.t)+'] '+(e.count>1?'x'+e.count+' ':'')+_sanitize(e.msg)); });
+  L.push('원인: 원인 미확정 (검수자·사용자 판단 필요)','증상 메모: ');
+  return L.join('\n');
+}
+function showSysReport(){
+  document.getElementById('sysReportOut').innerHTML='<div style="margin-top:8px"><div style="font-size:11px;color:var(--sub);margin-bottom:4px">복사 전 확인하세요(민감정보 제외됨). "증상 메모:"에 상황을 직접 적어도 됩니다.</div><textarea id="sysRepTa" style="width:100%;height:150px;font-size:11.5px;font-family:monospace;border:1px solid var(--line);border-radius:8px;padding:8px;box-sizing:border-box"></textarea><div style="margin-top:6px"><button type="button" id="sysCopyBtn" class="navbtn gold" style="color:#3c3527">📋 클립보드로 복사</button><span id="sysCopyMsg" style="font-size:11.5px;color:var(--good);margin-left:8px"></span></div></div>';
+  document.getElementById('sysRepTa').value=buildSysReport();
+  document.getElementById('sysCopyBtn').addEventListener('click', function(){ var ta=document.getElementById('sysRepTa'); ta.select(); function done(){ document.getElementById('sysCopyMsg').textContent='복사됨'; } try{ navigator.clipboard.writeText(ta.value).then(done,function(){ try{document.execCommand('copy');done();}catch(_){document.getElementById('sysCopyMsg').textContent='복사 실패 — 직접 선택하세요';} }); }catch(e){ try{document.execCommand('copy');done();}catch(_){document.getElementById('sysCopyMsg').textContent='복사 실패 — 직접 선택하세요';} } });
+}
 function openPage(id){
   var r = records.find(function(x){ return x.id===id; });
   if(!r) return;
@@ -2698,6 +2784,8 @@ function openPage(id){
 }
 document.getElementById('relClose').addEventListener('click', closeRelModal);
 document.getElementById('relSearch').addEventListener('input', function(e){ renderRelResults(e.target.value.trim()); });
+document.getElementById('btnSysCheck').addEventListener('click', openSysCheck);
+document.getElementById('sysClose').addEventListener('click', function(){ document.getElementById('sysModal').classList.remove('on'); });
 document.getElementById('pgClose').addEventListener('click', function(){
   document.getElementById('pageModal').classList.remove('on');
 });
@@ -2956,7 +3044,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.25-0911-1228 준비됨 — records / records_todos / records_meta 컬렉션 사용');
+console.log('[기록보관실] v7.26-0911-1250 준비됨 — records / records_todos / records_meta 컬렉션 사용');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
