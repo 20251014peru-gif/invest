@@ -10,7 +10,7 @@
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 /* ══════════════════════════════════════════════════════════
-   🗂 투자 기록보관실  v7.17-0911-0914
+   🗂 투자 기록보관실  v7.18-0911-0930
    업무일지(worklog)와 한눈에 구분되도록 네이비×골드 테마로 짰다.
    업무일지의 8뷰 엔진(카드·표·보드·달력)을 새 창고(records)에
    맞게 다시 짠 것 — worklog_entries 와는 완전히 분리된 컬렉션.
@@ -458,7 +458,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1>
-  <span class="ver">v7.17-0911-0914 · 서희타워</span>
+  <span class="ver">v7.18-0911-0930 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -476,6 +476,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
       <span class="dd" id="todayDate"></span>
       <span class="sp"></span>
       <span class="streak" id="streakBadge" style="display:none"></span>
+      <label style="font-size:11.5px;color:var(--sub);display:inline-flex;align-items:center;gap:3px;cursor:pointer;margin-right:2px"><input type="checkbox" id="hideDoneChk" style="cursor:pointer"> 완료 숨김</label>
       <button type="button" class="iconbtn" id="btnTmplMgr" title="체크리스트 항목 편집">✏️</button>
       <div class="menuWrap">
         <button type="button" class="iconbtn" id="btnTodayMenu" title="더보기">⋯</button>
@@ -486,11 +487,11 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
     </div>
     <div class="cols">
       <div class="col">
-        <h4>🔔 오늘 확인예정</h4>
+        <div style="font-size:11px;font-weight:800;color:var(--sub);margin:0 0 4px">🔔 확인예정</div>
         <div id="dueList"></div>
       </div>
       <div class="col">
-        <h4>✅ 체크리스트</h4>
+        <div style="font-size:11px;font-weight:800;color:var(--sub);margin:0 0 4px">✅ 체크리스트</div>
         <div id="todoList"></div>
         <div class="todoAdd">
           <input type="text" id="todoInput" placeholder="할 일을 적고 Enter…">
@@ -728,6 +729,25 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 </div>
 
 <!-- 페이지 보기 (노션식 읽기 화면) -->
+<div class="ovwrap" id="relModal">
+  <div class="modal" style="max-width:560px">
+    <div class="mhd"><b>🔗 기록 연결</b><button class="x" id="relClose">✕</button></div>
+    <div class="mbody">
+      <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap">
+        <label style="font-size:12.5px;color:var(--sub)">관계</label>
+        <select id="relType" style="padding:5px 8px;border:1px solid var(--line);border-radius:7px;font-size:12.5px">
+          <option value="supports">뒷받침 (supports)</option>
+          <option value="contradicts">반박/상충 (contradicts)</option>
+          <option value="same_event">같은 사건 (same_event)</option>
+          <option value="same_topic">같은 주제 (same_topic)</option>
+          <option value="related" selected>관련 (related)</option>
+        </select>
+        <input type="text" id="relSearch" placeholder="제목·종목·주제·채널로 검색" style="flex:1 1 160px;padding:6px 10px;border:1px solid var(--line);border-radius:7px;font-size:12.5px">
+      </div>
+      <div id="relResults" style="max-height:340px;overflow:auto"></div>
+    </div>
+  </div>
+</div>
 <div class="ovwrap" id="pageModal">
   <div class="modal pageModalBox" style="max-width:820px">
     <div class="mhd"><b id="pgKindTitle">📺 유튜브</b><button class="x" id="pgClose">✕</button></div>
@@ -1003,6 +1023,8 @@ var curVerify = ''; // v5: 검증상태 필터
 var curTopic = ''; // v7.15: Topic 필터 (stocks와 별개)
 var curQ = '';
 var DUE_SHOW=3, TODO_SHOW=4, dueExpanded=false, todoExpanded=false; // v7.16: 오늘 할 일 더보기/접기
+var hideDone = (function(){ try{ return localStorage.getItem('rec_hide_done')!=='0'; }catch(e){ return true; } })(); // v7.18 완료 숨김(기본 ON)
+var REL_SRC=''; var REL_TYPE_LBL={supports:'뒷받침',contradicts:'반박/상충',same_event:'같은 사건',same_topic:'같은 주제',related:'관련'};
 var calYM = todayStr().slice(0,7);
 var EDIT = null; // 지금 수정 중인 기록 id (null이면 새로 추가)
 var pickedStocks = []; // 모달 안에서 고르는 중인 종목들
@@ -1124,7 +1146,7 @@ function renderMiniSummary(){
   if(vc.unconfirmed) vchips.push(['unconfirmed','미확인 '+vc.unconfirmed]);
   if(vc.conflict) vchips.push(['conflict','상충 '+vc.conflict]);
   var s3 = vchips.map(function(c){ return '<span class="msVerify" data-vf="'+c[0]+'" style="'+chip+'">'+esc(c[1])+'</span>'; }).join('')
-    + (dueN? '<span style="font-size:11.5px;color:var(--sub);margin-left:2px">· 오늘 확인 '+dueN+'</span>':'');
+    + (dueN? '<span class="msDue" style="font-size:11.5px;color:var(--navy-700);margin-left:2px;cursor:pointer;text-decoration:underline">· 오늘 확인 '+dueN+'</span>':'');
   if(!vchips.length && !dueN) s3='<div style="font-size:12px;color:var(--sub2)">확인 필요 없음</div>';
   host.innerHTML = '<div style="'+box+'">'
     + '<div style="'+colS+'"><div style="'+hS+'">⭐ 최근 중요 기록</div>'+s1+'</div>'
@@ -1134,6 +1156,7 @@ function renderMiniSummary(){
   host.querySelectorAll('.msImp').forEach(function(el){ el.addEventListener('click', function(){ openPage(el.getAttribute('data-open')); }); });
   host.querySelectorAll('.msTopic').forEach(function(el){ el.addEventListener('click', function(){ curTopic=el.getAttribute('data-tp'); render(); renderTopicChips(); }); });
   host.querySelectorAll('.msVerify').forEach(function(el){ el.addEventListener('click', function(){ curVerify=el.getAttribute('data-vf'); render(); renderVerifyPicker(); }); });
+  host.querySelectorAll('.msDue').forEach(function(el){ el.addEventListener('click', function(){ dueExpanded=true; renderDue(); var c=document.querySelector('.today'); if(c) c.scrollIntoView({behavior:'smooth',block:'start'}); }); });
 }
 function renderDue(){
   var t = todayStr();
@@ -1169,6 +1192,7 @@ function todayTodos(){
 function renderTodos(){
   var host = document.getElementById('todoList');
   var list = todayTodos().slice().sort(function(a,b){ return (a.done?1:0)-(b.done?1:0); }); // v7.16: 미완료 우선
+  if(hideDone) list = list.filter(function(t){ return !t.done; }); // v7.18: 완료 숨김(데이터는 유지, 화면만)
   if(!list.length){ host.innerHTML = '<div class="emptyMini">오늘 할 일을 적어보세요</div>'; }
   else{
     var shown = todoExpanded ? list : list.slice(0, TODO_SHOW);
@@ -1218,6 +1242,7 @@ function renderTodos(){
   var tm=document.getElementById('todoMore'); if(tm) tm.addEventListener('click', function(){ todoExpanded=!todoExpanded; renderTodos(); });
 }
 document.getElementById('todoAddBtn').addEventListener('click', addTodo);
+(function(){ var c=document.getElementById('hideDoneChk'); if(c){ c.checked=hideDone; c.addEventListener('change', function(){ hideDone=c.checked; try{ localStorage.setItem('rec_hide_done', hideDone?'1':'0'); }catch(e){} renderTodos(); }); } })();
 document.getElementById('todoInput').addEventListener('keydown', function(e){ if(e.key==='Enter') addTodo(); });
 function addTodo(){
   var inp = document.getElementById('todoInput');
@@ -2474,6 +2499,44 @@ function removeRecord(id){
 /* ══════════════════════════════════════════════════════════
    페이지 보기 (노션식 읽기 화면 — 전체요약 복붙용)
    ══════════════════════════════════════════════════════════ */
+function renderRelResults(q){
+  var host=document.getElementById('relResults'); if(!host) return;
+  var src=records.find(function(x){ return x.id===REL_SRC; });
+  var linked={}; ((src&&src.relations)||[]).forEach(function(rl){ linked[rl.targetId]=1; });
+  q=(q||'').toLowerCase();
+  var list=records.filter(function(r){
+    if(r.id===REL_SRC || linked[r.id]) return false;
+    if(!q) return true;
+    var hay=[r.title,r.oneLiner,(r.stocks||[]).join(' '),(r.topics||[]).join(' '),r.channel].join(' ').toLowerCase();
+    return hay.indexOf(q)>=0;
+  }).slice(0,40);
+  if(!list.length){ host.innerHTML='<div style="font-size:12.5px;color:var(--sub2);padding:8px">연결할 기록이 없어요</div>'; return; }
+  host.innerHTML=list.map(function(r){ var k=KINDS[r.kind]||KINDS.memo;
+    return '<div class="relPick" data-id="'+esc(r.id)+'" style="padding:8px 10px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13px">'+k.i+' <b>'+esc(r.title||'')+'</b>'+(r.oneLiner?' <span style="color:var(--sub2);font-size:11.5px">— '+esc(r.oneLiner)+'</span>':'')+'</div>'; }).join('');
+  host.querySelectorAll('.relPick').forEach(function(el){ el.addEventListener('click', function(){ addRelation(REL_SRC, el.getAttribute('data-id'), document.getElementById('relType').value); }); });
+}
+function openRelModal(srcId){
+  REL_SRC=srcId; document.getElementById('relSearch').value=''; renderRelResults('');
+  resetModalPos(document.querySelector('#relModal .modal'));
+  document.getElementById('relModal').classList.add('on');
+}
+function closeRelModal(){ document.getElementById('relModal').classList.remove('on'); }
+function addRelation(srcId,targetId,type){
+  var r=records.find(function(x){ return x.id===srcId; }); if(!r||!db) return;
+  var rels=(r.relations||[]).slice();
+  if(rels.some(function(x){ return x.targetId===targetId; })) return;
+  rels.push({relationId:'rel_'+Date.now(), targetId:targetId, type:type||'related', note:'', createdAt:Date.now()});
+  r.relations=rels;
+  db.collection('records').doc(srcId).update({relations:rels}).catch(function(e){ logBug('관계 저장 실패: '+e.message); });
+  closeRelModal(); openPage(srcId);
+}
+function delRelation(srcId,targetId){
+  var r=records.find(function(x){ return x.id===srcId; }); if(!r||!db) return;
+  var rels=(r.relations||[]).filter(function(x){ return x.targetId!==targetId; });
+  r.relations=rels;
+  db.collection('records').doc(srcId).update({relations:rels}).catch(function(e){ logBug('관계 삭제 실패: '+e.message); });
+  openPage(srcId);
+}
 function openPage(id){
   var r = records.find(function(x){ return x.id===id; });
   if(!r) return;
@@ -2523,7 +2586,9 @@ function openPage(id){
   var judgeHtml = (r.aiInterpretation ? '<div class="pg-h4">🤖 AI 해석</div><div class="pg-body">'+esc(r.aiInterpretation)+'</div>' : '') + (r.userJudgment ? '<div class="pg-h4">🙋 내 판단</div><div class="pg-body">'+esc(r.userJudgment)+'</div>' : '');
   var _fwd = (r.relations||[]).map(function(rl){ var t=(records||[]).find(function(x){return x.id===rl.targetId;}); return t?{rec:t,type:rl.type||'related',dir:'→'}:null; }).filter(Boolean);
   var _rev = reverseRelations(r.id).map(function(t){ return {rec:t,type:'',dir:'←'}; });
-  var relationsHtml = (_fwd.concat(_rev)).length ? '<div class="pg-h4">🔗 연결된 기록</div><div class="pg-stocks">'+_fwd.concat(_rev).map(function(o){ return '<span class="stag">'+o.dir+' '+esc(o.rec.title||'')+(o.type?' ('+esc(o.type)+')':'')+'</span>'; }).join('')+'</div>' : '';
+  var relFwd = _fwd.map(function(o){ return '<div style="font-size:12.5px;margin:3px 0"><b>'+esc(o.rec.title||'')+'</b> <span style="color:var(--sub2)">↳ '+esc(REL_TYPE_LBL[o.type]||o.type||'관련')+'</span> <span class="relDel" data-del="'+esc(o.rec.id)+'" style="color:var(--warn);cursor:pointer;margin-left:5px">✕</span></div>'; }).join('');
+  var relRev = _rev.map(function(o){ return '<div style="font-size:12px;color:var(--sub);margin:3px 0">← '+esc(o.rec.title||'')+' <span style="color:var(--sub2);font-size:11px">(이 기록을 참조)</span></div>'; }).join('');
+  var relationsHtml = '<div class="pg-h4">🔗 연결된 기록 <button type="button" id="relAddBtn" style="font-size:11.5px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:2px 9px;cursor:pointer;font-weight:400;margin-left:4px">+ 연결</button></div>' + ((relFwd||relRev) ? relFwd+relRev : '<div style="font-size:12px;color:var(--sub2)">아직 연결된 기록이 없어요</div>');
   var bodyHtml = (r.body||r.summary) ? '<details><summary class="pg-h4" style="cursor:pointer">'+esc(f.bodyLbl)+' (펼치기)</summary><div class="pg-body">'+esc(r.body||(r.summary||''))+'</div></details>' : '';
   var html = ''
     + (r.image ? '<img src="'+esc(r.image)+'" alt="" style="width:100%;max-height:360px;object-fit:cover;border-radius:12px;margin-bottom:14px;display:block">' : '')
@@ -2539,9 +2604,13 @@ function openPage(id){
     + bodyHtml;
 
   document.getElementById('pgBody').innerHTML = html;
+  var _rab=document.getElementById('relAddBtn'); if(_rab) _rab.addEventListener('click', function(){ openRelModal(id); });
+  document.querySelectorAll('#pgBody .relDel').forEach(function(el){ el.addEventListener('click', function(){ delRelation(id, el.getAttribute('data-del')); }); });
   resetModalPos(document.querySelector('#pageModal .modal'));
   document.getElementById('pageModal').classList.add('on');
 }
+document.getElementById('relClose').addEventListener('click', closeRelModal);
+document.getElementById('relSearch').addEventListener('input', function(e){ renderRelResults(e.target.value.trim()); });
 document.getElementById('pgClose').addEventListener('click', function(){
   document.getElementById('pageModal').classList.remove('on');
 });
@@ -2800,7 +2869,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.17-0911-0914 준비됨 — records / records_todos / records_meta 컬렉션 사용');
+console.log('[기록보관실] v7.18-0911-0930 준비됨 — records / records_todos / records_meta 컬렉션 사용');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
