@@ -78,3 +78,6 @@ news-priority.js가 같은 문장의 분야·변화·수치·실행 표현과 �
 
 ## v016 통합 분석실
 research.html은 기존 독립 프로그램을 보존하는 공통 메뉴. 상세 상단은 ../js/macro-detail.js와 공식 일정·기간별 원자료를 공유. extra 지표도 같은 ID로 연결. 기존 개인 저장·서버·AI 요청 코드는 변경하지 않음.
+
+## v020 통합 화면
+사용자 승인으로 기존 독립 보기의 진입은 ../research-dashboard.html로 옮겼다. ../js/research-dashboard.mjs는 목록/상세/세 번째 페이지 상태를, research-tools.mjs는 기존 chart/live-chart/AI/storage 모듈을 연결한다. 원래 private collection과 Google 인증은 유지한다. 레코드 ID와 뉴스 주소 변환은 research-routing.mjs에서 처리한다. 기존 records.html은 원본 보관실로 유지하고 편집 폼을 세 번째 페이지에 연결한다. 승인된 설계·검증 대조는 ../../docs/RESEARCH-STANDARD.md 및 RESEARCH-CHANGELOG.md를 따른다.
