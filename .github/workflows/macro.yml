@@ -1,4 +1,4 @@
-# v 20260913  macro.yml — 매크로 수집 + 보강지표. 정각 회피 + concurrency + 실패 시 status.json fail + ntfy
+# v 20260913  macro.yml — 매크로 수집 + 보강지표 + 시간 메타. 정각 회피 + concurrency + 실패 시 ntfy
 name: Macro Collector
 on:
   schedule:
@@ -34,6 +34,7 @@ jobs:
             python scripts/macro_extra.py || echo "::warning::보강 매크로 수집 일부 실패 — facts/macro_extra.json 확인"
             python scripts/regime.py || echo "::warning::레짐 판정 실패(값 없음) — status.json 에 표시됨"
             NTFY_TOPIC="$NTFY_TOPIC" python scripts/calendar.py || echo "::warning::발표 달력 실패"
+            python scripts/macro_time_meta.py || echo "::warning::지표 시간 메타 생성 실패 — 원 수집 데이터는 유지"
             python scripts/journal.py || echo "::warning::일지 초안 실패"
             git add facts/macro.json facts/macro_history.json facts/macro_extra.json facts/macro_extra_history.json facts/kr_key.json facts/calendar_sent.json analysis/regime.json analysis/calendar.json log/ data/status.json 2>/dev/null || true
             if git diff --cached --quiet; then echo "::notice::변경 없음"; exit 0; fi
