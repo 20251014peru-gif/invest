@@ -1,9 +1,9 @@
 name: Research workspace checks
 on:
   pull_request:
-    paths: ['research*.html', 'js/research*', 'data/research-cpi.json', 'tests/research.test.mjs', '.github/workflows/research-checks.yml']
+    paths: ['research*.html', 'js/research*', 'data/research-cpi.json', 'tests/research*.mjs', '.github/workflows/research-checks.yml']
   push:
-    paths: ['research*.html', 'js/research*', 'data/research-cpi.json', 'tests/research.test.mjs', '.github/workflows/research-checks.yml']
+    paths: ['research*.html', 'js/research*', 'data/research-cpi.json', 'tests/research*.mjs', '.github/workflows/research-checks.yml']
 permissions:
   contents: read
 jobs:
@@ -14,5 +14,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test tests/research.test.mjs tests/macro-detail.test.cjs
+      - run: node --test tests/research*.mjs tests/macro-detail.test.cjs
       - run: node --check js/research-app.mjs
+      - run: node --check js/research-dashboard.mjs
