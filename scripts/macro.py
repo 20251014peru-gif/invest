@@ -94,9 +94,11 @@ def derive_diff(rows):
 
 def derive_yoy(rows):
     """월간 지수 → 전년동월비 %. rows 오름차순, 13개 이상 필요. 반환 [(전월, 전월yoy), (최신, yoy)]"""
-    if len(rows) < 14: raise RuntimeError(f"yoy 계산에 14개월 필요, {len(rows)}개")
-    yoy = lambda i: round((rows[i][1] / rows[i - 12][1] - 1) * 100, 2)
-    return [(rows[-2][0], yoy(-2)), (rows[-1][0], yoy(-1))]
+    from macro_periods import transform
+    values = transform(rows, 'yoy')
+    if len(values) < 2 or values[-1]['period'] != rows[-1][0]:
+        raise RuntimeError('전년 같은 달 원자료 부족 — 다른 달로 대체하지 않음')
+    return [(p['period'], round(p['value'], 2)) for p in values[-2:]]
 
 FETCH = {"fred": fetch_fred, "yahoo": fetch_yahoo, "stooq": fetch_stooq}
 

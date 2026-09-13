@@ -7,8 +7,9 @@ const now=new Date('2026-09-08T05:00:00Z');
 const row=(id,extra={})=>({id,value:100,prev:100,cycle:'D',as_of:'2026-09-07',unit:'pt',...extra});
 test('실제 35개 자료가 핵심과 분야별 목록에 정확히 한 번씩 보존된다',()=>{
   const read=p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url),'utf8'));
-  const items=mergeIndicators(read('../../data/indicators.json'),read('../../facts/macro.json'));
-  const board=marketBoard(items,read('../../facts/macro_history.json'),now);
+  const macro=read('../../facts/macro.json');
+  const items=mergeIndicators(read('../../data/indicators.json'),macro);
+  const board=marketBoard(items,read('../../facts/macro_history.json'),new Date(macro.collected_at));
   const ids=[...board.fixed,...board.extras].map(x=>x.row.id).concat(board.remaining.map(x=>x.id));
   assert.equal(items.length,35);assert.equal(ids.length,35);assert.equal(new Set(ids).size,35);
   assert.deepEqual(board.fixed.map(x=>x.row.id),FIXED);assert.ok(board.extras.length>=2&&board.extras.length<=4);
