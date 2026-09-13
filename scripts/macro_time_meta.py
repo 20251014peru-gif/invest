@@ -1,5 +1,9 @@
-# v 20260913 — 매크로 지표의 '자료 기준일/수집시각/발표주기/다음 갱신/신선도'를 표준화한다.
-# 원칙: 수집기가 매시간 돌아가는 것과 원 지표가 새로 발표되는 주기는 서로 다르다.
+# v 20260913-objective — 매크로 시간정보를 '확인된 사실'만으로 표준화한다.
+# 원칙:
+# 1) 수집 주기와 원자료 발표 주기를 분리한다.
+# 2) 다음 발표일은 공식 일정이 출처 URL과 함께 검증된 경우에만 표시한다.
+# 3) 임의 stale 기준, 주기 기반 추정일, 보간 날짜를 만들지 않는다.
+# 4) 판단 대신 객관값(as_of, collected_at, age_days, source)을 제공한다.
 import json, os, datetime as dt
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -10,8 +14,6 @@ FREQ = {
     "D": "일간", "W": "주간", "M": "월간", "Q": "분기", "A": "연간",
     "weekday": "영업일", "daily": "일간", "weekly": "주간", "monthly": "월간", "quarterly": "분기"
 }
-STALE_DAYS = {"D": 5, "W": 15, "M": 70, "Q": 140, "A": 430,
-              "weekday": 5, "daily": 5, "weekly": 15, "monthly": 70, "quarterly": 140}
 
 def load(path, default):
     try:
@@ -22,92 +24,86 @@ def save(path, obj):
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, ensure_ascii=False, indent=2)
 
-def parse_as_of(s):
+def parse_exact_date(s):
+    """정확한 YYYY-MM-DD만 날짜 나이 계산에 사용한다. 월/연 자료에 임의 말일을 붙이지 않는다."""
     s = str(s or "").strip()
     try:
-        if len(s) >= 10: return dt.date.fromisoformat(s[:10])
-        if len(s) == 7:  # 월간 자료는 그 달 말일 기준으로 신선도를 계산
-            y, m = map(int, s.split("-")); n = dt.date(y + (m == 12), 1 if m == 12 else m + 1, 1)
-            return n - dt.timedelta(days=1)
-        if len(s) == 4: return dt.date(int(s), 12, 31)
-    except Exception: pass
+        if len(s) >= 10 and s[4] == "-" and s[7] == "-":
+            return dt.date.fromisoformat(s[:10])
+    except Exception:
+        pass
     return None
 
-def next_business_day(d):
-    n = d + dt.timedelta(days=1)
-    while n.weekday() >= 5: n += dt.timedelta(days=1)
-    return n
-
-def estimate_next(cycle, as_of):
-    """공식 일정이 없을 때 거짓 정밀도를 피하고 '갱신 가능 시점'을 보수적으로 표현한다."""
-    base = parse_as_of(as_of) or dt.datetime.now(KST).date()
-    if cycle in ("D", "weekday", "daily"):
-        d = next_business_day(base)
-        return {"date": d.isoformat(), "label": f"다음 영업일 이후 ({d:%m/%d})", "estimated": True}
-    if cycle in ("W", "weekly"):
-        d = base + dt.timedelta(days=7)
-        return {"date": d.isoformat(), "label": f"다음 주 발표 예상 ({d:%m/%d} 전후)", "estimated": True}
-    if cycle in ("M", "monthly"):
-        return {"date": "", "label": "다음 공식 월간 발표", "estimated": True}
-    if cycle in ("Q", "quarterly"):
-        return {"date": "", "label": "다음 공식 분기 발표", "estimated": True}
-    if cycle == "A":
-        return {"date": "", "label": "다음 공식 연간 발표", "estimated": True}
-    return {"date": "", "label": "발표 일정 확인", "estimated": True}
+def official_event_map(cal):
+    """공식 검증 플래그 + 출처 URL + 날짜가 모두 있는 일정만 채택한다."""
+    out = {}
+    for e in cal.get("upcoming", []):
+        verified = e.get("verified_official") is True or e.get("evidence") == "official"
+        if not verified or not e.get("id") or not e.get("date") or not e.get("url"):
+            continue
+        out.setdefault(e["id"], e)
+    return out
 
 def main():
     path = P("facts", "macro.json")
     doc = load(path, {})
     view = load(P("data", "macro_view.json"), {}).get("items", {})
     cal = load(P("analysis", "calendar.json"), {})
-    upcoming = {}
-    for e in cal.get("upcoming", []):
-        if e.get("id") and e.get("date"):
-            upcoming.setdefault(e["id"], e)
+    official = official_event_map(cal)
 
     today = dt.datetime.now(KST).date()
-    counts = {"fresh": 0, "waiting": 0, "stale": 0, "error": 0, "pending": 0}
+    counts = {"today": 0, "available": 0, "scheduled": 0, "error": 0, "pending": 0, "unknown": 0}
+
     for r in doc.get("items", []):
         m = view.get(r.get("id"), {})
         cycle = r.get("cycle") or m.get("cycle") or ""
-        frequency = m.get("frequency") or FREQ.get(cycle, cycle or "미정")
-        r["frequency"] = frequency
+        r["frequency"] = m.get("frequency") or FREQ.get(cycle, cycle or "미확인")
 
-        exact = upcoming.get(r.get("id"))
-        if exact:
-            t = (" " + exact.get("time", "")) if exact.get("time") else ""
-            r["next_update"] = {"date": exact["date"], "label": f"{exact['date'][5:].replace('-', '/')} {t.strip()} 공식 일정".strip(), "estimated": False, "source": exact.get("url", "")}
+        ev = official.get(r.get("id"))
+        if ev:
+            time_part = (" " + ev.get("time", "").strip()) if ev.get("time") else ""
+            r["next_update"] = {
+                "date": ev["date"],
+                "time": ev.get("time", ""),
+                "label": f"{ev['date']}{time_part}",
+                "verified": True,
+                "source": ev["url"]
+            }
         else:
-            r["next_update"] = estimate_next(cycle, r.get("as_of"))
+            r["next_update"] = {
+                "date": "", "time": "", "label": "공식 일정 미확인",
+                "verified": False, "source": ""
+            }
+
+        exact_date = parse_exact_date(r.get("as_of"))
+        r["age_days"] = (today - exact_date).days if exact_date else None
 
         if r.get("error"):
             state = "error"
         elif r.get("pending"):
             state = "pending"
+        elif ev and ev.get("date") > today.isoformat():
+            state = "scheduled"
+        elif exact_date == today:
+            state = "today"
+        elif r.get("value") is not None and r.get("as_of"):
+            state = "available"
         else:
-            d = parse_as_of(r.get("as_of"))
-            age = (today - d).days if d else None
-            r["age_days"] = age
-            limit = STALE_DAYS.get(cycle, 70)
-            if age is not None and age > limit:
-                state = "stale"
-            elif cycle in ("D", "weekday", "daily") and age is not None and age <= 1:
-                state = "fresh"
-            else:
-                state = "waiting"
+            state = "unknown"
         r["freshness"] = state
         counts[state] = counts.get(state, 0) + 1
 
     doc["time_meta"] = {
-        "schema": "macro_time/1",
+        "schema": "macro_time/2",
+        "policy": "objective_only",
         "computed_at": dt.datetime.now(KST).replace(microsecond=0).isoformat(),
         "collector_schedule": "매시 05분",
         "collector_interval": "1시간",
-        "note": "next_update.estimated=true 는 공식 발표일이 아니라 주기 기반 예상. 공식 일정이 연결되면 estimated=false.",
-        "freshness_counts": counts
+        "note": "다음 발표일은 verified_official/evidence=official + 출처 URL이 있는 일정만 표시. 그 외는 '공식 일정 미확인'. 임의 추정·보간·stale 임계값 없음.",
+        "status_counts": counts
     }
     save(path, doc)
-    print("macro time metadata:", counts)
+    print("macro objective time metadata:", counts)
 
 if __name__ == "__main__":
     main()
