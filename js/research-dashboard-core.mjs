@@ -1,5 +1,5 @@
 import {safeUrl} from './research-core.mjs';
-export const DASH_RELEASE={version:'v018-20260914-000355-KST',summary:'전체 대시보드 · 8개 보기 · 공통 3페이지 탐색'};
+export const DASH_RELEASE={version:'v019-20260914-050618-KST',summary:'뉴스레이더 연결 · 기사 보관 · 중복 방지'};
 export const KINDS={indicator:'지표',news:'뉴스',idea:'분석',memo:'메모',chart:'차트',youtube:'유튜브',record:'기록'};
 export const VIEWS={card:'카드',list:'목록',table:'표',board:'종류 보드',topic:'주제별',calendar:'달력',timeline:'타임라인',gallery:'갤러리'};
 export const strings=v=>Array.isArray(v)?v.filter(x=>typeof x==='string'&&x.trim()):[];
