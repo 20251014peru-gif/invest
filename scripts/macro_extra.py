@@ -29,10 +29,10 @@ def fred(series):
     return out
 
 def yoy(rows):
-    if len(rows)<14: raise RuntimeError('yoy 계산에 14개 이상 필요')
-    prev=(rows[-2][1]/rows[-14][1]-1)*100
-    cur=(rows[-1][1]/rows[-13][1]-1)*100
-    return rows[-1][0],cur,prev
+    from macro_periods import transform
+    values=transform(rows,'yoy')
+    if len(values)<2 or values[-1]['period']!=rows[-1][0]:raise RuntimeError('전년 같은 달 원자료 부족')
+    return values[-1]['period'],values[-1]['value'],values[-2]['value']
 
 def mom_pct(rows):
     if len(rows)<3: raise RuntimeError('mom 계산에 3개 이상 필요')
