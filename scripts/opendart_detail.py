@@ -1,5 +1,5 @@
-# v 20260915-WaveB2  opendart_detail.py — 고위험 Event 공식 상세 API adapter (DS005). endpoint 는 공식명만(추측 금지).
-# 반환 field 는 실호출로 확인. field_map 의 기대 키와 대조해 SCHEMA_MISMATCH 판정.
+# v 20260915-WaveB6  opendart_detail.py — 고위험 Event 공식 상세 API adapter (DS005).
+# endpoint/field는 공식가이드 또는 라이브 실응답으로 검증된 것만 사용한다.
 import json, urllib.request, urllib.parse
 BASE="https://opendart.fss.or.kr/api/"
 ENDPOINTS={
@@ -28,14 +28,16 @@ def match_by_rcept(rows, rcept_no):
     return (hit[0],"MATCHED") if hit else (None,"NO_MATCH_IN_ROWS")
 
 def check_schema(field_names, event_type, field_map):
+    """실응답 schema 검사. external 값은 상세 API 필드가 아니므로 검사하지 않는다."""
     entry=field_map.get(event_type,{})
     if entry.get("status")=="PENDING_GUIDE_READ" or entry.get("materialityStatus")=="NOT_REQUIRED":
         return {"schema":"SKIP"}
-    need=set()
+    need=set(entry.get("required_fields",[]))
     for m in entry.get("metrics",[]):
         if m.get("reported_field"): need.add(m["reported_field"])
         for spec in (m.get("numerator",{}), m.get("denominator",{})):
             if "field" in spec: need.add(spec["field"])
             if "fields" in spec: need.update(spec["fields"])
+            # prefix/external은 단일 상세응답 필수필드로 간주하지 않는다.
     missing=sorted(need - set(field_names))
-    return {"schema":"OK"} if not missing else {"schema":"SCHEMA_MISMATCH","missing":missing}
+    return {"schema":"OK","required":sorted(need)} if not missing else {"schema":"SCHEMA_MISMATCH","missing":missing,"required":sorted(need)}
