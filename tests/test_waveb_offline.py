@@ -1,9 +1,9 @@
-# Wave B 오프라인 단위테스트 — 공식필드 기반 계산·상태·parser 검증. 네트워크 불필요.
+# Wave B 오프라인 단위테스트 — 공식필드 계산·상태·사건별 Materiality threshold 검증. 네트워크 불필요.
 import os, sys
 from decimal import Decimal
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),"..","scripts"))
 import materiality as MAT, risk_gate as RG, opendart_detail as OD, event_normalizer as N
-R=[]; ck=lambda n,c,d="":R.append((n,bool(c),d)); FM=MAT.load_field_map()
+R=[]; ck=lambda n,c,d="":R.append((n,bool(c),d)); FM=MAT.load_field_map(); TH=MAT.load_thresholds()
 ck("parser 콤마제거", MAT.num("92,000,000,000")==Decimal("92000000000"))
 ck("parser 소수", MAT.num("18.4")==Decimal("18.4"))
 ck("parser '-'·''·null → None", MAT.num("-") is None and MAT.num("") is None and MAT.num(None) is None)
@@ -37,8 +37,26 @@ aud=N.normalize_item({"stock_code":"111111","company":"X","sector":"s","report_n
 ck("일반 감사보고서→PERIODIC/AUDIT_REPORT(U0)", aud["family"]=="PERIODIC" and aud["type"]=="AUDIT_REPORT" and aud["urgency"]=="U0")
 bs=N.normalize_item({"stock_code":"111111","company":"X","sector":"s","report_nm":"영업정지","rcept_no":"29990101000003","rcept_dt":"29990101","url":""}); bs["materialityStatus"]="UNKNOWN"; RG.evaluate(bs)
 ck("영업정지 규모미확인→자동 M3 금지·방어검토는 허용", bs["materiality"]=="UNKNOWN" and bs["fast_risk_defense_allowed"] and bs["structural_risk"]=="REVIEW")
+
+# 사건별 threshold: 공통 10/3/1 규칙을 사용하지 않는지 검증
+ck("유상증자 희석 10% → M2(20/5 기준)", MAT.band_for("RIGHTS_OFFERING",mets,TH)=="M2")
+row25={"nstk_ostk_cnt":"2500000","nstk_estk_cnt":"0","bfic_tisstk_ostk":"10000000","bfic_tisstk_estk":"0"}
+m25=MAT.compute("RIGHTS_OFFERING",row25,{},"R7",FM)[0]
+ck("유상증자 희석 25% → M3", MAT.band_for("RIGHTS_OFFERING",m25,TH)=="M3")
+mb7=MAT.compute("BUSINESS_SUSPENSION",{"bsnsp_amt":"7000000000","rsl":"100000000000","sl_vs":"7.0"},{},"R8",FM)[0]
+ck("영업정지 7% → M2(10/5 기준)", MAT.band_for("BUSINESS_SUSPENSION",mb7,TH)=="M2")
+mb3=MAT.compute("BUSINESS_SUSPENSION",{"bsnsp_amt":"3000000000","rsl":"100000000000","sl_vs":"3.0"},{},"R9",FM)[0]
+ck("영업정지 3% → M1", MAT.band_for("BUSINESS_SUSPENSION",mb3,TH)=="M1")
+bw=[{"metric":"bw_shares_ratio","status":"REPORTED_ONLY","reportedValue":7.0,"computedValue":None}]
+ck("BW 잠재희석 7% → M2(15/5 기준)", MAT.band_for("BW_ISSUE",bw,TH)=="M2")
+buy=[{"metric":"buyback_to_mktcap","status":"CALCULATED","reportedValue":None,"computedValue":2.0}]
+ck("자사주취득 시총대비 2% → M2(3/1 기준)", MAT.band_for("BUYBACK",buy,TH)=="M2")
+only_raise=[{"metric":"raise_to_mktcap","status":"CALCULATED","reportedValue":None,"computedValue":30.0}]
+ck("정책 미정 metric은 30%여도 임의 M3 금지", MAT.band_for("RIGHTS_OFFERING",only_raise,TH)=="UNKNOWN")
+ck("구형 공통 worst_band 비활성", MAT.worst_band([{"metric":"x","status":"CALCULATED","computedValue":99.0}])=="UNKNOWN")
+
 p=sum(1 for _,ok,_ in R if ok)
-print("Wave B 오프라인 단위테스트 (공식필드 기반)\n"+"-"*60)
+print("Wave B 오프라인 단위테스트 (공식필드 + 사건별 threshold)\n"+"-"*60)
 for n,ok,d in R: print(f"  [{'PASS' if ok else 'FAIL'}] {n}"+(f"  · {d}" if d else ""))
 print("-"*60+f"\n  합계 {p}/{len(R)} PASS")
 sys.exit(0 if p==len(R) else 1)
