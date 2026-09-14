@@ -21,15 +21,15 @@ jobs:
         env:
           GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          AI_ACCESS_PIN: ${{ secrets.AI_ACCESS_PIN }}
+          AI_ACCESS_CODE: ${{ secrets.AI_ACCESS_CODE }}
           NO_PAID: ${{ inputs.confirm_no_paid_test }}
         run: |
           set -euo pipefail
           [ "$NO_PAID" = "true" ] || { echo "::error::유료 AI 시험 금지 확인이 필요합니다"; exit 1; }
           [ -n "$GCP_SERVICE_ACCOUNT_KEY" ] || { echo "::error::GitHub Secret GCP_SERVICE_ACCOUNT_KEY 미설정"; exit 1; }
           [ -n "$ANTHROPIC_API_KEY" ] || { echo "::error::GitHub Secret ANTHROPIC_API_KEY 미설정"; exit 1; }
-          [ -n "$AI_ACCESS_PIN" ] || { echo "::error::GitHub Secret AI_ACCESS_PIN 미설정"; exit 1; }
-          [ ${#AI_ACCESS_PIN} -ge 6 ] || { echo "::error::AI_ACCESS_PIN은 6자 이상 사용"; exit 1; }
+          [ -n "$AI_ACCESS_CODE" ] || { echo "::error::GitHub Secret AI_ACCESS_CODE 미설정"; exit 1; }
+          [ ${#AI_ACCESS_CODE} -ge 16 ] || { echo "::error::AI_ACCESS_CODE는 16자 이상 사용"; exit 1; }
           echo "필수 Secret 존재 확인 완료(값은 출력하지 않음)"
 
       - uses: actions/checkout@v4
@@ -71,15 +71,15 @@ jobs:
       - name: Set Firebase Secret Manager values
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          AI_ACCESS_PIN: ${{ secrets.AI_ACCESS_PIN }}
+          AI_ACCESS_CODE: ${{ secrets.AI_ACCESS_CODE }}
         run: |
           set -euo pipefail
           umask 077
           printf '%s' "$ANTHROPIC_API_KEY" >/tmp/anthropic_api_key
-          printf '%s' "$AI_ACCESS_PIN" >/tmp/ai_access_pin
+          printf '%s' "$AI_ACCESS_CODE" >/tmp/ai_access_code
           firebase functions:secrets:set ANTHROPIC_API_KEY --data-file /tmp/anthropic_api_key --project my-system-25497
-          firebase functions:secrets:set AI_ACCESS_PIN --data-file /tmp/ai_access_pin --project my-system-25497
-          rm -f /tmp/anthropic_api_key /tmp/ai_access_pin
+          firebase functions:secrets:set AI_ACCESS_CODE --data-file /tmp/ai_access_code --project my-system-25497
+          rm -f /tmp/anthropic_api_key /tmp/ai_access_code
           echo "Firebase secrets set (values hidden)"
 
       - name: Deploy access function codebase
