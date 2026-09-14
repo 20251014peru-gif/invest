@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {
   MODEL_POLICY, AI_POLICY_VERSION, analysisFingerprint, estimateCostUsd, costFromUsageUsd,
-  kstKeys, buildAnalysisPrompt, pricingIsStale, ANALYSIS_OUTPUT_SCHEMA
+  kstKeys, buildAnalysisPrompt, pricingIsStale, ANALYSIS_OUTPUT_SCHEMA, cleanThesis
 } from '../lib/ai_core.js';
 
 let tests=0;
@@ -41,4 +41,27 @@ eq(ANALYSIS_OUTPUT_SCHEMA.additionalProperties,false);
 deep(kstKeys(new Date('2026-09-14T16:00:00Z')),{day:'2026-09-15',month:'2026-09'});
 eq(pricingIsStale(pricing,new Date('2026-09-20T00:00:00Z')),false);
 eq(pricingIsStale(pricing,new Date('2027-01-01T00:00:00Z')),true);
+
+const legacyStock={
+  name:'테스트전자',status:'보유',
+  customFields:[
+    {label:'매수사유',value:'AI 수요 성장'},
+    {label:'핵심가정',value:'마진 개선 지속'},
+    {label:'반증조건',value:'마진 2분기 연속 하락'},
+    {label:'촉매',value:'신제품 양산'},
+    {label:'리스크',value:'고객 집중'},
+    {label:'재평가시점',value:'2026-12'}
+  ],
+  thesisLog:[{date:'2026-09-01',text:'초기 관찰'},{date:'2026-09-15',text:'가정 유지'}]
+};
+const lt=cleanThesis(legacyStock);
+eq(lt.thesisId,'테스트전자');
+match(lt.statement,/매수사유: AI 수요 성장/);
+match(lt.statement,/핵심가정: 마진 개선 지속/);
+match(lt.statement,/2026-09-15 가정 유지/);
+deep(lt.confirmationConditions,['핵심가정: 마진 개선 지속','촉매: 신제품 양산']);
+deep(lt.invalidationConditions,['반증조건: 마진 2분기 연속 하락','리스크: 고객 집중']);
+eq(lt.expectedHorizon,'2026-12');
+eq(lt.version,'2026-09-15');
+
 console.log(`Wave C AI core: ${tests}/${tests} PASS`);
