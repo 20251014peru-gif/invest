@@ -8,7 +8,7 @@ import {onCall, HttpsError} from 'firebase-functions/v2/https';
 import {defineSecret} from 'firebase-functions/params';
 import * as logger from 'firebase-functions/logger';
 import {
-  MODEL_POLICY, PROMPT_VERSION, ANALYSIS_OUTPUT_SCHEMA,
+  MODEL_POLICY, PROMPT_VERSION, AI_POLICY_VERSION, ANALYSIS_OUTPUT_SCHEMA,
   analysisFingerprint, buildAnalysisPrompt, getPrice,
   estimateCostUsd, costFromUsageUsd, kstKeys, pricingIsStale, sha256
 } from './lib/ai_core.js';
@@ -49,9 +49,18 @@ function choosePolicy(tier) {
   return {tier: key, ...MODEL_POLICY[key]};
 }
 function anthropicClient() { return new Anthropic({apiKey: ANTHROPIC_API_KEY.value()}); }
-function outputConfig() { return {format: {type: 'json_schema', schema: ANALYSIS_OUTPUT_SCHEMA}}; }
+function outputConfig(policy) {
+  const out = {format: {type: 'json_schema', schema: ANALYSIS_OUTPUT_SCHEMA}};
+  if (policy?.effort) out.effort = policy.effort;
+  return out;
+}
 async function countInputTokens(client, policy, prompt) {
-  const counted = await client.messages.countTokens({model: policy.model, system: prompt.system, messages: [{role: 'user', content: prompt.user}], output_config: outputConfig()});
+  const counted = await client.messages.countTokens({
+    model: policy.model,
+    system: prompt.system,
+    messages: [{role: 'user', content: prompt.user}],
+    output_config: outputConfig(policy)
+  });
   return Number(counted.input_tokens || 0);
 }
 function requireEvent(prompt) {
@@ -65,7 +74,6 @@ async function reserveBudget(reserveUsd, cfg) {
   const dref = db.collection('ai_cost_daily').doc(day);
   const mref = db.collection('ai_cost_monthly').doc(month);
   await db.runTransaction(async tx => {
-    // Firestore transaction: all reads before writes.
     const ds = await tx.get(dref);
     const ms = await tx.get(mref);
     const d = ds.exists ? ds.data() : {}; const m = ms.exists ? ms.data() : {};
@@ -111,14 +119,23 @@ export const estimateEventAnalysis = onCall({region: REGION, secrets: [ANTHROPIC
   const prompt=buildAnalysisPrompt(request.data?.event,request.data?.thesis); requireEvent(prompt);
   const inputTokens=await countInputTokens(anthropicClient(),policy,prompt);
   const cfg=await settings();
-  return {provider:'anthropic',tier:policy.tier,model:policy.model,estimatedInputTokens:inputTokens,estimatedOutputTokens:policy.estimateOutputTokens,estimatedCostUsd:estimateCostUsd(inputTokens,policy.estimateOutputTokens,price),maxCostUsd:estimateCostUsd(inputTokens,policy.maxTokens,price),pricingStale:pricingIsStale(pricing),pricingVerifiedAt:pricing.verifiedAt,budgets:{dailyBudgetUsd:cfg.dailyBudgetUsd,monthlyBudgetUsd:cfg.monthlyBudgetUsd},note:'Estimate only. Final cost uses API response usage.'};
+  return {
+    provider:'anthropic',tier:policy.tier,model:policy.model,effort:policy.effort||null,
+    aiPolicyVersion:AI_POLICY_VERSION,
+    estimatedInputTokens:inputTokens,estimatedOutputTokens:policy.estimateOutputTokens,
+    estimatedCostUsd:estimateCostUsd(inputTokens,policy.estimateOutputTokens,price),
+    maxOutputTokens:policy.maxTokens,maxCostUsd:estimateCostUsd(inputTokens,policy.maxTokens,price),
+    pricingStale:pricingIsStale(pricing),pricingVerifiedAt:pricing.verifiedAt,
+    budgets:{dailyBudgetUsd:cfg.dailyBudgetUsd,monthlyBudgetUsd:cfg.monthlyBudgetUsd},
+    note:'Estimate only. Final cost uses API response usage; max cost reserves full max_tokens output headroom.'
+  };
 });
 
 export const analyzeEvent = onCall({region: REGION, secrets: [ANTHROPIC_API_KEY], timeoutSeconds: 180, memory: '512MiB'}, async request => {
   const uid=request.auth?.uid; await assertAuthorized(uid); assertPayloadSize(request.data);
   const pricing=loadPricing(), cfg=await settings(), policy=choosePolicy(request.data?.tier), price=getPrice(pricing,policy.model);
   const prompt=buildAnalysisPrompt(request.data?.event,request.data?.thesis); requireEvent(prompt);
-  const fingerprint=analysisFingerprint({event:request.data?.event,thesis:request.data?.thesis,model:policy.model,promptVersion:PROMPT_VERSION});
+  const fingerprint=analysisFingerprint({event:request.data?.event,thesis:request.data?.thesis,model:policy.model,promptVersion:PROMPT_VERSION,policyVersion:AI_POLICY_VERSION});
   const aref=db.collection('event_ai_analysis').doc(fingerprint); const existing=await aref.get();
   if (existing.exists && existing.data()?.status==='success') return {cacheHit:true,apiCalled:false,incrementalCostUsd:0,analysis:publicAnalysis(existing.data())};
 
@@ -130,21 +147,50 @@ export const analyzeEvent = onCall({region: REGION, secrets: [ANTHROPIC_API_KEY]
   const usageRef=db.collection('ai_usage').doc(); const snapshot=priceSnapshot(policy.model,price,pricing); const requestedAt=new Date().toISOString();
   let message=null, budgetSettled=false;
   try {
-    message=await client.messages.create({model:policy.model,max_tokens:policy.maxTokens,system:prompt.system,messages:[{role:'user',content:prompt.user}],output_config:outputConfig(),metadata:{user_id:sha256(uid).slice(0,64)}});
+    message=await client.messages.create({
+      model:policy.model,
+      max_tokens:policy.maxTokens,
+      system:prompt.system,
+      messages:[{role:'user',content:prompt.user}],
+      output_config:outputConfig(policy),
+      metadata:{user_id:sha256(uid).slice(0,64)}
+    });
+    if (message.stop_reason === 'max_tokens') throw new Error('Claude output hit max_tokens before a complete structured answer.');
+    if (message.stop_reason === 'refusal') throw new Error('Claude refused this analysis request.');
     const text=message.content?.find?.(b=>b.type==='text')?.text; if(!text) throw new Error('Claude returned no text block');
     const output=JSON.parse(text); const actualUsd=costFromUsageUsd(message.usage||{},price);
     await reconcileBudget(budgetKeys,reserveMaxCostUsd,actualUsd,false); budgetSettled=true;
     const completedAt=new Date().toISOString();
-    const analysisPublic={schema:'event-ai-analysis/1',status:'success',reviewRequired:true,g6Unlocked:false,eventId:prompt.event.event_id,fingerprint,provider:'anthropic',tier:policy.tier,model:policy.model,promptVersion:PROMPT_VERSION,output,usage:message.usage||{},estimatedCostUsd,costFromUsageUsd:actualUsd,billedCostUsd:null,priceSnapshot:snapshot,pricingStale:pricingIsStale(pricing),requestedAt,completedAt};
+    const analysisPublic={
+      schema:'event-ai-analysis/1',status:'success',reviewRequired:true,g6Unlocked:false,eventId:prompt.event.event_id,fingerprint,
+      provider:'anthropic',tier:policy.tier,model:policy.model,effort:policy.effort||null,aiPolicyVersion:AI_POLICY_VERSION,
+      promptVersion:PROMPT_VERSION,stopReason:message.stop_reason||null,output,usage:message.usage||{},estimatedCostUsd,
+      costFromUsageUsd:actualUsd,billedCostUsd:null,priceSnapshot:snapshot,pricingStale:pricingIsStale(pricing),requestedAt,completedAt
+    };
     await aref.set({...analysisPublic,uid,createdAt:FieldValue.serverTimestamp()},{merge:false});
-    await usageRef.set({schema:'ai_usage/1',status:'success',eventId:prompt.event.event_id,analysisType:'risk_thesis',fingerprint,uid,provider:'anthropic',tier:policy.tier,model:policy.model,promptVersion:PROMPT_VERSION,inputTokens:Number(message.usage?.input_tokens||0),outputTokens:Number(message.usage?.output_tokens||0),cacheReadInputTokens:Number(message.usage?.cache_read_input_tokens||0),cacheCreationInputTokens:Number(message.usage?.cache_creation_input_tokens||0),estimatedInputTokens:inputTokens,estimatedCostUsd,reservedMaxCostUsd,costFromUsageUsd:actualUsd,billedCostUsd:null,priceSnapshot:snapshot,requestedAt,completedAt,createdAt:FieldValue.serverTimestamp()});
+    await usageRef.set({
+      schema:'ai_usage/1',status:'success',eventId:prompt.event.event_id,analysisType:'risk_thesis',fingerprint,uid,
+      provider:'anthropic',tier:policy.tier,model:policy.model,effort:policy.effort||null,aiPolicyVersion:AI_POLICY_VERSION,
+      promptVersion:PROMPT_VERSION,stopReason:message.stop_reason||null,
+      inputTokens:Number(message.usage?.input_tokens||0),outputTokens:Number(message.usage?.output_tokens||0),
+      cacheReadInputTokens:Number(message.usage?.cache_read_input_tokens||0),cacheCreationInputTokens:Number(message.usage?.cache_creation_input_tokens||0),
+      estimatedInputTokens:inputTokens,estimatedCostUsd,reservedMaxCostUsd,costFromUsageUsd:actualUsd,billedCostUsd:null,
+      priceSnapshot:snapshot,requestedAt,completedAt,createdAt:FieldValue.serverTimestamp()
+    });
     return {cacheHit:false,apiCalled:true,incrementalCostUsd:actualUsd,analysis:analysisPublic};
   } catch(err) {
     const usage=message?.usage||err?.usage||null; const actualUsd=usage?costFromUsageUsd(usage,price):0;
     if(!budgetSettled) await reconcileBudget(budgetKeys,reserveMaxCostUsd,actualUsd,!usage);
     const completedAt=new Date().toISOString();
     try {
-      await usageRef.set({schema:'ai_usage/1',status:'error',eventId:prompt.event.event_id,analysisType:'risk_thesis',fingerprint,uid,provider:'anthropic',tier:policy.tier,model:policy.model,promptVersion:PROMPT_VERSION,usage:usage||null,estimatedInputTokens:inputTokens,estimatedCostUsd,reservedMaxCostUsd,costFromUsageUsd:usage?actualUsd:null,billedCostUsd:null,costStatus:usage?'USAGE_RECONCILED':'UNRECONCILED',errorType:err?.name||'Error',errorMessage:String(err?.message||err).slice(0,500),priceSnapshot:snapshot,requestedAt,completedAt,createdAt:FieldValue.serverTimestamp()});
+      await usageRef.set({
+        schema:'ai_usage/1',status:'error',eventId:prompt.event.event_id,analysisType:'risk_thesis',fingerprint,uid,
+        provider:'anthropic',tier:policy.tier,model:policy.model,effort:policy.effort||null,aiPolicyVersion:AI_POLICY_VERSION,
+        promptVersion:PROMPT_VERSION,stopReason:message?.stop_reason||null,usage:usage||null,
+        estimatedInputTokens:inputTokens,estimatedCostUsd,reservedMaxCostUsd,costFromUsageUsd:usage?actualUsd:null,billedCostUsd:null,
+        costStatus:usage?'USAGE_RECONCILED':'UNRECONCILED',errorType:err?.name||'Error',errorMessage:String(err?.message||err).slice(0,500),
+        priceSnapshot:snapshot,requestedAt,completedAt,createdAt:FieldValue.serverTimestamp()
+      });
     } catch(logErr) { logger.error('Failed to persist AI usage error', {eventId:prompt.event.event_id,error:logErr?.message}); }
     logger.error('Event AI analysis failed',{eventId:prompt.event.event_id,fingerprint,error:err?.message});
     throw new HttpsError('internal',usage?'AI analysis failed after usage was recorded.':'AI analysis failed; budget reserve marked unreconciled for review.');
