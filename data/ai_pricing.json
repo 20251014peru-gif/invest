@@ -1,0 +1,41 @@
+{
+  "schema": "ai_pricing/1",
+  "provider": "anthropic",
+  "currency": "USD",
+  "verifiedAt": "2026-09-15",
+  "sourceType": "official",
+  "source": "Anthropic Platform Pricing",
+  "staleWarnAfterDays": 90,
+  "models": {
+    "claude-haiku-4-5-20251001": {
+      "displayName": "Claude Haiku 4.5",
+      "inputPerMillion": 1.0,
+      "outputPerMillion": 5.0,
+      "cacheReadPerMillion": 0.10,
+      "cache5mWritePerMillion": 1.25,
+      "cache1hWritePerMillion": 2.00,
+      "effectiveFrom": null,
+      "note": "현재가 검증. 과거 시작일은 이 파일에서 단정하지 않음."
+    },
+    "claude-sonnet-5": {
+      "displayName": "Claude Sonnet 5",
+      "inputPerMillion": 2.0,
+      "outputPerMillion": 10.0,
+      "cacheReadPerMillion": 0.20,
+      "cache5mWritePerMillion": 2.50,
+      "cache1hWritePerMillion": 4.00,
+      "effectiveFrom": null,
+      "note": "$2/$10 현재 표준가. 가격 변경 시 verifiedAt과 새 이력 구조를 함께 갱신."
+    },
+    "claude-opus-5": {
+      "displayName": "Claude Opus 5",
+      "inputPerMillion": 5.0,
+      "outputPerMillion": 25.0,
+      "cacheReadPerMillion": 0.50,
+      "cache5mWritePerMillion": 6.25,
+      "cache1hWritePerMillion": 10.00,
+      "effectiveFrom": null,
+      "note": "현재가 검증. 과거 시작일은 이 파일에서 단정하지 않음."
+    }
+  }
+}
