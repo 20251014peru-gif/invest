@@ -1,4 +1,4 @@
-# v 20260915-WaveB4  event_engine_validate.py — GitHub Actions에서 실제 OpenDART 검증.
+# v 20260915-WaveB5  event_engine_validate.py — GitHub Actions에서 실제 OpenDART 검증.
 # 현재 7일 index에 샘플이 없어도 watchlist corp_code 기준으로 180/365일 상세 API를 직접 탐색한다.
 import os, json, sys, datetime as dt, urllib.request, urllib.parse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -52,7 +52,8 @@ def run(days=None):
     for et in OD.ENDPOINTS:
         a={"type":et,"endpoint":OD.endpoint_for(et),"corp_queries":0,"status_ok":0,"schema":"-","field_names":set(),
            "MATCHED":0,"NO_DETAIL_RECORD":0,"NO_MATCH":0,"TYPE_MISMATCH":0,"reported":0,"computed":0,
-           "VERIFIED":0,"CALCULATED":0,"REPORTED_ONLY":0,"CONFLICT":0,"UNKNOWN":0,"NOT_REQUIRED":0,"G3":0,"samples":0}
+           "VERIFIED":0,"CALCULATED":0,"REPORTED_ONLY":0,"CONFLICT":0,"UNKNOWN":0,"NOT_REQUIRED":0,"G3":0,
+           "M0":0,"M1":0,"M2":0,"M3":0,"BAND_UNKNOWN":0,"samples":0}
         success_corps=0
         for sc,corp,m in corp_items:
             res=OD.fetch(et,corp,bgn_s,end_s,key); a["corp_queries"]+=1
@@ -80,6 +81,9 @@ def run(days=None):
                         match_state="TYPE_MISMATCH"; a["TYPE_MISMATCH"]+=1; rep["errors"].append({"type":et,"stock_code":sc,"rcept_no":rcept,"TYPE_MISMATCH":ev.get("type")})
                 else: a["NO_MATCH"]+=1
                 mets,ov=MAT.compute(et,row,{},rcept,field_map=FM)
+                band="M3" if ov=="NOT_REQUIRED" and et=="DEFAULT" else MAT.band_for(et,mets)
+                if band in ("M0","M1","M2","M3"): a[band]+=1
+                else: a["BAND_UNKNOWN"]+=1
                 for metric in mets:
                     if metric.get("reportedValue") is not None: a["reported"]+=1
                     if metric.get("computedValue") is not None: a["computed"]+=1
@@ -89,20 +93,21 @@ def run(days=None):
                 if ov=="NOT_REQUIRED": a["NOT_REQUIRED"]+=1
                 if ev is not None:
                     ev["corp_code"]=corp; ev["facts"]=MAT.extract_facts(et,row,FM); ev["metrics"]=mets; ev["materialityStatus"]=ov
-                    ev["materiality"]="M3" if ov=="NOT_REQUIRED" and et=="DEFAULT" else MAT.worst_band(mets); RG.evaluate(ev)
+                    ev["materiality"]=band; RG.evaluate(ev)
                     if ev.get("riskGate")=="G3": a["G3"]+=1
                 with open(os.path.join(fixdir,f"{et}_{rcept or sc}.json"),"w",encoding="utf-8") as f:
                     json.dump({"type":et,"stock_code":sc,"rcept_no":rcept,"match":match_state,"field_names":res.get("field_names",[]),
-                               "materialityStatus":ov,"facts":MAT.extract_facts(et,row,FM),"metrics":mets,"row":_san(row)},f,ensure_ascii=False,indent=2)
+                               "materialityStatus":ov,"materiality":band,"facts":MAT.extract_facts(et,row,FM),"metrics":mets,"row":_san(row)},f,ensure_ascii=False,indent=2)
             if success_corps>=MAX_SUCCESS_CORPS_PER_ENDPOINT: break
         a["no_sample"]=a["status_ok"]==0; a["field_names"]=sorted(a["field_names"]); rep["endpoints"].append(a)
     endpoint_ok=sum(1 for a in rep["endpoints"] if a["status_ok"]>0); matched=sum(a["MATCHED"] for a in rep["endpoints"])
     materiality_real=sum(a["VERIFIED"]+a["CALCULATED"]+a["REPORTED_ONLY"] for a in rep["endpoints"])
+    banded=sum(a["M0"]+a["M1"]+a["M2"]+a["M3"] for a in rep["endpoints"])
     schema_mismatch=sum(1 for e in rep["errors"] if "SCHEMA_MISMATCH" in e)
-    validation_pass=bool(corp_result.get("ok") and corp_result.get("count",0)>0 and endpoint_ok>=3 and matched>=1 and materiality_real>=1 and schema_mismatch==0)
-    rep["validation"]={"pass":validation_pass,"endpoint_success":endpoint_ok,"matched":matched,"materiality_real":materiality_real,"schema_mismatch":schema_mismatch}
+    validation_pass=bool(corp_result.get("ok") and corp_result.get("count",0)>0 and endpoint_ok>=3 and matched>=1 and materiality_real>=1 and banded>=1 and schema_mismatch==0)
+    rep["validation"]={"pass":validation_pass,"endpoint_success":endpoint_ok,"matched":matched,"materiality_real":materiality_real,"materiality_banded":banded,"schema_mismatch":schema_mismatch}
     print(json.dumps(rep,ensure_ascii=False,indent=2))
-    print(f"\n요약: 응답성공 endpoint {endpoint_ok}종(목표 3+) · MATCHED {matched} · Materiality실계산 {materiality_real} · SCHEMA_MISMATCH {schema_mismatch} · 오류 {len(rep['errors'])} · LIVE_VALIDATION={'PASS' if validation_pass else 'FAIL'}")
+    print(f"\n요약: 응답성공 endpoint {endpoint_ok}종 · MATCHED {matched} · Materiality실계산 {materiality_real} · 사건별M등급 {banded} · SCHEMA_MISMATCH {schema_mismatch} · 오류 {len(rep['errors'])} · LIVE_VALIDATION={'PASS' if validation_pass else 'FAIL'}")
     return 0 if validation_pass else 1
 
 if __name__=="__main__": sys.exit(run())
