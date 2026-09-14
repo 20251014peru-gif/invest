@@ -1,0 +1,38 @@
+{
+  "schema": "opendart_field_map/2",
+  "_note": "OpenDART 공식 개발가이드(DS005)에서 실제로 읽은 응답 필드만 기입. 안 읽은 endpoint 는 PENDING_GUIDE_READ 로 두고 절대 짐작으로 채우지 않는다. validate.yml 실행 시 실응답과 대조해 SCHEMA_MISMATCH 를 기록한다.",
+  "tolerance_pp": 0.5,
+  "maps": {
+    "RIGHTS_OFFERING": {
+      "status": "VERIFIED_SCHEMA",
+      "endpoint": "piicDecsn.json",
+      "apiId": "2020023",
+      "source": "공식가이드 DS005/2020023 (2026-09-15 확인)",
+      "facts": ["fdpp_fclt","fdpp_bsninh","fdpp_op","fdpp_dtrp","fdpp_ocsa","fdpp_etc","ic_mthn"],
+      "metrics": [
+        {"name":"ordinary_dilution","unit":"%","reported_field":null,"numerator":{"field":"nstk_ostk_cnt"},"denominator":{"field":"bfic_tisstk_ostk"},"formula":"nstk_ostk_cnt / bfic_tisstk_ostk * 100"},
+        {"name":"other_share_dilution","unit":"%","reported_field":null,"numerator":{"field":"nstk_estk_cnt"},"denominator":{"field":"bfic_tisstk_estk"},"formula":"nstk_estk_cnt / bfic_tisstk_estk * 100"},
+        {"name":"total_dilution","unit":"%","reported_field":null,"numerator":{"fields":["nstk_ostk_cnt","nstk_estk_cnt"]},"denominator":{"fields":["bfic_tisstk_ostk","bfic_tisstk_estk"]},"formula":"(nstk_ostk_cnt+nstk_estk_cnt)/(bfic_tisstk_ostk+bfic_tisstk_estk)*100"},
+        {"name":"raise_to_mktcap","unit":"%","reported_field":null,"numerator":{"prefix":"fdpp_"},"denominator":{"external":"market_cap"},"formula":"sum(fdpp_*) / market_cap * 100"}
+      ]
+    },
+    "BUSINESS_SUSPENSION": {
+      "status":"VERIFIED_SCHEMA","endpoint":"bsnSp.json","apiId":"2020020","source":"공식가이드 DS005/2020020 (2026-09-15 확인)",
+      "metrics":[{"name":"suspended_sales_ratio","unit":"%","reported_field":"sl_vs","numerator":{"field":"bsnsp_amt"},"denominator":{"field":"rsl"},"formula":"bsnsp_amt / rsl * 100"}]
+    },
+    "BW_ISSUE": {
+      "status":"VERIFIED_SCHEMA","endpoint":"bdwtIsDecsn.json","apiId":"2020034","source":"공식가이드 DS005/2020034 (2026-09-15 확인)",
+      "metrics":[
+        {"name":"bw_shares_ratio","unit":"%","reported_field":"nstk_isstk_tisstk_vs","numerator":{"field":"nstk_isstk_cnt"},"denominator":{"external":"listed_shares"},"formula":"nstk_isstk_cnt / listed_shares * 100"},
+        {"name":"bw_to_mktcap","unit":"%","reported_field":null,"numerator":{"field":"bd_fta"},"denominator":{"external":"market_cap"},"formula":"bd_fta / market_cap * 100"}
+      ]
+    },
+    "DEFAULT":{"endpoint":"dfOcr.json","apiId":"2020019","materialityStatus":"NOT_REQUIRED","note":"부도=구조적 위험(risk_gate). 금액비율 불필요."},
+    "CB_ISSUE":{"status":"PENDING_GUIDE_READ","endpoint":"cvbdIsDecsn.json","apiId":"2020033","guide_url":"https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS005&apiId=2020033"},
+    "EB_ISSUE":{"status":"PENDING_GUIDE_READ","endpoint":"exbdIsDecsn.json","apiId":"2020035","guide_url":"https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS005&apiId=2020035"},
+    "BUYBACK":{"status":"PENDING_GUIDE_READ","endpoint":"tsstkAqDecsn.json","apiId":"2020038","guide_url":"https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS005&apiId=2020038"},
+    "TREASURY_DISPOSAL":{"status":"PENDING_GUIDE_READ","endpoint":"tsstkDpDecsn.json","apiId":"2020039","guide_url":"https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS005&apiId=2020039"},
+    "LITIGATION":{"status":"PENDING_GUIDE_READ","endpoint":"lwstLg.json","apiId":"2020028","guide_url":"https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS005&apiId=2020028"}
+  },
+  "_tolerance_note":"허용오차는 코드 상수 materiality.RATIO_TOLERANCE_PP(0.5%p) 사용."
+}
