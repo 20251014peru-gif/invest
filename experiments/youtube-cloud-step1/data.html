@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script src="connection-config.js"></script>
+<script src="connection.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 📚 자료함 — 유튜브 요약기의 책갈피·메모를 채널 무관하게 모아 본다 (v38-c1-0914)
+     읽기 전용. 데이터는 youtube.html 이 저장한 Firestore youtube_summaries 그대로.
+     열기: http://localhost:5055/data   (app.py 가 서빙 — 파일을 직접 열면 Firestore 로그인이 막힐 수 있다) -->
+<script>window.APP_VERSION = "v38-c1-0914";</script>
+<script>document.title = "📚 자료함 " + window.APP_VERSION;</script>
+<style>
+:root{
+  --green:#2d6a4f; --green-lt:#e8f2ec; --gold:#8a5a00; --gold-lt:#f5ecd9;
+  --bg:#fdfcf9; --card:#ffffff; --line:#dfe3dd; --txt:#222; --sub:#777; --warn:#c0392b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--txt);font-size:15px;line-height:1.6}
+.wrap{max-width:1600px;margin:0 auto;padding:14px 16px 60px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+h1{font-size:22px;color:var(--green)}
+.ver{font-size:12px;color:var(--sub);background:#eee;border-radius:8px;padding:2px 8px}
+a.back{margin-left:auto;font-size:13px;color:var(--green);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tabs button{min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:14px;cursor:pointer;font-family:inherit}
+.tabs button.on{background:var(--green);color:#fff;border-color:var(--green)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.filters select,.filters input{min-height:40px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit;background:#fff}
+.filters input{flex:1;min-width:180px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:5px 11px;background:#fff;font-size:13px;cursor:pointer;min-height:36px;font-family:inherit}
+.chip.on{background:var(--gold-lt);border-color:var(--gold);color:var(--gold);font-weight:700}
+.stat{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--sub);margin-bottom:8px}
+.stat b{color:var(--txt)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:10px}
+.mk{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;display:flex;gap:10px;align-items:flex-start}
+.mk img{width:120px;height:68px;object-fit:cover;border-radius:8px;flex:none;background:#eee}
+.mk .t{font-weight:800;color:var(--green);font-size:13px;white-space:nowrap}
+.mk .lb{font-size:14.5px;line-height:1.45;margin:2px 0}
+.mk .meta{font-size:12px;color:var(--sub);display:flex;gap:6px;flex-wrap:wrap}
+.mk .meta a{color:var(--green);text-decoration:none}
+.mk .meta a.plant{color:var(--gold);border:1px solid var(--gold);border-radius:6px;padding:0 6px}
+.tag{font-size:13px}
+.tag.g:before{content:'🟢'} .tag.y:before{content:'🟡'} .tag.r:before{content:'🔴'}
+.vid{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;margin-bottom:10px}
+.vid h3{font-size:15px;margin-bottom:4px}
+.vid h3 small{color:var(--sub);font-weight:400;font-size:12.5px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:5px 8px;border-bottom:1px solid #eee;text-align:left;vertical-align:top}
+th{color:var(--sub);font-weight:600;font-size:12.5px}
+td.num{text-align:right;white-space:nowrap}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:#eee;margin:6px 0 2px}
+.bar i{display:block;height:100%} .bar .g{background:#3c9a6a} .bar .y{background:#e0b64a} .bar .r{background:#d9534f} .bar .n{background:#c9ced0}
+.memo{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fffbea;margin-bottom:10px;white-space:pre-wrap;line-height:1.55;font-size:14.5px}
+.memo .hd{font-size:12.5px;color:var(--sub);margin-bottom:4px;white-space:normal}
+.memo .hd b{color:var(--txt)}
+.empty{color:var(--sub);padding:20px;text-align:center}
+#bug{position:fixed;left:8px;bottom:8px;max-width:520px;max-height:38vh;overflow:auto;background:#1e2a24;color:#cde;font-size:12px;font-family:Consolas,monospace;border-radius:10px;padding:8px 10px;display:none;z-index:99;white-space:pre-wrap}
+#bugBtn{position:fixed;right:10px;bottom:10px;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:20px;cursor:pointer;z-index:99}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.mk img{width:96px;height:54px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>📚 자료함</h1>
+    <span class="ver" id="verBadge"></span>
+    <span class="ver" id="syncBadge">불러오는 중…</span>
+    <a class="back" href="/" title="유튜브 요약기로">📺 요약기로</a>
+  </header>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="on" data-tab="marks">📌 책갈피 모아보기</button>
+      <button data-tab="time">⏱ 다시보기 시간표</button>
+      <button data-tab="memo">📝 내 메모 모아보기</button>
+    </div>
+    <div class="filters">
+      <select id="fCh"><option value="">채널 전체</option></select>
+      <span class="chip on" data-tag="">전부</span>
+      <span class="chip" data-tag="g">🟢 검증</span>
+      <span class="chip" data-tag="y">🟡 해석</span>
+      <span class="chip" data-tag="r">🔴 유도</span>
+      <span class="chip" data-tag="cap">📸 사진 있음</span>
+      <input id="fQ" type="search" placeholder="책갈피·제목·메모에서 찾기 (엔터)">
+    </div>
+    <div class="stat" id="stat"></div>
+    <div id="view"></div>
+  </div>
+</div>
+<button id="bugBtn" title="오류 로그">🐞</button>
+<div id="bug"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+/* ─── 공통 ─── */
+var bugLog = [];
+function logBug(m) {
+  var s = '[' + new Date().toLocaleTimeString('ko-KR') + '] ' + m;
+  bugLog.push(s); var b = document.getElementById('bug'); if (b) b.textContent = bugLog.join('\n');
+  try { console.log('[자료함]', m); } catch (e) {}
+}
+window.onerror = function (m, u, l) { logBug('오류: ' + m + ' (' + l + '줄)'); };
+window.addEventListener('unhandledrejection', function (e) { logBug('약속 오류: ' + (e.reason && e.reason.message || e.reason)); });
+document.getElementById('bugBtn').onclick = function () { var b = document.getElementById('bug'); b.style.display = b.style.display === 'block' ? 'none' : 'block'; };
+document.getElementById('verBadge').textContent = window.APP_VERSION;
+
+var SERVER = window.YT_CONNECTION.apiBase;
+var SUM_COL = 'youtube_summaries';
+var firebaseConfig = {   /* youtube.html 과 같은 값 — 설계상 공개값 */
+  apiKey: "AIzaSyAyG1chECYsbO7cSZUuXmNa0_KDYBmahPY",
+  authDomain: "my-system-25497.firebaseapp.com",
+  projectId: "my-system-25497",
+  storageBucket: "my-system-25497.firebasestorage.app"
+};
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function fmt(t) { t = Math.max(0, Math.round(+t || 0)); var h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60; return (h ? h + ':' : '') + (h ? String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0'); }
+function mins(sec) { return sec >= 60 ? Math.round(sec / 60) + '분' : Math.round(sec) + '초'; }
+function ytAt(vid, t) { return 'https://www.youtube.com/watch?v=' + encodeURIComponent(vid) + '&t=' + Math.max(0, Math.floor(+t || 0)) + 's'; }
+function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+/* ─── 상태 ─── */
+var S = { docs: [], tab: lsGet('wl_ytdata_tab', 'marks'), ch: lsGet('wl_ytdata_ch', ''), tag: lsGet('wl_ytdata_tag', ''), q: '' };
+
+/* ─── 불러오기 ─── */
+var db = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  firebase.auth().signInAnonymously().catch(function (e) { logBug('익명로그인: ' + e.message); });
+  firebase.auth().onAuthStateChanged(function (u) { if (u) load(); else setSync('로그인 대기'); });
+} catch (e) { logBug('Firebase 초기화 실패: ' + e.message); setSync('연결 실패'); }
+
+function setSync(t) { document.getElementById('syncBadge').textContent = t; }
+
+async function load() {
+  try {
+    setSync('불러오는 중…');
+    var q = await db.collection(SUM_COL).get();
+    var docs = [];
+    q.forEach(function (d) {
+      var x = d.data() || {};
+      if (x.휴지통 || x.관통분석 || x.사부분석) return;
+      docs.push({
+        id: d.id, ch: x.채널 || '', title: x.제목 || '(제목 없음)', pub: (x.게시일 || x.일시 || '').slice(0, 10),
+        when: x.일시 || '', ts: +x.ts || 0, vid: x.vid || '', url: x.url || '',
+        marks: Array.isArray(x.marks) ? x.marks.filter(function (m) { return m && typeof m.t === 'number'; }) : [],
+        memo: (x.memo || '').trim()
+      });
+    });
+    docs.sort(function (a, b) { return (b.pub || '').localeCompare(a.pub || '') || b.ts - a.ts; });
+    S.docs = docs;
+    var chs = {}; docs.forEach(function (d) { if (d.ch) chs[d.ch] = (chs[d.ch] || 0) + 1; });
+    var sel = document.getElementById('fCh');
+    Object.keys(chs).sort().forEach(function (c) { var o = document.createElement('option'); o.value = c; o.textContent = c + ' (' + chs[c] + ')'; sel.appendChild(o); });
+    sel.value = S.ch; if (sel.value !== S.ch) { S.ch = ''; }
+    var nm = docs.reduce(function (n, d) { return n + d.marks.length; }, 0), nmemo = docs.filter(function (d) { return d.memo; }).length;
+    setSync('요약 ' + docs.length + ' · 책갈피 ' + nm + ' · 메모 ' + nmemo);
+    logBug('불러옴 — 요약 ' + docs.length + '건 / 책갈피 ' + nm + '개 / 메모 ' + nmemo + '건');
+    render();
+  } catch (e) { logBug('불러오기 실패: ' + e.message); setSync('불러오기 실패'); }
+}
+
+/* ─── 필터 ─── */
+function filtered() {
+  var q = S.q.toLowerCase();
+  return S.docs.filter(function (d) { return !S.ch || d.ch === S.ch; })
+    .map(function (d) {
+      var mk = d.marks.filter(function (m) {
+        if (S.tag === 'cap') return !!m.cap;
+        if (S.tag) return m.tag === S.tag;
+        return true;
+      }).filter(function (m) { return !q || (m.label || '').toLowerCase().indexOf(q) >= 0 || d.title.toLowerCase().indexOf(q) >= 0 || d.ch.toLowerCase().indexOf(q) >= 0; });
+      return { d: d, mk: mk };
+    });
+}
+
+/* ─── 화면 ─── */
+function render() {
+  document.querySelectorAll('.tabs button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-tab') === S.tab); });
+  document.querySelectorAll('.chip').forEach(function (c) { c.classList.toggle('on', c.getAttribute('data-tag') === S.tag); });
+  var v = document.getElementById('view'), st = document.getElementById('stat');
+  var rows = filtered();
+  if (S.tab === 'marks') renderMarks(rows, v, st);
+  else if (S.tab === 'time') renderTime(rows, v, st);
+  else renderMemo(v, st);
+}
+
+function renderMarks(rows, v, st) {
+  var all = [];
+  rows.forEach(function (r) { r.mk.forEach(function (m) { all.push({ d: r.d, m: m }); }); });
+  all.sort(function (a, b) { return (b.d.pub || '').localeCompare(a.d.pub || '') || b.d.ts - a.d.ts || a.m.t - b.m.t; });
+  var g = 0, y = 0, rr = 0, c = 0;
+  all.forEach(function (x) { if (x.m.tag === 'g') g++; else if (x.m.tag === 'y') y++; else if (x.m.tag === 'r') rr++; if (x.m.cap) c++; });
+  st.innerHTML = '책갈피 <b>' + all.length + '</b>개 · 🟢 ' + g + ' · 🟡 ' + y + ' · 🔴 ' + rr + ' · 📸 ' + c + ' · 영상 ' + rows.filter(function (r) { return r.mk.length; }).length + '편';
+  if (!all.length) { v.innerHTML = '<div class="empty">조건에 맞는 책갈피가 없습니다. 요약 화면에서 [📌 지금 책갈피] 를 누르면 여기 쌓입니다.</div>'; return; }
+  v.innerHTML = '<div class="grid">' + all.slice(0, 400).map(function (x) {
+    var m = x.m, d = x.d;
+    var img = m.cap ? '<a href="' + esc(ytAt(d.vid, m.t)) + '" target="_blank"><img src="' + esc(window.YT_CONNECTION.captureUrl(m.cap)) + '" alt="" loading="lazy"></a>' : '';
+    var src = m.from === 'timeline' ? '⏱' : m.from === 'ai' ? '▶' : '📌';
+    return '<div class="mk">' + img + '<div style="min-width:0;flex:1">' +
+      '<div><span class="t">' + src + ' ' + fmt(m.t) + (m.t2 ? '~' + fmt(m.t2) : '') + '</span> <span class="tag ' + esc(m.tag || '') + '"></span></div>' +
+      '<div class="lb">' + esc(m.label || '(제목 없음)') + '</div>' +
+      '<div class="meta"><span>' + esc(d.ch) + '</span><span>·</span><span title="' + esc(d.title) + '">' + esc(d.title.slice(0, 40)) + (d.title.length > 40 ? '…' : '') + '</span><span>·</span><span>' + esc(d.pub) + '</span>' +
+      (d.vid ? '<a href="' + esc(ytAt(d.vid, m.t)) + '" target="_blank">▶ 여기부터 보기</a>' : '') +
+      '<a href="' + esc(window.YT_CONNECTION.summaryUrl(d.id)) + '" target="_blank">📄 요약 열기</a>' +
+      '<a href="javascript:void(0)" class="plant" data-id="' + esc(d.id) + '" data-t="' + esc(m.t) + '" title="이 장면을 채널 판단노트의 근거로 심는다">🧭 판단노트에 심기</a>' +
+      '</div></div></div>';
+  }).join('') + '</div>' + (all.length > 400 ? '<div class="empty">400개까지만 표시 — 채널이나 검색으로 좁히세요</div>' : '');
+}
+
+/* 다시보기 시간표 — 책갈피 시각끼리 빼서 '이 얘기에 몇 분 썼나'. 마지막 책갈피는 끝을 모르므로 t2 가 있을 때만 잰다.
+   AI 는 표시(태그)만, 집계는 여기(프로그램)가 한다. */
+function segments(marks) {
+  var ms = marks.slice().sort(function (a, b) { return a.t - b.t; }), out = [];
+  for (var i = 0; i < ms.length; i++) {
+    var m = ms[i], end = m.t2 && m.t2 > m.t ? m.t2 : (i + 1 < ms.length ? ms[i + 1].t : null);
+    out.push({ m: m, dur: end == null ? null : Math.max(0, end - m.t) });
+  }
+  return out;
+}
+function renderTime(rows, v, st) {
+  var vids = rows.filter(function (r) { return r.mk.length >= 1; });
+  var tot = { g: 0, y: 0, r: 0, n: 0 }, measured = 0;
+  var html = vids.map(function (r) {
+    var seg = segments(r.mk), sum = { g: 0, y: 0, r: 0, n: 0 }, known = 0;
+    seg.forEach(function (s) { if (s.dur != null) { sum[s.m.tag || 'n'] += s.dur; known += s.dur; } });
+    Object.keys(sum).forEach(function (k) { tot[k] += sum[k]; }); measured += known;
+    var bar = known ? '<div class="bar">' + ['g', 'y', 'r', 'n'].map(function (k) { return '<i class="' + k + '" style="width:' + (sum[k] / known * 100).toFixed(1) + '%" title="' + k + '"></i>'; }).join('') + '</div>' : '';
+    var line = known ? '🟢 ' + mins(sum.g) + ' · 🟡 ' + mins(sum.y) + ' · 🔴 ' + mins(sum.r) + ' · 태그 없음 ' + mins(sum.n) + ' <span style="color:var(--sub)">(잰 구간 ' + mins(known) + ')</span>' : '<span style="color:var(--sub)">책갈피가 1개라 구간을 잴 수 없음</span>';
+    return '<div class="vid"><h3>' + esc(r.d.ch) + ' — ' + esc(r.d.title) + ' <small>' + esc(r.d.pub) + '</small></h3>' + bar + '<div style="font-size:13.5px">' + line + '</div>' +
+      '<table><tr><th>시각</th><th>내용</th><th>태그</th><th style="text-align:right">쓴 시간</th></tr>' +
+      seg.map(function (s) {
+        return '<tr><td><a href="' + esc(ytAt(r.d.vid, s.m.t)) + '" target="_blank" style="color:var(--green);text-decoration:none">' + fmt(s.m.t) + '</a></td><td>' + esc(s.m.label || '') + '</td><td><span class="tag ' + esc(s.m.tag || '') + '"></span></td><td class="num">' + (s.dur == null ? '—' : mins(s.dur)) + '</td></tr>';
+      }).join('') + '</table></div>';
+  }).join('');
+  st.innerHTML = '영상 <b>' + vids.length + '</b>편 · 잰 시간 합계 ' + mins(measured) + ' — 🟢 ' + mins(tot.g) + ' · 🟡 ' + mins(tot.y) + ' · 🔴 ' + mins(tot.r) + ' · 태그 없음 ' + mins(tot.n) +
+    (measured ? ' → <b>🔴 유도에 ' + Math.round(tot.r / measured * 100) + '%</b>' : '');
+  /* 채널별 집계 — "이 채널은 🔴 유도에 평균 몇 %" (판단노트에 숫자 근거로 쓸 수 있다). 잰 시간이 있는 채널만 */
+  var byCh = {};
+  vids.forEach(function (r) {
+    var c = byCh[r.d.ch] || (byCh[r.d.ch] = { g: 0, y: 0, r: 0, n: 0, k: 0, v: 0 });
+    segments(r.mk).forEach(function (s) { if (s.dur != null) { c[s.m.tag || 'n'] += s.dur; c.k += s.dur; } }); c.v++;
+  });
+  var chRows = Object.keys(byCh).filter(function (c) { return byCh[c].k > 0; }).sort(function (a, b) { return byCh[b].r / byCh[b].k - byCh[a].r / byCh[a].k; });
+  var chHtml = chRows.length > 1 || (chRows.length === 1 && !S.ch) ? '<div class="vid" style="background:var(--green-lt)"><h3>채널별 — 잰 시간 기준</h3><table><tr><th>채널</th><th>영상</th><th>잰 시간</th><th style="text-align:right">🟢 검증</th><th style="text-align:right">🟡 해석</th><th style="text-align:right">🔴 유도</th></tr>' +
+    chRows.map(function (c) { var x = byCh[c]; var p = function (n) { return Math.round(n / x.k * 100) + '%'; };
+      return '<tr><td><b>' + esc(c) + '</b></td><td>' + x.v + '편</td><td>' + mins(x.k) + '</td><td class="num">' + p(x.g) + '</td><td class="num">' + p(x.y) + '</td><td class="num"><b>' + p(x.r) + '</b></td></tr>'; }).join('') + '</table></div>' : '';
+  v.innerHTML = chHtml + (html || '<div class="empty">책갈피가 있는 영상이 없습니다.</div>');
+}
+
+function renderMemo(v, st) {
+  var q = S.q.toLowerCase();
+  var docs = S.docs.filter(function (d) { return d.memo && (!S.ch || d.ch === S.ch) && (!q || d.memo.toLowerCase().indexOf(q) >= 0 || d.title.toLowerCase().indexOf(q) >= 0); });
+  st.innerHTML = '메모 <b>' + docs.length + '</b>건 · 글자 ' + docs.reduce(function (n, d) { return n + d.memo.length; }, 0).toLocaleString();
+  v.innerHTML = docs.map(function (d) {
+    return '<div class="memo"><div class="hd"><b>' + esc(d.ch) + '</b> · ' + esc(d.title) + ' · ' + esc(d.pub) + (d.vid ? ' · <a href="' + esc(ytAt(d.vid, 0)) + '" target="_blank" style="color:var(--green)">▶ 영상</a>' : '') + ' · <a href="' + esc(window.YT_CONNECTION.summaryUrl(d.id)) + '" target="_blank" style="color:var(--green)">📄 요약 열기</a></div>' + esc(d.memo) + '</div>';
+  }).join('') || '<div class="empty">메모가 없습니다. 요약 화면 오른쪽 📝 내 메모 칸에 적으면 여기 모입니다.</div>';
+}
+
+/* ─── 조작 ─── */
+document.querySelector('.tabs').addEventListener('click', function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  S.tab = b.getAttribute('data-tab'); lsSet('wl_ytdata_tab', S.tab); render();
+});
+document.querySelector('.filters').addEventListener('click', function (e) {
+  var c = e.target.closest('.chip'); if (!c) return;
+  S.tag = c.getAttribute('data-tag'); lsSet('wl_ytdata_tag', S.tag); render();
+});
+/* 🧭 판단노트에 심기 — youtube_channels/<채널>.내근거 배열에 붙인다(arrayUnion). 요약기 판단노트 탭 "🙋 내가 심은 근거" 에 보이고,
+   "노트 다시 정리" 때 AI 에게도 같이 간다. 한 줄 메모는 선택. */
+document.getElementById('view').addEventListener('click', function (e) {
+  var a = e.target.closest('a.plant'); if (!a) return;
+  var d = S.docs.find(function (x) { return x.id === a.getAttribute('data-id'); }); if (!d) return;
+  var t = +a.getAttribute('data-t'); var m = d.marks.find(function (k) { return +k.t === t; }); if (!m) return;
+  if (!db) { alert('DB 연결이 없습니다'); return; }
+  var note = prompt('[' + d.ch + '] ' + fmt(m.t) + ' ' + (m.label || '') + '\n\n이 장면을 판단노트 근거로 심습니다. 한 줄 메모(선택):', '');
+  if (note === null) return;
+  var item = { ts: Date.now(), from: 'bookmark', sumId: d.id, vid: d.vid || '', t: m.t, label: m.label || '', tag: m.tag || '', 제목: d.title, 게시일: d.pub, note: (note || '').trim().slice(0, 200) };
+  db.collection('youtube_channels').doc(d.ch).set({ 내근거: firebase.firestore.FieldValue.arrayUnion(item) }, { merge: true })
+    .then(function () { a.textContent = '✅ 심었음'; a.style.color = 'var(--gold)'; logBug('판단노트에 심음: ' + d.ch + ' ' + fmt(m.t) + ' ' + (m.label || '')); })
+    .catch(function (err) { alert('심기 실패: ' + err.message); logBug('심기 실패: ' + err.message); });
+});
+document.getElementById('fCh').addEventListener('change', function () { S.ch = this.value; lsSet('wl_ytdata_ch', S.ch); render(); });
+document.getElementById('fQ').addEventListener('keydown', function (e) { if (e.key === 'Enter') { S.q = this.value.trim(); render(); } });
+document.getElementById('fQ').addEventListener('input', function () { if (!this.value) { S.q = ''; render(); } });
+render();
+</script>
+</body>
+</html>

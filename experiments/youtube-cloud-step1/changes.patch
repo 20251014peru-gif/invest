@@ -1,0 +1,182 @@
+--- a/app.py
++++ b/app.py
+@@ -5,7 +5,7 @@
+ - 모델: claude-sonnet-4-6
+ - 저장은 하지 않음: 브라우저가 결과를 받아 Firestore(my-system-25497)에 저장
+ - 채널 프로필/기록/휴지통/관통분석 = 전부 브라우저+Firestore 담당 → v3 웹앱과 데이터 공유
+-버전: v38-0910-2034 (KST) — youtube.html 의 APP_VERSION 과 같은 값을 유지할 것
++버전: v38-c1-0914 (KST) — youtube.html 의 APP_VERSION 과 같은 값을 유지할 것
+ """
+ import os, re, json, traceback, urllib.request, urllib.parse
+ from datetime import datetime
+@@ -13,7 +13,7 @@
+ from flask import Flask, request, jsonify, send_from_directory
+ 
+ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+-APP_VERSION = "v38-0910-2034"   # ★ youtube.html <head> 의 APP_VERSION 과 반드시 같게
++APP_VERSION = "v38-c1-0914"   # ★ youtube.html <head> 의 APP_VERSION 과 반드시 같게
+ MODEL = "claude-sonnet-4-6"
+ CAPTURE_DIR = os.path.join(BASE_DIR, "captures")
+ os.makedirs(CAPTURE_DIR, exist_ok=True)
+@@ -1019,6 +1019,16 @@
+     except Exception as e:
+         return {"error": str(e)}
+ 
++@app.route("/connection-config.js")
++@app.route("/connection.js")
++def connection_asset():
++    # 연결 설정과 연결 코드만 제공한다. 키·비용 장부는 공개하지 않는다.
++    name = request.path.rsplit("/", 1)[-1]
++    response = send_from_directory(BASE_DIR, name)
++    response.headers["Cache-Control"] = "no-store"
++    return response
++
++
+ @app.route("/data")
+ def data_page():
+     """📚 자료함 — 책갈피·다시보기 시간표·메모 모아보기 (v31). 같은 origin 이라 Firestore 익명 로그인이 그대로 된다."""
+--- a/youtube.html
++++ b/youtube.html
+@@ -1,13 +1,15 @@
+ <!DOCTYPE html>
+ <html lang="ko">
+ <head>
++<script src="connection-config.js"></script>
++<script src="connection.js"></script>
+ <meta charset="utf-8">
+ <meta name="referrer" content="strict-origin-when-cross-origin"><!-- v32: 유튜브 임베드 153(Referer 없음) 예방 — 기본값을 명시 -->
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <script>
+ /* ★ 버전 원본 — 여기 한 곳만 고치면 탭 제목·화면 배지가 자동으로 바뀝니다.
+    app.py 의 APP_VERSION 도 같은 값으로 맞추세요 (다르면 화면에 경고가 뜹니다). */
+-window.APP_VERSION = "v38-0910-2034";
++window.APP_VERSION = "v38-c1-0914";
+ window.APP_TAGLINE = "캡처 · 오타사전 파일 · AI 비용 한도";
+ /* v34: 파일(file://)로 열면 유튜브 임베드가 153 오류(Referer 없음)를 낸다 — 서버가 켜져 있으면 http://localhost:5055 로 자동 이동.
+    서버가 꺼져 있으면 그대로 둔다(파일로도 요약 기록 보기는 되므로). */
+@@ -194,7 +196,7 @@
+     <h1>📺 유튜브 요약기</h1>
+     <span class="ver" id="verBadge"></span>
+     <span class="sync off" id="syncBadge">동기화 확인중</span>
+-    <a href="http://localhost:5055/data" target="_blank" id="dataLink" title="책갈피·다시보기 시간표·메모 모아보기" style="margin-left:auto;font-size:13px;color:var(--green);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fff;">📚 자료함</a>
++    <a href="data.html" target="_blank" id="dataLink" title="책갈피·다시보기 시간표·메모 모아보기" style="margin-left:auto;font-size:13px;color:var(--green);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fff;">📚 자료함</a>
+   </header>
+ 
+   <div class="card" id="soxBar" style="padding:10px 14px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:13px;">
+@@ -381,7 +383,8 @@
+    const 로 아래쪽에 선언해두면 TDZ 오류가 나면서 이 script 블록 전체가 통째로 죽습니다.
+    (= 서버가 꺼져 있을 때 화면 절반이 동작 안 하던 원인) */
+ var bugLog=[];
+-const SERVER = "http://localhost:5055"; // 로컬 파이썬 서버 (자막+AI)
++document.getElementById("dataLink").href = window.YT_CONNECTION.dataPage;
++const SERVER = window.YT_CONNECTION.apiBase; // AI·자막·종목 API 주소
+ const MODEL = "claude-sonnet-4-6";
+ const firebaseConfig = {
+   apiKey: "AIzaSyAyG1chECYsbO7cSZUuXmNa0_KDYBmahPY",
+@@ -639,7 +642,7 @@
+ function fmtSec(t){const m=Math.floor(t/60), s=Math.floor(t%60); return `${m}:${String(s).padStart(2,'0')}`;}
+ function captureFigureHtml(path,label,t){
+   return `<figure style="margin:14px 0 22px;">
+-    <img src="${SERVER}${path}" style="width:100%;height:auto;border-radius:10px;border:1px solid var(--line);display:block;" loading="lazy">
++    <img src="${window.YT_CONNECTION.captureUrl(path)}" style="width:100%;height:auto;border-radius:10px;border:1px solid var(--line);display:block;" loading="lazy">
+     <figcaption style="font-size:13px;color:var(--sub);margin-top:6px;">${escapeHtml(label||'')} · ${fmtSec(t)}</figcaption>
+   </figure>`;
+ }
+@@ -728,7 +731,7 @@
+   }
+   if(!items.length)return body.replace(/<!--CAP:[\s\S]*?-->/g,'');
+   try{
+-    const r=await fetch(`${SERVER}/api/capture`,{
++    const r=await fetch(`${window.YT_CONNECTION.captureBase}/api/capture`,{
+       method:'POST', headers:{'Content-Type':'application/json'},
+       body:JSON.stringify({videoId:vid, timestamps:items})
+     }).then(r=>r.json());
+@@ -1041,7 +1044,7 @@
+     var checks = ytExtractChecks();
+     var existingId = meta.vid ? await ytFindExistingRecordId(meta.vid) : null;
+     var recId = existingId || ('yt_' + (meta.vid || currentSummaryId));
+-    var link = SERVER + '/?open=' + encodeURIComponent(currentSummaryId); // 요약된 창으로 바로 가는 링크
++    var link = window.YT_CONNECTION.summaryUrl(currentSummaryId); // 요약된 창으로 바로 가는 링크
+     var data = {
+       kind:'youtube',
+       date: (meta.게시일 || kstStr().slice(0,10)),
+@@ -4248,7 +4251,7 @@
+       old.innerHTML = '<b>📸 찍은 장면 ' + list.length + '</b><div class="ytCapGrid">' +
+         list.map(function (m) {
+           return '<figure data-t="' + Math.floor(m.t || 0) + '">' +
+-                 '<img src="' + esc2(srv() + m.cap) + '" loading="lazy" alt="">' +
++                 '<img src="' + esc2(window.YT_CONNECTION.captureUrl(m.cap)) + '" loading="lazy" alt="">' +
+                  '<figcaption>' + mkFmt(m.t || 0) +
+                  (m.label ? ' · ' + esc2(m.label) : '') + '</figcaption></figure>';
+         }).join('') + '</div>';
+@@ -4382,7 +4385,7 @@
+     delete mk.capErr;
+     render();
+     var body = JSON.stringify({ videoId: MK.vid, timestamps: [{ t: mk.t, label: mk.label || '' }] });
+-    fetch(srv() + '/api/capture', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body })
++    fetch(window.YT_CONNECTION.captureBase + '/api/capture', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body })
+       .then(function (r) { return r.json(); })
+       .then(function (r) {
+         delete MK.capBusy[mk.t];
+@@ -4462,7 +4465,7 @@
+         if (mk.cap) {
+           var im = document.createElement('img');
+           im.className = 'mkTh'; im.loading = 'lazy';
+-          im.src = srv() + mk.cap;
++          im.src = window.YT_CONNECTION.captureUrl(mk.cap);
+           im.title = '클릭하면 이 장면부터 재생';
+           im.onclick = function () { seek(mk.t); };
+           im.onerror = function () { if (im.parentNode) im.parentNode.textContent = ''; };
+--- a/data.html
++++ b/data.html
+@@ -1,12 +1,14 @@
+ <!DOCTYPE html>
+ <html lang="ko">
+ <head>
++<script src="connection-config.js"></script>
++<script src="connection.js"></script>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+-<!-- 📚 자료함 — 유튜브 요약기의 책갈피·메모를 채널 무관하게 모아 본다 (v38-0910-2034)
++<!-- 📚 자료함 — 유튜브 요약기의 책갈피·메모를 채널 무관하게 모아 본다 (v38-c1-0914)
+      읽기 전용. 데이터는 youtube.html 이 저장한 Firestore youtube_summaries 그대로.
+      열기: http://localhost:5055/data   (app.py 가 서빙 — 파일을 직접 열면 Firestore 로그인이 막힐 수 있다) -->
+-<script>window.APP_VERSION = "v38-0910-2034";</script>
++<script>window.APP_VERSION = "v38-c1-0914";</script>
+ <script>document.title = "📚 자료함 " + window.APP_VERSION;</script>
+ <style>
+ :root{
+@@ -106,7 +108,7 @@
+ document.getElementById('bugBtn').onclick = function () { var b = document.getElementById('bug'); b.style.display = b.style.display === 'block' ? 'none' : 'block'; };
+ document.getElementById('verBadge').textContent = window.APP_VERSION;
+ 
+-var SERVER = location.origin && location.origin.indexOf('http') === 0 ? location.origin : 'http://localhost:5055';
++var SERVER = window.YT_CONNECTION.apiBase;
+ var SUM_COL = 'youtube_summaries';
+ var firebaseConfig = {   /* youtube.html 과 같은 값 — 설계상 공개값 */
+   apiKey: "AIzaSyAyG1chECYsbO7cSZUuXmNa0_KDYBmahPY",
+@@ -198,14 +200,14 @@
+   if (!all.length) { v.innerHTML = '<div class="empty">조건에 맞는 책갈피가 없습니다. 요약 화면에서 [📌 지금 책갈피] 를 누르면 여기 쌓입니다.</div>'; return; }
+   v.innerHTML = '<div class="grid">' + all.slice(0, 400).map(function (x) {
+     var m = x.m, d = x.d;
+-    var img = m.cap ? '<a href="' + esc(ytAt(d.vid, m.t)) + '" target="_blank"><img src="' + esc(SERVER + m.cap) + '" alt="" loading="lazy"></a>' : '';
++    var img = m.cap ? '<a href="' + esc(ytAt(d.vid, m.t)) + '" target="_blank"><img src="' + esc(window.YT_CONNECTION.captureUrl(m.cap)) + '" alt="" loading="lazy"></a>' : '';
+     var src = m.from === 'timeline' ? '⏱' : m.from === 'ai' ? '▶' : '📌';
+     return '<div class="mk">' + img + '<div style="min-width:0;flex:1">' +
+       '<div><span class="t">' + src + ' ' + fmt(m.t) + (m.t2 ? '~' + fmt(m.t2) : '') + '</span> <span class="tag ' + esc(m.tag || '') + '"></span></div>' +
+       '<div class="lb">' + esc(m.label || '(제목 없음)') + '</div>' +
+       '<div class="meta"><span>' + esc(d.ch) + '</span><span>·</span><span title="' + esc(d.title) + '">' + esc(d.title.slice(0, 40)) + (d.title.length > 40 ? '…' : '') + '</span><span>·</span><span>' + esc(d.pub) + '</span>' +
+       (d.vid ? '<a href="' + esc(ytAt(d.vid, m.t)) + '" target="_blank">▶ 여기부터 보기</a>' : '') +
+-      '<a href="' + esc(SERVER + '/?open=' + encodeURIComponent(d.id)) + '" target="_blank">📄 요약 열기</a>' +
++      '<a href="' + esc(window.YT_CONNECTION.summaryUrl(d.id)) + '" target="_blank">📄 요약 열기</a>' +
+       '<a href="javascript:void(0)" class="plant" data-id="' + esc(d.id) + '" data-t="' + esc(m.t) + '" title="이 장면을 채널 판단노트의 근거로 심는다">🧭 판단노트에 심기</a>' +
+       '</div></div></div>';
+   }).join('') + '</div>' + (all.length > 400 ? '<div class="empty">400개까지만 표시 — 채널이나 검색으로 좁히세요</div>' : '');
+@@ -256,7 +258,7 @@
+   var docs = S.docs.filter(function (d) { return d.memo && (!S.ch || d.ch === S.ch) && (!q || d.memo.toLowerCase().indexOf(q) >= 0 || d.title.toLowerCase().indexOf(q) >= 0); });
+   st.innerHTML = '메모 <b>' + docs.length + '</b>건 · 글자 ' + docs.reduce(function (n, d) { return n + d.memo.length; }, 0).toLocaleString();
+   v.innerHTML = docs.map(function (d) {
+-    return '<div class="memo"><div class="hd"><b>' + esc(d.ch) + '</b> · ' + esc(d.title) + ' · ' + esc(d.pub) + (d.vid ? ' · <a href="' + esc(ytAt(d.vid, 0)) + '" target="_blank" style="color:var(--green)">▶ 영상</a>' : '') + ' · <a href="' + esc(SERVER + '/?open=' + encodeURIComponent(d.id)) + '" target="_blank" style="color:var(--green)">📄 요약 열기</a></div>' + esc(d.memo) + '</div>';
++    return '<div class="memo"><div class="hd"><b>' + esc(d.ch) + '</b> · ' + esc(d.title) + ' · ' + esc(d.pub) + (d.vid ? ' · <a href="' + esc(ytAt(d.vid, 0)) + '" target="_blank" style="color:var(--green)">▶ 영상</a>' : '') + ' · <a href="' + esc(window.YT_CONNECTION.summaryUrl(d.id)) + '" target="_blank" style="color:var(--green)">📄 요약 열기</a></div>' + esc(d.memo) + '</div>';
+   }).join('') || '<div class="empty">메모가 없습니다. 요약 화면 오른쪽 📝 내 메모 칸에 적으면 여기 모입니다.</div>';
+ }
