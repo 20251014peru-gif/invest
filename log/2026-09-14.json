@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-09-14",
-  "generated_at": "2026-09-14T14:57:52+09:00",
+  "generated_at": "2026-09-14T21:13:51+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 64.2%(-10.40%p) · 유가 WTI 102.37 $(+2.3%) · 구리 6.46 $/lb(-1.4%)"
+      "t": "미 비농업고용 증감 162 천명(+671.4%) · VIX 17.58 pt(+11.0%) · 수출금액지수 전년비 64.2%(-10.40%p) · 유가 WTI 103.44 $(+3.4%)"
     },
     {
       "k": "오늘 발표",
@@ -18,7 +18,7 @@
     },
     {
       "k": "산업·종목",
-      "t": "DART 35건(수주·공급계약 6) · 토론실 근거글 +0(적중 7) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
+      "t": "DART 29건(수주·공급계약 6) · 토론실 근거글 +0(적중 7) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
     },
     {
       "k": "미입력",
@@ -37,7 +37,7 @@
       "key": "credit_spread",
       "label": "신용 스프레드",
       "value": "0.67%p",
-      "sub": "주의 · 2026-09-11",
+      "sub": "주의 · 2026-09-14",
       "tone": "yellow"
     },
     {
@@ -71,6 +71,20 @@
       "group": "us"
     },
     {
+      "id": "vix",
+      "name": "VIX",
+      "value": 17.58,
+      "unit": "pt",
+      "prev": 15.84,
+      "delta": 1.74,
+      "delta_text": "+11.0%",
+      "judge": "중립",
+      "as_of": "2026-09-14",
+      "cycle": "D",
+      "score": 10.984848484848476,
+      "group": "us"
+    },
+    {
       "id": "kr_export_yoy",
       "name": "수출금액지수 전년비",
       "value": 64.2,
@@ -87,43 +101,43 @@
     {
       "id": "wti",
       "name": "유가 WTI",
-      "value": 102.37,
+      "value": 103.44,
       "unit": "$",
       "prev": 100.05,
-      "delta": 2.32,
-      "delta_text": "+2.3%",
+      "delta": 3.39,
+      "delta_text": "+3.4%",
       "judge": "",
       "as_of": "2026-09-14",
       "cycle": "D",
-      "score": 2.318840579710152,
+      "score": 3.388305847076462,
       "group": "world"
     },
     {
       "id": "copper",
       "name": "구리",
-      "value": 6.456,
+      "value": 6.422,
       "unit": "$/lb",
       "prev": 6.548,
-      "delta": -0.092,
-      "delta_text": "-1.4%",
+      "delta": -0.126,
+      "delta_text": "-1.9%",
       "judge": "",
       "as_of": "2026-09-14",
       "cycle": "D",
-      "score": 1.405009163103232,
+      "score": 1.9242516799022655,
       "group": "world"
     },
     {
       "id": "gold",
       "name": "금",
-      "value": 4371.0,
+      "value": 4329.9,
       "unit": "$/oz",
       "prev": 4408.9,
-      "delta": -37.9,
-      "delta_text": "-0.9%",
+      "delta": -79.0,
+      "delta_text": "-1.8%",
       "judge": "",
       "as_of": "2026-09-14",
       "cycle": "D",
-      "score": 0.8596248497357536,
+      "score": 1.7918301617183428,
       "group": "world"
     },
     {
@@ -141,31 +155,17 @@
       "group": "kr"
     },
     {
-      "id": "m2",
-      "name": "미 M2",
-      "value": 23218.0,
-      "unit": "십억$",
-      "prev": 23115.2,
-      "delta": 102.8,
-      "delta_text": "+0.4%",
-      "judge": "",
-      "as_of": "2026-07-01",
-      "cycle": "M",
-      "score": 0.4447290094829344,
-      "group": "us"
-    },
-    {
       "id": "hsi",
       "name": "항셍지수",
-      "value": 24909.81,
+      "value": 24917.6,
       "unit": "pt",
       "prev": 24805.63,
-      "delta": 104.18,
-      "delta_text": "+0.4%",
+      "delta": 111.97,
+      "delta_text": "+0.5%",
       "judge": "중립",
       "as_of": "2026-09-14",
       "cycle": "D",
-      "score": 0.41998530172384374,
+      "score": 0.45138946279533126,
       "group": "world"
     }
   ],
@@ -249,6 +249,20 @@
           "group": "us"
         },
         {
+          "id": "vix",
+          "name": "VIX",
+          "value": 17.58,
+          "unit": "pt",
+          "prev": 15.84,
+          "delta": 1.74,
+          "delta_text": "+11.0%",
+          "judge": "중립",
+          "as_of": "2026-09-14",
+          "cycle": "D",
+          "score": 10.984848484848476,
+          "group": "us"
+        },
+        {
           "id": "kr_export_yoy",
           "name": "수출금액지수 전년비",
           "value": 64.2,
@@ -265,43 +279,43 @@
         {
           "id": "wti",
           "name": "유가 WTI",
-          "value": 102.37,
+          "value": 103.44,
           "unit": "$",
           "prev": 100.05,
-          "delta": 2.32,
-          "delta_text": "+2.3%",
+          "delta": 3.39,
+          "delta_text": "+3.4%",
           "judge": "",
           "as_of": "2026-09-14",
           "cycle": "D",
-          "score": 2.318840579710152,
+          "score": 3.388305847076462,
           "group": "world"
         },
         {
           "id": "copper",
           "name": "구리",
-          "value": 6.456,
+          "value": 6.422,
           "unit": "$/lb",
           "prev": 6.548,
-          "delta": -0.092,
-          "delta_text": "-1.4%",
+          "delta": -0.126,
+          "delta_text": "-1.9%",
           "judge": "",
           "as_of": "2026-09-14",
           "cycle": "D",
-          "score": 1.405009163103232,
+          "score": 1.9242516799022655,
           "group": "world"
         },
         {
           "id": "gold",
           "name": "금",
-          "value": 4371.0,
+          "value": 4329.9,
           "unit": "$/oz",
           "prev": 4408.9,
-          "delta": -37.9,
-          "delta_text": "-0.9%",
+          "delta": -79.0,
+          "delta_text": "-1.8%",
           "judge": "",
           "as_of": "2026-09-14",
           "cycle": "D",
-          "score": 0.8596248497357536,
+          "score": 1.7918301617183428,
           "group": "world"
         },
         {
@@ -319,38 +333,24 @@
           "group": "kr"
         },
         {
-          "id": "m2",
-          "name": "미 M2",
-          "value": 23218.0,
-          "unit": "십억$",
-          "prev": 23115.2,
-          "delta": 102.8,
-          "delta_text": "+0.4%",
-          "judge": "",
-          "as_of": "2026-07-01",
-          "cycle": "M",
-          "score": 0.4447290094829344,
-          "group": "us"
-        },
-        {
           "id": "hsi",
           "name": "항셍지수",
-          "value": 24909.81,
+          "value": 24917.6,
           "unit": "pt",
           "prev": 24805.63,
-          "delta": 104.18,
-          "delta_text": "+0.4%",
+          "delta": 111.97,
+          "delta_text": "+0.5%",
           "judge": "중립",
           "as_of": "2026-09-14",
           "cycle": "D",
-          "score": 0.41998530172384374,
+          "score": 0.45138946279533126,
           "group": "world"
         }
       ]
     },
     {
       "id": "2026-09-14/auto/flow",
-      "time": "10:33",
+      "time": "18:11",
       "who": "auto",
       "kind": "flow",
       "title": "공시·토론실 — 근거글 +0, 수주·공급계약 6",
@@ -358,7 +358,7 @@
     },
     {
       "id": "2026-09-14/auto/macro",
-      "time": "14:56",
+      "time": "21:12",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 35/35 수집",
