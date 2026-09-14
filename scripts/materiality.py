@@ -1,13 +1,18 @@
-# v 20260915-WaveB4 materiality.py — 공식값(reported) vs 프로그램 계산값(computed) + Decimal parser.
+# v 20260915-WaveB5 materiality.py — 공식값/계산값 검증 + 사건별 Materiality threshold.
 import os, json
 from decimal import Decimal, InvalidOperation
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__))); P=lambda *a:os.path.join(ROOT,*a)
 RATIO_TOLERANCE_PP = Decimal("0.5")
+BAND_ORDER={"UNKNOWN":-1,"M0":0,"M1":1,"M2":2,"M3":3}
 
 def _load():
     try: return json.load(open(P("data","opendart_field_map.json"),encoding="utf-8"))
     except FileNotFoundError: return {"maps":{}}
 def load_field_map(): return _load().get("maps",{})
+
+def load_thresholds():
+    try: return json.load(open(P("data","event_thresholds.json"),encoding="utf-8")).get("events",{})
+    except FileNotFoundError: return {}
 
 def num(v):
     if v is None: return None
@@ -46,7 +51,7 @@ def compute(event_type, detail_row, external, rcept_no, field_map=None):
     if not entry: return [], "UNKNOWN"
     if entry.get("materialityStatus")=="NOT_REQUIRED": return [], "NOT_REQUIRED"
     if entry.get("status")=="PENDING_GUIDE_READ":
-        return [{"metric":"_pending","status":"UNKNOWN","reason":"공식 가이드 필드 미확인(자동계산 비활성)","rcept_no":rcept_no}], "UNKNOWN"
+        return [{"metric":"_pending","status":"UNKNOWN","reason":"공식 가이드 필드 미확인(자동계산 비활성)","rcept_no":rcept_no,"materialityBand":"UNKNOWN"}], "UNKNOWN"
     row=detail_row or {}; ext=external or {}; out=[]
     for m in entry.get("metrics",[]):
         reported=num(row.get(m["reported_field"])) if m.get("reported_field") else None
@@ -64,7 +69,7 @@ def compute(event_type, detail_row, external, rcept_no, field_map=None):
             "formula":m["formula"],"source":f"OpenDART:{entry['endpoint']}","rcept_no":rcept_no,
             "tolerance_pp":float(RATIO_TOLERANCE_PP),
             "diff_pp":(float(abs(reported-computed_pct)) if (reported is not None and computed_pct is not None) else None),
-            "status":st,"reason":reason,"direction":"UNKNOWN"})
+            "status":st,"reason":reason,"direction":"UNKNOWN","materialityBand":"UNKNOWN"})
     if not out: return [], "UNKNOWN"
     if any(x["status"]=="CONFLICT" for x in out): overall="CONFLICT"
     elif all(x["status"]=="UNKNOWN" for x in out): overall="UNKNOWN"
@@ -77,9 +82,28 @@ def extract_facts(event_type, detail_row, field_map=None):
     keys=(fm.get(event_type,{}) or {}).get("facts",[])
     return {k:(detail_row or {}).get(k) for k in keys if (detail_row or {}).get(k) not in (None,"")}
 
+def _band_value(value, policy):
+    if value is None: return "UNKNOWN"
+    v=Decimal(str(value))
+    if v >= Decimal(str(policy["m3_gte"])): return "M3"
+    if v >= Decimal(str(policy["m2_gte"])): return "M2"
+    if v >= Decimal(str(policy.get("m1_gte",0))): return "M1"
+    return "M0"
+
+def band_for(event_type, metrics, thresholds=None):
+    """사건별/metric별 threshold로 M0~M3 판정. 정책 없는 metric은 임의 공통기준을 적용하지 않는다."""
+    th=thresholds if thresholds is not None else load_thresholds()
+    policies=th.get(event_type,{})
+    bands=[]
+    for m in metrics or []:
+        policy=policies.get(m.get("metric"))
+        if not policy or m.get("status") not in ("VERIFIED","CALCULATED","REPORTED_ONLY"):
+            m["materialityBand"]="UNKNOWN"
+            continue
+        value=m.get("computedValue") if m.get("computedValue") is not None else m.get("reportedValue")
+        b=_band_value(value,policy); m["materialityBand"]=b; bands.append(b)
+    return max(bands,key=lambda b:BAND_ORDER[b]) if bands else "UNKNOWN"
+
 def worst_band(metrics):
-    vals=[x.get("computedValue") if x.get("computedValue") is not None else x.get("reportedValue")
-          for x in metrics if x.get("status") in ("VERIFIED","CALCULATED","REPORTED_ONLY")]
-    vals=[v for v in vals if isinstance(v,(int,float))]
-    if not vals: return "UNKNOWN"
-    v=max(vals); return "M3" if v>=10 else "M2" if v>=3 else "M1" if v>=1 else "M0"
+    """구형 공통 threshold 사용 금지. event_type 없는 판정은 안전하게 UNKNOWN."""
+    return "UNKNOWN"
