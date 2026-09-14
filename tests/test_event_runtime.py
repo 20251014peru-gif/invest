@@ -34,7 +34,7 @@ ck("유상증자 10% → M2", en["materiality"]=="M2",str(en.get("materiality"))
 ck("G3 도달", en["riskGate"]=="G3")
 ck("G3여도 신규매수 잠금 유지", en["new_buy_locked"] is True)
 
-# process: 동일 rcept 재실행 시 신규 Event 중복 생성 금지
+# process: 첫 실행은 baseline(알림 0), 이후 동일 rcept 중복금지, 진짜 신규만 알림
 with tempfile.TemporaryDirectory() as td:
     oldroot=ER.ROOT; ER.ROOT=td
     os.makedirs(os.path.join(td,"facts","events"),exist_ok=True)
@@ -42,14 +42,24 @@ with tempfile.TemporaryDirectory() as td:
     ER._ensure_corp_map=lambda key,codes: ({"005930":{"corp_code":"00126380"}},None)
     def simple_enrich(e,key,cmap,field_map=None,fetcher=None):
         e["corp_code"]="00126380"; e["detailAttempts"]=1; e["detailStatus"]="NO_ENDPOINT"
+        e["lastDetailAttemptAt"]="2999-01-01T10:00:00+09:00"
         e["materialityStatus"]="UNKNOWN"; e["materiality"]="UNKNOWN"; return e
     ER.enrich_event=simple_enrich
     item=raw("단일판매ㆍ공급계약체결","29990101000009")
-    a=ER.process([item],"KEY"); b=ER.process([item],"KEY")
-    ck("첫 실행 신규 Event 1건", len(a["new_events"])==1)
-    ck("동일 rcept 재실행 신규 0건", len(b["new_events"])==0)
+    a=ER.process([item],"KEY")
+    ck("첫 실행 baseline_mode", a["baseline_mode"] is True)
+    ck("첫 실행 기존공시 알림 0건", len(a["new_events"])==0)
+    b=ER.process([item],"KEY")
+    ck("두번째 동일 rcept 신규 0건", len(b["new_events"])==0)
     idx=json.load(open(os.path.join(td,"facts","events","index.json"),encoding="utf-8"))
     ck("Event index 중복 없음", idx["count"]==1)
+    saved=idx["events"][0]
+    ck("기존 detailAttempts 보존", saved["detailAttempts"]==1)
+    ck("기존 lastDetailAttemptAt 보존", saved["lastDetailAttemptAt"]=="2999-01-01T10:00:00+09:00")
+    ck("기존 corp_code 보존", saved["corp_code"]=="00126380")
+    new_item=raw("단일판매ㆍ공급계약체결","29990101000010")
+    c=ER.process([item,new_item],"KEY")
+    ck("baseline 이후 진짜 신규 1건만 알림", len(c["new_events"])==1 and ER._rcept(c["new_events"][0])=="29990101000010")
     ER._ensure_corp_map=original_ensure; ER.enrich_event=original_enrich; ER.ROOT=oldroot
 
 p=sum(1 for _,ok,_ in R if ok)
