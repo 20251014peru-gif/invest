@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-09-14",
-  "generated_at": "2026-09-14T09:51:38+09:00",
+  "generated_at": "2026-09-14T14:57:52+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 64.2%(-10.40%p) · 유가 WTI 102.84 $(+2.8%) · 금 4,374 $/oz(-0.8%)"
+      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 64.2%(-10.40%p) · 유가 WTI 102.37 $(+2.3%) · 구리 6.46 $/lb(-1.4%)"
     },
     {
       "k": "오늘 발표",
@@ -18,7 +18,7 @@
     },
     {
       "k": "산업·종목",
-      "t": "DART 33건(수주·공급계약 5) · 토론실 근거글 +0(적중 7) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
+      "t": "DART 35건(수주·공급계약 6) · 토론실 근거글 +0(적중 7) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
     },
     {
       "k": "미입력",
@@ -87,44 +87,58 @@
     {
       "id": "wti",
       "name": "유가 WTI",
-      "value": 102.84,
+      "value": 102.37,
       "unit": "$",
       "prev": 100.05,
-      "delta": 2.79,
-      "delta_text": "+2.8%",
+      "delta": 2.32,
+      "delta_text": "+2.3%",
       "judge": "",
       "as_of": "2026-09-14",
       "cycle": "D",
-      "score": 2.7886056971514304,
-      "group": "world"
-    },
-    {
-      "id": "gold",
-      "name": "금",
-      "value": 4374.5,
-      "unit": "$/oz",
-      "prev": 4408.9,
-      "delta": -34.4,
-      "delta_text": "-0.8%",
-      "judge": "",
-      "as_of": "2026-09-14",
-      "cycle": "D",
-      "score": 0.7802399691532954,
+      "score": 2.318840579710152,
       "group": "world"
     },
     {
       "id": "copper",
       "name": "구리",
-      "value": 6.512,
+      "value": 6.456,
       "unit": "$/lb",
       "prev": 6.548,
-      "delta": -0.036,
-      "delta_text": "-0.5%",
+      "delta": -0.092,
+      "delta_text": "-1.4%",
       "judge": "",
       "as_of": "2026-09-14",
       "cycle": "D",
-      "score": 0.5497861942577958,
+      "score": 1.405009163103232,
       "group": "world"
+    },
+    {
+      "id": "gold",
+      "name": "금",
+      "value": 4371.0,
+      "unit": "$/oz",
+      "prev": 4408.9,
+      "delta": -37.9,
+      "delta_text": "-0.9%",
+      "judge": "",
+      "as_of": "2026-09-14",
+      "cycle": "D",
+      "score": 0.8596248497357536,
+      "group": "world"
+    },
+    {
+      "id": "usdkrw",
+      "name": "원달러 환율",
+      "value": 1346.4,
+      "unit": "원",
+      "prev": 1338.2,
+      "delta": 8.2,
+      "delta_text": "+0.6%",
+      "judge": "우호",
+      "as_of": "2026-09-14",
+      "cycle": "D",
+      "score": 0.6127634135405803,
+      "group": "kr"
     },
     {
       "id": "m2",
@@ -141,32 +155,18 @@
       "group": "us"
     },
     {
-      "id": "kr_lead",
-      "name": "선행지수순환변동치",
-      "value": 104.2,
+      "id": "hsi",
+      "name": "항셍지수",
+      "value": 24909.81,
       "unit": "pt",
-      "prev": 103.8,
-      "delta": 0.4,
+      "prev": 24805.63,
+      "delta": 104.18,
       "delta_text": "+0.4%",
-      "judge": "",
-      "as_of": "2026-07",
-      "cycle": "M",
-      "score": 0.3853564547206221,
-      "group": "kr"
-    },
-    {
-      "id": "kr_cpi_yoy",
-      "name": "한국 CPI 전년비",
-      "value": 3.09,
-      "unit": "%",
-      "prev": 2.79,
-      "delta": 0.3,
-      "delta_text": "+0.30%p",
-      "judge": "부담",
-      "as_of": "2026-08",
-      "cycle": "M",
-      "score": 0.2999999999999998,
-      "group": "kr"
+      "judge": "중립",
+      "as_of": "2026-09-14",
+      "cycle": "D",
+      "score": 0.41998530172384374,
+      "group": "world"
     }
   ],
   "releases": {
@@ -265,44 +265,58 @@
         {
           "id": "wti",
           "name": "유가 WTI",
-          "value": 102.84,
+          "value": 102.37,
           "unit": "$",
           "prev": 100.05,
-          "delta": 2.79,
-          "delta_text": "+2.8%",
+          "delta": 2.32,
+          "delta_text": "+2.3%",
           "judge": "",
           "as_of": "2026-09-14",
           "cycle": "D",
-          "score": 2.7886056971514304,
-          "group": "world"
-        },
-        {
-          "id": "gold",
-          "name": "금",
-          "value": 4374.5,
-          "unit": "$/oz",
-          "prev": 4408.9,
-          "delta": -34.4,
-          "delta_text": "-0.8%",
-          "judge": "",
-          "as_of": "2026-09-14",
-          "cycle": "D",
-          "score": 0.7802399691532954,
+          "score": 2.318840579710152,
           "group": "world"
         },
         {
           "id": "copper",
           "name": "구리",
-          "value": 6.512,
+          "value": 6.456,
           "unit": "$/lb",
           "prev": 6.548,
-          "delta": -0.036,
-          "delta_text": "-0.5%",
+          "delta": -0.092,
+          "delta_text": "-1.4%",
           "judge": "",
           "as_of": "2026-09-14",
           "cycle": "D",
-          "score": 0.5497861942577958,
+          "score": 1.405009163103232,
           "group": "world"
+        },
+        {
+          "id": "gold",
+          "name": "금",
+          "value": 4371.0,
+          "unit": "$/oz",
+          "prev": 4408.9,
+          "delta": -37.9,
+          "delta_text": "-0.9%",
+          "judge": "",
+          "as_of": "2026-09-14",
+          "cycle": "D",
+          "score": 0.8596248497357536,
+          "group": "world"
+        },
+        {
+          "id": "usdkrw",
+          "name": "원달러 환율",
+          "value": 1346.4,
+          "unit": "원",
+          "prev": 1338.2,
+          "delta": 8.2,
+          "delta_text": "+0.6%",
+          "judge": "우호",
+          "as_of": "2026-09-14",
+          "cycle": "D",
+          "score": 0.6127634135405803,
+          "group": "kr"
         },
         {
           "id": "m2",
@@ -319,46 +333,32 @@
           "group": "us"
         },
         {
-          "id": "kr_lead",
-          "name": "선행지수순환변동치",
-          "value": 104.2,
+          "id": "hsi",
+          "name": "항셍지수",
+          "value": 24909.81,
           "unit": "pt",
-          "prev": 103.8,
-          "delta": 0.4,
+          "prev": 24805.63,
+          "delta": 104.18,
           "delta_text": "+0.4%",
-          "judge": "",
-          "as_of": "2026-07",
-          "cycle": "M",
-          "score": 0.3853564547206221,
-          "group": "kr"
-        },
-        {
-          "id": "kr_cpi_yoy",
-          "name": "한국 CPI 전년비",
-          "value": 3.09,
-          "unit": "%",
-          "prev": 2.79,
-          "delta": 0.3,
-          "delta_text": "+0.30%p",
-          "judge": "부담",
-          "as_of": "2026-08",
-          "cycle": "M",
-          "score": 0.2999999999999998,
-          "group": "kr"
+          "judge": "중립",
+          "as_of": "2026-09-14",
+          "cycle": "D",
+          "score": 0.41998530172384374,
+          "group": "world"
         }
       ]
     },
     {
       "id": "2026-09-14/auto/flow",
-      "time": "08:40",
+      "time": "10:33",
       "who": "auto",
       "kind": "flow",
-      "title": "공시·토론실 — 근거글 +0, 수주·공급계약 5",
+      "title": "공시·토론실 — 근거글 +0, 수주·공급계약 6",
       "text": "SK하이닉스 \"ADR과 국내주가 갭차이 분석\"(중) · SK하이닉스 \"자사주 매입 시작\"(상) · SK하이닉스 \"자사주 매입 시작\"(상)"
     },
     {
       "id": "2026-09-14/auto/macro",
-      "time": "09:49",
+      "time": "14:56",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 35/35 수집",
