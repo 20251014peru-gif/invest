@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {
   MODEL_POLICY, AI_POLICY_VERSION, analysisFingerprint, estimateCostUsd, costFromUsageUsd,
-  kstKeys, buildAnalysisPrompt, pricingIsStale, ANALYSIS_OUTPUT_SCHEMA, cleanThesis
+  kstKeys, buildAnalysisPrompt, pricingIsStale, ANALYSIS_OUTPUT_SCHEMA, cleanThesis, decisionPolicy
 } from '../lib/ai_core.js';
 
 let tests=0;
@@ -18,11 +18,11 @@ eq(estimateCostUsd(4000,1000,price),0.018);
 eq(costFromUsageUsd({input_tokens:4000,output_tokens:1000},price),0.018);
 eq(costFromUsageUsd({input_tokens:4000,output_tokens:1000,cache_read_input_tokens:1000},price),0.0182);
 
-const event={schema:'event/waveB2-1',event_id:'EV-X',type:'RIGHTS_OFFERING',family:'DILUTION',claimStatus:'CONFIRMED',facts:{b:2,a:1},metrics:[{metric:'ordinary_dilution',computedValue:10}],unknowns:[],versions:[{rcept_no:'20260101000001'}]};
+const event={schema:'event/waveB2-1',event_id:'EV-X',type:'RIGHTS_OFFERING',family:'DILUTION',claimStatus:'CONFIRMED',materiality:'M2',materialityStatus:'CALCULATED',facts:{b:2,a:1},metrics:[{metric:'ordinary_dilution',computedValue:10,status:'CALCULATED'}],unknowns:[],versions:[{rcept_no:'20260101000001'}]};
 const f1=analysisFingerprint({event,thesis:{statement:'A',version:'1'},model:'claude-sonnet-5'});
 const f2=analysisFingerprint({event:{...event,facts:{a:1,b:2}},thesis:{version:'1',statement:'A'},model:'claude-sonnet-5'});
 eq(f1,f2,'key order must not change fingerprint');
-const f3=analysisFingerprint({event:{...event,metrics:[{metric:'ordinary_dilution',computedValue:11}]},thesis:{statement:'A',version:'1'},model:'claude-sonnet-5'});
+const f3=analysisFingerprint({event:{...event,metrics:[{metric:'ordinary_dilution',computedValue:11,status:'CALCULATED'}]},thesis:{statement:'A',version:'1'},model:'claude-sonnet-5'});
 neq(f1,f3,'metric change must invalidate cache');
 const f4=analysisFingerprint({event,thesis:{statement:'A',version:'1'},model:'claude-sonnet-5',policyVersion:'different-policy'});
 neq(f1,f4,'AI policy change must invalidate cache');
@@ -63,5 +63,14 @@ deep(lt.confirmationConditions,['핵심가정: 마진 개선 지속','촉매: �
 deep(lt.invalidationConditions,['반증조건: 마진 2분기 연속 하락','리스크: 고객 집중']);
 eq(lt.expectedHorizon,'2026-12');
 eq(lt.version,'2026-09-15');
+
+// G6: server policy is authoritative, not the browser UI.
+eq(decisionPolicy(event,'BUY',false).reason,'RISK_REVIEW_REQUIRED');
+eq(decisionPolicy(event,'BUY',true).ok,true);
+eq(decisionPolicy({...event,claimStatus:'UNCONFIRMED'},'BUY',true).reason,'AGGRESSIVE_DECISION_LOCKED');
+eq(decisionPolicy({...event,materiality:'UNKNOWN',materialityStatus:'UNKNOWN'},'ADD',true).reason,'AGGRESSIVE_DECISION_LOCKED');
+eq(decisionPolicy({...event,metrics:[{metric:'x',status:'CONFLICT'}]},'BUY',true).reason,'AGGRESSIVE_DECISION_LOCKED');
+eq(decisionPolicy({...event,claimStatus:'UNCONFIRMED',materiality:'UNKNOWN',materialityStatus:'UNKNOWN'},'SELL',true).ok,true);
+eq(decisionPolicy(event,'INVALID',true).reason,'INVALID_DECISION');
 
 console.log(`Wave C AI core: ${tests}/${tests} PASS`);
