@@ -1,13 +1,16 @@
 import crypto from 'node:crypto';
 
-export const PROMPT_VERSION = 'event-risk-v1';
+export const PROMPT_VERSION = 'event-risk-v2';
+export const AI_POLICY_VERSION = 'ai-policy-20260915-2';
 export const ANALYSIS_SCHEMA_VERSION = 'event-ai-analysis/1';
 export const FIELD_MAP_SCHEMA = 'opendart_field_map/3';
 
+// Haiku 4.5 does not support effort. Sonnet/Opus 5 use adaptive thinking by default;
+// maxTokens therefore leaves headroom for thinking + the final structured JSON.
 export const MODEL_POLICY = {
-  routine: {model: 'claude-haiku-4-5-20251001', maxTokens: 900, estimateOutputTokens: 500},
-  analysis: {model: 'claude-sonnet-5', maxTokens: 1800, estimateOutputTokens: 950},
-  deep: {model: 'claude-opus-5', maxTokens: 2600, estimateOutputTokens: 1500}
+  routine: {model: 'claude-haiku-4-5-20251001', effort: null, maxTokens: 900, estimateOutputTokens: 500},
+  analysis: {model: 'claude-sonnet-5', effort: 'medium', maxTokens: 4000, estimateOutputTokens: 1200},
+  deep: {model: 'claude-opus-5', effort: 'high', maxTokens: 6000, estimateOutputTokens: 1800}
 };
 
 export const ANALYSIS_OUTPUT_SCHEMA = {
@@ -111,13 +114,14 @@ export function sha256(value) {
   return crypto.createHash('sha256').update(String(value)).digest('hex');
 }
 
-export function analysisFingerprint({event, thesis, model, promptVersion = PROMPT_VERSION}) {
+export function analysisFingerprint({event, thesis, model, promptVersion = PROMPT_VERSION, policyVersion = AI_POLICY_VERSION}) {
   const e = cleanEvent(event);
   const t = cleanThesis(thesis || {});
   const latest = e.versions.length ? e.versions[e.versions.length - 1].rcept_no : '';
   return sha256(stableStringify({
     analysisSchema: ANALYSIS_SCHEMA_VERSION,
     fieldMapSchema: FIELD_MAP_SCHEMA,
+    aiPolicyVersion: policyVersion,
     eventSchema: e.schema,
     event_id: e.event_id,
     latestRceptNo: latest,
@@ -184,7 +188,8 @@ export function buildAnalysisPrompt(eventInput, thesisInput) {
     'Materiality is size, not direction. Separate positive and negative scenarios.',
     'If evidence is insufficient, say UNKNOWN or request additional research.',
     'You may analyze G4 risk and G5 thesis impact, but you must never unlock G6 or issue an automatic BUY/SELL decision.',
-    'Do not use web search, tools, or external knowledge as if it were verified event fact.'
+    'Do not use web search, tools, or external knowledge as if it were verified event fact.',
+    'Thinking should be used only when it materially improves risk/thesis reasoning; keep the final structured answer concise.'
   ].join(' ');
   const user = `EVENT_DATA\n${JSON.stringify(event)}\n\nTHESIS_DATA\n${JSON.stringify(thesis)}\n\nAnalyze risk, counter-case, thesis impact, and what must be checked next.`;
   return {system, user, event, thesis};
