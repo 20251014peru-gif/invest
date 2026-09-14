@@ -1,13 +1,14 @@
 {
-  "schema": "opendart_field_map/2",
-  "_note": "OpenDART 공식 개발가이드(DS005)에서 실제로 읽은 응답 필드만 기입. 안 읽은 endpoint 는 PENDING_GUIDE_READ 로 두고 절대 짐작으로 채우지 않는다. validate.yml 실행 시 실응답과 대조해 SCHEMA_MISMATCH 를 기록한다.",
+  "schema": "opendart_field_map/3",
+  "_note": "OpenDART 공식 개발가이드 또는 GitHub Actions 실응답으로 검증된 필드만 사용. 표본이 없는 endpoint는 PENDING_GUIDE_READ로 남기고 추측으로 채우지 않는다.",
   "tolerance_pp": 0.5,
   "maps": {
     "RIGHTS_OFFERING": {
       "status": "VERIFIED_SCHEMA",
       "endpoint": "piicDecsn.json",
       "apiId": "2020023",
-      "source": "공식가이드 DS005/2020023 (2026-09-15 확인)",
+      "source": "OpenDART 공식가이드 DS005/2020023 + 2026-09-15 라이브 검증",
+      "required_fields": ["rcept_no","nstk_ostk_cnt","nstk_estk_cnt","bfic_tisstk_ostk","bfic_tisstk_estk"],
       "facts": ["fdpp_fclt","fdpp_bsninh","fdpp_op","fdpp_dtrp","fdpp_ocsa","fdpp_etc","ic_mthn"],
       "metrics": [
         {"name":"ordinary_dilution","unit":"%","reported_field":null,"numerator":{"field":"nstk_ostk_cnt"},"denominator":{"field":"bfic_tisstk_ostk"},"formula":"nstk_ostk_cnt / bfic_tisstk_ostk * 100"},
@@ -17,21 +18,54 @@
       ]
     },
     "BUSINESS_SUSPENSION": {
-      "status":"VERIFIED_SCHEMA","endpoint":"bsnSp.json","apiId":"2020020","source":"공식가이드 DS005/2020020 (2026-09-15 확인)",
+      "status":"VERIFIED_SCHEMA","endpoint":"bsnSp.json","apiId":"2020020","source":"OpenDART 공식가이드 DS005/2020020",
+      "required_fields":["rcept_no","bsnsp_amt","rsl","sl_vs"],
       "metrics":[{"name":"suspended_sales_ratio","unit":"%","reported_field":"sl_vs","numerator":{"field":"bsnsp_amt"},"denominator":{"field":"rsl"},"formula":"bsnsp_amt / rsl * 100"}]
     },
     "BW_ISSUE": {
-      "status":"VERIFIED_SCHEMA","endpoint":"bdwtIsDecsn.json","apiId":"2020034","source":"공식가이드 DS005/2020034 (2026-09-15 확인)",
+      "status":"VERIFIED_SCHEMA","endpoint":"bdwtIsDecsn.json","apiId":"2020034","source":"OpenDART 공식가이드 DS005/2020034",
+      "required_fields":["rcept_no","nstk_isstk_cnt","nstk_isstk_tisstk_vs","bd_fta"],
       "metrics":[
         {"name":"bw_shares_ratio","unit":"%","reported_field":"nstk_isstk_tisstk_vs","numerator":{"field":"nstk_isstk_cnt"},"denominator":{"external":"listed_shares"},"formula":"nstk_isstk_cnt / listed_shares * 100"},
         {"name":"bw_to_mktcap","unit":"%","reported_field":null,"numerator":{"field":"bd_fta"},"denominator":{"external":"market_cap"},"formula":"bd_fta / market_cap * 100"}
       ]
     },
+    "CB_ISSUE": {
+      "status":"LIVE_VERIFIED_SCHEMA","endpoint":"cvbdIsDecsn.json","apiId":"2020033","source":"OpenDART 2026-09-15 GitHub Actions 실응답",
+      "required_fields":["rcept_no","bd_fta","cv_prc","cvisstk_cnt","cvisstk_tisstk_vs"],
+      "facts":["bd_fta","cv_prc","cvisstk_cnt","cvisstk_tisstk_vs","act_mktprcfl_cvprc_lwtrsprc","act_mktprcfl_cvprc_lwtrsprc_bs","bdis_mthn","cvrqpd_bgd","cvrqpd_edd","fdpp_fclt","fdpp_bsninh","fdpp_op","fdpp_dtrp","fdpp_ocsa","fdpp_etc"],
+      "metrics":[
+        {"name":"potential_dilution","unit":"%","reported_field":"cvisstk_tisstk_vs","numerator":{"field":"cvisstk_cnt"},"denominator":{"external":"listed_shares"},"formula":"cvisstk_cnt / listed_shares * 100"},
+        {"name":"cb_to_mktcap","unit":"%","reported_field":null,"numerator":{"field":"bd_fta"},"denominator":{"external":"market_cap"},"formula":"bd_fta / market_cap * 100"}
+      ]
+    },
+    "EB_ISSUE": {
+      "status":"LIVE_VERIFIED_SCHEMA","endpoint":"exbdIsDecsn.json","apiId":"2020035","source":"OpenDART 2026-09-15 GitHub Actions 실응답",
+      "required_fields":["rcept_no","bd_fta","ex_prc","extg","extg_stkcnt","extg_tisstk_vs"],
+      "facts":["bd_fta","ex_prc","ex_prc_dmth","extg","extg_stkcnt","extg_tisstk_vs","bdis_mthn","exrqpd_bgd","exrqpd_edd","fdpp_fclt","fdpp_bsninh","fdpp_op","fdpp_dtrp","fdpp_ocsa","fdpp_etc"],
+      "metrics":[
+        {"name":"exchange_shares_ratio","unit":"%","reported_field":"extg_tisstk_vs","numerator":{"field":"extg_stkcnt"},"denominator":{"external":"exchange_target_listed_shares"},"formula":"extg_stkcnt / exchange_target_listed_shares * 100"},
+        {"name":"eb_to_mktcap","unit":"%","reported_field":null,"numerator":{"field":"bd_fta"},"denominator":{"external":"market_cap"},"formula":"bd_fta / market_cap * 100"}
+      ],
+      "materiality_note":"교환대상주식 비율은 자동 희석률로 해석하지 않는다. 별도 정책 확정 전 M등급 UNKNOWN."
+    },
+    "BUYBACK": {
+      "status":"LIVE_VERIFIED_SCHEMA","endpoint":"tsstkAqDecsn.json","apiId":"2020038","source":"OpenDART 2026-09-15 GitHub Actions 실응답",
+      "required_fields":["rcept_no","aqpln_stk_ostk","aqpln_prc_ostk","aq_pp","aq_mth"],
+      "facts":["aqpln_stk_ostk","aqpln_stk_estk","aqpln_prc_ostk","aqpln_prc_estk","aq_pp","aq_mth","aqexpd_bgd","aqexpd_edd","eaq_ostk","eaq_estk"],
+      "metrics":[
+        {"name":"buyback_to_mktcap","unit":"%","reported_field":null,"numerator":{"prefix":"aqpln_prc_"},"denominator":{"external":"market_cap"},"formula":"sum(aqpln_prc_*) / market_cap * 100"}
+      ]
+    },
+    "TREASURY_DISPOSAL": {
+      "status":"LIVE_VERIFIED_SCHEMA","endpoint":"tsstkDpDecsn.json","apiId":"2020039","source":"OpenDART 2026-09-15 GitHub Actions 실응답",
+      "required_fields":["rcept_no","dppln_stk_ostk","dppln_prc_ostk","dp_pp"],
+      "facts":["dppln_stk_ostk","dppln_stk_estk","dpstk_prc_ostk","dpstk_prc_estk","dppln_prc_ostk","dppln_prc_estk","dp_pp","dp_m_mkt","dp_m_ovtm","dp_m_otc","dp_m_etc","dpprpd_bgd","dpprpd_edd"],
+      "metrics":[
+        {"name":"disposal_to_mktcap","unit":"%","reported_field":null,"numerator":{"prefix":"dppln_prc_"},"denominator":{"external":"market_cap"},"formula":"sum(dppln_prc_*) / market_cap * 100"}
+      ]
+    },
     "DEFAULT":{"endpoint":"dfOcr.json","apiId":"2020019","materialityStatus":"NOT_REQUIRED","note":"부도=구조적 위험(risk_gate). 금액비율 불필요."},
-    "CB_ISSUE":{"status":"PENDING_GUIDE_READ","endpoint":"cvbdIsDecsn.json","apiId":"2020033","guide_url":"https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS005&apiId=2020033"},
-    "EB_ISSUE":{"status":"PENDING_GUIDE_READ","endpoint":"exbdIsDecsn.json","apiId":"2020035","guide_url":"https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS005&apiId=2020035"},
-    "BUYBACK":{"status":"PENDING_GUIDE_READ","endpoint":"tsstkAqDecsn.json","apiId":"2020038","guide_url":"https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS005&apiId=2020038"},
-    "TREASURY_DISPOSAL":{"status":"PENDING_GUIDE_READ","endpoint":"tsstkDpDecsn.json","apiId":"2020039","guide_url":"https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS005&apiId=2020039"},
     "LITIGATION":{"status":"PENDING_GUIDE_READ","endpoint":"lwstLg.json","apiId":"2020028","guide_url":"https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS005&apiId=2020028"}
   },
   "_tolerance_note":"허용오차는 코드 상수 materiality.RATIO_TOLERANCE_PP(0.5%p) 사용."
