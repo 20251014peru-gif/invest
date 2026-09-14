@@ -1,5 +1,5 @@
 {
-  "schema": "event_thresholds/1",
+  "schema": "event_thresholds/2",
   "_note": "M은 사건의 크기만 판정한다. 방향(호재/악재)은 별도. 정책이 없는 metric은 임의 공통기준으로 등급화하지 않고 UNKNOWN으로 남긴다.",
   "events": {
     "SUPPLY_CONTRACT": {
@@ -16,9 +16,7 @@
     "BW_ISSUE": {
       "bw_shares_ratio": {"m3_gte": 15, "m2_gte": 5, "m1_gte": 0.01}
     },
-    "EB_ISSUE": {
-      "potential_dilution": {"m3_gte": 15, "m2_gte": 5, "m1_gte": 0.01}
-    },
+    "EB_ISSUE": {},
     "BUYBACK": {
       "buyback_to_mktcap": {"m3_gte": 3, "m2_gte": 1, "m1_gte": 0.01}
     },
