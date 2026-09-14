@@ -1,4 +1,5 @@
-# v 20260915-WaveB4 — 오프라인 회귀 + OpenDART 실검증. workflow_dispatch 전용.
+# v 20260915-WaveB5 — 오프라인 회귀 + OpenDART 실검증. workflow_dispatch 전용.
+# 실행 화면의 선택 브랜치와 무관하게 검증 대상 코드는 event-engine 브랜치를 checkout한다.
 name: Event Engine Validate (manual)
 on:
   workflow_dispatch:
@@ -13,11 +14,18 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout event-engine validation branch
+        uses: actions/checkout@v4
+        with:
+          ref: event-engine
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
+      - name: Confirm validation ref
+        run: |
+          echo "Validation branch: $(git branch --show-current)"
+          git log -1 --oneline
       - name: Python syntax check
-        run: python -m py_compile scripts/event_*.py scripts/correction_resolver.py scripts/materiality.py scripts/opendart_detail.py scripts/risk_gate.py scripts/corp_code_cache.py tests/test_waveb_offline.py
+        run: python -m py_compile scripts/event_dictionary.py scripts/event_schema.py scripts/event_normalizer.py scripts/event_engine_validate.py scripts/correction_resolver.py scripts/materiality.py scripts/opendart_detail.py scripts/risk_gate.py scripts/corp_code_cache.py tests/test_waveb_offline.py
       - name: Wave A 실제 DART replay
         run: python scripts/replay_test.py
       - name: Wave B offline regression
