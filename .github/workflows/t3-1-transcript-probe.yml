@@ -1,0 +1,41 @@
+# T3-1 자막 확보 프로브 (초안 v2 · 미등록 · 미실행) — v 20260911-D2
+# 무엇: GitHub-hosted runner(데이터센터 IP) 에서 youtube-transcript-api 로 대표 영상 최대 5개의 자막(시간정보 포함)을 받아보는 1회성 시험.
+# 아님: cron 없음 · AI 호출 없음 · Firestore/Firebase/Storage/Anthropic 키 없음 · 프록시·쿠키 없음 · 저장소에 아무것도 commit/push 하지 않음.
+# 판정: 워크플로의 초록(성공) = "프로브가 끝까지 실행됨" 일 뿐이다. 자막 확보 여부는 Summary 의 '유효' 열과 '유효 자막 확보 N' 숫자로만 판정한다.
+#       프로브 종료코드 2 = 실행 실패(라이브러리 import 실패 등) → 워크플로 빨강. 자막 미확보는 종료코드 0(실행 완료) 이며 warning 주석으로만 표시.
+# 결과: Actions 화면의 'Summary' 와 아티팩트(t3-1-result, 7일 보관) — 자막 본문·예외 원문은 어디에도 출력하지 않는다.
+name: T3-1 transcript probe (manual, one-shot)
+on:
+  workflow_dispatch: {}          # 수동 실행만. push/schedule 로는 절대 돌지 않는다.
+permissions:
+  contents: read                 # 읽기 전용 — 기존 배치 워크플로(contents: write)와 다르다
+concurrency:
+  group: t3-1-probe
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15          # 전체 상한. 영상당 처리시간 예산 150초 × 5 + 대기 = 약 13분. 초과해도 영상별 결과는 즉시 저장돼 있다
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 라이브러리 설치 (버전 고정) + 실제 설치 버전 기록
+        run: |
+          python -m pip install --quiet "youtube-transcript-api==1.2.4" "requests>=2.31"
+          python -m pip show youtube-transcript-api | sed -n '1,2p'
+      - name: 프로브 실행 (순차 · 네트워크 오류만 1회 재시도 · 영상별 처리시간 예산 150초)
+        run: python tests/t3_1/probe.py tests/t3_1/videos.json
+      - name: 결과를 Summary 에 표시 (실행 상태와 자막 확보를 분리해 표시)
+        if: always()
+        run: |
+          if [ -f tests/t3_1/out/result.md ]; then cat tests/t3_1/out/result.md >> "$GITHUB_STEP_SUMMARY"; else echo "결과 파일 없음 — 프로브가 시작 전에 실패(실행 실패, 자막 미확보 판정 아님)" >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: 결과 파일 보관 (7일)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: t3-1-result
+          path: tests/t3_1/out/
+          retention-days: 7
+          if-no-files-found: warn
