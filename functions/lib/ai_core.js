@@ -4,6 +4,7 @@ export const PROMPT_VERSION = 'event-risk-v2';
 export const AI_POLICY_VERSION = 'ai-policy-20260915-2';
 export const ANALYSIS_SCHEMA_VERSION = 'event-ai-analysis/1';
 export const FIELD_MAP_SCHEMA = 'opendart_field_map/3';
+export const DECISION_VALUES = ['WATCH','HOLD','REDUCE','SELL','BUY','ADD'];
 
 // Haiku 4.5 does not support effort. Sonnet/Opus 5 use adaptive thinking by default;
 // maxTokens therefore leaves headroom for thinking + the final structured JSON.
@@ -135,6 +136,18 @@ export function cleanThesis(input = {}) {
     invalidationConditions: cleanJson(invalidations || []),
     status: cleanString(input.status, 80)
   };
+}
+
+export function decisionPolicy(eventInput, decisionInput, riskReviewed) {
+  const event = cleanEvent(eventInput || {});
+  const decision = cleanString(decisionInput, 20).toUpperCase();
+  if (!DECISION_VALUES.includes(decision)) return {ok:false, reason:'INVALID_DECISION'};
+  if (riskReviewed !== true) return {ok:false, reason:'RISK_REVIEW_REQUIRED'};
+  const aggressive = decision === 'BUY' || decision === 'ADD';
+  const metricConflict = Array.isArray(event.metrics) && event.metrics.some(x => x?.status === 'CONFLICT');
+  const unresolved = event.claimStatus !== 'CONFIRMED' || event.materiality === 'UNKNOWN' || event.materialityStatus === 'UNKNOWN' || event.materialityStatus === 'CONFLICT' || metricConflict;
+  if (aggressive && unresolved) return {ok:false, reason:'AGGRESSIVE_DECISION_LOCKED'};
+  return {ok:true, decision, event};
 }
 
 export function stableStringify(value) {
