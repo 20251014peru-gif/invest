@@ -1,0 +1,16 @@
+{
+  "name": "invest-event-ai-functions",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "engines": {"node": "22"},
+  "scripts": {
+    "sync-config": "node scripts/sync-config.js",
+    "test:core": "node test/ai_core.test.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.119.0",
+    "firebase-admin": "14.4.0",
+    "firebase-functions": "7.3.2"
+  }
+}

@@ -1,0 +1,52 @@
+name: Event Engine Wave C CI
+on:
+  push:
+    branches: [event-engine-wave-c]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Python syntax check
+        run: python -m py_compile scripts/dart.py scripts/event_runtime.py scripts/event_notifier.py
+      - name: Wave B replay regression
+        run: python scripts/replay_test.py
+      - name: Wave B materiality regression
+        run: python tests/test_waveb_offline.py
+      - name: Wave C Event runtime/notifier tests
+        run: python tests/test_event_runtime.py
+      - name: Browser inline JavaScript syntax
+        run: |
+          python - <<'PY'
+          import re, pathlib
+          out=[]
+          for name in ['events.html','ai-register.html']:
+              text=pathlib.Path(name).read_text(encoding='utf-8')
+              blocks=re.findall(r'<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>',text,re.I|re.S)
+              if not blocks: raise SystemExit(f'no inline script found: {name}')
+              for i,b in enumerate(blocks):
+                  p=pathlib.Path('/tmp')/f'{name}.{i}.js'; p.write_text(b,encoding='utf-8'); out.append(str(p))
+          pathlib.Path('/tmp/inline-list.txt').write_text('\n'.join(out),encoding='utf-8')
+          PY
+          while IFS= read -r f; do node --check "$f"; done < /tmp/inline-list.txt
+      - name: Install Wave C server dependencies
+        run: |
+          npm --prefix functions install --no-audit --no-fund
+          npm --prefix functions-access install --no-audit --no-fund
+      - name: Sync canonical AI pricing
+        run: npm --prefix functions run sync-config
+      - name: Wave C deterministic cost/fingerprint tests
+        run: npm --prefix functions run test:core
+      - name: Import Firebase function codebases
+        run: |
+          node -e "import('./functions/index.js').then(()=>console.log('AI gateway import OK'))"
+          node -e "import('./functions-access/index.js').then(()=>console.log('Access gateway import OK'))"
+      - name: Validate firebase config JSON
+        run: node -e "const x=require('./firebase.json'); if(!Array.isArray(x.functions)||x.functions.length!==2)process.exit(1); console.log('firebase codebases OK')"
