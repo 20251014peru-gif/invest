@@ -1,0 +1,28 @@
+name: Event Engine Wave C CI
+on:
+  push:
+    branches: [event-engine-wave-c]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Wave B replay regression
+        run: python scripts/replay_test.py
+      - name: Wave B materiality regression
+        run: python tests/test_waveb_offline.py
+      - name: Install Wave C server dependencies
+        run: npm --prefix functions install --no-audit --no-fund
+      - name: Sync canonical AI pricing
+        run: npm --prefix functions run sync-config
+      - name: Wave C deterministic cost/fingerprint tests
+        run: npm --prefix functions run test:core
+      - name: Import Firebase AI gateway
+        run: node -e "import('./functions/index.js').then(()=>console.log('AI gateway import OK'))"
