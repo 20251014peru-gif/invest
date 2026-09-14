@@ -87,14 +87,52 @@ export function cleanEvent(input = {}) {
   };
 }
 
+function customFieldsMap(input = {}) {
+  const out = {};
+  for (const row of Array.isArray(input.customFields) ? input.customFields : []) {
+    const label = cleanString(row?.label, 120).trim();
+    const value = cleanString(row?.value, 3000).trim();
+    if (label && value && out[label] === undefined) out[label] = value;
+  }
+  return out;
+}
+
+function recentThesisLog(input = {}) {
+  const rows = Array.isArray(input.thesisLog) ? input.thesisLog : [];
+  return rows.slice(-5).map(x => {
+    const date = cleanString(x?.date, 20).trim();
+    const text = cleanString(x?.text, 1200).trim();
+    return text ? `${date ? date + ' ' : ''}${text}` : '';
+  }).filter(Boolean);
+}
+
 export function cleanThesis(input = {}) {
+  const cf = customFieldsMap(input);
+  const log = recentThesisLog(input);
+  const explicitStatement = cleanString(input.statement, 5000).trim();
+  const fallbackStatement = [
+    cf['매수사유'] ? `매수사유: ${cf['매수사유']}` : '',
+    cf['핵심가정'] ? `핵심가정: ${cf['핵심가정']}` : '',
+    log.length ? `최근 투자논지 이력:\n${log.join('\n')}` : ''
+  ].filter(Boolean).join('\n');
+  const confirmations = input.confirmationConditions ?? [
+    cf['핵심가정'] ? `핵심가정: ${cf['핵심가정']}` : '',
+    cf['촉매'] ? `촉매: ${cf['촉매']}` : ''
+  ].filter(Boolean);
+  const invalidations = input.invalidationConditions ?? [
+    cf['반증조건'] ? `반증조건: ${cf['반증조건']}` : '',
+    cf['리스크'] ? `리스크: ${cf['리스크']}` : '',
+    cf['손절가'] ? `손절가: ${cf['손절가']}` : '',
+    cf['매도조건'] ? `매도조건: ${cf['매도조건']}` : ''
+  ].filter(Boolean);
+  const latestLogDate = Array.isArray(input.thesisLog) && input.thesisLog.length ? cleanString(input.thesisLog[input.thesisLog.length - 1]?.date, 40) : '';
   return {
-    thesisId: cleanString(input.thesisId || input.id, 180),
-    version: cleanString(input.version, 80),
-    statement: cleanString(input.statement, 5000),
-    expectedHorizon: cleanString(input.expectedHorizon, 1000),
-    confirmationConditions: cleanJson(input.confirmationConditions || []),
-    invalidationConditions: cleanJson(input.invalidationConditions || []),
+    thesisId: cleanString(input.thesisId || input.id || input.name, 180),
+    version: cleanString(input.version || latestLogDate, 80),
+    statement: cleanString(explicitStatement || fallbackStatement, 5000),
+    expectedHorizon: cleanString(input.expectedHorizon || cf['재평가시점'], 1000),
+    confirmationConditions: cleanJson(confirmations || []),
+    invalidationConditions: cleanJson(invalidations || []),
     status: cleanString(input.status, 80)
   };
 }
@@ -155,8 +193,6 @@ export function costFromUsageUsd(usage = {}, price) {
   const output = Number(usage.output_tokens || 0);
   const cacheRead = Number(usage.cache_read_input_tokens || 0);
   const cacheCreate = Number(usage.cache_creation_input_tokens || 0);
-  // Core Wave C does not enable prompt caching. If the API nevertheless returns cache usage,
-  // record it using 5m write price conservatively rather than pretending it is free.
   const total = (
     input * Number(price.inputPerMillion) +
     output * Number(price.outputPerMillion) +
