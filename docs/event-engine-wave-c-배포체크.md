@@ -37,9 +37,9 @@ GitHub Actions에서 Firebase CLI를 인증할 JSON 키를 하나 만든다.
 |---|---|
 | `GCP_SERVICE_ACCOUNT_KEY` | 위 전용 배포 Service Account JSON 전체 |
 | `ANTHROPIC_API_KEY` | **새로 발급한** Anthropic API key. 과거 코드에 노출된 키 재사용 금지 |
-| `AI_ACCESS_PIN` | 집/회사/폰에서 기기 등록할 개인 PIN. 6자 이상 권장 |
+| `AI_ACCESS_CODE` | 집/회사/폰에서 기기 등록할 개인 Access Code. **16자 이상**의 긴 문자열/문구 사용 |
 
-**Secret 값은 채팅/코드/HTML에 붙여넣지 않는다.**
+**Secret 값은 채팅/코드/HTML에 붙여넣지 않는다.** 짧은 숫자 PIN은 사용하지 않는다.
 
 ## 배포 버튼
 main에 수동 workflow가 이미 준비되어 있다.
@@ -53,7 +53,7 @@ workflow가 하는 일:
 2. `event-engine-wave-c` checkout
 3. Google Cloud 인증
 4. Wave C 핵심 테스트 재실행
-5. `ANTHROPIC_API_KEY`, `AI_ACCESS_PIN`을 Firebase Secret Manager에 저장
+5. `ANTHROPIC_API_KEY`, `AI_ACCESS_CODE`를 Firebase Secret Manager에 저장
 6. `functions:event-access` codebase 배포
 7. `functions:event-ai` codebase 배포
 8. 배포 함수 목록 확인
@@ -62,13 +62,20 @@ workflow가 하는 일:
 
 ## codebase 분리 이유
 `firebase.json`:
-- `event-access` → 기기 PIN 등록 함수
+- `event-access` → 기기 Access Code 등록 함수
 - `event-ai` → 예상비용/AI 분석 함수
 
 서로 다른 codebase로 분리해 한쪽 배포가 다른 Firebase 함수들을 삭제하는 위험을 낮춘다.
 
+## 기기 등록 보안
+- 등록 비밀값은 `AI_ACCESS_CODE`, 최소 16자.
+- 브라우저에는 비밀값이나 Anthropic 키가 저장되지 않는다.
+- 실패 시 익명 UID 기준 하루 5회 제한.
+- IP는 원문을 저장하지 않고 SHA-256 일부값으로만 카운트하며 하루 20회 제한.
+- 등록 후 실제 AI 호출에도 일/월 예산 제한이 별도로 적용된다.
+
 ## 배포 후 무료/최소비용 검증 순서
-1. `ai-register.html`에서 집/회사/폰 각 기기를 PIN으로 1회 등록.
+1. `ai-register.html`에서 집/회사/폰 각 기기를 Access Code로 1회 등록.
 2. `events.html`에서 Event 선택.
 3. **예상비용 확인**만 실행 → Anthropic Token Counting으로 입력 token/예상비용 확인.
 4. 이 단계까지 메시지 생성 비용은 0.
