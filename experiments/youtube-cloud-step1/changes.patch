@@ -100,7 +100,26 @@
      var data = {
        kind:'youtube',
        date: (meta.게시일 || kstStr().slice(0,10)),
-@@ -4248,7 +4251,7 @@
+@@ -4010,6 +4013,18 @@
+   function startPaste(ov) {
+     try {
+       var r = cleanScript(ov.querySelector('#ytpText').value);
++      if (window.YTJobs) {
++        window.YTJobs.submit({
++          title: ov.querySelector('#ytpTitle').value.trim(),
++          transcript: r.text,
++          channel: ov.querySelector('#ytpCh').value.trim(),
++          url: (ov.querySelector('#ytpUrl').value || '').trim(),
++          publishDate: (ov.querySelector('#ytpDate').value || '').trim(),
++          timeline: (ov.querySelector('#ytpTL').value || '').trim(),
++          chaptersOnly: !!ov.querySelector('#ytpTLCh').checked
++        }, ov);
++        return;
++      }
+       var url = (ov.querySelector('#ytpUrl').value || '').trim();
+       /* runSummary() 는 #url 칸을 읽고 extractVideoId() 로 검사한다.
+          주소를 안 넣었으면 통과하도록 가짜가 아닌 '붙여넣기 표식' 주소를 만든다. */
+@@ -4248,7 +4263,7 @@
        old.innerHTML = '<b>📸 찍은 장면 ' + list.length + '</b><div class="ytCapGrid">' +
          list.map(function (m) {
            return '<figure data-t="' + Math.floor(m.t || 0) + '">' +
@@ -109,7 +128,7 @@
                   '<figcaption>' + mkFmt(m.t || 0) +
                   (m.label ? ' · ' + esc2(m.label) : '') + '</figcaption></figure>';
          }).join('') + '</div>';
-@@ -4382,7 +4385,7 @@
+@@ -4382,7 +4397,7 @@
      delete mk.capErr;
      render();
      var body = JSON.stringify({ videoId: MK.vid, timestamps: [{ t: mk.t, label: mk.label || '' }] });
@@ -118,7 +137,7 @@
        .then(function (r) { return r.json(); })
        .then(function (r) {
          delete MK.capBusy[mk.t];
-@@ -4462,7 +4465,7 @@
+@@ -4462,7 +4477,7 @@
          if (mk.cap) {
            var im = document.createElement('img');
            im.className = 'mkTh'; im.loading = 'lazy';

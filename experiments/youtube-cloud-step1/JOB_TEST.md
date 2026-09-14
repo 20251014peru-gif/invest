@@ -1,6 +1,6 @@
 # 작업 접수·결과 보관 2차 시험
 
-이번 추가분은 실제 요약기와 분리된 **로컬 합성 시험**이다. `job-demo.html`은 Firebase를 불러오지 않는다. `job_service.py`는 127.0.0.1에서만 실행되고 실제 AI 대신 정해진 시험 결과를 만든다. 기존 youtube.html의 요약 버튼은 아직 이 작업 서버에 연결하지 않았다.
+이 문서는 2차의 독립적인 **로컬 합성 시험** 사용법이다. `job-demo.html`은 Firebase를 불러오지 않는다. `job_service.py`는 127.0.0.1에서만 실행되고 실제 AI 대신 정해진 시험 결과를 만든다. 이후 추가된 기존 화면 연결 방식은 [CONNECTED_TEST.md](CONNECTED_TEST.md)를 따른다.
 
 ## 검증 결과
 

@@ -43,8 +43,15 @@ class JobStore:
     def submit(self, owner, key, payload):
         if not isinstance(key, str) or not 8 <= len(key) <= 128:
             raise ValueError('요청 식별자를 확인하세요.')
-        if not isinstance(payload, dict) or set(payload) != {'title', 'transcript'}:
+        required = {'title', 'transcript'}
+        optional = {'channel', 'url', 'publishDate', 'timeline', 'chaptersOnly'}
+        if not isinstance(payload, dict) or not required <= set(payload) or set(payload) - required - optional:
             raise ValueError('제목과 자막을 입력하세요.')
+        for field, limit in [('channel', 300), ('url', 2000), ('publishDate', 10), ('timeline', 20000)]:
+            if field in payload and (not isinstance(payload[field], str) or len(payload[field]) > limit):
+                raise ValueError('메타 정보 길이를 확인하세요.')
+        if 'chaptersOnly' in payload and not isinstance(payload['chaptersOnly'], bool):
+            raise ValueError('책갈피 설정을 확인하세요.')
         if not isinstance(payload['title'], str) or not 1 <= len(payload['title'].strip()) <= 300:
             raise ValueError('제목 길이를 확인하세요.')
         if not isinstance(payload['transcript'], str) or not 100 <= len(payload['transcript'].strip()) <= 80000:

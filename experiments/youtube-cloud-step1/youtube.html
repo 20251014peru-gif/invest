@@ -4013,6 +4013,18 @@ async function loadDashboard(){
   function startPaste(ov) {
     try {
       var r = cleanScript(ov.querySelector('#ytpText').value);
+      if (window.YTJobs) {
+        window.YTJobs.submit({
+          title: ov.querySelector('#ytpTitle').value.trim(),
+          transcript: r.text,
+          channel: ov.querySelector('#ytpCh').value.trim(),
+          url: (ov.querySelector('#ytpUrl').value || '').trim(),
+          publishDate: (ov.querySelector('#ytpDate').value || '').trim(),
+          timeline: (ov.querySelector('#ytpTL').value || '').trim(),
+          chaptersOnly: !!ov.querySelector('#ytpTLCh').checked
+        }, ov);
+        return;
+      }
       var url = (ov.querySelector('#ytpUrl').value || '').trim();
       /* runSummary() 는 #url 칸을 읽고 extractVideoId() 로 검사한다.
          주소를 안 넣었으면 통과하도록 가짜가 아닌 '붙여넣기 표식' 주소를 만든다. */

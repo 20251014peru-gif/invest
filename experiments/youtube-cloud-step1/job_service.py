@@ -3,12 +3,14 @@ import argparse
 import hmac
 import json
 import os
+import re
 from pathlib import Path
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
 from job_store import JobStore, Conflict, QueueFull, process_one
+from pipeline_processor import pipeline_processor
 
 
 class ExclusiveWorker:
@@ -39,7 +41,7 @@ def synthetic_processor(payload):
             'input_chars': len(payload['transcript']), 'ai_calls': 0, 'firestore_writes': 0}
 
 
-def handler_for(store, tokens):
+def handler_for(store, tokens, pipeline_enabled=False, healthy=lambda: True):
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):
             pass  # Do not log titles, transcript bodies, or credentials.
@@ -50,6 +52,7 @@ def handler_for(store, tokens):
             self.send_header('Content-Type', content_type)
             self.send_header('Cache-Control', 'no-store')
             self.send_header('X-Content-Type-Options', 'nosniff')
+            self.send_header('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'")
             self.send_header('Content-Length', str(len(body)))
             self.end_headers()
             try:
@@ -70,6 +73,17 @@ def handler_for(store, tokens):
             path = urlsplit(self.path).path
             if path == '/':
                 return self.respond(200, Path(__file__).with_name('job-demo.html').read_bytes(), 'text/html; charset=utf-8')
+            if path == '/youtube.html':
+                if not pipeline_enabled:
+                    return self.respond(409, {'error': '--processor pipeline 옵션으로 시험 서버를 실행하세요.'})
+                html = Path(__file__).with_name('youtube.html').read_text(encoding='utf-8')
+                html = re.sub(r'<script\b[^>]*\bsrc=["\']https?://[^>]*>\s*</script>', '', html, flags=re.I)
+                html = html.replace('<head>', '<head><script src="offline-fixture.js"></script><script src="queue-client.js"></script>', 1)
+                return self.respond(200, html.encode('utf-8'), 'text/html; charset=utf-8')
+            if path in ['/connection.js', '/offline-fixture.js', '/queue-client.js']:
+                return self.respond(200, Path(__file__).with_name(path[1:]).read_bytes(), 'application/javascript; charset=utf-8')
+            if path == '/connection-config.js':
+                return self.respond(200, b'window.YT_CONNECTION_CONFIG={};', 'application/javascript')
             owner = self.owner()
             if owner is None:
                 return self.respond(401, {'error': '시험용 접근 코드를 입력하세요.'})
@@ -86,6 +100,8 @@ def handler_for(store, tokens):
                 return self.respond(401, {'error': '시험용 접근 코드를 입력하세요.'})
             if self.path != '/api/jobs':
                 return self.respond(404, {'error': '없는 경로입니다.'})
+            if not healthy():
+                return self.respond(503, {'error': '작업 처리기가 중단되었습니다. 서버 상태를 확인하세요.'})
             try:
                 length = int(self.headers.get('Content-Length', '0'))
                 if not 0 < length <= 600000:
@@ -95,6 +111,10 @@ def handler_for(store, tokens):
                 self.connection.settimeout(5)
                 body = json.loads(self.rfile.read(length))
                 if not isinstance(body, dict) or set(body) != {'request_key', 'payload'}:
+                    raise ValueError()
+                if pipeline_enabled and (not isinstance(body['payload'], dict) or
+                        not isinstance(body['payload'].get('transcript'), str) or
+                        len(body['payload']['transcript'].strip()) < 300):
                     raise ValueError()
                 row, created = store.submit(owner, body['request_key'], body['payload'])
                 return self.respond(202 if created else 200, row)
@@ -114,6 +134,7 @@ def main():
     parser.add_argument('--db', required=True)
     parser.add_argument('--port', type=int, default=0)
     parser.add_argument('--ready-file', required=True)
+    parser.add_argument('--processor', choices=['synthetic', 'pipeline'], default='synthetic')
     args = parser.parse_args()
     token = os.environ.get('YT_JOB_TEST_TOKEN', '')
     if len(token) < 24 or not token.isascii():
@@ -127,15 +148,15 @@ def main():
     def worker():
         while not stop.is_set():
             try:
-                worked = process_one(store, synthetic_processor)
-            except Exception:
+                worked = process_one(store, pipeline_processor if args.processor == 'pipeline' else synthetic_processor)
+            except BaseException:
                 stop.set()  # Storage failure stops the worker, no repeat inference.
                 break
             if not worked:
                 stop.wait(0.1)
     thread = threading.Thread(target=worker, daemon=True)
     thread.start()
-    server = ThreadingHTTPServer(('127.0.0.1', args.port), handler_for(store, {token: 'local-test'}))
+    server = ThreadingHTTPServer(('127.0.0.1', args.port), handler_for(store, {token: 'local-test'}, args.processor == 'pipeline', lambda: not stop.is_set()))
     Path(args.ready_file).write_text(json.dumps({'url': 'http://127.0.0.1:%s/' % server.server_port, 'mode': 'synthetic'}))
     try:
         server.serve_forever()

@@ -92,6 +92,15 @@ class JobsTest(unittest.TestCase):
             guard.close()
         ExclusiveWorker(str(self.path) + '.lock').close()
 
+    def test_metadata_roundtrip_and_validation(self):
+        payload = {**self.payload, 'channel':'test', 'timeline':'00:00 start', 'chaptersOnly':True}
+        self.store.submit('a', 'request-meta', payload)
+        self.assertEqual(payload, self.store.claim_next()['payload'])
+        with self.assertRaises(ValueError):
+            self.store.submit('a', 'request-bad1', {**self.payload, 'chaptersOnly':'false'})
+        with self.assertRaises(ValueError):
+            self.store.submit('a', 'request-bad2', {**self.payload, 'timeline':'x'*20001})
+
 
 if __name__ == '__main__':
     unittest.main()
