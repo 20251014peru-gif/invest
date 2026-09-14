@@ -1,0 +1,36 @@
+{
+  "schema": "event_thresholds/2",
+  "_note": "M은 사건의 크기만 판정한다. 방향(호재/악재)은 별도. 정책이 없는 metric은 임의 공통기준으로 등급화하지 않고 UNKNOWN으로 남긴다.",
+  "events": {
+    "SUPPLY_CONTRACT": {
+      "contract_to_revenue": {"m3_gte": 10, "m2_gte": 3, "m1_gte": 1}
+    },
+    "RIGHTS_OFFERING": {
+      "ordinary_dilution": {"m3_gte": 20, "m2_gte": 5, "m1_gte": 0.01},
+      "other_share_dilution": {"m3_gte": 20, "m2_gte": 5, "m1_gte": 0.01},
+      "total_dilution": {"m3_gte": 20, "m2_gte": 5, "m1_gte": 0.01}
+    },
+    "CB_ISSUE": {
+      "potential_dilution": {"m3_gte": 15, "m2_gte": 5, "m1_gte": 0.01}
+    },
+    "BW_ISSUE": {
+      "bw_shares_ratio": {"m3_gte": 15, "m2_gte": 5, "m1_gte": 0.01}
+    },
+    "EB_ISSUE": {},
+    "BUYBACK": {
+      "buyback_to_mktcap": {"m3_gte": 3, "m2_gte": 1, "m1_gte": 0.01}
+    },
+    "BUSINESS_SUSPENSION": {
+      "suspended_sales_ratio": {"m3_gte": 10, "m2_gte": 5, "m1_gte": 0.01}
+    },
+    "LITIGATION": {
+      "claim_to_equity": {"m3_gte": 10, "m2_gte": 5, "m1_gte": 0.01}
+    },
+    "EARNINGS_PRELIMINARY": {
+      "surprise_abs_pct": {"m3_gte": 20, "m2_gte": 10, "m1_gte": 0.01}
+    },
+    "ASSET_TRANSACTION": {
+      "transaction_ratio": {"m3_gte": 10, "m2_gte": 5, "m1_gte": 0.01}
+    }
+  }
+}
