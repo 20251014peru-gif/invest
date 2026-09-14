@@ -1,5 +1,6 @@
-# v 20260915-WaveC1 event_runtime.py — DART list 신규 Event만 상세조회/중대성 계산/장기보존.
+# v 20260915-WaveC2 event_runtime.py — DART list 신규 Event만 상세조회/중대성 계산/장기보존.
 # 운영 원칙: 매 실행마다 전체 34종목×9 endpoint를 돌지 않는다. 신규/미해결 Event에 해당 endpoint만 호출한다.
+# 첫 운영 실행(index 없음)은 baseline 구축으로 간주해 기존 공시 알림 폭탄을 막는다.
 import json, os, datetime as dt
 import event_normalizer as N
 import correction_resolver as C
@@ -27,13 +28,13 @@ def _save(path, obj):
 def _now(): return dt.datetime.now(KST).replace(microsecond=0).isoformat()
 
 
-def _rcept(ev): return str((ev.get("versions") or [{}])[0].get("rcept_no") or "")
-def _date(ev): return str((ev.get("versions") or [{}])[0].get("rcept_dt") or "")
+def _rcept(ev): return str((ev.get("versions") or [{}])[0].get("rcept_no") or ev.get("rcept_no") or "")
+def _date(ev): return str((ev.get("versions") or [{}])[0].get("rcept_dt") or ev.get("date") or "")
 
 
 def _summary(ev):
     return {
-        "event_id":ev.get("event_id"),"date":_date(ev),"stock_code":ev.get("stock_code"),
+        "event_id":ev.get("event_id"),"date":_date(ev),"stock_code":ev.get("stock_code"),"corp_code":ev.get("corp_code"),
         "rcept_no":_rcept(ev),"company":ev.get("company"),"family":ev.get("family"),"type":ev.get("type"),
         "version_type":ev.get("version_type"),"urgency":ev.get("urgency"),
         "sourceLevel":ev.get("sourceLevel"),"claimStatus":ev.get("claimStatus"),"dataStatus":ev.get("dataStatus"),
@@ -42,7 +43,7 @@ def _summary(ev):
         "structural_risk":ev.get("structural_risk"),"fast_risk_defense_allowed":ev.get("fast_risk_defense_allowed",False),
         "link_status":ev.get("link_status"),"link_confidence":ev.get("link_confidence"),
         "detailStatus":ev.get("detailStatus","NOT_RUN"),"detailAttempts":int(ev.get("detailAttempts",0)),
-        "lastDetailAttemptAt":ev.get("lastDetailAttemptAt"),"url":(ev.get("versions") or [{}])[0].get("url","")
+        "lastDetailAttemptAt":ev.get("lastDetailAttemptAt"),"url":(ev.get("versions") or [{}])[0].get("url",ev.get("url",""))
     }
 
 
@@ -69,7 +70,7 @@ def enrich_event(ev, key, corp_map, field_map=None, fetcher=None):
     """신규/미해결 한 Event만 상세조회. 실패는 UNKNOWN으로 남기고 collector 전체를 깨뜨리지 않는다."""
     fm=field_map if field_map is not None else MAT.load_field_map(); fetcher=fetcher or OD.fetch
     sc=ev.get("stock_code",""); corp=(corp_map.get(sc) or {}).get("corp_code")
-    ev["corp_code"]=corp or None
+    ev["corp_code"]=corp or ev.get("corp_code") or None
     ev["detailAttempts"]=int(ev.get("detailAttempts",0))+1; ev["lastDetailAttemptAt"]=_now()
 
     entry=fm.get(ev.get("type"),{})
@@ -116,10 +117,24 @@ def _upsert_day(ev):
     _save(path,doc)
 
 
+def _restore_summary_state(ev, old):
+    """normalizer가 새 객체를 만들더라도 이미 검증한 요약 상태는 잃지 않는다."""
+    if not old: return ev
+    for k,default in (
+        ("corp_code",None),("detailAttempts",0),("detailStatus","NOT_RUN"),("lastDetailAttemptAt",None),
+        ("materiality","UNKNOWN"),("materialityStatus","UNKNOWN"),("structural_risk",None),
+        ("fast_risk_defense_allowed",False),("riskGate","G2"),("decisionLocked",True)):
+        if k in old: ev[k]=old.get(k,default)
+    return ev
+
+
 def process(items, key):
     """현재 DART list items를 Event로 처리하고 신규/중대성변경 Event를 반환한다."""
     now=_now(); idx_path=P("facts","events","index.json")
+    index_existed=os.path.exists(idx_path)
     idx=_load(idx_path,{"schema":"events-index/2","updated":now,"count":0,"events":[]})
+    # index 자체가 없거나 비어 있으면 첫 운영 baseline. 기존 공시는 저장하되 알림하지 않는다.
+    baseline_mode=(not index_existed) or not bool(idx.get("events"))
     old_by_rcept={str(x.get("rcept_no") or ""):x for x in idx.get("events",[])}
     current=C.resolve(N.normalize_all(items))
     stock_codes={e.get("stock_code") for e in current if e.get("stock_code")}
@@ -128,25 +143,24 @@ def process(items, key):
 
     for ev in current:
         r=_rcept(ev); old=old_by_rcept.get(r); is_new=old is None
-        if old:
-            ev["detailAttempts"]=int(old.get("detailAttempts",0)); ev["detailStatus"]=old.get("detailStatus","NOT_RUN")
-            ev["materiality"]=old.get("materiality","UNKNOWN"); ev["materialityStatus"]=old.get("materialityStatus","UNKNOWN")
+        _restore_summary_state(ev,old)
         retry=(not is_new and ev.get("detailStatus") not in ("MATCHED","NOT_REQUIRED","NO_ENDPOINT") and int(ev.get("detailAttempts",0))<MAX_DETAIL_ATTEMPTS)
         if is_new or retry:
             before=old.get("materiality","UNKNOWN") if old else "UNKNOWN"
             ev=enrich_event(ev,key,cmap,field_map=fm)
-            if not is_new and before!=ev.get("materiality") and ev.get("materiality") in ("M2","M3"):
+            if not baseline_mode and not is_new and before!=ev.get("materiality") and ev.get("materiality") in ("M2","M3"):
                 ev["notification_reason"]="MATERIALITY_UPDATE"; material_updates.append(ev)
             _upsert_day(ev)
         else:
             RG.evaluate(ev)
-        if is_new:
+        if is_new and not baseline_mode:
             ev["notification_reason"]="NEW_EVENT"; new_events.append(ev)
         processed.append(ev)
         old_by_rcept[r]=_summary(ev)
 
     merged=list(old_by_rcept.values()); merged.sort(key=lambda x:(str(x.get("date") or ""),str(x.get("rcept_no") or "")),reverse=True)
-    out={"schema":"events-index/2","updated":now,"count":len(merged),"events":merged}
+    out={"schema":"events-index/2","updated":now,"count":len(merged),"baselineBuiltAt":idx.get("baselineBuiltAt") or (now if baseline_mode else None),"events":merged}
     _save(idx_path,out)
     return {"processed":processed,"new_events":new_events,"material_updates":material_updates,
-            "corp_refresh":corp_refresh,"index_count":len(merged)}
+            "corp_refresh":corp_refresh,"index_count":len(merged),"baseline_mode":baseline_mode,
+            "baseline_count":len(current) if baseline_mode else 0}
