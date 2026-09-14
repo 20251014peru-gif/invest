@@ -1,0 +1,41 @@
+# v 20260915-WaveB4 — 오프라인 회귀 + OpenDART 실검증. workflow_dispatch 전용.
+name: Event Engine Validate (manual)
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: '조회기간(일) — 표본 부족 시 365로 늘린다'
+        default: '180'
+        required: true
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - name: Python syntax check
+        run: python -m py_compile scripts/event_*.py scripts/correction_resolver.py scripts/materiality.py scripts/opendart_detail.py scripts/risk_gate.py scripts/corp_code_cache.py tests/test_waveb_offline.py
+      - name: Wave A 실제 DART replay
+        run: python scripts/replay_test.py
+      - name: Wave B offline regression
+        run: python tests/test_waveb_offline.py
+      - name: OpenDART 실제 호출 검증
+        env:
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+        run: |
+          echo "::add-mask::$DART_API_KEY"
+          DART_DAYS="${{ inputs.days }}" python scripts/event_engine_validate.py
+      - name: 검증 산출물 업로드
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: event-engine-validation-${{ github.run_id }}
+          path: |
+            facts/events/
+            data/corp_codes.json
+            tests/fixtures/opendart/
+          if-no-files-found: warn
+          retention-days: 14
