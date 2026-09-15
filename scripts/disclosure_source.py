@@ -3,6 +3,7 @@ Guide: https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS001&apiId=2019003
 """
 import io, re, zipfile, urllib.request, urllib.parse, datetime as dt
 from html.parser import HTMLParser
+import disclosure_facts as DF
 MAX_BYTES=4_000_000
 MAX_TEXT=16000
 class Text(HTMLParser):
@@ -35,7 +36,7 @@ def extract(blob,rcept_no):
     lines=[re.sub(r'[\t \r\f\v]+',' ',line).strip(' |') for line in ''.join(parser.parts).split('\n')]
     plain='\n'.join(line for line in lines if line)
     if len(plain)<100: raise ValueError('EMPTY_DOCUMENT')
-    return {'text':plain[:MAX_TEXT],'truncated':len(plain)>MAX_TEXT,'extraction':'text-with-table-cell-separators'}
+    return {**DF.extract(plain[:MAX_TEXT]),'text':plain[:MAX_TEXT],'truncated':len(plain)>MAX_TEXT,'extraction':'text-with-table-cell-separators'}
 def fetch(rcept_no,key):
     result={'status':'UNAVAILABLE','rceptNo':rcept_no,'url':'https://dart.fss.or.kr/dsaf001/main.do?rcpNo='+rcept_no,'fetchedAt':dt.datetime.now(dt.timezone.utc).isoformat()}
     if not re.fullmatch(r'\d{14}',rcept_no) or not key: return {**result,'reason':'INVALID_REQUEST'}

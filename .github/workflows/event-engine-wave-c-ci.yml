@@ -23,7 +23,9 @@ jobs:
       - name: Wave C Event runtime/notifier tests
         run: python tests/test_event_runtime.py
       - name: Original disclosure extraction tests
-        run: python tests/test_disclosure_source.py
+        run: |
+          python tests/test_disclosure_source.py
+          python tests/test_disclosure_facts.py
       - name: Browser inline JavaScript syntax
         run: |
           python - <<'PY'
