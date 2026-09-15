@@ -50,7 +50,7 @@ async function settings() {
 }
 function choosePolicy(tier) {
   const key = ['routine','analysis','deep'].includes(tier) ? tier : 'analysis';
-  return {tier: key, ...MODEL_POLICY[key]};
+  return {tier: key, ...MODEL_POLICY[key], promptVersion: key==='routine' ? PROMPT_VERSION+'-brief-v2' : PROMPT_VERSION};
 }
 function anthropicClient() { return new Anthropic({apiKey: ANTHROPIC_API_KEY.value(), maxRetries: 0}); }
 function outputConfig(policy) {
@@ -134,7 +134,7 @@ export const estimateEventAnalysis = onCall({region: REGION, secrets: [ANTHROPIC
   const event=await authoritativeEvent(eventIdFrom(request.data));
   const thesis=await serverThesis(event.company);
   const pricing=loadPricing(), policy=choosePolicy(request.data?.tier), price=getPrice(pricing,policy.model);
-  const prompt=buildAnalysisPrompt(event,thesis);
+  const prompt=buildAnalysisPrompt(event,thesis,policy.tier);
   const readiness=analysisReadiness(event,thesis);
   if(!readiness.canAnalyze) return {canAnalyze:false,readiness,estimatedInputTokens:0,estimatedCostUsd:0,maxCostUsd:0,output:missingEvidenceOutput()};
   const inputTokens=await countInputTokens(anthropicClient(),policy,prompt);
@@ -157,12 +157,28 @@ export const analyzeEvent = onCall({region: REGION, secrets: [ANTHROPIC_API_KEY]
   const event=await authoritativeEvent(eventIdFrom(request.data));
   const thesis=await serverThesis(event.company);
   const pricing=loadPricing(), cfg=await settings(), policy=choosePolicy(request.data?.tier), price=getPrice(pricing,policy.model);
-  const prompt=buildAnalysisPrompt(event,thesis);
+  const prompt=buildAnalysisPrompt(event,thesis,policy.tier);
   const readiness=analysisReadiness(event,thesis);
   if(!readiness.canAnalyze) return {cacheHit:false,apiCalled:false,incrementalCostUsd:0,analysis:{status:'insufficient_data',output:missingEvidenceOutput(),readiness,thesisAssessment:'INSUFFICIENT_DATA',reviewRequired:true,g6Unlocked:false}};
-  const fingerprint=analysisFingerprint({event,thesis,model:policy.model,promptVersion:PROMPT_VERSION,policyVersion:AI_POLICY_VERSION});
+  const fingerprint=analysisFingerprint({event,thesis,model:policy.model,promptVersion:policy.promptVersion,policyVersion:AI_POLICY_VERSION});
   const aref=db.collection('event_ai_analysis').doc(fingerprint); const existing=await aref.get();
-  if (existing.exists && existing.data()?.status==='success') return {cacheHit:true,apiCalled:false,incrementalCostUsd:0,analysis:publicAnalysis(existing.data())};
+  if(existing.exists){
+    const saved=existing.data();
+    if(saved.status==='success') return {cacheHit:true,apiCalled:false,incrementalCostUsd:0,analysis:publicAnalysis(saved)};
+    if(saved.usageId){
+      const ledger=await db.collection('ai_usage').doc(saved.usageId).get();const record=ledger.data();
+      if(record?.costStatus==='USAGE_RECONCILED' && record.output){
+        const recoveredOutput=parseAnalysisOutput({stop_reason:'end_turn',content:[{type:'text',text:JSON.stringify(record.output)}]});
+        const recovered=firestoreSafe({...record,schema:'event-ai-analysis/1',status:'success',output:recoveredOutput,readiness,
+          thesisAssessment:!readiness.hasThesis?'NO_THESIS':recoveredOutput.evidenceSufficiency==='LOW'?'INSUFFICIENT_DATA':'ASSESSED',reviewRequired:true,g6Unlocked:false});
+        delete recovered.createdAt;
+        await aref.set({...recovered,createdAt:FieldValue.serverTimestamp()},{merge:false});
+        return {cacheHit:true,apiCalled:false,incrementalCostUsd:0,analysis:publicAnalysis(recovered)};
+      }
+    }
+    throw new HttpsError('failed-precondition','이 분석의 이전 요청이 처리 중이거나 실패했습니다. 추가 유료 호출은 하지 않았습니다.',
+      {failureStage:saved.failureStage||'pending',errorCode:saved.errorCode||'ATTEMPT_PENDING'});
+  }
 
   const client=anthropicClient();
   const inputTokens=await countInputTokens(client,policy,prompt);
@@ -175,7 +191,7 @@ export const analyzeEvent = onCall({region: REGION, secrets: [ANTHROPIC_API_KEY]
   const usageDocument = (usage, actualUsd, status) => firestoreSafe({
     schema:'ai_usage/1',status,eventId:event.event_id,analysisType:'risk_thesis',fingerprint,uid,
     provider:'anthropic',tier:policy.tier,model:policy.model,effort:policy.effort||null,
-    aiPolicyVersion:AI_POLICY_VERSION,promptVersion:PROMPT_VERSION,stopReason:message?.stop_reason||null,
+    aiPolicyVersion:AI_POLICY_VERSION,promptVersion:policy.promptVersion,stopReason:message?.stop_reason||null,
     usage:usage||null,inputTokens:Number(usage?.input_tokens||0),outputTokens:Number(usage?.output_tokens||0),
     cacheReadInputTokens:Number(usage?.cache_read_input_tokens||0),cacheCreationInputTokens:Number(usage?.cache_creation_input_tokens||0),
     estimatedInputTokens:inputTokens,estimatedCostUsd,reservedMaxCostUsd:reserveMaxCostUsd,
@@ -202,7 +218,7 @@ export const analyzeEvent = onCall({region: REGION, secrets: [ANTHROPIC_API_KEY]
     const analysisPublic=firestoreSafe({
       schema:'event-ai-analysis/1',status:'success',readiness,thesisAssessment:!readiness.hasThesis?'NO_THESIS':output.evidenceSufficiency==='LOW'?'INSUFFICIENT_DATA':'ASSESSED',reviewRequired:true,g6Unlocked:false,eventId:event.event_id,fingerprint,
       provider:'anthropic',tier:policy.tier,model:policy.model,effort:policy.effort||null,aiPolicyVersion:AI_POLICY_VERSION,
-      promptVersion:PROMPT_VERSION,stopReason:message.stop_reason||null,output,usage:message.usage||{},estimatedCostUsd,
+      promptVersion:policy.promptVersion,stopReason:message.stop_reason||null,output,usage:message.usage||{},estimatedCostUsd,
       costFromUsageUsd:actualUsd,billedCostUsd:null,priceSnapshot:snapshot,pricingStale:pricingIsStale(pricing),requestedAt,
       completedAt:new Date().toISOString()
     });
@@ -231,7 +247,7 @@ export const analyzeEvent = onCall({region: REGION, secrets: [ANTHROPIC_API_KEY]
   }
 });
 
-export const getEventDecision = onCall({region:REGION,timeoutSeconds:30,memory:'128MiB'}, async request => {
+export const getEventDecision = onCall({region:REGION,timeoutSeconds:30,memory:'256MiB',concurrency:20}, async request => {
   const uid=request.auth?.uid; await assertAuthorized(uid); assertPayloadSize(request.data);
   const eventId=eventIdFrom(request.data); if(!eventId) throw new HttpsError('invalid-argument','event_id required.');
   const snap=await db.collection('event_decisions').doc(eventId).get();
@@ -240,7 +256,7 @@ export const getEventDecision = onCall({region:REGION,timeoutSeconds:30,memory:'
   return {exists:true,eventId,decision:d.decision||'',gate:d.gate||'',riskReviewed:d.riskReviewed===true,confirmedAt:d.confirmedAt?.toDate?.()?.toISOString?.()||null};
 });
 
-export const confirmEventDecision = onCall({region:REGION,timeoutSeconds:45,memory:'128MiB'}, async request => {
+export const confirmEventDecision = onCall({region:REGION,timeoutSeconds:45,memory:'256MiB',concurrency:20}, async request => {
   const uid=request.auth?.uid; await assertAuthorized(uid); assertPayloadSize(request.data);
   const event=await authoritativeEvent(eventIdFrom(request.data));
   const policy=decisionPolicy(event,request.data?.decision,request.data?.riskReviewed===true);

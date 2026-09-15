@@ -2,6 +2,7 @@
 import argparse, os, re
 import event_runtime as ER
 import disclosure_source as DS
+import disclosure_facts as DF
 
 def run(rcept_no):
     if not re.fullmatch(r'\d{14}',rcept_no): raise ValueError('Invalid receipt number')
@@ -19,6 +20,8 @@ def run(rcept_no):
         event['sourceAttempts']=int(event.get('sourceAttempts',0))+1
         ER._save(file,daily)
         row.update(ER._summary(event));ER._save(ER.P('facts','events','index.json'),index)
+    event['sourceDocument'].update(DF.extract(event['sourceDocument'].get('text','')))
+    ER._save(file,daily)
     print('Source status:',event['sourceDocument']['status'])
     print('Source reason:',event['sourceDocument'].get('reason','OK'))
     print('Extracted characters:',len(event['sourceDocument'].get('text','')))
