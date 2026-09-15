@@ -74,3 +74,5 @@ eq(decisionPolicy({...event,claimStatus:'UNCONFIRMED',materiality:'UNKNOWN',mate
 eq(decisionPolicy(event,'INVALID',true).reason,'INVALID_DECISION');
 
 console.log(`Wave C AI core: ${tests}/${tests} PASS`);
+
+await import('./ai_gateway.test.js');
