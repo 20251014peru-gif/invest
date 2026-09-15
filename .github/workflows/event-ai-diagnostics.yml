@@ -1,0 +1,35 @@
+name: Event AI diagnostics (read only)
+on:
+  push:
+    branches: [hotfix/event-ai-usage-decisions]
+    paths: [.github/workflows/event-ai-diagnostics.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          project_id: my-system-25497
+      - uses: google-github-actions/setup-gcloud@v3
+      - name: Read bounded error diagnostics without response content
+        run: |
+          gcloud logging read 'resource.type="cloud_run_revision" AND (resource.labels.service_name="geteventdecision" OR resource.labels.service_name="confirmeventdecision" OR resource.labels.service_name="analyzeevent") AND severity>=ERROR' --project my-system-25497 --freshness=6h --limit=80 --format=json >/tmp/event-errors.json
+          python - <<'PY'
+          import json,re
+          rows=json.load(open('/tmp/event-errors.json'))
+          for row in rows:
+              payload=row.get('jsonPayload',{})
+              text=str(row.get('textPayload',''))+' '+str(payload.get('message',''))
+              out={'at':row.get('timestamp'),'service':row.get('resource',{}).get('labels',{}).get('service_name')}
+              for key in ('failureStage','errorCode','costStatus'):
+                  value=payload.get(key)
+                  if isinstance(value,str) and re.fullmatch(r'[A-Za-z_]{1,60}',value):out[key]=value
+              for pattern,label in [(r'memory limit|out of memory|memory exceeded','MEMORY_LIMIT'),(r'PERMISSION_DENIED','PERMISSION_DENIED'),(r'DEADLINE_EXCEEDED','DEADLINE_EXCEEDED'),(r'UNAVAILABLE','UNAVAILABLE'),(r'RESOURCE_EXHAUSTED','RESOURCE_EXHAUSTED')]:
+                  if re.search(pattern,text,re.I):out[label]=True
+              if len(out)>2:print(json.dumps(out))
+          print('Error records scanned:',len(rows))
+          PY
