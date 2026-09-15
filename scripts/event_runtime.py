@@ -8,6 +8,7 @@ import corp_code_cache as CC
 import opendart_detail as OD
 import materiality as MAT
 import risk_gate as RG
+import disclosure_source as DS
 
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__))); P=lambda *a:os.path.join(ROOT,*a)
 KST=dt.timezone(dt.timedelta(hours=9))
@@ -42,6 +43,7 @@ def _summary(ev):
         "riskGate":ev.get("riskGate"),"decisionLocked":ev.get("decisionLocked",True),
         "structural_risk":ev.get("structural_risk"),"fast_risk_defense_allowed":ev.get("fast_risk_defense_allowed",False),
         "link_status":ev.get("link_status"),"link_confidence":ev.get("link_confidence"),
+        "sourceStatus":ev.get("sourceDocument",{}).get("status","NOT_RUN"),"sourceAttempts":int(ev.get("sourceAttempts",0)),
         "detailStatus":ev.get("detailStatus","NOT_RUN"),"detailAttempts":int(ev.get("detailAttempts",0)),
         "lastDetailAttemptAt":ev.get("lastDetailAttemptAt"),"url":(ev.get("versions") or [{}])[0].get("url",ev.get("url",""))
     }
@@ -141,9 +143,16 @@ def process(items, key):
     cmap,corp_refresh=_ensure_corp_map(key,stock_codes); fm=MAT.load_field_map()
     new_events=[]; material_updates=[]; processed=[]
 
+    source_budget=3  # bounded public-document requests per collector run
     for ev in current:
         r=_rcept(ev); old=old_by_rcept.get(r); is_new=old is None
         _restore_summary_state(ev,old)
+        if old:
+            d=_date(ev)
+            saved=_load(P("facts","events",f"{d[:4]}-{d[4:6]}-{d[6:8]}.json"),{})
+            full=next((x for x in saved.get("events",[]) if _rcept(x)==r),{})
+            if full.get("sourceDocument"): ev["sourceDocument"]=full["sourceDocument"]
+            ev["sourceAttempts"]=int(full.get("sourceAttempts",0))
         retry=(not is_new and ev.get("detailStatus") not in ("MATCHED","NOT_REQUIRED","NO_ENDPOINT") and int(ev.get("detailAttempts",0))<MAX_DETAIL_ATTEMPTS)
         if is_new or retry:
             before=old.get("materiality","UNKNOWN") if old else "UNKNOWN"
@@ -152,7 +161,13 @@ def process(items, key):
                 ev["notification_reason"]="MATERIALITY_UPDATE"; material_updates.append(ev)
             _upsert_day(ev)
         else:
+            ev=full or ev
             RG.evaluate(ev)
+        if key and source_budget and not ev.get("facts") and ev.get("sourceDocument",{}).get("status")!="AVAILABLE" and int(ev.get("sourceAttempts",0))<2:
+            ev["sourceDocument"]=DS.fetch(r,key)
+            ev["sourceAttempts"]=int(ev.get("sourceAttempts",0))+1
+            source_budget-=1
+            _upsert_day(ev)
         if is_new and not baseline_mode:
             ev["notification_reason"]="NEW_EVENT"; new_events.append(ev)
         processed.append(ev)
