@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       rcept_no:
-        description: '원문을 확보할 기존 Event 접수번호 (14자리)'
+        description: '접수번호 14자리 또는 pending (미수집 최대 30건)'
         required: true
         type: string
 permissions:

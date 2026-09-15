@@ -6,8 +6,6 @@ import disclosure_facts as DF
 
 def run(rcept_no):
     if not re.fullmatch(r'\d{14}',rcept_no): raise ValueError('Invalid receipt number')
-    key=os.environ.get('DART_API_KEY','')
-    if not key: raise ValueError('DART_API_KEY missing')
     index=ER._load(ER.P('facts','events','index.json'),{})
     row=next((x for x in index.get('events',[]) if x.get('rcept_no')==rcept_no),None)
     if not row: raise ValueError('Receipt not indexed')
@@ -16,6 +14,8 @@ def run(rcept_no):
     event=next((x for x in daily.get('events',[]) if ER._rcept(x)==rcept_no),None)
     if not event: raise ValueError('Event details missing')
     if event.get('sourceDocument',{}).get('status')!='AVAILABLE':
+        key=os.environ.get('DART_API_KEY','')
+        if not key: raise ValueError('DART_API_KEY missing')
         event['sourceDocument']=DS.fetch(rcept_no,key)
         event['sourceAttempts']=int(event.get('sourceAttempts',0))+1
         ER._save(file,daily)
@@ -25,5 +25,17 @@ def run(rcept_no):
     print('Source status:',event['sourceDocument']['status'])
     print('Source reason:',event['sourceDocument'].get('reason','OK'))
     print('Extracted characters:',len(event['sourceDocument'].get('text','')))
+def pending(limit=30):
+    if not 1 <= limit <= 30: raise ValueError('Limit must be 1..30')
+    index=ER._load(ER.P('facts','events','index.json'),{})
+    candidates=[r for r in index.get('events',[]) if r.get('sourceStatus')!='AVAILABLE' and int(r.get('sourceAttempts',0))<2]
+    # Give never-attempted documents priority over retrying a failed endpoint.
+    candidates.sort(key=lambda r:int(r.get('sourceAttempts',0)))
+    selected=candidates[:limit]
+    for row in selected: run(row['rcept_no'])
+    print('Pending documents processed:',len(selected))
+    return len(selected)
+
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('rcept_no');run(p.parse_args().rcept_no)
+    p=argparse.ArgumentParser();p.add_argument('rcept_no');p.add_argument('--limit',type=int,default=30);args=p.parse_args()
+    pending(args.limit) if args.rcept_no=='pending' else run(args.rcept_no)
