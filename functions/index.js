@@ -7,6 +7,7 @@ import {getFirestore, FieldValue} from 'firebase-admin/firestore';
 import {onCall, HttpsError} from 'firebase-functions/v2/https';
 import {defineSecret} from 'firebase-functions/params';
 import * as logger from 'firebase-functions/logger';
+import {parseAnalysisOutput, firestoreSafe, settleUsage} from './lib/ai_result.js';
 import {
   MODEL_POLICY, PROMPT_VERSION, AI_POLICY_VERSION, ANALYSIS_OUTPUT_SCHEMA,
   analysisFingerprint, buildAnalysisPrompt, getPrice, decisionPolicy,
@@ -51,7 +52,7 @@ function choosePolicy(tier) {
   const key = ['routine','analysis','deep'].includes(tier) ? tier : 'analysis';
   return {tier: key, ...MODEL_POLICY[key]};
 }
-function anthropicClient() { return new Anthropic({apiKey: ANTHROPIC_API_KEY.value()}); }
+function anthropicClient() { return new Anthropic({apiKey: ANTHROPIC_API_KEY.value(), maxRetries: 0}); }
 function outputConfig(policy) {
   const out = {format: {type: 'json_schema', schema: ANALYSIS_OUTPUT_SCHEMA}};
   if (policy?.effort) out.effort = policy.effort;
@@ -97,11 +98,13 @@ async function serverThesis(company) {
   return hit && typeof hit==='object' ? hit : null;
 }
 
-async function reserveBudget(reserveUsd, cfg) {
+async function reserveBudget(reserveUsd, cfg, aref, usageRef) {
   const {day, month} = kstKeys();
   const dref = db.collection('ai_cost_daily').doc(day);
   const mref = db.collection('ai_cost_monthly').doc(month);
   await db.runTransaction(async tx => {
+    const attempt = await tx.get(aref);
+    if (attempt.exists) throw new HttpsError('failed-precondition', 'Analysis already exists or requires review; no new paid call was made.');
     const ds = await tx.get(dref);
     const ms = await tx.get(mref);
     const d = ds.exists ? ds.data() : {}; const m = ms.exists ? ms.data() : {};
@@ -112,25 +115,10 @@ async function reserveBudget(reserveUsd, cfg) {
     const common = {updatedAt: FieldValue.serverTimestamp()};
     tx.set(dref, {...common, reservedUsd: Number(d.reservedUsd || 0) + reserveUsd}, {merge: true});
     tx.set(mref, {...common, reservedUsd: Number(m.reservedUsd || 0) + reserveUsd}, {merge: true});
+    tx.set(aref, {status: 'processing', usageId: usageRef.id, requestedAt: new Date().toISOString()});
+    tx.set(usageRef, {status: 'pending', reservedMaxCostUsd: reserveUsd, budgetKeys: {day, month}});
   });
   return {day, month};
-}
-async function reconcileBudget(keys, reserveUsd, actualUsd, unreconciled = false) {
-  const dref = db.collection('ai_cost_daily').doc(keys.day);
-  const mref = db.collection('ai_cost_monthly').doc(keys.month);
-  await db.runTransaction(async tx => {
-    const ds = await tx.get(dref);
-    const ms = await tx.get(mref);
-    for (const [ref, snap] of [[dref, ds], [mref, ms]]) {
-      const v = snap.exists ? snap.data() : {};
-      tx.set(ref, {
-        reservedUsd: Math.max(0, Number(v.reservedUsd || 0) - reserveUsd),
-        spentUsd: Number(v.spentUsd || 0) + (unreconciled ? 0 : actualUsd),
-        unreconciledUsd: Number(v.unreconciledUsd || 0) + (unreconciled ? reserveUsd : 0),
-        updatedAt: FieldValue.serverTimestamp()
-      }, {merge: true});
-    }
-  });
 }
 function priceSnapshot(model, price, pricing) {
   return {model, inputPricePerMillion:Number(price.inputPerMillion), outputPricePerMillion:Number(price.outputPerMillion), cacheReadPerMillion:Number(price.cacheReadPerMillion||0), cache5mWritePerMillion:Number(price.cache5mWritePerMillion||0), pricingVerifiedAt:pricing.verifiedAt, pricingSource:pricing.source};
@@ -175,53 +163,66 @@ export const analyzeEvent = onCall({region: REGION, secrets: [ANTHROPIC_API_KEY]
   const inputTokens=await countInputTokens(client,policy,prompt);
   const estimatedCostUsd=estimateCostUsd(inputTokens,policy.estimateOutputTokens,price);
   const reserveMaxCostUsd=estimateCostUsd(inputTokens,policy.maxTokens,price);
-  const budgetKeys=await reserveBudget(reserveMaxCostUsd,cfg);
-  const usageRef=db.collection('ai_usage').doc(); const snapshot=priceSnapshot(policy.model,price,pricing); const requestedAt=new Date().toISOString();
-  let message=null, budgetSettled=false;
+  const usageRef=db.collection('ai_usage').doc();
+  const budgetKeys=await reserveBudget(reserveMaxCostUsd,cfg,aref,usageRef);
+  const snapshot=priceSnapshot(policy.model,price,pricing), requestedAt=new Date().toISOString();
+  let message=null, output=null, stage='provider', costStatus='RESERVED';
+  const usageDocument = (usage, actualUsd, status) => firestoreSafe({
+    schema:'ai_usage/1',status,eventId:event.event_id,analysisType:'risk_thesis',fingerprint,uid,
+    provider:'anthropic',tier:policy.tier,model:policy.model,effort:policy.effort||null,
+    aiPolicyVersion:AI_POLICY_VERSION,promptVersion:PROMPT_VERSION,stopReason:message?.stop_reason||null,
+    usage:usage||null,inputTokens:Number(usage?.input_tokens||0),outputTokens:Number(usage?.output_tokens||0),
+    cacheReadInputTokens:Number(usage?.cache_read_input_tokens||0),cacheCreationInputTokens:Number(usage?.cache_creation_input_tokens||0),
+    estimatedInputTokens:inputTokens,estimatedCostUsd,reservedMaxCostUsd:reserveMaxCostUsd,
+    costFromUsageUsd:actualUsd,billedCostUsd:null,priceSnapshot:snapshot,requestedAt,
+    completedAt:new Date().toISOString(),output
+  });
+  const settle = async (usage, actualUsd, status) => {
+    const args={usageRef,dailyRef:db.collection('ai_cost_daily').doc(budgetKeys.day),
+      monthlyRef:db.collection('ai_cost_monthly').doc(budgetKeys.month),reserveUsd:reserveMaxCostUsd,
+      actualUsd,usageDoc:usageDocument(usage,actualUsd,status),timestamp:()=>FieldValue.serverTimestamp()};
+    // Only persistence is retried. The ledger makes ambiguous commits idempotent.
+    try { return await settleUsage(db,args); }
+    catch { return await settleUsage(db,args); }
+  };
   try {
     message=await client.messages.create({
       model:policy.model,max_tokens:policy.maxTokens,system:prompt.system,messages:[{role:'user',content:prompt.user}],
       output_config:outputConfig(policy),metadata:{user_id:sha256(uid).slice(0,64)}
     });
-    if (message.stop_reason === 'max_tokens') throw new Error('Claude output hit max_tokens before a complete structured answer.');
-    if (message.stop_reason === 'refusal') throw new Error('Claude refused this analysis request.');
-    const text=message.content?.find?.(b=>b.type==='text')?.text; if(!text) throw new Error('Claude returned no text block');
-    const output=JSON.parse(text); const actualUsd=costFromUsageUsd(message.usage||{},price);
-    await reconcileBudget(budgetKeys,reserveMaxCostUsd,actualUsd,false); budgetSettled=true;
-    const completedAt=new Date().toISOString();
-    const analysisPublic={
+    stage='parse';
+    output=parseAnalysisOutput(message);
+    stage='persistence';
+    const actualUsd=message.usage?costFromUsageUsd(message.usage,price):null;
+    const analysisPublic=firestoreSafe({
       schema:'event-ai-analysis/1',status:'success',reviewRequired:true,g6Unlocked:false,eventId:event.event_id,fingerprint,
       provider:'anthropic',tier:policy.tier,model:policy.model,effort:policy.effort||null,aiPolicyVersion:AI_POLICY_VERSION,
       promptVersion:PROMPT_VERSION,stopReason:message.stop_reason||null,output,usage:message.usage||{},estimatedCostUsd,
-      costFromUsageUsd:actualUsd,billedCostUsd:null,priceSnapshot:snapshot,pricingStale:pricingIsStale(pricing),requestedAt,completedAt
-    };
-    await aref.set({...analysisPublic,uid,createdAt:FieldValue.serverTimestamp()},{merge:false});
-    await usageRef.set({
-      schema:'ai_usage/1',status:'success',eventId:event.event_id,analysisType:'risk_thesis',fingerprint,uid,
-      provider:'anthropic',tier:policy.tier,model:policy.model,effort:policy.effort||null,aiPolicyVersion:AI_POLICY_VERSION,
-      promptVersion:PROMPT_VERSION,stopReason:message.stop_reason||null,
-      inputTokens:Number(message.usage?.input_tokens||0),outputTokens:Number(message.usage?.output_tokens||0),
-      cacheReadInputTokens:Number(message.usage?.cache_read_input_tokens||0),cacheCreationInputTokens:Number(message.usage?.cache_creation_input_tokens||0),
-      estimatedInputTokens:inputTokens,estimatedCostUsd,reservedMaxCostUsd,costFromUsageUsd:actualUsd,billedCostUsd:null,
-      priceSnapshot:snapshot,requestedAt,completedAt,createdAt:FieldValue.serverTimestamp()
+      costFromUsageUsd:actualUsd,billedCostUsd:null,priceSnapshot:snapshot,pricingStale:pricingIsStale(pricing),requestedAt,
+      completedAt:new Date().toISOString()
     });
+    costStatus=await settle(message.usage,actualUsd,'success');
+    await aref.set({...analysisPublic,uid,usageId:usageRef.id,createdAt:FieldValue.serverTimestamp()},{merge:false});
     return {cacheHit:false,apiCalled:true,incrementalCostUsd:actualUsd,analysis:analysisPublic};
   } catch(err) {
-    const usage=message?.usage||err?.usage||null; const actualUsd=usage?costFromUsageUsd(usage,price):0;
-    if(!budgetSettled) await reconcileBudget(budgetKeys,reserveMaxCostUsd,actualUsd,!usage);
-    const completedAt=new Date().toISOString();
+    const failureStage=stage;
+    const usage=message?.usage||err?.usage||null, actualUsd=usage?costFromUsageUsd(usage,price):null;
+    const errorCode=failureStage==='parse' ? (err.code||'INVALID_OUTPUT') : failureStage==='provider' ? 'PROVIDER_FAILED' : 'PERSISTENCE_FAILED';
     try {
-      await usageRef.set({
-        schema:'ai_usage/1',status:'error',eventId:event.event_id,analysisType:'risk_thesis',fingerprint,uid,
-        provider:'anthropic',tier:policy.tier,model:policy.model,effort:policy.effort||null,aiPolicyVersion:AI_POLICY_VERSION,
-        promptVersion:PROMPT_VERSION,stopReason:message?.stop_reason||null,usage:usage||null,
-        estimatedInputTokens:inputTokens,estimatedCostUsd,reservedMaxCostUsd,costFromUsageUsd:usage?actualUsd:null,billedCostUsd:null,
-        costStatus:usage?'USAGE_RECONCILED':'UNRECONCILED',errorType:err?.name||'Error',errorMessage:String(err?.message||err).slice(0,500),
-        priceSnapshot:snapshot,requestedAt,completedAt,createdAt:FieldValue.serverTimestamp()
+      if(costStatus==='RESERVED') costStatus=await settle(usage,actualUsd,'error');
+      await usageRef.set({status:'error',failureStage,errorCode},{merge:true});
+      // Do not overwrite a success whose write committed but acknowledgement was lost.
+      await db.runTransaction(async tx => {
+        const current=await tx.get(aref);
+        if(current.data()?.status!=='success') tx.set(aref,{status:'error',failureStage,errorCode,usageId:usageRef.id},{merge:true});
       });
-    } catch(logErr) { logger.error('Failed to persist AI usage error', {eventId:event.event_id,error:logErr?.message}); }
-    logger.error('Event AI analysis failed',{eventId:event.event_id,fingerprint,error:err?.message});
-    throw new HttpsError('internal',usage?'AI analysis failed after usage was recorded.':'AI analysis failed; budget reserve marked unreconciled for review.');
+    } catch {
+      logger.error('AI failure persistence incomplete',{eventId:event.event_id,fingerprint,failureStage,costStatus});
+    }
+    logger.error('Event AI analysis failed',{eventId:event.event_id,fingerprint,failureStage,errorCode,costStatus});
+    throw new HttpsError('internal',
+      'AI analysis '+failureStage+' failed. Cost status: '+costStatus+'. Do not repeat the paid analysis; review the existing attempt.',
+      {failureStage,errorCode,costStatus,usageId:usageRef.id});
   }
 });
 
