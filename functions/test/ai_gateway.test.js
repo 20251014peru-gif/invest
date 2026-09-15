@@ -42,9 +42,9 @@ function harness({reply={...response,usage:sdkUsage},failAnalysis=false,lostSett
   const bindings={...core,...result,fs:{existsSync:()=>true,readFileSync:()=>JSON.stringify(pricing)},path:{dirname:()=>'',join:()=>''},fileURLToPath:()=>'',Anthropic,initializeApp:()=>{},getFirestore:()=>db,FieldValue:{serverTimestamp:()=>sentinel},onCall:(_,fn)=>fn,HttpsError,defineSecret:()=>({value:()=> 'FAKE_TEST_KEY'}),logger:{error:()=>{}},fetch:()=>{throw Error('network forbidden');}};
   const text=source.replace('import.meta.url',"'file:///test/index.js'")+
     '\nrawCache.set("facts/events/index.json",{at:Date.now(),value:{events:[testEvent]}});'+
-    '\nrawCache.set("facts/events/2026-09-15.json",{at:Date.now(),value:{events:[testEvent]}});return {analyzeEvent,estimateEventAnalysis};';
+    '\nrawCache.set("facts/events/2026-09-15.json",{at:Date.now(),value:{events:[testEvent]}});return {analyzeEvent,estimateEventAnalysis,getEventDecision,confirmEventDecision};';
   const handler=new Function(...Object.keys(bindings),'testEvent',text)(...Object.values(bindings),event);
-  return {estimate:()=>handler.estimateEventAnalysis({auth:{uid:'u'},data:{eventId:'EV-1'}}),run:()=>handler.analyzeEvent({auth:{uid:'u'},data:{eventId:'EV-1'}}),docs,calls:()=>calls,counts:()=>counts};
+  return {setAnalysisFailure:value=>{failAnalysis=value;},decision:data=>handler.confirmEventDecision({auth:{uid:'u'},data:{eventId:'EV-1',...data}}),getDecision:()=>handler.getEventDecision({auth:{uid:'u'},data:{eventId:'EV-1'}}),estimate:()=>handler.estimateEventAnalysis({auth:{uid:'u'},data:{eventId:'EV-1'}}),run:()=>handler.analyzeEvent({auth:{uid:'u'},data:{eventId:'EV-1'}}),docs,calls:()=>calls,counts:()=>counts};
 }
 const total=(h,field)=>[...h.docs].filter(([k])=>k.startsWith('ai_cost_')).map(([,v])=>v[field]||0);
 const expected=core.costFromUsageUsd(response.usage,{inputPerMillion:2,outputPerMillion:10});
@@ -72,3 +72,7 @@ console.log('Wave C result/gateway regression: PASS (mock provider only)');
 const noEvidence=harness({noEvidence:true});const free=await noEvidence.run();assert.equal(free.apiCalled,false);assert.equal(free.analysis.status,'insufficient_data');assert.equal(noEvidence.calls(),0);assert.equal(noEvidence.counts(),0);assert.equal(noEvidence.docs.size,1);
 
 const prepared=harness();const estimate=await prepared.estimate();assert.equal(estimate.canAnalyze,true);assert.equal(estimate.readiness.hasThesis,false);assert.equal(prepared.calls(),0);const emptyEstimate=await noEvidence.estimate();assert.equal(emptyEstimate.canAnalyze,false);assert.equal(noEvidence.counts(),0);
+
+const recoverable=harness({failAnalysis:true});await recoverable.run().catch(()=>{});recoverable.setAnalysisFailure(false);const recovered=await recoverable.run();assert.equal(recovered.apiCalled,false);assert.equal(recovered.incrementalCostUsd,0);assert.equal(recoverable.calls(),1);assert.deepEqual(total(recoverable,'spentUsd'),[expected,expected]);
+const decisions=harness();assert.equal((await decisions.getDecision()).exists,false);await assert.rejects(decisions.decision({decision:'WATCH',riskReviewed:false}));assert.equal((await decisions.decision({decision:'WATCH',riskReviewed:true})).ok,true);assert.equal((await decisions.getDecision()).decision,'WATCH');await assert.rejects(decisions.decision({decision:'BUY',riskReviewed:true}));assert.equal(decisions.calls(),0);
+assert.match(core.buildAnalysisPrompt({},null,'routine').system,/BRIEF MODE/);assert.equal(core.MODEL_POLICY.routine.maxTokens,1800);

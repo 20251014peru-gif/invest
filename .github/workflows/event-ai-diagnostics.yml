@@ -18,9 +18,10 @@ jobs:
       - name: Read bounded error diagnostics without response content
         run: |
           gcloud logging read 'resource.type="cloud_run_revision" AND (resource.labels.service_name="geteventdecision" OR resource.labels.service_name="confirmeventdecision" OR resource.labels.service_name="analyzeevent") AND severity>=ERROR' --project my-system-25497 --freshness=6h --limit=80 --format=json >/tmp/event-errors.json
+          gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="analyzeevent" AND severity>=ERROR' --project my-system-25497 --freshness=6h --limit=30 --format=json >/tmp/ai-errors.json
           python - <<'PY'
           import json,re
-          rows=json.load(open('/tmp/event-errors.json'))
+          rows=json.load(open('/tmp/event-errors.json'))+json.load(open('/tmp/ai-errors.json'))
           for row in rows:
               payload=row.get('jsonPayload',{})
               text=str(row.get('textPayload',''))+' '+str(payload.get('message',''))
