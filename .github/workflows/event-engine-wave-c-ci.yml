@@ -26,6 +26,7 @@ jobs:
         run: |
           python tests/test_disclosure_source.py
           python tests/test_disclosure_facts.py
+          python tests/test_source_refresh.py
       - name: Browser inline JavaScript syntax
         run: |
           python - <<'PY'
