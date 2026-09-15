@@ -4,6 +4,10 @@ sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[1]/'scripts'))
 import refresh_event_source as R
 
 class Refresh(unittest.TestCase):
+    def test_bounded_reason_without_secret_leak(self):
+        for error,expected in [(ValueError('DOCUMENT_TOO_LARGE'),'DOCUMENT_TOO_LARGE'),(ValueError('secret-url'),'DOCUMENT_FORMAT')]:
+            with patch.object(R.DS.urllib.request,'urlopen',side_effect=error):
+                self.assertEqual(R.DS.fetch('20260914800398','FAKE')['reason'],expected)
     def test_pending_bounded_order_and_retries(self):
         rows=[{'rcept_no':'retry','sourceAttempts':1},{'rcept_no':'done','sourceStatus':'AVAILABLE'},{'rcept_no':'exhausted','sourceAttempts':2},{'rcept_no':'new','sourceAttempts':0}]
         with patch.object(R.ER,'_load',return_value={'events':rows}),patch.object(R,'run') as run:

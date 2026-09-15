@@ -47,6 +47,10 @@ def fetch(rcept_no,key):
             match=re.search(rb'<status>(\d+)</status>',blob)
             return {**result,'reason':'DART_'+(match.group(1).decode() if match else 'UNAVAILABLE')}
         return {**result,**extract(blob,rcept_no),'status':'AVAILABLE'}
+    except ValueError as e:
+        reason=str(e)
+        allowed={'DOCUMENT_TOO_LARGE','AMBIGUOUS_DOCUMENT','DOCUMENT_ENCODING','EMPTY_DOCUMENT'}
+        return {**result,'reason':reason if reason in allowed else 'DOCUMENT_FORMAT'}
     except Exception as e:
         # Never serialize an exception URL, because it contains the DART API key.
         return {**result,'reason':type(e).__name__}
