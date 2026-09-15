@@ -1,0 +1,36 @@
+name: Event Source Refresh (manual, no AI)
+on:
+  workflow_dispatch:
+    inputs:
+      rcept_no:
+        description: '원문을 확보할 기존 Event 접수번호 (14자리)'
+        required: true
+        type: string
+permissions:
+  contents: write
+concurrency:
+  group: dart
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Refresh original document only
+        env:
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+          RECEIPT: ${{ inputs.rcept_no }}
+        run: python scripts/refresh_event_source.py "$RECEIPT"
+      - name: Save source evidence
+        run: |
+          git config user.name "dart-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add facts/events
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "data: refresh disclosure original text (no AI)"
+          git push origin HEAD:main

@@ -29,7 +29,7 @@ function safe(v) {
   assert.notEqual(v,undefined,'Firestore rejects undefined');
   if(v && typeof v==='object') for(const x of Object.values(v)) safe(x);
 }
-function harness({reply={...response,usage:sdkUsage},failAnalysis=false,lostSettlement=false,failSettlement=false,providerFail=false,lostAnalysis=false}={}) {
+function harness({reply={...response,usage:sdkUsage},failAnalysis=false,lostSettlement=false,failSettlement=false,providerFail=false,lostAnalysis=false,noEvidence=false}={}) {
   const docs=new Map([['ai_users/u',{enabled:true}]]); let calls=0, counts=0, next=0, lost=false, chain=Promise.resolve();
   const db={collection(name){return {doc(id=String(++next)){const key=name+'/'+id;return {id,key,
     async get(){return snap(key);},async set(v,opt){safe(v);if(name==='event_ai_analysis' && v.status==='success' && failAnalysis) throw Error('storage unavailable');write(key,v,opt);if(name==='event_ai_analysis' && v.status==='success' && lostAnalysis)throw Error('lost acknowledgement');}};}};},
@@ -37,14 +37,14 @@ function harness({reply={...response,usage:sdkUsage},failAnalysis=false,lostSett
   function snap(key){return {exists:docs.has(key),data:()=>docs.get(key)};}
   function write(key,v,opt){docs.set(key,opt?.merge?{...docs.get(key),...v}:v);}
   class Anthropic {constructor(options){assert.equal(options.maxRetries,0);this.messages={countTokens:async()=>{counts++;return {input_tokens:1426};},create:async()=>{calls++;if(providerFail)throw Error('provider unavailable');return reply;}};}}
-  const event={schema:'event/waveB2-1',event_id:'EV-1',company:'Test',date:'20260915',materiality:'UNKNOWN'};
+  const event={schema:'event/waveB2-1',event_id:'EV-1',company:'Test',facts:noEvidence?{}:{revenue:100},date:'20260915',materiality:'UNKNOWN'};
   const pricing={verifiedAt:'2026-09-15',models:{'claude-sonnet-5':{inputPerMillion:2,outputPerMillion:10}}};
   const bindings={...core,...result,fs:{existsSync:()=>true,readFileSync:()=>JSON.stringify(pricing)},path:{dirname:()=>'',join:()=>''},fileURLToPath:()=>'',Anthropic,initializeApp:()=>{},getFirestore:()=>db,FieldValue:{serverTimestamp:()=>sentinel},onCall:(_,fn)=>fn,HttpsError,defineSecret:()=>({value:()=> 'FAKE_TEST_KEY'}),logger:{error:()=>{}},fetch:()=>{throw Error('network forbidden');}};
   const text=source.replace('import.meta.url',"'file:///test/index.js'")+
     '\nrawCache.set("facts/events/index.json",{at:Date.now(),value:{events:[testEvent]}});'+
-    '\nrawCache.set("facts/events/2026-09-15.json",{at:Date.now(),value:{events:[testEvent]}});return analyzeEvent;';
+    '\nrawCache.set("facts/events/2026-09-15.json",{at:Date.now(),value:{events:[testEvent]}});return {analyzeEvent,estimateEventAnalysis};';
   const handler=new Function(...Object.keys(bindings),'testEvent',text)(...Object.values(bindings),event);
-  return {run:()=>handler({auth:{uid:'u'},data:{eventId:'EV-1'}}),docs,calls:()=>calls,counts:()=>counts};
+  return {estimate:()=>handler.estimateEventAnalysis({auth:{uid:'u'},data:{eventId:'EV-1'}}),run:()=>handler.analyzeEvent({auth:{uid:'u'},data:{eventId:'EV-1'}}),docs,calls:()=>calls,counts:()=>counts};
 }
 const total=(h,field)=>[...h.docs].filter(([k])=>k.startsWith('ai_cost_')).map(([,v])=>v[field]||0);
 const expected=core.costFromUsageUsd(response.usage,{inputPerMillion:2,outputPerMillion:10});
@@ -68,3 +68,7 @@ for (const options of [{lostSettlement:true},{lostAnalysis:true},{failAnalysis:t
   await h.run().catch(()=>{});assert.equal(h.calls(),1,'failure/retry must not trigger another paid call');
 }
 console.log('Wave C result/gateway regression: PASS (mock provider only)');
+
+const noEvidence=harness({noEvidence:true});const free=await noEvidence.run();assert.equal(free.apiCalled,false);assert.equal(free.analysis.status,'insufficient_data');assert.equal(noEvidence.calls(),0);assert.equal(noEvidence.counts(),0);assert.equal(noEvidence.docs.size,1);
+
+const prepared=harness();const estimate=await prepared.estimate();assert.equal(estimate.canAnalyze,true);assert.equal(estimate.readiness.hasThesis,false);assert.equal(prepared.calls(),0);const emptyEstimate=await noEvidence.estimate();assert.equal(emptyEstimate.canAnalyze,false);assert.equal(noEvidence.counts(),0);
