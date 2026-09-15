@@ -11,7 +11,7 @@ import {parseAnalysisOutput, firestoreSafe, settleUsage} from './lib/ai_result.j
 import {
   MODEL_POLICY, PROMPT_VERSION, AI_POLICY_VERSION, ANALYSIS_OUTPUT_SCHEMA,
   analysisFingerprint, buildAnalysisPrompt, getPrice, decisionPolicy, analysisReadiness, missingEvidenceOutput,
-  estimateCostUsd, costFromUsageUsd, kstKeys, pricingIsStale, sha256
+  reviewAnalysisWording, estimateCostUsd, costFromUsageUsd, kstKeys, pricingIsStale, sha256
 } from './lib/ai_core.js';
 
 initializeApp();
@@ -126,7 +126,7 @@ function priceSnapshot(model, price, pricing) {
 function publicAnalysis(doc) {
   if (!doc) return null;
   const {uid, createdAt, ...safe} = doc;
-  return safe;
+  return {...safe, wordingWarnings:reviewAnalysisWording(safe.output)};
 }
 
 export const estimateEventAnalysis = onCall({region: REGION, secrets: [ANTHROPIC_API_KEY], timeoutSeconds: 60, memory: '256MiB'}, async request => {
@@ -137,6 +137,9 @@ export const estimateEventAnalysis = onCall({region: REGION, secrets: [ANTHROPIC
   const prompt=buildAnalysisPrompt(event,thesis,policy.tier);
   const readiness=analysisReadiness(event,thesis);
   if(!readiness.canAnalyze) return {canAnalyze:false,readiness,estimatedInputTokens:0,estimatedCostUsd:0,maxCostUsd:0,output:missingEvidenceOutput()};
+  const fingerprint=analysisFingerprint({event,thesis,model:policy.model,promptVersion:policy.promptVersion,policyVersion:AI_POLICY_VERSION});
+  const saved=await db.collection('event_ai_analysis').doc(fingerprint).get();
+  if(saved.exists && saved.data()?.status==='success') return {canAnalyze:false,cacheHit:true,readiness,estimatedCostUsd:0,maxCostUsd:0,analysis:publicAnalysis(saved.data())};
   const inputTokens=await countInputTokens(anthropicClient(),policy,prompt);
   const cfg=await settings();
   return {
@@ -224,7 +227,7 @@ export const analyzeEvent = onCall({region: REGION, secrets: [ANTHROPIC_API_KEY]
     });
     costStatus=await settle(message.usage,actualUsd,'success');
     await aref.set({...analysisPublic,uid,usageId:usageRef.id,createdAt:FieldValue.serverTimestamp()},{merge:false});
-    return {cacheHit:false,apiCalled:true,incrementalCostUsd:actualUsd,analysis:analysisPublic};
+    return {cacheHit:false,apiCalled:true,incrementalCostUsd:actualUsd,analysis:publicAnalysis(analysisPublic)};
   } catch(err) {
     const failureStage=stage;
     const usage=message?.usage||err?.usage||null, actualUsd=usage?costFromUsageUsd(usage,price):null;

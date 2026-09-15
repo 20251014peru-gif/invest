@@ -76,3 +76,9 @@ const prepared=harness();const estimate=await prepared.estimate();assert.equal(e
 const recoverable=harness({failAnalysis:true});await recoverable.run().catch(()=>{});recoverable.setAnalysisFailure(false);const recovered=await recoverable.run();assert.equal(recovered.apiCalled,false);assert.equal(recovered.incrementalCostUsd,0);assert.equal(recoverable.calls(),1);assert.deepEqual(total(recoverable,'spentUsd'),[expected,expected]);
 const decisions=harness();assert.equal((await decisions.getDecision()).exists,false);await assert.rejects(decisions.decision({decision:'WATCH',riskReviewed:false}));assert.equal((await decisions.decision({decision:'WATCH',riskReviewed:true})).ok,true);assert.equal((await decisions.getDecision()).decision,'WATCH');await assert.rejects(decisions.decision({decision:'BUY',riskReviewed:true}));assert.equal(decisions.calls(),0);
 assert.match(core.buildAnalysisPrompt({},null,'routine').system,/BRIEF MODE/);assert.equal(core.MODEL_POLICY.routine.maxTokens,1800);
+
+const beforeCounts=good.counts(),beforeSpent=total(good,'spentUsd');
+const cachedEstimate=await good.estimate();assert.equal(cachedEstimate.cacheHit,true);assert.equal(cachedEstimate.canAnalyze,false);assert.equal(cachedEstimate.estimatedCostUsd,0);assert.equal(good.counts(),beforeCounts);assert.equal(good.calls(),1);assert.deepEqual(total(good,'spentUsd'),beforeSpent);
+const risky={positiveCase:['누계 수주가 증가해 수주 잔량 축적 측면의 선행지표가 확대됐다.'],counterArguments:['통화(백만불) 조건이 공시에 없어 판단이 어렵다.'],keyRisks:['정보 비대칭 리스크: 기관투자자 및 애널리스트 대상 자료다.']};
+assert.deepEqual(core.reviewAnalysisWording(risky).map(x=>x.code),['ORDERS_BACKLOG','CURRENCY_STATED','AUDIENCE_INFERENCE']);
+assert.deepEqual(core.reviewAnalysisWording({positiveCase:['누계 수주와 수주잔고는 다른 지표로 잔고 증가를 단정할 수 없다.'],counterArguments:['백만불로 표기되며 환율은 미확인이다.']}),[]);

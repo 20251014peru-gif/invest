@@ -27,6 +27,7 @@ jobs:
           for i in 1 2 3 4; do
             git fetch origin main; git reset --hard origin/main
             python scripts/dart.py
+            python scripts/refresh_event_source.py pending --limit 3
             git add facts/dart.json facts/events data/corp_codes.json data/status.json 2>/dev/null || true
             if git diff --cached --quiet; then echo "::notice::변경 없음"; exit 0; fi
             git commit -q -m "auto: dart event $(date -u +%Y-%m-%dT%H:%MZ)"

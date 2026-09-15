@@ -278,3 +278,21 @@ export function missingEvidenceOutput() {
     invalidationTrigger:['공시 자료와 기존 투자논지를 확보한 뒤 판단'],
     additionalResearchNeeded:['원문 확보 상태 확인', '기록보관실에 매수사유·핵심가정 기록'], evidenceSufficiency:'LOW'};
 }
+
+// Bounded wording checks are review hints, not verification of every claim.
+export function reviewAnalysisWording(output = {}) {
+  const warnings=[];
+  const fields=Object.entries(output).filter(([key])=>!['thesisImpact','evidenceSufficiency'].includes(key));
+  for(const [field,value] of fields){
+    for(const sentence of (Array.isArray(value)?value:[value])){
+      if(typeof sentence!=='string')continue;
+      if(/누계\s*수주/.test(sentence)&&/수주\s*(잔량|잔고)/.test(sentence)&&/(확대|축적|증가)/.test(sentence)&&!/(단정|확정할 수 없|의미하지|다른 지표)/.test(sentence))
+        warnings.push({field,code:'ORDERS_BACKLOG',message:'누계 수주와 수주잔고는 다른 지표입니다. 수주잔고 확대 여부는 별도 자료로 확인하세요.'});
+      if(/통화/.test(sentence)&&/(없어|없다|없음|미기재)/.test(sentence)&&/백만불/.test(JSON.stringify(output)))
+        warnings.push({field,code:'CURRENCY_STATED',message:'분석에 백만불 단위가 기재돼 있습니다. 통화 미확인 주장과 환율·환산 기준 미확인을 구분하세요.'});
+      if(/정보\s*비대칭/.test(sentence)&&/(기관|애널리스트)/.test(sentence))
+        warnings.push({field,code:'AUDIENCE_INFERENCE',message:'기관·애널리스트 대상이라는 표기만으로 정보 비대칭 위험을 단정할 수 없습니다.'});
+    }
+  }
+  return [...new Map(warnings.map(w=>[w.code,w])).values()];
+}
