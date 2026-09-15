@@ -10,7 +10,7 @@ import * as logger from 'firebase-functions/logger';
 import {parseAnalysisOutput, firestoreSafe, settleUsage} from './lib/ai_result.js';
 import {
   MODEL_POLICY, PROMPT_VERSION, AI_POLICY_VERSION, ANALYSIS_OUTPUT_SCHEMA,
-  analysisFingerprint, buildAnalysisPrompt, getPrice, decisionPolicy,
+  analysisFingerprint, buildAnalysisPrompt, getPrice, decisionPolicy, analysisReadiness, missingEvidenceOutput,
   estimateCostUsd, costFromUsageUsd, kstKeys, pricingIsStale, sha256
 } from './lib/ai_core.js';
 
@@ -135,9 +135,12 @@ export const estimateEventAnalysis = onCall({region: REGION, secrets: [ANTHROPIC
   const thesis=await serverThesis(event.company);
   const pricing=loadPricing(), policy=choosePolicy(request.data?.tier), price=getPrice(pricing,policy.model);
   const prompt=buildAnalysisPrompt(event,thesis);
+  const readiness=analysisReadiness(event,thesis);
+  if(!readiness.canAnalyze) return {canAnalyze:false,readiness,estimatedInputTokens:0,estimatedCostUsd:0,maxCostUsd:0,output:missingEvidenceOutput()};
   const inputTokens=await countInputTokens(anthropicClient(),policy,prompt);
   const cfg=await settings();
   return {
+    canAnalyze:true,readiness,
     provider:'anthropic',tier:policy.tier,model:policy.model,effort:policy.effort||null,
     aiPolicyVersion:AI_POLICY_VERSION,eventId:event.event_id,
     estimatedInputTokens:inputTokens,estimatedOutputTokens:policy.estimateOutputTokens,
@@ -155,6 +158,8 @@ export const analyzeEvent = onCall({region: REGION, secrets: [ANTHROPIC_API_KEY]
   const thesis=await serverThesis(event.company);
   const pricing=loadPricing(), cfg=await settings(), policy=choosePolicy(request.data?.tier), price=getPrice(pricing,policy.model);
   const prompt=buildAnalysisPrompt(event,thesis);
+  const readiness=analysisReadiness(event,thesis);
+  if(!readiness.canAnalyze) return {cacheHit:false,apiCalled:false,incrementalCostUsd:0,analysis:{status:'insufficient_data',output:missingEvidenceOutput(),readiness,thesisAssessment:'INSUFFICIENT_DATA',reviewRequired:true,g6Unlocked:false}};
   const fingerprint=analysisFingerprint({event,thesis,model:policy.model,promptVersion:PROMPT_VERSION,policyVersion:AI_POLICY_VERSION});
   const aref=db.collection('event_ai_analysis').doc(fingerprint); const existing=await aref.get();
   if (existing.exists && existing.data()?.status==='success') return {cacheHit:true,apiCalled:false,incrementalCostUsd:0,analysis:publicAnalysis(existing.data())};
@@ -195,7 +200,7 @@ export const analyzeEvent = onCall({region: REGION, secrets: [ANTHROPIC_API_KEY]
     stage='persistence';
     const actualUsd=message.usage?costFromUsageUsd(message.usage,price):null;
     const analysisPublic=firestoreSafe({
-      schema:'event-ai-analysis/1',status:'success',reviewRequired:true,g6Unlocked:false,eventId:event.event_id,fingerprint,
+      schema:'event-ai-analysis/1',status:'success',readiness,thesisAssessment:!readiness.hasThesis?'NO_THESIS':output.evidenceSufficiency==='LOW'?'INSUFFICIENT_DATA':'ASSESSED',reviewRequired:true,g6Unlocked:false,eventId:event.event_id,fingerprint,
       provider:'anthropic',tier:policy.tier,model:policy.model,effort:policy.effort||null,aiPolicyVersion:AI_POLICY_VERSION,
       promptVersion:PROMPT_VERSION,stopReason:message.stop_reason||null,output,usage:message.usage||{},estimatedCostUsd,
       costFromUsageUsd:actualUsd,billedCostUsd:null,priceSnapshot:snapshot,pricingStale:pricingIsStale(pricing),requestedAt,

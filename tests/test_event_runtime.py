@@ -38,7 +38,7 @@ ck("G3여도 신규매수 잠금 유지", en["new_buy_locked"] is True)
 with tempfile.TemporaryDirectory() as td:
     oldroot=ER.ROOT; ER.ROOT=td
     os.makedirs(os.path.join(td,"facts","events"),exist_ok=True)
-    original_ensure=ER._ensure_corp_map; original_enrich=ER.enrich_event
+    original_source=ER.DS.fetch; ER.DS.fetch=lambda r,key: {"status":"UNAVAILABLE","rceptNo":r}; original_ensure=ER._ensure_corp_map; original_enrich=ER.enrich_event
     ER._ensure_corp_map=lambda key,codes: ({"005930":{"corp_code":"00126380"}},None)
     def simple_enrich(e,key,cmap,field_map=None,fetcher=None):
         e["corp_code"]="00126380"; e["detailAttempts"]=1; e["detailStatus"]="NO_ENDPOINT"
@@ -60,7 +60,7 @@ with tempfile.TemporaryDirectory() as td:
     new_item=raw("단일판매ㆍ공급계약체결","29990101000010")
     c=ER.process([item,new_item],"KEY")
     ck("baseline 이후 진짜 신규 1건만 알림", len(c["new_events"])==1 and ER._rcept(c["new_events"][0])=="29990101000010")
-    ER._ensure_corp_map=original_ensure; ER.enrich_event=original_enrich; ER.ROOT=oldroot
+    ER.DS.fetch=original_source; ER._ensure_corp_map=original_ensure; ER.enrich_event=original_enrich; ER.ROOT=oldroot
 
 p=sum(1 for _,ok,_ in R if ok)
 print("Event Runtime/Notifier tests\n"+"-"*60)
