@@ -1,4 +1,4 @@
-<!-- v 20260916-2035 (종목 붙여넣기 칩 그룹에 연한 배경 박스 추가로 구별 + 종목 버튼 클릭 시 탭 대신 크기 지정된 새 창으로 열리게 수정)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260916-2150 (헤더에 AI 사용량 표시 추가 — Board Signals 자동비용 + 캡쳐분석 개인키 비용 합산)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -39,8 +39,11 @@
   .jcell:empty:before{content:attr(data-ph);color:#bbb}
   /* ── 탭 UI ── */
   .topwrap{background:var(--card)}
-  .epslinks{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-bottom:8px}
-  .epsgrp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+  .epslinks{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-bottom:8px;align-items:start}
+  .epsgrp{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+  .epsgrp-label{font-size:12px;color:var(--sub);margin-bottom:6px}
+  .epsgrp-chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+  .epsgrp-chips a{text-align:center}
   @media (max-width:760px){ .epslinks{grid-template-columns:1fr} }
   .tabbar{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;background:var(--card);padding:8px 12px;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
   .tab{min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);font:inherit;font-size:14px;font-weight:700;cursor:pointer;color:var(--sub);white-space:nowrap}
@@ -98,6 +101,7 @@
 <header>
   <h1>🦢 CYGNUS 시장 상태</h1>
   <small id="ver"></small>
+  <small id="aiUsage" class="muted"></small>
 </header>
 <nav class="tabbar" id="tabbar" hidden>
   <button class="tab" type="button" data-go="market">🌐 시장</button>
@@ -291,14 +295,33 @@
   </section>
 
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260916-2035"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260916-2150"></script>
 <script src="js/nav.js" data-page="market"></script>
 <script src="js/regime.js"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260916-2035';
+  document.getElementById('ver').textContent='v 20260916-2150';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
+
+  // AI 사용량(헤더) — Board Signals 자동비용(facts/board.json) + 캡쳐분석 개인키 비용(localStorage cai_cost) 합산해서 표시
+  (function(){
+    var elU=document.getElementById('aiUsage'); if(!elU) return;
+    function caiCost(){ try{return JSON.parse(localStorage.getItem('cai_cost')||'{}')}catch(e){return {}} }
+    function render(){
+      get('facts/board.json').then(function(d){
+        var boardUsd=(d.ai_cost&&d.ai_cost.total_usd)||0;
+        var cai=caiCost(); var caiUsd=cai.total_usd||0;
+        var total=boardUsd+caiUsd;
+        var unpriced=cai.unpriced_calls?(' · 캡쳐 '+cai.unpriced_calls+'건 가격미확인'):'';
+        elU.textContent='🤖 AI $'+total.toFixed(4)+unpriced;
+        elU.title='Board Signals $'+boardUsd.toFixed(4)+' + 캡쳐분석 $'+caiUsd.toFixed(4)+' (토큰수×공식단가 계산값 — 실제 청구서와 다를 수 있음)';
+      }).catch(function(){ elU.textContent=''; });
+    }
+    render();
+    document.addEventListener('cai-updated', render);
+  })();
+
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
   var JC={'우호':'good','안정':'good','강':'good','확장':'good','정상':'good','주의':'warn','중립':'mid','부담':'bad','위험':'bad','약':'bad','수축':'bad','역전':'bad'};
 
@@ -689,20 +712,12 @@
   // 선행EPS 복원 + 종목별 네이버 링크
   renderEPS();
   (function(){ var lk=document.getElementById('epsLinks'); if(!lk) return;
-    lk.addEventListener('click',function(e){
-      var a=e.target.closest('a[href]'); if(!a) return;
-      if(e.button!==0||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey) return;
-      e.preventDefault();
-      var w=1100,h=850;
-      var left=Math.max(0,(screen.width-w)/2), top=Math.max(0,(screen.height-h)/2);
-      window.open(a.href,'_blank','noopener,width='+w+',height='+h+',left='+left+',top='+top);
-    });
     get('data/sectors.json').then(function(d){
       (d.sectors||[]).forEach(function(sec){
         var comps=(sec.companies||[]).filter(function(c){return c.code});
         if(!comps.length) return;
         var chips=comps.map(function(c){ var u='https://finance.naver.com/item/main.naver?code='+encodeURIComponent(c.code); return '<a class="btn" style="padding:4px 9px;font-size:12px" target="_blank" rel="noopener" href="'+u+'">'+esc(c.name)+' ↗</a>'; }).join('');
-        lk.innerHTML += '<div class="epsgrp"><span class="muted" style="font-size:12px">'+esc(sec.name)+':</span>'+chips+'</div>';
+        lk.innerHTML += '<div class="epsgrp"><div class="epsgrp-label">'+esc(sec.name)+'</div><div class="epsgrp-chips">'+chips+'</div></div>';
       });
     }).catch(function(e){ lk.innerHTML='<span class="muted">종목 목록을 못 불러왔어요('+esc(e.message)+'). 네이버금융에서 종목명 검색.</span>'; });
   })();
