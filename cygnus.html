@@ -1,4 +1,4 @@
-<!-- v 20260916-1613 (탭 버튼 → 트리 내비게이션 전환, 사이트맵 칩 클릭 가능, AI 비용 표시, 틀고정 스크롤 겹침 수정, 버전 위치 오른쪽으로)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260916-1725 (종목 버튼 클릭 시 새 탭 대신 옆에 네이버 패널 열림)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -39,6 +39,12 @@
   .jcell:empty:before{content:attr(data-ph);color:#bbb}
   /* ── 탭 UI ── */
   .topwrap{background:var(--card)}
+  .stockframe{position:fixed;top:0;right:-100vw;bottom:0;width:48vw;max-width:900px;background:var(--card);border-left:1px solid var(--line);box-shadow:-6px 0 20px rgba(0,0,0,.12);z-index:9000;display:flex;flex-direction:column;transition:right .2s}
+  .stockframe.open{right:0}
+  .stockframe-bar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line)}
+  .stockframe iframe{flex:1;border:0;width:100%;background:#fff}
+  body.stockframe-open main{max-width:calc(100% - 48vw)}
+  @media (max-width:900px){ .stockframe{width:100vw} body.stockframe-open main{max-width:100%} }
   .tabbar{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;background:var(--card);padding:8px 12px;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
   .tab{min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);font:inherit;font-size:14px;font-weight:700;cursor:pointer;color:var(--sub);white-space:nowrap}
   .tab.on{background:var(--p1);border-color:#93c5fd;color:var(--ink)}
@@ -288,12 +294,16 @@
   </section>
 
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260916-1613"></script>
+<div class="stockframe" id="stockFrame" hidden>
+  <div class="stockframe-bar"><b id="stockFrameTitle" style="font-size:14px"></b><button type="button" class="btn" id="stockFrameClose">✕ 닫기</button></div>
+  <iframe id="stockFrameIframe" title="네이버 종목 화면"></iframe>
+</div>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260916-1725"></script>
 <script src="js/nav.js" data-page="market"></script>
 <script src="js/regime.js"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260916-1613';
+  document.getElementById('ver').textContent='v 20260916-1725';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -685,13 +695,36 @@
   }
   // 선행EPS 복원 + 종목별 네이버 링크
   renderEPS();
+  var stockFrame=document.getElementById('stockFrame'), stockFrameIframe=document.getElementById('stockFrameIframe'), stockFrameTitle=document.getElementById('stockFrameTitle');
+  function openStockFrame(name,url){
+    if(!stockFrame) return;
+    if(stockFrameTitle) stockFrameTitle.textContent=name;
+    if(stockFrameIframe) stockFrameIframe.src=url;
+    stockFrame.hidden=false;
+    document.body.classList.add('stockframe-open');
+    requestAnimationFrame(function(){ stockFrame.classList.add('open'); });
+  }
+  function closeStockFrame(){
+    if(!stockFrame) return;
+    stockFrame.classList.remove('open');
+    document.body.classList.remove('stockframe-open');
+    setTimeout(function(){ stockFrame.hidden=true; if(stockFrameIframe) stockFrameIframe.src='about:blank'; },200);
+  }
+  var stockFrameCloseBtn=document.getElementById('stockFrameClose');
+  if(stockFrameCloseBtn) stockFrameCloseBtn.addEventListener('click',closeStockFrame);
   (function(){ var lk=document.getElementById('epsLinks'); if(!lk) return;
+    lk.addEventListener('click',function(e){
+      var a=e.target.closest('a[data-stockurl]'); if(!a) return;
+      if(e.button!==0||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey) return;
+      e.preventDefault();
+      openStockFrame(a.getAttribute('data-stockname'),a.getAttribute('data-stockurl'));
+    });
     get('data/sectors.json').then(function(d){
       (d.sectors||[]).forEach(function(sec){
         var comps=(sec.companies||[]).filter(function(c){return c.code});
         if(!comps.length) return;
         lk.innerHTML += '<span class="muted" style="align-self:center;font-size:12px;margin-left:4px">'+esc(sec.name)+':</span>';
-        comps.forEach(function(c){ lk.innerHTML += '<a class="btn" style="padding:4px 9px;font-size:12px" target="_blank" rel="noopener" href="https://finance.naver.com/item/main.naver?code='+encodeURIComponent(c.code)+'">'+esc(c.name)+' ↗</a>'; });
+        comps.forEach(function(c){ var u='https://finance.naver.com/item/main.naver?code='+encodeURIComponent(c.code); lk.innerHTML += '<a class="btn" style="padding:4px 9px;font-size:12px" target="_blank" rel="noopener" href="'+u+'" data-stockname="'+esc(c.name)+'" data-stockurl="'+u+'">'+esc(c.name)+' ↗</a>'; });
       });
     }).catch(function(e){ lk.innerHTML='<span class="muted">종목 목록을 못 불러왔어요('+esc(e.message)+'). 네이버금융에서 종목명 검색.</span>'; });
   })();
