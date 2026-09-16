@@ -148,6 +148,8 @@ def run(fetch_map=None, manual=None):
                     rec["pending"] = True                                 # 키 없음 = 미설정(경고 띠 아님, 화면엔 '미설정')
                 else:
                     rows = fetch_ecos(ind["ecos"], cfg.get("relay", ""))
+            elif ind["source"] == "kr_key":
+                rec["pending"] = True                                     # 값은 아래 key_stats 블록에서 채움(KeyStatisticList 재사용, 별도 호출 없음)
             else:
                 rows = fetch_map[ind["source"]](ind["symbol"])
                 if len(rows) < 1: raise RuntimeError("데이터 없음")
@@ -212,6 +214,27 @@ def run(fetch_map=None, manual=None):
                 items_k.append(it)
             save(kpath, {"schema": "kr_key/1", "source": "ECOS KeyStatisticList(100대 통계지표)", "collected_at": kst_iso(), "count": len(items_k), "items": items_k})
             print(f"한국 경제 한 판 {len(items_k)}개 저장")
+            # kr_key 소스 지표(예: 투자자예탁금) 채우기 — 별도 호출 없이 위에서 받은 items_k 재사용
+            dep_rec = next((r for r in out if r.get("source") == "kr_key"), None)
+            if dep_rec is not None:
+                row = next((it for it in items_k if it.get("name") == "투자자예탁금"), None)
+                if row and row.get("value") not in (None, ""):
+                    try:
+                        v = float(str(row["value"]).replace(",", ""))
+                        c = str(row.get("as_of", ""))
+                        dep_rec["value"] = v
+                        dep_rec["as_of"] = f"{c[:4]}-{c[4:6]}" if len(c) >= 6 else c
+                        dep_rec["collected_at"] = kst_iso()
+                        dep_rec["pending"] = False
+                        pv = row.get("prev")
+                        if pv not in (None, ""):
+                            dep_rec["prev"] = float(str(pv).replace(",", ""))
+                            if dep_rec["prev"]:
+                                dep_rec["change_pct"] = round((v - dep_rec["prev"]) / dep_rec["prev"] * 100, 2)
+                    except (TypeError, ValueError) as e:
+                        dep_rec["error"] = f"kr_key 파싱 실패: {e}"[:200]
+                else:
+                    dep_rec["error"] = "kr_key 목록에 '투자자예탁금' 없음(ECOS 항목명 변경 가능성)"
         except Exception as e:
             errors.append(f"kr_key: {type(e).__name__}: {e}"[:200])
     ok = sum(1 for r in out if r["value"] is not None)
