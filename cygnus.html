@@ -52,6 +52,19 @@
   .mtree{line-height:1.95;font-size:14px}
   .mtree b.hub{background:var(--p6);border-radius:8px;padding:1px 8px}
   .mtree a{color:#1d4ed8;text-decoration:none}
+  /* ── 지표 색인(조감도) ── */
+  .idxbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+  .idxbar input[type=search]{flex:1 1 220px;min-height:40px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit}
+  .idxzoom{display:flex;gap:4px}
+  .idxzoom button{min-height:36px;min-width:36px;border:1px solid var(--line);border-radius:8px;background:var(--card);cursor:pointer;font:inherit}
+  .idxwrap{overflow:auto;border:1px solid var(--line);border-radius:12px;padding:10px;background:#fafbfe}
+  .idxtree{display:flex;gap:10px;align-items:flex-start;transform-origin:top left;width:max-content}
+  .idxcol{flex:0 0 200px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px}
+  .idxcol h4{font-size:13px;margin:0 0 6px;color:var(--sub)}
+  .idxchip{display:block;width:100%;text-align:left;border:1px solid var(--line);border-radius:8px;padding:4px 8px;margin-bottom:5px;background:#fff;font-size:12.5px;cursor:pointer;font:inherit}
+  .idxchip.on{background:var(--p1);border-color:#93c5fd}
+  .idxchip.dim{opacity:.28}
+  .idxdetail{font-size:12px;color:var(--sub);background:#f6f7fb;border-radius:8px;padding:6px 8px;margin:-2px 0 6px;line-height:1.6}
 </style>
 <link rel="stylesheet" href="js/skin.css">
 </head>
@@ -178,6 +191,20 @@
     <b>③ 지금 켜져 있는 자동 수집</b> <span class="tag">status.json 실시간</span>
     <div id="mapJobs" class="muted" style="margin-top:6px">불러오는 중…</div>
   </div>
+
+  <div class="card" style="margin-top:12px">
+    <b>④ 지표 색인</b> <span class="tag">CYGNUS 안의 모든 지표 · 축·위치·뜻</span>
+    <p class="muted" style="margin:6px 0 0">축(가지)별로 묶은 지표 칩. 누르면 뜻·단위·위치가 펼쳐짐. 파란 점(●)=레짐 판정에 실제로 들어가는 지표.</p>
+    <div class="idxbar">
+      <input type="search" id="idxQ" placeholder="지표 이름으로 찾기">
+      <div class="idxzoom">
+        <button type="button" data-z="-" title="축소">−</button>
+        <button type="button" data-z="fit" title="한 화면에 맞춤">맞춤</button>
+        <button type="button" data-z="+" title="확대">+</button>
+      </div>
+    </div>
+    <div class="idxwrap"><div class="idxtree" id="idxTree"><p class="muted">불러오는 중…</p></div></div>
+  </div>
   </section>
 
 </main>
@@ -300,6 +327,70 @@
     return legend+svg+tbl+note;
   }
   loadInd();
+  // 지표 색인(사이트맵 탭 ④) — data/indicators.json(항목) + data/axes.json(축 이름·순서) + data/regime_rules.json(레짐 판정 포함 여부)를
+  // 그대로 다시 읽어 축별 트리로 보여줌. 새 지표·새 축이 생겨도 코드 안 고치고 자동으로 따라감(하드코딩 없음).
+  var idxZoom=1;
+  function idxApply(z){ idxZoom=Math.max(.4,Math.min(2,z)); var t=document.getElementById('idxTree'); if(t) t.style.zoom=idxZoom; }
+  function idxFit(){
+    idxApply(1);
+    var wrap=document.querySelector('.idxwrap'), t=document.getElementById('idxTree');
+    if(!wrap||!t) return;
+    for(var i=0;i<7;i++){
+      var tw=t.getBoundingClientRect().width, th=t.getBoundingClientRect().height;
+      var aw=wrap.getBoundingClientRect().width-20, ah=Math.max(240,window.innerHeight*0.7);
+      if(tw<10||th<10||aw<10) break;
+      var k=Math.min(aw/tw, ah/th);
+      if(k>0.99&&k<1.01) break;
+      idxApply(idxZoom*k);
+    }
+  }
+  function loadIndex(){
+    Promise.all([
+      get('data/indicators.json').catch(function(){return {items:[]};}),
+      get('data/axes.json').catch(function(){return {axes:[]};}),
+      get('data/regime_rules.json').catch(function(){return {};})
+    ]).then(function(res){
+      var items=res[0].items||[], axesList=res[1].axes||[], rules=res[2]||{};
+      var BLOCKNAME={growth:'성장',inflation:'물가',liquidity:'유동성'};
+      var inRegime={};
+      ['growth','inflation','liquidity'].forEach(function(bk){
+        ((rules[bk]||{}).signals||[]).forEach(function(s){ (inRegime[s.id]=inRegime[s.id]||[]).push(BLOCKNAME[bk]); });
+      });
+      var byAxis={}; items.forEach(function(it){ (byAxis[it.axis]=byAxis[it.axis]||[]).push(it); });
+      var tree=document.getElementById('idxTree'); if(!tree) return;
+      tree.innerHTML=axesList.map(function(ax){
+        var list=(byAxis[ax.id]||[]).slice().sort(function(a,b){return String(a.name).localeCompare(String(b.name),'ko');});
+        if(!list.length) return '';
+        var body=list.map(function(it,i){
+          var reg=inRegime[it.id], uid=ax.id+'_'+i, dot=reg?' <span style="color:#1d4ed8">●</span>':'';
+          var loc='🌐 시장 탭 · ③ 축·전략 탭'+(it.id==='kr_deposit'?' · 💰 수급 탭':'');
+          var detail=(it.rule?esc(it.rule)+'<br>':'')+'단위 '+esc(it.unit||'—')+' · '+esc(CYCLES[it.cycle]||it.cycle||'—')+
+            '<br>'+(reg?'레짐 판정에 포함('+esc(reg.join('·'))+')':'레짐 판정에는 안 들어감 · 참고용')+
+            '<br>위치: '+loc;
+          return '<button type="button" class="idxchip" data-name="'+esc(it.name)+'" data-target="idxd_'+esc(uid)+'">'+esc(it.name)+dot+'</button>'+
+            '<div class="idxdetail" id="idxd_'+esc(uid)+'" hidden>'+detail+'</div>';
+        }).join('');
+        return '<div class="idxcol"><h4>'+esc(ax.name)+'</h4>'+body+'</div>';
+      }).join('')||'<p class="muted">아직 지표 데이터가 없습니다.</p>';
+      tree.querySelectorAll('.idxchip').forEach(function(b){
+        b.onclick=function(){ var d=document.getElementById(b.getAttribute('data-target')); if(d) d.hidden=!d.hidden; b.classList.toggle('on', d&&!d.hidden); };
+      });
+      idxFit();
+    });
+  }
+  window.idxFit=idxFit; // show()는 별도 IIFE(탭 이동)에 있어 window 를 통해 불러야 함
+  loadIndex();
+  document.querySelectorAll('.idxzoom button').forEach(function(b){
+    b.onclick=function(){ var k=b.getAttribute('data-z'); if(k==='fit') idxFit(); else idxApply(idxZoom+(k==='+'?0.12:-0.12)); };
+  });
+  var idxQEl=document.getElementById('idxQ');
+  if(idxQEl) idxQEl.oninput=function(){
+    var q=idxQEl.value.trim().toLowerCase();
+    document.querySelectorAll('.idxchip').forEach(function(b){
+      var m=!q || (b.getAttribute('data-name')||'').toLowerCase().indexOf(q)>=0;
+      b.classList.toggle('dim', !m);
+    });
+  };
   // 보고서 함: data/reports.json + raw/report_log.json + analysis/calendar.json
   Promise.all([get('data/reports.json'), get('raw/report_log.json').catch(function(){return {items:[]}}), get('analysis/calendar.json').catch(function(){return null})]).then(function(r){
     var reps=(r[0].items||[]), log=(r[1].items||[]), cal=r[2], box=document.getElementById('repBox'), el=document.getElementById('repCards'); if(!box||!reps.length) return;
@@ -733,7 +824,7 @@
     tabs.forEach(function(t){ t.classList.toggle('on', t.getAttribute('data-go')===name); });
     var s=document.getElementById('tabsub'); if(s) s.textContent=SUB[name]||'';
     try{localStorage.setItem('cygnus_tab',name);}catch(e){}
-    if(name==='map') loadJobs();
+    if(name==='map'){ loadJobs(); if(window.idxFit) window.idxFit(); }
     window.scrollTo(0,0);
   }
   tabs.forEach(function(t){ t.addEventListener('click',function(){ show(t.getAttribute('data-go')); }); });
