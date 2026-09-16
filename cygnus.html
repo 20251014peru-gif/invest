@@ -67,6 +67,8 @@
   .fbox small{color:var(--sub);font-size:12px;display:block;margin:1px 0 4px}
   .fbox.c1{background:#eef6ff}.fbox.c2{background:#f0fdf4}.fbox.c3{background:#fefce8}.fbox.c4{background:#fef2f2}
   .fbox .chip2{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:8px;padding:2px 8px;margin:3px 3px 0 0;font-size:12.5px}
+  .chip2go{cursor:pointer;font:inherit;transition:background .15s,border-color .15s}
+  .chip2go:hover{background:var(--p1);border-color:#93c5fd}
   .arrow{text-align:center;color:var(--sub);font-size:12px;margin:6px 0}
   .mtree{line-height:1.95;font-size:14px}
   .mtree b.hub{background:var(--p6);border-radius:8px;padding:1px 8px}
@@ -79,8 +81,8 @@
   .idxwrap{overflow:auto;border:1px solid var(--line);border-radius:12px;padding:10px;background:#fafbfe}
   .idxtree{display:flex;gap:10px;align-items:flex-start;transform-origin:top left;width:max-content}
   .idxcol{flex:0 0 200px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px}
-  .idxcol h4{font-size:13px;margin:0 0 6px;color:var(--sub)}
-  .idxchip{display:block;width:100%;text-align:left;border:1px solid var(--line);border-radius:8px;padding:4px 8px;margin-bottom:5px;background:#fff;font-size:12.5px;cursor:pointer;font:inherit}
+  .idxcol h4{font-size:14px;margin:0 0 6px;color:var(--sub)}
+  .idxchip{display:block;width:100%;text-align:left;border:1px solid var(--line);border-radius:8px;padding:6px 8px;margin-bottom:5px;background:#fff;font-size:14px;cursor:pointer;font:inherit}
   .idxchip.on{background:var(--p1);border-color:#93c5fd}
   .idxchip.dim{opacity:.28}
   .idxdetail{font-size:12px;color:var(--sub);background:#f6f7fb;border-radius:8px;padding:6px 8px;margin:-2px 0 6px;line-height:1.6}
@@ -90,7 +92,8 @@
 <body>
 <div class="topwrap">
 <header>
-  <h1>🦢 CYGNUS 시장 상태 <small id="ver"></small></h1>
+  <h1>🦢 CYGNUS 시장 상태</h1>
+  <small id="ver"></small>
 </header>
 <nav class="tabbar" id="tabbar" hidden>
   <button class="tab" type="button" data-go="market">🌐 시장</button>
@@ -222,8 +225,8 @@
         <span class="chip2">facts/macro.json</span><span class="chip2">facts/dart.json</span><span class="chip2">facts/board.json</span><span class="chip2">data/axes.json</span><span class="chip2">data/sectors.json</span><span class="chip2">data/status.json</span>
       </div>
       <div class="arrow">↓ 화면이 읽어 표시</div>
-      <div class="fbox c3"><b>CYGNUS 화면 (이 페이지)</b><small>위 탭으로 이동</small>
-        <span class="chip2">🌐 시장(레짐·지표)</span><span class="chip2">🏭 산업·종목(공시·토론실)</span><span class="chip2">💰 수급</span><span class="chip2">🔍 종목분석(캡쳐)</span>
+      <div class="fbox c3"><b>CYGNUS 화면 (이 페이지)</b><small>눌러서 이동</small>
+        <button type="button" class="chip2 chip2go" data-go="market">🌐 시장(레짐·지표)</button><button type="button" class="chip2 chip2go" data-go="sector">🏭 산업·종목(공시·토론실)</button><button type="button" class="chip2 chip2go" data-go="supply">💰 수급</button><button type="button" class="chip2 chip2go" data-go="stock">🔍 종목분석(캡쳐)</button>
       </div>
       <div class="arrow">↓ 중요한 것만</div>
       <div class="fbox c4"><b>폰 알림 (ntfy)</b><small>손 안 대도 뜸</small>
@@ -386,7 +389,7 @@
   // 지표 색인(사이트맵 탭 ④) — data/indicators.json(항목) + data/axes.json(축 이름·순서) + data/regime_rules.json(레짐 판정 포함 여부)를
   // 그대로 다시 읽어 축별 트리로 보여줌. 새 지표·새 축이 생겨도 코드 안 고치고 자동으로 따라감(하드코딩 없음).
   var idxZoom=1;
-  function idxApply(z){ idxZoom=Math.max(.4,Math.min(2,z)); var t=document.getElementById('idxTree'); if(t) t.style.zoom=idxZoom; }
+  function idxApply(z){ idxZoom=Math.max(.75,Math.min(2,z)); var t=document.getElementById('idxTree'); if(t) t.style.zoom=idxZoom; }
   function idxFit(){
     idxApply(1);
     var wrap=document.querySelector('.idxwrap'), t=document.getElementById('idxTree');
@@ -522,7 +525,9 @@
   get('facts/board.json').then(function(d){
     var box=document.getElementById('boardBox'), items=(d.items||[]);
     var nHit=(typeof d.hit==='number')?d.hit:items.filter(function(i){return (i.verify&&i.verify.status)==='적중'}).length;
-    document.getElementById('boardTag').textContent = d.updated ? ('갱신 '+window.Status.kstStr(d.updated)+' · '+items.length+'건'+(nHit?' · 적중 '+nHit:'')) : '자동 필터 (첫 실행 대기)';
+    var ac=d.ai_cost||{};
+    var costTxt=(ac.total_usd!=null)?(' · AI비용 누적 $'+ac.total_usd.toFixed(4)):'';
+    document.getElementById('boardTag').textContent = d.updated ? ('갱신 '+window.Status.kstStr(d.updated)+' · '+items.length+'건'+(nHit?' · 적중 '+nHit:'')+costTxt) : '자동 필터 (첫 실행 대기)';
     if(!items.length){ box.innerHTML='아직 없음 — GitHub Actions 「Board Signals」가 돌면 관심 종목 토론실에서 <b>근거 있는 주장</b>만 뽑아 여기 뜹니다. (ANTHROPIC_API_KEY Secret 필요)<br><small>토론실 글은 검증 안 된 주장입니다. 근거 후보를 모아줄 뿐, 사실 확인·판단은 달님이 합니다.</small>'; return; }
     var SC={'상':'#dcfce7','중':'#fef3c7','하':'#eef'};
     var VC={'적중':'#dcfce7','빗나감':'#fee2e2','무관':'#eef','미검증':'#f3f4f6'};
@@ -534,7 +539,8 @@
           '<td><small>'+esc(i.when||'')+'</small></td>'+
           '<td><span class="j" style="background:'+(VC[v]||'#f3f4f6')+'"'+((i.verify&&i.verify.note)?' title="'+esc(i.verify.note)+'"':'')+'>'+esc(v)+'</span></td>'+
           '<td><a href="'+esc(i.url)+'" target="_blank" rel="noopener">보기</a></td></tr>';}).join('')+'</table></div>'+
-      '<p class="muted" style="margin:6px 2px 0;font-size:12px">⚠ 검증 안 된 주장 후보입니다. LLM 이 "근거를 대려는 글인지"만 걸렀을 뿐, 맞다는 뜻이 아닙니다. 확인·판단은 달님.</p>';
+      '<p class="muted" style="margin:6px 2px 0;font-size:12px">⚠ 검증 안 된 주장 후보입니다. LLM 이 "근거를 대려는 글인지"만 걸렀을 뿐, 맞다는 뜻이 아닙니다. 확인·판단은 달님.</p>'+
+      (ac.total_usd!=null ? '<p class="muted" style="margin:2px 2px 0;font-size:11.5px">🤖 AI 비용(이 카드) — '+esc(ac.model||'')+' 기준 누적 $'+ac.total_usd.toFixed(4)+' (토큰 '+(ac.total_input_tokens||0).toLocaleString()+'in/'+(ac.total_output_tokens||0).toLocaleString()+'out'+(ac.since?', '+esc(ac.since.slice(0,10))+'부터':'')+'). API 응답 토큰수×공식 단가 계산값 — 실제 카드 청구서와는 다를 수 있음.</p>' : '');
   }).catch(function(e){ document.getElementById('boardBox').textContent='토론실 못 불러옴: '+e.message; });
 
   // 산업 사슬 — 노션식 토글: 볼 산업만 켜고 나머지는 끈다(브라우저 기억). 값 있을 때만 카드.
@@ -895,6 +901,13 @@
     show(names[nx]);
   });
   var HASH={board:'sector',sectors:'sector',supply:'supply',ind:'market',regimeH:'market',pos:'stock',cap:'stock'};
+  function scrollToId(id){
+    var el=document.getElementById(id); if(!el) return;
+    var tw=document.querySelector('.topwrap');
+    var off=(tw?tw.getBoundingClientRect().height:0)+8;
+    var top=window.pageYOffset+el.getBoundingClientRect().top-off;
+    window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+  }
   // ── 트리 내비게이션: 탭 버튼 자리를 대신하는 펼침 패널. show()/fromHash()는 안 건드리고 그대로 재사용 ──
   var NAVNAME={market:'🌐 시장',sector:'🏭 산업·종목',supply:'💰 수급',stock:'🔍 종목분석',map:'🗺 사이트맵'};
   var navHead=document.getElementById('navHead'), navTree=document.getElementById('navTree'),
@@ -909,11 +922,14 @@
     b.addEventListener('click',function(){
       var go=b.getAttribute('data-go'), tg=b.getAttribute('data-target');
       show(go);
-      if(tg){ var el=document.getElementById(tg); if(el) setTimeout(function(){ el.scrollIntoView({behavior:'smooth',block:'start'}); },60); }
+      if(tg){ setTimeout(function(){ scrollToId(tg); },60); }
       document.querySelectorAll('.navchip').forEach(function(x){ x.classList.toggle('on', x===b); });
     });
   });
-  function fromHash(){ var h=(location.hash||'').replace('#',''); if(HASH[h]){ show(HASH[h]); var el=document.getElementById(h); if(el) setTimeout(function(){ el.scrollIntoView({behavior:'smooth',block:'start'}); },60); return true; } return false; }
+  document.querySelectorAll('.chip2go').forEach(function(b){
+    b.addEventListener('click',function(){ show(b.getAttribute('data-go')); });
+  });
+  function fromHash(){ var h=(location.hash||'').replace('#',''); if(HASH[h]){ show(HASH[h]); setTimeout(function(){ scrollToId(h); },60); return true; } return false; }
   window.addEventListener('hashchange',fromHash);
   if(!fromHash()){
     var start='market'; try{ var s=localStorage.getItem('cygnus_tab'); if(s)start=s; }catch(e){}
