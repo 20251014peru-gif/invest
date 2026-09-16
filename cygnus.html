@@ -38,7 +38,7 @@
   .muted{color:var(--sub);font-size:13px}
   .jcell:empty:before{content:attr(data-ph);color:#bbb}
   /* ── 탭 UI ── */
-  .topwrap{position:sticky;top:0;z-index:6;background:var(--card)}
+  .topwrap{background:var(--card)}
   .tabbar{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;background:var(--card);padding:8px 12px;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
   .tab{min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);font:inherit;font-size:14px;font-weight:700;cursor:pointer;color:var(--sub);white-space:nowrap}
   .tab.on{background:var(--p1);border-color:#93c5fd;color:var(--ink)}
@@ -904,9 +904,7 @@
   var HASH={board:'sector',sectors:'sector',supply:'supply',ind:'market',regimeH:'market',pos:'stock',cap:'stock'};
   function scrollToId(id){
     var el=document.getElementById(id); if(!el) return;
-    var tw=document.querySelector('.topwrap');
-    var off=(tw?tw.getBoundingClientRect().height:0)+8;
-    var top=window.pageYOffset+el.getBoundingClientRect().top-off;
+    var top=window.pageYOffset+el.getBoundingClientRect().top-8;
     window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
   }
   // ── 트리 내비게이션: 탭 버튼 자리를 대신하는 펼침 패널. show()/fromHash()는 안 건드리고 그대로 재사용 ──
