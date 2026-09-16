@@ -1,4 +1,4 @@
-<!-- v 20260907-2300 (보고서 함, 읽는 순서 띠, 기준일·수집시각·주기 표시, 고른 지표 12·수동입력 링크·레짐 규칙 판정 카드, 지표 3묶음, KOSPI·KOSDAQ, ECOS, 한 판, 전일비 수정)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260916-1613 (탭 버튼 → 트리 내비게이션 전환, 사이트맵 칩 클릭 가능, AI 비용 표시, 틀고정 스크롤 겹침 수정, 버전 위치 오른쪽으로)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -268,12 +268,12 @@
   </section>
 
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260907-2300"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260916-1613"></script>
 <script src="js/nav.js" data-page="market"></script>
 <script src="js/regime.js"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260907-2300';
+  document.getElementById('ver').textContent='v 20260916-1613';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
