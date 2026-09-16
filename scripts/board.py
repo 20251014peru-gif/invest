@@ -15,6 +15,7 @@ KEY     = os.environ.get("ANTHROPIC_API_KEY", "").strip()
 RELAY   = os.environ.get("RELAY_URL", "").strip()          # 있으면 CORS/IP차단 우회용 프록시로 경유
 MODEL   = os.environ.get("BOARD_MODEL", "claude-haiku-4-5-20251001").strip()
 TOPIC   = os.environ.get("NTFY_TOPIC", "").strip()
+_USAGE = {"input_tokens": 0, "output_tokens": 0, "calls": 0}  # _ask() 가 호출마다 채움 → run() 끝에서 비용 계산
 MAX_CO      = int(os.environ.get("BOARD_MAX_CO", "40"))     # 이번 실행에서 훑을 회사 수 상한(비용/시간)
 POSTS_PER   = int(os.environ.get("BOARD_POSTS_PER", "20"))  # 회사당 최근 글 상한
 NEW_LIMIT   = int(os.environ.get("BOARD_NEW_LIMIT", "200")) # 한 번에 LLM 에 보낼 새 글 총 상한
@@ -104,6 +105,10 @@ def _ask(user_text, max_tokens=2000):
         "content-type": "application/json", "x-api-key": KEY, "anthropic-version": "2023-06-01"})
     with urllib.request.urlopen(req, timeout=90) as r:
         resp = json.loads(r.read().decode("utf-8"))
+    u = resp.get("usage") or {}
+    _USAGE["input_tokens"] += int(u.get("input_tokens", 0) or 0)
+    _USAGE["output_tokens"] += int(u.get("output_tokens", 0) or 0)
+    _USAGE["calls"] += 1
     return "".join(b.get("text", "") for b in resp.get("content", []) if b.get("type") == "text")
 
 def call_claude(posts):
@@ -183,6 +188,31 @@ def set_status(status, note="", cause="", fix=""):
            "cause": cause, "fix": fix, "link": "cygnus.html#board", "note": note}
     stj["jobs"] = [j for j in stj.get("jobs", []) if j.get("id") != "board"] + [job]
     stj["updated"] = kst_iso(); save(P("data", "status.json"), stj)
+
+
+def _ai_cost(prev_ai_cost, now_iso):
+    """_USAGE(이번 실행 토큰 수) x data/ai_pricing.json 단가로 비용 계산 + 이전 누적과 합침.
+    단가 파일에 이 모델이 없으면(확인 불가) usd 를 None 으로 남기고 토큰 수만 누적한다."""
+    pricing = (load(P("data", "ai_pricing.json"), {}).get("models") or {}).get(MODEL)
+    run_usd = None
+    if pricing:
+        run_usd = (_USAGE["input_tokens"] / 1e6 * pricing.get("inputPerMillion", 0)
+                   + _USAGE["output_tokens"] / 1e6 * pricing.get("outputPerMillion", 0))
+    prev = prev_ai_cost or {}
+    total_usd = (prev.get("total_usd") or 0) + (run_usd or 0)
+    return {
+        "model": MODEL,
+        "last_run_usd": round(run_usd, 6) if run_usd is not None else None,
+        "last_run_calls": _USAGE["calls"],
+        "last_run_input_tokens": _USAGE["input_tokens"],
+        "last_run_output_tokens": _USAGE["output_tokens"],
+        "total_usd": round(total_usd, 6) if pricing else prev.get("total_usd"),
+        "total_calls": (prev.get("total_calls") or 0) + _USAGE["calls"],
+        "total_input_tokens": (prev.get("total_input_tokens") or 0) + _USAGE["input_tokens"],
+        "total_output_tokens": (prev.get("total_output_tokens") or 0) + _USAGE["output_tokens"],
+        "since": prev.get("since") or now_iso,
+        "_정직": "Anthropic API 응답의 usage(토큰 수) x data/ai_pricing.json 단가로 계산한 값. 실제 카드 청구서(수수료·환율 등)와는 다를 수 있음.",
+    }
 
 
 def run():
@@ -265,7 +295,8 @@ def run():
         "_정직": "검증 안 된 '주장 후보'. LLM 은 근거를 대려는 글인지만 걸렀을 뿐, 사실 여부는 판단 못 함. 판단은 달님.",
         "_검증": "verify.status: 미검증→적중(공시로 확인)만 자동. '빗나감'은 공시 없음≠거짓이라 자동판정 안 함(달님).",
         "scanned_companies": len(cos), "new_posts": len(fresh), "new_kept": len(kept_new),
-        "count": len(merged), "hit": n_hit, "items": merged, "seen": seen})
+        "count": len(merged), "hit": n_hit, "ai_cost": _ai_cost(prevj.get("ai_cost"), now_iso),
+        "items": merged, "seen": seen})
     set_status("ok", note=f"훑음 {len(cos)}종목 · 새 글 {len(fresh)} · 근거글 +{len(kept_new)}(누적 {len(merged)}) · 적중 {n_hit}")
     print(f"토론실: {len(cos)}종목 훑음, 새 글 {len(fresh)}건, 근거글 +{len(kept_new)}(누적 {len(merged)}), 적중 {n_hit}")
 
