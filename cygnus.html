@@ -144,14 +144,18 @@
 <main>
   <div class="tabsub" id="tabsub"></div>
   <section class="tabpanel" data-tab="market">
-  <h2 id="regimeH">레짐 요약 <span class="tag">성장×물가 4분면 + 유동성 · 공식 근거 있을 때만</span></h2>
+  <div id="regimeH">
+  <h2>레짐 요약 <span class="tag">성장×물가 4분면 + 유동성 · 공식 근거 있을 때만</span></h2>
   <div class="regime" id="regime"></div>
+  </div>
 
-  <h2 id="ind">지표 — 실시간 + 매크로 <span class="tag" id="macroTag"></span><span class="tag">누르면 20·50일선 봉 위치 + 원본 링크</span></h2>
+  <div id="ind">
+  <h2>지표 — 실시간 + 매크로 <span class="tag" id="macroTag"></span><span class="tag">누르면 20·50일선 봉 위치 + 원본 링크</span></h2>
   <p class="muted" style="margin:-4px 0 8px">각 카드를 <b>누르면</b> 20일·50일 이동평균선 사이 <b>현재 봉 위치</b>와 <b>원본 사이트 링크</b>가 열립니다. 값은 화면 열 때 실시간(야후) · 없으면 매크로(FRED, 며칠 늦음).</p>
   <div id="indDetail"></div>
   <div class="grid" id="indGrid"></div>
   <p class="muted" id="macroEmpty" hidden>아직 수집된 값이 없습니다 — GitHub Actions 「Macro Collector」를 한 번 실행하면 채워집니다.</p>
+  </div>
   <div id="krKey" style="margin-top:16px" hidden>
     <h2 style="margin-top:0">🇰🇷 한국 경제 — 고른 지표 <span class="tag" id="krKeyTag"></span><span class="tag">한국은행 100대 통계지표에서 고름 · 뜻·변화·때 · 판정 없음</span></h2>
     <p class="muted" style="margin:-4px 0 8px">새 값이 나온 지표가 <b>위로</b> 오고 <b>NEW</b> 가 붙습니다(14일). 카드의 "오르면 →" 는 투자에서 어떻게 읽는지 한 줄(Claude 초안). 고르는 목록은 data/indicators.json 의 key_stats.pick.</p>
@@ -168,27 +172,37 @@
 
   </section>
   <section class="tabpanel" data-tab="sector" hidden>
-  <h2 id="sectors">산업 사슬<span class="tag">공정 순서 · 회사 다섯 칸 · 판단은 달님 칸</span><span class="tag">🔗 축 연결 = 시장→산업→종목</span></h2>
+    <div id="sectors">
+<h2>산업 사슬<span class="tag">공정 순서 · 회사 다섯 칸 · 판단은 달님 칸</span><span class="tag">🔗 축 연결 = 시장→산업→종목</span></h2>
   <p class="muted" style="margin:-4px 0 8px">각 산업에 <b>관련 대변화 축</b>이 붙어 있어요. 위 레짐/축이 움직이면 → 그 축에 걸린 산업을 보고 → 그 산업의 회사(종목)로 좁혀갑니다.</p>
-  <div class="card" id="dartPanel" style="margin-bottom:12px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>📢 최근 공시</b><span class="tag" id="dartTag">DART 자동 수집</span></div><div id="dartBox" class="muted" style="margin-top:6px">불러오는 중…</div></div>
-  <div class="card" id="board" style="margin-bottom:12px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>💬 토론실 근거글</b><span class="tag" id="boardTag">종목토론실 자동 필터</span><span class="tag" style="background:#fee2e2;color:#991b1b">미검증 주장 · 판단은 달님</span></div><div id="boardBox" class="muted" style="margin-top:6px">불러오는 중…</div></div>
   <div id="hotBanner" style="margin:0 0 8px;font-size:14px"></div>
   <div id="sectorChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
   <div id="sectorBox"></div>
 
-  </section>
+  
+  </div>
+<div class="card" id="dartPanel" style="margin-bottom:12px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>📢 최근 공시</b><span class="tag" id="dartTag">DART 자동 수집</span></div><div id="dartBox" class="muted" style="margin-top:6px">불러오는 중…</div></div>
+  <div class="card" id="board" style="margin-bottom:12px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>💬 토론실 근거글</b><span class="tag" id="boardTag">종목토론실 자동 필터</span><span class="tag" style="background:#fee2e2;color:#991b1b">미검증 주장 · 판단은 달님</span></div><div id="boardBox" class="muted" style="margin-top:6px">불러오는 중…</div></div>
+  
+</section>
   <section class="tabpanel" data-tab="supply" hidden>
-  <h2 id="supply">영웅문 붙여넣기 — 수급<span class="tag">투자자별 매매동향 화면을 복사해서 붙여넣기</span></h2>
-  <div id="supplyDeposit" style="margin-bottom:12px"></div>
+    <div id="supply">
+<h2>영웅문 붙여넣기 — 수급<span class="tag">투자자별 매매동향 화면을 복사해서 붙여넣기</span></h2>
   <div class="card">
     <textarea id="paste" placeholder="영웅문 [0257] 투자자별 매매동향 등에서 복사한 텍스트를 붙여넣으세요. 외국인·기관·개인 순매수와 코스피·코스닥 등락을 찾아냅니다."></textarea>
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="parseBtn" type="button">읽어내기</button><button class="btn" id="copyBtn" type="button" hidden>JSON 복사</button><span class="muted" style="align-self:center">복사한 JSON 을 raw/supply.json 의 items 에 붙여넣으면 전략 카드 '수급'의 재료가 됩니다</span></div>
     <div id="parsed"></div>
   </div>
 
-  </section>
+  
+  </div>
+<div id="supplyDeposit" style="margin-bottom:12px"></div>
+  
+
+</section>
   <section class="tabpanel" data-tab="stock" hidden>
-  <h2 id="pos">종목 붙여넣기 — 분석<span class="tag">선행EPS · 가격 위치 · 재무 요약을 한 번에</span></h2>
+    <div id="pos">
+<h2>종목 붙여넣기 — 분석<span class="tag">선행EPS · 가격 위치 · 재무 요약을 한 번에</span></h2>
   <div class="card">
     <details style="margin-bottom:10px"><summary style="cursor:pointer;font-weight:600">📖 사용법 (무엇을 붙여도 자동 판별)</summary>
       <div style="margin:8px 0;line-height:1.9">
@@ -207,10 +221,16 @@
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="aparseBtn" type="button">분석</button><button class="btn" id="aclearBtn" type="button">🗑 지우기</button><span class="muted" style="align-self:center;font-size:12px">결과는 이 브라우저에 저장 · [지우기]로 초기화</span></div>
     <div id="aparsed"></div>
   </div>
-  <h2 id="cap">📸 캡쳐 분석 — 사진은 여기 <span class="tag">붙여넣기(Ctrl+V) 또는 파일 선택 · 브라우저의 Claude API 키로 읽음</span><span class="tag">키 없으면 캡쳐를 채팅에 보내기</span></h2>
+  
+  </div>
+  <div id="cap">
+<h2>📸 캡쳐 분석 — 사진은 여기 <span class="tag">붙여넣기(Ctrl+V) 또는 파일 선택 · 브라우저의 Claude API 키로 읽음</span><span class="tag">키 없으면 캡쳐를 채팅에 보내기</span></h2>
   <p class="muted" style="margin:-4px 0 8px">네이버 종목 화면(기업실적분석/투자정보)을 <b>캡쳐해서 채팅에 보내면</b>, 이미지에서 직접 읽은 재무요약·고점진단·적정주가가 여기 종목별로 쌓입니다. 잘못 올렸거나 값이 바뀌면 카드의 <b>[지우기]</b>로 숨기고 다시 보내주세요.</p>
   <div id="capBox" class="muted">아직 분석된 캡쳐가 없어요. 네이버 종목 화면을 캡쳐해서 채팅에 보내주세요.</div>
-  </section>
+  
+  </div>
+
+</section>
 
   <section class="tabpanel" data-tab="map" hidden>
   <h2>🗺 사이트맵 — 시스템 연결도 <span class="tag">데이터가 폰까지 오는 길 · 프로그램 관계</span></h2>
@@ -917,10 +937,22 @@
       if(navChev) navChev.textContent=willOpen?'▴ 접기':'▾ 메뉴';
     });
   }
+  var NAVGROUP={
+    market:['regimeH','ind','krKey','repBox'],
+    sector:['sectors','dartPanel','board'],
+    supply:['supply','supplyDeposit'],
+    stock:['pos','cap'],
+    map:['mapFlow','mapConn','mapAuto','mapIndex']
+  };
+  function focusSection(go,tg){
+    var grp=NAVGROUP[go]; if(!grp||!tg) return;
+    grp.forEach(function(id){ var el=document.getElementById(id); if(el) el.hidden=(id!==tg); });
+  }
   document.querySelectorAll('.navchip').forEach(function(b){
     b.addEventListener('click',function(){
       var go=b.getAttribute('data-go'), tg=b.getAttribute('data-target');
       show(go);
+      focusSection(go,tg);
       if(tg){ setTimeout(function(){ scrollToId(tg); },60); }
       document.querySelectorAll('.navchip').forEach(function(x){ x.classList.toggle('on', x===b); });
     });
@@ -930,7 +962,7 @@
   });
   function fromHash(){
     var h=(window.__cygHash||location.hash||'').replace('#',''); window.__cygHash='';
-    if(HASH[h]){ show(HASH[h]); setTimeout(function(){ scrollToId(h); },60); setTimeout(function(){ scrollToId(h); },700); return true; }
+    if(HASH[h]){ show(HASH[h]); focusSection(HASH[h],h); setTimeout(function(){ scrollToId(h); },60); setTimeout(function(){ scrollToId(h); },700); return true; }
     return false;
   }
   window.addEventListener('hashchange',fromHash);
