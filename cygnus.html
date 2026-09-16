@@ -42,6 +42,17 @@
   .tab{min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);font:inherit;font-size:14px;font-weight:700;cursor:pointer;color:var(--sub);white-space:nowrap}
   .tab.on{background:var(--p1);border-color:#93c5fd;color:var(--ink)}
   .tabsub{color:var(--sub);font-size:12.5px;margin:2px 0 12px}
+  /* ── 트리 내비게이션(탭 버튼 대체) ── */
+  .navpanel{border-bottom:1px solid var(--line);background:var(--card)}
+  .navhead{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;min-height:44px}
+  .navhead b{font-size:15px}
+  .navhead .navloc{color:var(--ink);font-size:14px;font-weight:700;flex:1}
+  .navhead .navchev{font-size:12px;color:var(--sub)}
+  .navtree{display:flex;gap:10px;overflow-x:auto;padding:0 12px 12px;-webkit-overflow-scrolling:touch}
+  .navcol{flex:0 0 190px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px}
+  .navcol h4{font-size:13px;margin:0 0 6px;color:var(--sub)}
+  .navchip{display:block;width:100%;text-align:left;border:1px solid var(--line);border-radius:8px;padding:6px 8px;margin-bottom:5px;background:#fff;font-size:13px;cursor:pointer;font:inherit;min-height:36px}
+  .navchip.on{background:var(--p1);border-color:#93c5fd;font-weight:700}
   [hidden]{display:none!important}
   /* ── 사이트맵 ── */
   .fbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px}
@@ -73,12 +84,44 @@
 <header>
   <h1>🦢 CYGNUS 시장 상태 <small id="ver"></small></h1>
 </header>
-<nav class="tabbar" id="tabbar">
+<nav class="tabbar" id="tabbar" hidden>
   <button class="tab" type="button" data-go="market">🌐 시장</button>
   <button class="tab" type="button" data-go="sector">🏭 산업·종목</button>
   <button class="tab" type="button" data-go="supply">💰 수급</button>
   <button class="tab" type="button" data-go="stock">🔍 종목분석</button>
   <button class="tab" type="button" data-go="map">🗺 사이트맵</button>
+</nav>
+<nav class="navpanel" id="navPanel">
+  <div class="navhead" id="navHead">
+    <b>☰</b><span class="navloc" id="navLoc">🌐 시장</span><span class="navchev" id="navChev">▾ 메뉴</span>
+  </div>
+  <div class="navtree" id="navTree" hidden>
+    <div class="navcol"><h4>🌐 시장</h4>
+      <button type="button" class="navchip" data-go="market" data-target="regimeH">레짐 요약</button>
+      <button type="button" class="navchip" data-go="market" data-target="ind">지표(실시간+매크로)</button>
+      <button type="button" class="navchip" data-go="market" data-target="krKey">한국 경제·고른 지표</button>
+      <button type="button" class="navchip" data-go="market" data-target="repBox">보고서 함</button>
+    </div>
+    <div class="navcol"><h4>🏭 산업·종목</h4>
+      <button type="button" class="navchip" data-go="sector" data-target="sectors">산업 사슬</button>
+      <button type="button" class="navchip" data-go="sector" data-target="dartPanel">최근 공시</button>
+      <button type="button" class="navchip" data-go="sector" data-target="board">토론실 근거글</button>
+    </div>
+    <div class="navcol"><h4>💰 수급</h4>
+      <button type="button" class="navchip" data-go="supply" data-target="supply">영웅문 붙여넣기</button>
+      <button type="button" class="navchip" data-go="supply" data-target="supplyDeposit">투자자예탁금 참고</button>
+    </div>
+    <div class="navcol"><h4>🔍 종목분석</h4>
+      <button type="button" class="navchip" data-go="stock" data-target="pos">종목 붙여넣기 분석</button>
+      <button type="button" class="navchip" data-go="stock" data-target="cap">캡쳐 분석</button>
+    </div>
+    <div class="navcol"><h4>🗺 사이트맵</h4>
+      <button type="button" class="navchip" data-go="map" data-target="mapFlow">① 데이터 흐름</button>
+      <button type="button" class="navchip" data-go="map" data-target="mapConn">② 프로그램 연결</button>
+      <button type="button" class="navchip" data-go="map" data-target="mapAuto">③ 자동 수집 현황</button>
+      <button type="button" class="navchip" data-go="map" data-target="mapIndex">④ 지표 색인</button>
+    </div>
+  </div>
 </nav>
 </div>
 <main>
@@ -155,7 +198,7 @@
   <section class="tabpanel" data-tab="map" hidden>
   <h2>🗺 사이트맵 — 시스템 연결도 <span class="tag">데이터가 폰까지 오는 길 · 프로그램 관계</span></h2>
 
-  <div class="card" style="margin-bottom:12px">
+  <div class="card" id="mapFlow" style="margin-bottom:12px">
     <b>① 데이터 흐름 <span class="tag" style="background:var(--p2)">나 없이 자동</span></b>
     <div class="flow" style="margin-top:8px">
       <div class="fbox c1"><b>수집기 (GitHub Actions)</b><small>정해진 시각에 저절로 실행 — 컴퓨터·나 필요 없음</small>
@@ -176,7 +219,7 @@
     </div>
   </div>
 
-  <div class="card" style="margin-bottom:12px">
+  <div class="card" id="mapConn" style="margin-bottom:12px">
     <b>② 프로그램 연결</b>
     <div class="mtree" style="margin-top:6px">
       <b class="hub">나의 시스템 (허브)</b><br>
@@ -187,12 +230,12 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="mapAuto">
     <b>③ 지금 켜져 있는 자동 수집</b> <span class="tag">status.json 실시간</span>
     <div id="mapJobs" class="muted" style="margin-top:6px">불러오는 중…</div>
   </div>
 
-  <div class="card" style="margin-top:12px">
+  <div class="card" id="mapIndex" style="margin-top:12px">
     <b>④ 지표 색인</b> <span class="tag">CYGNUS 안의 모든 지표 · 축·위치·뜻</span>
     <p class="muted" style="margin:6px 0 0">축(가지)별로 묶은 지표 칩. 누르면 뜻·단위·위치가 펼쳐짐. 파란 점(●)=레짐 판정에 실제로 들어가는 지표.</p>
     <div class="idxbar">
@@ -823,6 +866,7 @@
     if(!ok){ name='market'; panels.forEach(function(p){p.hidden=(p.getAttribute('data-tab')!=='market')}); }
     tabs.forEach(function(t){ t.classList.toggle('on', t.getAttribute('data-go')===name); });
     var s=document.getElementById('tabsub'); if(s) s.textContent=SUB[name]||'';
+    if(navLoc) navLoc.textContent=NAVNAME[name]||name;
     try{localStorage.setItem('cygnus_tab',name);}catch(e){}
     if(name==='map'){ loadJobs(); if(window.idxFit) window.idxFit(); }
     window.scrollTo(0,0);
@@ -838,6 +882,26 @@
     show(names[nx]);
   });
   var HASH={board:'sector',sectors:'sector',supply:'supply',ind:'market',regimeH:'market',pos:'stock',cap:'stock'};
+  // ── 트리 내비게이션: 탭 버튼 자리를 대신하는 펼침 패널. show()/fromHash()는 안 건드리고 그대로 재사용 ──
+  var NAVNAME={market:'🌐 시장',sector:'🏭 산업·종목',supply:'💰 수급',stock:'🔍 종목분석',map:'🗺 사이트맵'};
+  var navHead=document.getElementById('navHead'), navTree=document.getElementById('navTree'),
+      navLoc=document.getElementById('navLoc'), navChev=document.getElementById('navChev');
+  if(navHead&&navTree){
+    navHead.addEventListener('click',function(){
+      var willOpen=navTree.hidden; navTree.hidden=!willOpen;
+      if(navChev) navChev.textContent=willOpen?'▴ 접기':'▾ 메뉴';
+    });
+  }
+  document.querySelectorAll('.navchip').forEach(function(b){
+    b.addEventListener('click',function(){
+      var go=b.getAttribute('data-go'), tg=b.getAttribute('data-target');
+      show(go);
+      if(tg){ var el=document.getElementById(tg); if(el) setTimeout(function(){ el.scrollIntoView({behavior:'smooth',block:'start'}); },60); }
+      if(navTree) navTree.hidden=true;
+      if(navChev) navChev.textContent='▾ 메뉴';
+      document.querySelectorAll('.navchip').forEach(function(x){ x.classList.toggle('on', x===b); });
+    });
+  });
   function fromHash(){ var h=(location.hash||'').replace('#',''); if(HASH[h]){ show(HASH[h]); var el=document.getElementById(h); if(el) setTimeout(function(){ el.scrollIntoView({behavior:'smooth',block:'start'}); },60); return true; } return false; }
   window.addEventListener('hashchange',fromHash);
   if(!fromHash()){
