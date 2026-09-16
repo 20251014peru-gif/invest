@@ -106,6 +106,7 @@
   </section>
   <section class="tabpanel" data-tab="supply" hidden>
   <h2 id="supply">영웅문 붙여넣기 — 수급<span class="tag">투자자별 매매동향 화면을 복사해서 붙여넣기</span></h2>
+  <div id="supplyDeposit" style="margin-bottom:12px"></div>
   <div class="card">
     <textarea id="paste" placeholder="영웅문 [0257] 투자자별 매매동향 등에서 복사한 텍스트를 붙여넣으세요. 외국인·기관·개인 순매수와 코스피·코스닥 등락을 찾아냅니다."></textarea>
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="parseBtn" type="button">읽어내기</button><button class="btn" id="copyBtn" type="button" hidden>JSON 복사</button><span class="muted" style="align-self:center">복사한 JSON 을 raw/supply.json 의 items 에 붙여넣으면 전략 카드 '수급'의 재료가 됩니다</span></div>
@@ -337,6 +338,8 @@
         '<div style="font-size:13px;margin-top:6px">'+esc(p.meaning)+'</div><div style="font-size:12.5px;color:#374151;margin-top:3px"><b>오르면 →</b> '+esc(p.up)+'</div><div class="muted" style="font-size:12px;margin-top:3px">언제: '+esc(p.when)+'</div></div>'}; });
     cards.sort(function(a,b){ return (b.nw?1:0)-(a.nw?1:0); });
     pk.innerHTML=cards.map(function(c){return c.html}).join('');
+    var dep=byName['투자자예탁금'], depBox=document.getElementById('supplyDeposit');
+    if(dep&&depBox){ depBox.innerHTML='<div class="card" style="border-color:#93c5fd;background:#f8fbff"><div class="n" style="display:flex;justify-content:space-between;gap:6px;align-items:center"><span><span class="chip2">참고 · 자동 수집</span> <b>투자자예탁금</b></span></div><div class="v" style="font-size:22px;margin:4px 0 2px">'+fmtv(dep.value)+' <small class="muted" style="font-size:12px">'+esc(dep.unit||'')+' · 기준 '+esc(asof(dep.as_of))+' · '+cycOf(dep.as_of)+'</small></div><div style="font-size:13px">'+chg(dep)+'</div><div class="muted" style="font-size:12px;margin-top:6px">증시 대기 자금(조원) — 늘면 개인 매수 여력 ↑. 유동성 축 판정에는 🌐 시장 탭에서 이미 반영됨 · 이 카드는 참고용</div></div>'; }
     var groups={}; k.items.forEach(function(r){ (groups[r['class']||'기타']=groups[r['class']||'기타']||[]).push(r); });
     body.innerHTML='<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(320px,1fr))">'+Object.keys(groups).map(function(g){
       return '<div class="card"><b>'+esc(g)+'</b><table>'+groups[g].map(function(r){ return '<tr><td>'+esc(r.name)+(isNew(r)?' <span class="tag" style="font-size:10px">NEW</span>':'')+'</td><td style="text-align:right;white-space:nowrap"><b>'+fmtv(r.value)+'</b> <small class="muted">'+esc(r.unit||'')+'</small></td><td class="muted" style="white-space:nowrap;font-size:12px">'+esc(asof(r.as_of))+'</td></tr>'; }).join('')+'</table></div>';
