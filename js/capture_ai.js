@@ -1,8 +1,8 @@
-// v 20260907-2330  capture_ai.js — cygnus 「📸 캡쳐 분석」 애드온
+// v 20260916-2220  capture_ai.js — cygnus 「📸 캡쳐 분석」 애드온 (기본 모델 claude-sonnet-4-6 → claude-sonnet-5 로 변경 — 가격표에 없는 모델이라 AI 비용 계산 안 되던 문제 해결)
 // 캡쳐(스크린샷)를 붙여넣으면 사용자의 Claude API 키로 이미지를 Claude 에게 보내 재무를 자동 추출·분석한다.
 // 키/모델은 이 브라우저 localStorage 에만 저장(중계서버 주소처럼). api.anthropic.com 으로만 전송.
 (function () {
-  var LS_KEY = 'cai_key', LS_MODEL = 'cai_model', LS_RES = 'cai_results';
+  var LS_KEY = 'cai_key', LS_MODEL = 'cai_model', LS_RES = 'cai_results', LS_COST = 'cai_cost';
   function g(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } }
   function s(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function esc(x) { return String(x == null ? '' : x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -10,7 +10,33 @@
   function results() { try { return JSON.parse(localStorage.getItem(LS_RES) || '[]'); } catch (e) { return []; } }
   function saveResults(a) { s(LS_RES, JSON.stringify(a.slice(0, 20))); }
 
-  var PROMPT = '이 네이버 증권 종목 화면 캡쳐에서 재무 정보를 읽어 JSON 하나만 출력해. 설명이나 코드블록 없이 순수 JSON 만. 키: {"name":종목명, "code":종목코드, "price":현재가, "per":PER배수, "pbr":PBR배수, "eps_this":올해EPS, "eps_next":내년추정EPS, "w52hi":52주최고가, "w52lo":52주최저가, "rev_yoy":매출성장률퍼센트, "op_margin":영업이익률퍼센트, "op_margin_prev":전기영업이익률퍼센트, "net_margin":순이익률퍼센트, "roe":ROE퍼센트, "roe_prev":전기ROE퍼센트, "debt_ratio":부채비율퍼센트, "div_yield":배당수익률퍼센트}. 화면에 없는 값은 null. 숫자는 콤마 없이 숫자로만. 확실하지 않으면 null.';
+  // -- AI 비용 추적: 캡쳐분석은 달님 개인 API 키로 직접 호출하니 여기서 토큰x단가(data/ai_pricing.json)로 계산해 누적.
+  //    cygnus 헤더의 'AI 사용량'은 이 값 + Board Signals(facts/board.json) 값을 합산해서 보여줌.
+  function caiCost() { try { return JSON.parse(localStorage.getItem(LS_COST) || '{}'); } catch (e) { return {}; } }
+  function saveCaiCost(c) { s(LS_COST, JSON.stringify(c)); }
+  var _pricing = null;
+  function loadPricing() {
+    if (_pricing) return Promise.resolve(_pricing);
+    return fetch('data/ai_pricing.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); })
+      .then(function (j) { _pricing = (j && j.models) || {}; return _pricing; })
+      .catch(function () { _pricing = {}; return _pricing; });
+  }
+  function addUsage(model, usage, pricing) {
+    var c = caiCost();
+    var inTok = usage.input_tokens || 0, outTok = usage.output_tokens || 0;
+    var p = pricing[model];
+    c.model = model;
+    c.calls = (c.calls || 0) + 1;
+    c.total_input_tokens = (c.total_input_tokens || 0) + inTok;
+    c.total_output_tokens = (c.total_output_tokens || 0) + outTok;
+    if (p) { c.total_usd = (c.total_usd || 0) + (inTok / 1e6 * (p.inputPerMillion || 0) + outTok / 1e6 * (p.outputPerMillion || 0)); }
+    else { c.unpriced_calls = (c.unpriced_calls || 0) + 1; }
+    if (!c.since) c.since = new Date().toISOString();
+    saveCaiCost(c);
+    try { document.dispatchEvent(new Event('cai-updated')); } catch (e) {}
+  }
+
+  var PROMPT = '이 네이버 증권 종목 화면 캡쳐에서 재무 정보를 읽어 JSON 하나만 출력해. 설명이나 코드블록 없이 순수 JSON 만. 페이지 위쪽의 간단한 "펀더멘털"/"투자정보" 요약 박스(PER·PBR·EPS·BPS가 연도별 2개 열로 깔끔히 정리된 곳)를 최우선으로 쓰고, 아래쪽의 크고 복잡한 컨센서스/Financial Summary 표는 분기·연간이 섞여 있어 착각하기 쉬우니 보조 참고만 해. eps_this/eps_next는 반드시 연간(연도 단위) EPS만 쓰고 분기·반기 등 기간 EPS는 쓰지 마. 숫자가 비정상적으로 크거나(예: 전년 대비 몇 배씩 뜀) 앞뒤 흐름과 안 맞으면 잘못 읽은 걸로 보고 null로 남겨. 키: {"name":종목명, "code":종목코드, "price":현재가, "per":PER배수, "pbr":PBR배수, "eps_this":올해EPS, "eps_next":내년추정EPS, "w52hi":52주최고가, "w52lo":52주최저가, "rev_yoy":매출성장률퍼센트, "op_margin":영업이익률퍼센트, "op_margin_prev":전기영업이익률퍼센트, "net_margin":순이익률퍼센트, "roe":ROE퍼센트, "roe_prev":전기ROE퍼센트, "debt_ratio":부채비율퍼센트, "div_yield":배당수익률퍼센트}. 화면에 없는 값은 null. 숫자는 콤마 없이 숫자로만. 확실하지 않으면 null.';
 
   function analyze(f) {
     var out = {};
@@ -63,10 +89,17 @@
     return h;
   }
 
-  function renderAll() { var wrap = document.getElementById('caiResults'); if (!wrap) return; var rs = results(); wrap.innerHTML = rs.length ? rs.map(card).join('') : ''; }
+  function renderAll() {
+    var wrap = document.getElementById('caiResults'); if (!wrap) return;
+    var rs = results();
+    var clearBtn = rs.length ? '<div style="text-align:right;margin-bottom:8px"><button class="btn" id="caiClearAll" type="button" style="font-size:12px;padding:4px 10px">🗑 전체 지우기(' + rs.length + '개)</button></div>' : '';
+    wrap.innerHTML = clearBtn + (rs.length ? rs.map(card).join('') : '');
+    var cb = document.getElementById('caiClearAll');
+    if (cb) cb.onclick = function () { if (confirm('캡쳐 분석 결과 ' + rs.length + '개를 전체 삭제할까요? 되돌릴 수 없습니다.')) { saveResults([]); renderAll(); try { document.dispatchEvent(new Event('cai-updated')); } catch (e) {} } };
+  }
 
   function callClaude(b64, mt, statusEl) {
-    var key = g(LS_KEY, ''), model = g(LS_MODEL, 'claude-sonnet-4-6');
+    var key = g(LS_KEY, ''), model = g(LS_MODEL, 'claude-sonnet-5');
     if (!key) { statusEl.innerHTML = '<span style="color:#c00">사진은 받았지만 <b>API 키가 없어</b> 읽지 못했습니다 — 위 ⚙ Claude API 설정에서 키를 저장하고 다시 붙여넣으세요. 키 없이 쓰려면 캡쳐를 채팅(Claude)에 보내는 방식.</span>'; var d = document.querySelector('#caiPanel details'); if (d) d.open = true; return; }
     statusEl.textContent = '🔍 Claude 가 캡쳐 읽는 중…';
     fetch('https://api.anthropic.com/v1/messages', {
@@ -74,6 +107,7 @@
       headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true', 'content-type': 'application/json' },
       body: JSON.stringify({ model: model, max_tokens: 1024, messages: [{ role: 'user', content: [{ type: 'image', source: { type: 'base64', media_type: mt, data: b64 } }, { type: 'text', text: PROMPT }] }] })
     }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d.usage) { loadPricing().then(function (pricing) { addUsage(model, d.usage, pricing); }); }
       if (d.error) { statusEl.innerHTML = '<span style="color:#c00">오류: ' + esc(d.error.message || JSON.stringify(d.error)) + '</span>'; return; }
       var txt = (d.content && d.content[0] && d.content[0].text) || '';
       var m = txt.match(/\{[\s\S]*\}/); if (!m) { statusEl.innerHTML = '<span style="color:#c00">읽기 실패 — 응답 앞부분: ' + esc(txt.slice(0, 120)) + '</span>'; return; }
@@ -111,7 +145,7 @@
       + '<input id="caiKey" type="password" placeholder="Claude API 키 (sk-ant-...)" style="flex:1;min-width:220px;padding:6px;border:1px solid #ccc;border-radius:6px">'
       + '<input id="caiModel" placeholder="모델" style="width:180px;padding:6px;border:1px solid #ccc;border-radius:6px">'
       + '<button class="btn pri" id="caiSave" type="button">저장</button></div>'
-      + '<p class="muted" style="font-size:12px;margin:6px 0 0">키는 <b>이 브라우저에만</b> 저장돼요(중계서버 주소처럼). 다른 곳으로 안 나가고 api.anthropic.com 으로만 갑니다. 모델 기본값 claude-sonnet-4-6(달님 표준).</p></details>'
+      + '<p class="muted" style="font-size:12px;margin:6px 0 0">키는 <b>이 브라우저에만</b> 저장돼요(중계서버 주소처럼). 다른 곳으로 안 나가고 api.anthropic.com 으로만 갑니다. 모델 기본값 claude-sonnet-5(달님 표준).</p></details>'
       + '<div id="caiDrop" tabindex="0" style="border:2px dashed #c4b5fd;border-radius:8px;padding:16px;text-align:center;cursor:pointer;background:#fff">'
       + '📸 여기를 클릭한 뒤 <b>붙여넣기(Ctrl+V)</b> 하거나, <label style="color:#7c3aed;text-decoration:underline;cursor:pointer">파일 선택<input id="caiFile" type="file" accept="image/*" hidden></label><br>'
       + '<span class="muted" style="font-size:13px">네이버 종목 화면(투자정보·기업실적분석)을 캡쳐해 붙여넣으면 Claude 가 읽어 재무요약을 만듭니다</span></div>'
@@ -119,9 +153,9 @@
       + '</div><div id="caiResults"></div>';
     host.parentNode.insertBefore(panel, host);
     document.getElementById('caiKey').value = g(LS_KEY, '');
-    document.getElementById('caiModel').value = g(LS_MODEL, 'claude-sonnet-4-6');
+    document.getElementById('caiModel').value = g(LS_MODEL, 'claude-sonnet-5');
     var statusEl = document.getElementById('caiStatus');
-    document.getElementById('caiSave').onclick = function () { s(LS_KEY, document.getElementById('caiKey').value.trim()); s(LS_MODEL, document.getElementById('caiModel').value.trim() || 'claude-sonnet-4-6'); statusEl.textContent = '✅ 저장됨'; };
+    document.getElementById('caiSave').onclick = function () { s(LS_KEY, document.getElementById('caiKey').value.trim()); s(LS_MODEL, document.getElementById('caiModel').value.trim() || 'claude-sonnet-5'); statusEl.textContent = '✅ 저장됨'; };
     document.getElementById('caiFile').onchange = function (e) { handleFile(e.target.files[0], statusEl); };
     var drop = document.getElementById('caiDrop');
     drop.onclick = function () { drop.focus(); };
