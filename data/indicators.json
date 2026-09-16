@@ -74,6 +74,20 @@
       "cycle": "D"
     },
     {
+      "id": "kr_deposit",
+      "name": "투자자예탁금",
+      "source": "kr_key",
+      "symbol": "",
+      "unit": "조원",
+      "axis": "fx_liquidity",
+      "official": true,
+      "rule": "방향만 본다(기준값 미정 — 달님 판별 전). 늘면 매수 대기자금 증가(완화 신호)",
+      "thresholds": {},
+      "note": "ECOS KeyStatisticList(100대지표, facts/kr_key.json)에서 이름으로 찾아 채움 — 별도 StatisticSearch 호출 안 함(이미 수집 중인 값 재사용). 월간, 1.5개월 지연",
+      "group": "kr",
+      "cycle": "M"
+    },
+    {
       "id": "bok_rate",
       "name": "한은 기준금리",
       "source": "ecos",
