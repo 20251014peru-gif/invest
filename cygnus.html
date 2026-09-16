@@ -1,4 +1,4 @@
-<!-- v 20260916-2015 (종목 옆 패널/트레이딩뷰 차트 되돌림 — 종목 클릭 시 원래대로 네이버 실제 페이지가 새 탭으로 열림. 종목 붙여넣기 칩 목록은 섹터별 2열 그리드로 정리)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260916-2035 (종목 붙여넣기 칩 그룹에 연한 배경 박스 추가로 구별 + 종목 버튼 클릭 시 탭 대신 크기 지정된 새 창으로 열리게 수정)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -39,8 +39,8 @@
   .jcell:empty:before{content:attr(data-ph);color:#bbb}
   /* ── 탭 UI ── */
   .topwrap{background:var(--card)}
-  .epslinks{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;margin-bottom:8px}
-  .epsgrp{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .epslinks{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-bottom:8px}
+  .epsgrp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
   @media (max-width:760px){ .epslinks{grid-template-columns:1fr} }
   .tabbar{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;background:var(--card);padding:8px 12px;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
   .tab{min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);font:inherit;font-size:14px;font-weight:700;cursor:pointer;color:var(--sub);white-space:nowrap}
@@ -291,12 +291,12 @@
   </section>
 
 </main>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260916-2015"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260916-2035"></script>
 <script src="js/nav.js" data-page="market"></script>
 <script src="js/regime.js"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260916-2015';
+  document.getElementById('ver').textContent='v 20260916-2035';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -689,6 +689,14 @@
   // 선행EPS 복원 + 종목별 네이버 링크
   renderEPS();
   (function(){ var lk=document.getElementById('epsLinks'); if(!lk) return;
+    lk.addEventListener('click',function(e){
+      var a=e.target.closest('a[href]'); if(!a) return;
+      if(e.button!==0||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey) return;
+      e.preventDefault();
+      var w=1100,h=850;
+      var left=Math.max(0,(screen.width-w)/2), top=Math.max(0,(screen.height-h)/2);
+      window.open(a.href,'_blank','noopener,width='+w+',height='+h+',left='+left+',top='+top);
+    });
     get('data/sectors.json').then(function(d){
       (d.sectors||[]).forEach(function(sec){
         var comps=(sec.companies||[]).filter(function(c){return c.code});
