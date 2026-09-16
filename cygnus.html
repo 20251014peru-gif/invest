@@ -48,11 +48,19 @@
   .navhead b{font-size:15px}
   .navhead .navloc{color:var(--ink);font-size:14px;font-weight:700;flex:1}
   .navhead .navchev{font-size:12px;color:var(--sub)}
-  .navtree{display:flex;gap:10px;overflow-x:auto;padding:0 12px 12px;-webkit-overflow-scrolling:touch}
-  .navcol{flex:0 0 190px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px}
-  .navcol h4{font-size:13px;margin:0 0 6px;color:var(--sub)}
+  .navtree{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:0 12px 12px}
+  .navcol{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px;min-width:0}
+  .navcol h4{font-size:13px;margin:0 0 2px;color:var(--sub)}
+  .navdesc{font-size:11.5px;color:var(--sub);margin:0 0 6px;line-height:1.4}
   .navchip{display:block;width:100%;text-align:left;border:1px solid var(--line);border-radius:8px;padding:6px 8px;margin-bottom:5px;background:#fff;font-size:13px;cursor:pointer;font:inherit;min-height:36px}
   .navchip.on{background:var(--p1);border-color:#93c5fd;font-weight:700}
+  @media (max-width:760px){
+    .navtree{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .navcol{flex:0 0 190px}
+  }
+  /* nav.js 가 모든 허브 화면(허브·시장·축전략·수동입력)에 공통으로 붙이는 "투자일지→…" 띠 —
+     이 화면(CYGNUS)만 안 보이게 함. nav.js 자체는 다른 화면들이 같이 쓰므로 손 안 댐 */
+  #nav-strip{display:none!important}
   [hidden]{display:none!important}
   /* ── 사이트맵 ── */
   .fbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px}
@@ -93,29 +101,34 @@
 </nav>
 <nav class="navpanel" id="navPanel">
   <div class="navhead" id="navHead">
-    <b>☰</b><span class="navloc" id="navLoc">🌐 시장</span><span class="navchev" id="navChev">▾ 메뉴</span>
+    <b>☰</b><span class="navloc" id="navLoc">🌐 시장</span><span class="navchev" id="navChev">▴ 접기</span>
   </div>
-  <div class="navtree" id="navTree" hidden>
+  <div class="navtree" id="navTree">
     <div class="navcol"><h4>🌐 시장</h4>
+      <p class="navdesc">지금 시장이 어디 있는지 — 레짐 판정·지표·보고서</p>
       <button type="button" class="navchip" data-go="market" data-target="regimeH">레짐 요약</button>
       <button type="button" class="navchip" data-go="market" data-target="ind">지표(실시간+매크로)</button>
       <button type="button" class="navchip" data-go="market" data-target="krKey">한국 경제·고른 지표</button>
       <button type="button" class="navchip" data-go="market" data-target="repBox">보고서 함</button>
     </div>
     <div class="navcol"><h4>🏭 산업·종목</h4>
+      <p class="navdesc">산업 사슬·공시·토론실 근거글로 종목 후보 좁히기</p>
       <button type="button" class="navchip" data-go="sector" data-target="sectors">산업 사슬</button>
       <button type="button" class="navchip" data-go="sector" data-target="dartPanel">최근 공시</button>
       <button type="button" class="navchip" data-go="sector" data-target="board">토론실 근거글</button>
     </div>
     <div class="navcol"><h4>💰 수급</h4>
+      <p class="navdesc">영웅문 수급 붙여넣기·투자자예탁금 참고</p>
       <button type="button" class="navchip" data-go="supply" data-target="supply">영웅문 붙여넣기</button>
       <button type="button" class="navchip" data-go="supply" data-target="supplyDeposit">투자자예탁금 참고</button>
     </div>
     <div class="navcol"><h4>🔍 종목분석</h4>
+      <p class="navdesc">종목 붙여넣기·캡쳐로 재무·적정주가 분석</p>
       <button type="button" class="navchip" data-go="stock" data-target="pos">종목 붙여넣기 분석</button>
       <button type="button" class="navchip" data-go="stock" data-target="cap">캡쳐 분석</button>
     </div>
     <div class="navcol"><h4>🗺 사이트맵</h4>
+      <p class="navdesc">전체 시스템 연결도·지표 색인 — 뭐가 어디 있는지</p>
       <button type="button" class="navchip" data-go="map" data-target="mapFlow">① 데이터 흐름</button>
       <button type="button" class="navchip" data-go="map" data-target="mapConn">② 프로그램 연결</button>
       <button type="button" class="navchip" data-go="map" data-target="mapAuto">③ 자동 수집 현황</button>
@@ -897,8 +910,6 @@
       var go=b.getAttribute('data-go'), tg=b.getAttribute('data-target');
       show(go);
       if(tg){ var el=document.getElementById(tg); if(el) setTimeout(function(){ el.scrollIntoView({behavior:'smooth',block:'start'}); },60); }
-      if(navTree) navTree.hidden=true;
-      if(navChev) navChev.textContent='▾ 메뉴';
       document.querySelectorAll('.navchip').forEach(function(x){ x.classList.toggle('on', x===b); });
     });
   });
