@@ -4,6 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>if(location.hash){try{window.__cygHash=location.hash;history.replaceState(null,'',location.pathname+location.search);}catch(e){}}</script>
 <title>CYGNUS 시장 상태</title>
 <style>
   :root{--bg:#f6f7fb;--card:#fff;--line:#e3e6ee;--ink:#1f2430;--sub:#6b7280;--p1:#dbeafe;--p2:#dcfce7;--p3:#fef3c7;--p5:#fee2e2;--p6:#ede9fe}
@@ -929,7 +930,11 @@
   document.querySelectorAll('.chip2go').forEach(function(b){
     b.addEventListener('click',function(){ show(b.getAttribute('data-go')); });
   });
-  function fromHash(){ var h=(location.hash||'').replace('#',''); if(HASH[h]){ show(HASH[h]); setTimeout(function(){ scrollToId(h); },60); return true; } return false; }
+  function fromHash(){
+    var h=(window.__cygHash||location.hash||'').replace('#',''); window.__cygHash='';
+    if(HASH[h]){ show(HASH[h]); setTimeout(function(){ scrollToId(h); },60); setTimeout(function(){ scrollToId(h); },700); return true; }
+    return false;
+  }
   window.addEventListener('hashchange',fromHash);
   if(!fromHash()){
     var start='market'; try{ var s=localStorage.getItem('cygnus_tab'); if(s)start=s; }catch(e){}
