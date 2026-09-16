@@ -1,4 +1,4 @@
-<!-- v 20260916-1900 (종목 패널: 네이버 대신 트레이딩뷰 차트 위젯으로 교체 — 클릭 막힘/ChartIQ 라이선스 에러 없이 실제 차트 조작 가능)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
+<!-- v 20260916-1945 (트레이딩뷰 위젯 공식 문서 구조로 정렬 + 패널 높이 0으로 눌리지 않게 최소 높이 고정 — 빈 화면 원인 후보 두 가지 방어)  cygnus.html — CYGNUS 정적판: 매크로 지표(facts/macro.json) · 레짐 요약(data/axes.json) · 영웅문 붙여넣기(수급). PC 없이 GitHub Pages 에서 돈다 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -298,14 +298,14 @@
 <div class="stockframe" id="stockFrame" hidden>
   <div class="stockframe-resizer" id="stockFrameResizer" title="드래그해서 폭 조절"></div>
   <div class="stockframe-bar"><b id="stockFrameTitle" style="font-size:14px"></b><button type="button" class="btn" id="stockFrameClose">✕ 닫기</button></div>
-  <div id="stockFrameChart" style="flex:1;min-height:0"></div>
+  <div id="stockFrameChart" style="flex:1;min-height:420px"></div>
 </div>
-<script src="js/status.js" data-app="cygnus" data-version="v 20260916-1900"></script>
+<script src="js/status.js" data-app="cygnus" data-version="v 20260916-1945"></script>
 <script src="js/nav.js" data-page="market"></script>
 <script src="js/regime.js"></script>
 <script>
 (function(){
-  document.getElementById('ver').textContent='v 20260916-1900';
+  document.getElementById('ver').textContent='v 20260916-1945';
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var get=function(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' HTTP '+r.status);return r.json()})};
   var fmt=function(v,u){ if(v==null)return '—'; var n=Math.abs(v)>=1000?v.toLocaleString('ko-KR',{maximumFractionDigits:0}):v.toLocaleString('ko-KR',{maximumFractionDigits:2}); return n; };
@@ -705,11 +705,13 @@
     if(stockFrameTitle) stockFrameTitle.textContent=name;
     if(stockFrameChart){
       stockFrameChart.innerHTML='';
-      var wrap=document.createElement('div');
-      wrap.style.cssText='height:100%;width:100%';
-      var inner=document.createElement('div');
-      inner.style.cssText='height:100%;width:100%';
-      wrap.appendChild(inner);
+      var outer=document.createElement('div');
+      outer.className='tradingview-widget-container';
+      outer.style.cssText='height:100%;width:100%;min-height:420px';
+      var widget=document.createElement('div');
+      widget.className='tradingview-widget-container__widget';
+      widget.style.cssText='height:100%;width:100%';
+      outer.appendChild(widget);
       var script=document.createElement('script');
       script.type='text/javascript';
       script.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
@@ -719,8 +721,8 @@
         theme:'light', style:'1', locale:'kr', hide_top_toolbar:false,
         save_image:false, calendar:false, support_host:'https://www.tradingview.com'
       });
-      wrap.appendChild(script);
-      stockFrameChart.appendChild(wrap);
+      outer.appendChild(script);
+      stockFrameChart.appendChild(outer);
     }
     stockFrame.hidden=false;
     document.body.classList.add('stockframe-open');
