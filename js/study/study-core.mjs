@@ -39,7 +39,11 @@ export const RELATION_TYPES = {
   contradicts: {fwd: '반박/상충', rev: '이 기록과 상충'},
   same_event: {fwd: '같은 사건', rev: '같은 사건'},
   same_topic: {fwd: '같은 주제', rev: '같은 주제'},
-  related: {fwd: '관련', rev: '관련'}
+  related: {fwd: '관련', rev: '관련'},
+  // v7.28: records.html 의 "이어서 생각하기"/"모아 정리하기" 가 만드는 관계 — mergeRelations 가
+  // RELATION_TYPES 에 없는 타입은 'related' 로 낮추므로(모르는 타입 방어) 여기 등록해야 그대로 저장된다.
+  derived_from: {fwd: '생각의 출발점', rev: '이 기록에서 생각이 이어짐'},
+  synthesizes: {fwd: '정리에 사용한 자료', rev: '이 기록이 정리에 포함됨'}
 };
 
 export const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));

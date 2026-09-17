@@ -19,6 +19,8 @@ export function init(bridge) {
     relationListHTML: id => relationListHTML(bridge.records(), id, bridge.KINDS),
     openEditor,
     newNote: async () => (await editorMod()).openStudyEditor({bridge, store, offerDrafts: true}),
+    /* v7.28: "모아 정리하기" — 새 공부노트에 출처 관계(synthesizes)를 미리 채워서 연다. 초안 목록 제안은 건너뛴다(그 자리에서 바로 시작). */
+    newNoteWithRelations: async (relAdd, formPrefill) => (await editorMod()).openStudyEditor({bridge, store, offerDrafts: false, prefill: {relAdd: relAdd || [], form: formPrefill || {}}}),
     isEditorOpen: async () => (await editorMod()).isOpen(),
     openImport: async () => (await importMod()).openImport({bridge, store, openEditor}),
     openRestore: async () => (await importMod()).openRestore({bridge, store, openEditor}),
