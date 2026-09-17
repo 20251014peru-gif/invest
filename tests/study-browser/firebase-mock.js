@@ -15,9 +15,29 @@
   window.addEventListener('storage', function(e){ if(e.key===KEY) notify(); });
   function docSnap(name,id){ var d=col(load(),name)[id]; return {id:id, exists:!!d, data:function(){ return clone(d); }, metadata:{fromCache:false,hasPendingWrites:false}, ref:new DocRef(name,id)}; }
   function DocRef(name,id){ this._c=name; this.id=id||autoId(); }
+  /* v7.28: firebase.firestore.FieldValue.arrayUnion/arrayRemove/delete — records.html 의 "나중에 볼 것"
+     빠른 추가가 씀(읽기 없이 배열에 더하기). 실제 Firestore SDK와 같은 이름의 정적 함수를 흉내만 낸다. */
+  function isFV(v){ return v && typeof v==='object' && typeof v.__fv==='string'; }
+  function resolveFV(existing, data){
+    var out = clone(data);
+    Object.keys(out).forEach(function(k){
+      var v = out[k];
+      if(!isFV(v)) return;
+      if(v.__fv==='delete'){ delete out[k]; return; }
+      var cur = (existing && existing[k]) || [];
+      if(v.__fv==='arrayUnion'){
+        var merged = cur.slice();
+        v.items.forEach(function(it){ if(!merged.some(function(x){ return JSON.stringify(x)===JSON.stringify(it); })) merged.push(it); });
+        out[k] = merged;
+      } else if(v.__fv==='arrayRemove'){
+        out[k] = cur.filter(function(x){ return !v.items.some(function(it){ return JSON.stringify(it)===JSON.stringify(x); }); });
+      }
+    });
+    return out;
+  }
   DocRef.prototype.get=function(){ var f=fail(); if(f) return f; window.__mockStats.reads++; return Promise.resolve(docSnap(this._c,this.id)); };
-  DocRef.prototype.set=function(data,opt){ var f=fail(); if(f) return f; var db=load(), c=col(db,this._c); c[this.id]=(opt&&opt.merge)?Object.assign({},c[this.id]||{},clone(data)):clone(data); window.__mockStats.writes++; window.__mockStats.lastBytes=JSON.stringify(c[this.id]).length; save(db); notify(); return Promise.resolve(); };
-  DocRef.prototype.update=function(data){ var f=fail(); if(f) return f; var db=load(), c=col(db,this._c); if(!c[this.id]) return Promise.reject(new Error('No document to update')); Object.assign(c[this.id], clone(data)); window.__mockStats.writes++; window.__mockStats.lastBytes=JSON.stringify(c[this.id]).length; save(db); notify(); return Promise.resolve(); };
+  DocRef.prototype.set=function(data,opt){ var f=fail(); if(f) return f; var db=load(), c=col(db,this._c); c[this.id]=(opt&&opt.merge)?Object.assign({},c[this.id]||{},resolveFV(c[this.id],data)):resolveFV(null,data); window.__mockStats.writes++; window.__mockStats.lastBytes=JSON.stringify(c[this.id]).length; save(db); notify(); return Promise.resolve(); };
+  DocRef.prototype.update=function(data){ var f=fail(); if(f) return f; var db=load(), c=col(db,this._c); if(!c[this.id]) return Promise.reject(new Error('No document to update')); Object.assign(c[this.id], resolveFV(c[this.id],data)); window.__mockStats.writes++; window.__mockStats.lastBytes=JSON.stringify(c[this.id]).length; save(db); notify(); return Promise.resolve(); };
   DocRef.prototype.delete=function(){ var f=fail(); if(f) return f; var db=load(); delete col(db,this._c)[this.id]; window.__mockStats.writes++; save(db); notify(); return Promise.resolve(); };
   DocRef.prototype.onSnapshot=function(next){ var self=this; var fire=function(){ next(docSnap(self._c,self.id)); }; listeners.push(fire); setTimeout(fire,0); return function(){ listeners=listeners.filter(function(x){ return x!==fire; }); }; };
   function Query(name,filters,order){ this._c=name; this._f=filters||[]; this._o=order||null; }
@@ -38,6 +58,12 @@
   var auth={ currentUser:user, signInAnonymously:function(){ return Promise.resolve({user:user}); }, onAuthStateChanged:function(cb){ setTimeout(function(){ cb(user); },0); return function(){}; } };
   var app={ firestore:function(){ return firestore; }, auth:function(){ return auth; }, storage:function(){ return storage; } };
   window.firebase={ apps:[], initializeApp:function(){ this.apps.push(app); return app; }, app:function(){ return app; }, firestore:function(){ return firestore; }, storage:function(){ return storage; }, auth:function(){ return auth; } };
+  /* firebase.firestore 는 호출도 되고(인스턴스 얻기) firebase.firestore.FieldValue 처럼 정적 속성도 있는 실제 SDK 모양을 흉내 */
+  window.firebase.firestore.FieldValue = {
+    arrayUnion: function(){ return {__fv:'arrayUnion', items:Array.prototype.slice.call(arguments)}; },
+    arrayRemove: function(){ return {__fv:'arrayRemove', items:Array.prototype.slice.call(arguments)}; },
+    delete: function(){ return {__fv:'delete'}; }
+  };
   window.__mockReset=function(data){ save(data||{}); notify(); };
   window.__mockDump=function(){ return load(); };
   console.log('[시험] Firebase 대역 사용 중 — 운영 데이터 접속 없음');

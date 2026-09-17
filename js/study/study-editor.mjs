@@ -608,6 +608,9 @@ function loadSession(base, draft, prefill) {
     if (prefill.assets) for (const a of prefill.assets) if (!S.assets.some(x => x.id === a.id)) S.assets.push(a);
     if (prefill.origin) S.origin = prefill.origin;
     if (prefill.reason) S.reason = prefill.reason;
+    // v7.28: "모아 정리하기"(records.html) 가 새 공부노트를 만들 때 출처 관계를 미리 채운다.
+    // 실제 저장은 사용자가 직접 저장 버튼을 눌러야 일어난다(여기선 S.relAdd 에만 쌓아둔다 — 기존 저장 경로가 그대로 처리).
+    if (prefill.relAdd && prefill.relAdd.length) S.relAdd = prefill.relAdd.slice();
   }
   if (draft) {
     fillForm(root, draft.form || {});
