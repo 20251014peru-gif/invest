@@ -16,31 +16,33 @@ export function hasDraft(id) { return !!lsGet(DRAFT_PREFIX + id); }
 
 let S = null; // 현재 편집 세션(한 번에 하나)
 
+const M = ' data-tier="more"';
+// 모바일에서는 자주 쓰는 도구(굵게·글자색·강조·목록·이미지·실행 취소)만 한 줄로 보이고 나머지는 [⋯ 더보기]로 펼친다
 const TOOLBAR = `
-<select data-cmd="block" aria-label="문단 형식" title="문단 형식"><option value="p">본문</option><option value="1">제목 1</option><option value="2">제목 2</option><option value="3">제목 3</option></select>
-<span class="st-sep"></span>
 <button type="button" data-cmd="bold" aria-label="굵게 (Ctrl+B)" title="굵게 (Ctrl+B)"><b>B</b></button>
-<button type="button" data-cmd="italic" aria-label="기울임 (Ctrl+I)" title="기울임 (Ctrl+I)"><i>I</i></button>
-<button type="button" data-cmd="underline" aria-label="밑줄 (Ctrl+U)" title="밑줄 (Ctrl+U)"><u>U</u></button>
-<button type="button" data-cmd="strike" aria-label="취소선" title="취소선"><s>S</s></button>
 <button type="button" data-pop="color" aria-label="글자색" title="글자색" aria-haspopup="true"><span class="st-a">A</span>▾</button>
 <button type="button" data-pop="highlight" aria-label="배경 강조색" title="배경 강조색" aria-haspopup="true"><span class="st-hlicon">가</span>▾</button>
-<span class="st-sep"></span>
 <button type="button" data-cmd="bulletList" aria-label="글머리표 목록" title="글머리표 목록">•≡</button>
-<button type="button" data-cmd="orderedList" aria-label="번호 목록" title="번호 목록">1.</button>
-<button type="button" data-cmd="taskList" aria-label="체크 목록" title="체크 목록">☑</button>
-<button type="button" data-cmd="sink" aria-label="들여쓰기(하위 목록)" title="들여쓰기 (Tab)">⇥</button>
-<button type="button" data-cmd="lift" aria-label="내어쓰기" title="내어쓰기 (Shift+Tab)">⇤</button>
-<span class="st-sep"></span>
-<button type="button" data-cmd="blockquote" aria-label="인용" title="인용">❝</button>
-<button type="button" data-cmd="hr" aria-label="구분선" title="구분선">―</button>
-<button type="button" data-pop="link" aria-label="링크" title="링크 (Ctrl+K)" aria-haspopup="true">🔗</button>
-<button type="button" data-cmd="table" aria-label="표 추가" title="표 추가">▦</button>
 <button type="button" data-cmd="image" aria-label="이미지 추가" title="이미지 추가">🖼</button>
-<span class="st-sep"></span>
 <button type="button" data-cmd="undo" aria-label="실행 취소 (Ctrl+Z)" title="실행 취소 (Ctrl+Z)">↶</button>
-<button type="button" data-cmd="redo" aria-label="다시 실행 (Ctrl+Shift+Z)" title="다시 실행">↷</button>
-<button type="button" data-cmd="unfoldAll" aria-label="접은 섹션 모두 펼치기" title="접은 섹션 모두 펼치기">⇕</button>`;
+<button type="button" data-cmd="more" class="st-morebtn" aria-label="서식 도구 더보기" aria-expanded="false" title="더보기">⋯</button>
+<span class="st-sep"${M}></span>
+<select data-cmd="block" aria-label="문단 형식" title="문단 형식"${M}><option value="p">본문</option><option value="1">제목 1</option><option value="2">제목 2</option><option value="3">제목 3</option></select>
+<button type="button" data-cmd="italic" aria-label="기울임 (Ctrl+I)" title="기울임 (Ctrl+I)"${M}><i>I</i></button>
+<button type="button" data-cmd="underline" aria-label="밑줄 (Ctrl+U)" title="밑줄 (Ctrl+U)"${M}><u>U</u></button>
+<button type="button" data-cmd="strike" aria-label="취소선" title="취소선"${M}><s>S</s></button>
+<button type="button" data-pop="link" aria-label="링크" title="링크 (Ctrl+K)" aria-haspopup="true"${M}>🔗</button>
+<span class="st-sep"${M}></span>
+<button type="button" data-cmd="orderedList" aria-label="번호 목록" title="번호 목록"${M}>1.</button>
+<button type="button" data-cmd="taskList" aria-label="체크 목록" title="체크 목록"${M}>☑</button>
+<button type="button" data-cmd="sink" aria-label="들여쓰기(하위 목록)" title="들여쓰기 (Tab)"${M}>⇥</button>
+<button type="button" data-cmd="lift" aria-label="내어쓰기" title="내어쓰기 (Shift+Tab)"${M}>⇤</button>
+<button type="button" data-cmd="blockquote" aria-label="인용" title="인용"${M}>❝</button>
+<button type="button" data-cmd="hr" aria-label="구분선" title="구분선"${M}>―</button>
+<button type="button" data-cmd="table" aria-label="표 추가" title="표 추가"${M}>▦</button>
+<span class="st-sep"${M}></span>
+<button type="button" data-cmd="redo" aria-label="다시 실행 (Ctrl+Shift+Z)" title="다시 실행"${M}>↷</button>
+<button type="button" data-cmd="unfoldAll" aria-label="접은 섹션 모두 펼치기" title="접은 섹션 모두 펼치기"${M}>⇕</button>`;
 
 function shell(bridge) {
   let root = document.getElementById('studyModal');
@@ -110,6 +112,7 @@ function shell(bridge) {
       <div class="st-f"><span>이전 판</span><div id="stHistory"></div></div>
     </details>
   </div>
+  <div class="st-dock" id="stDock"></div>
   <div class="st-dialog" id="stDialog" hidden></div>
 </div>`;
   document.body.append(root);
@@ -310,7 +313,21 @@ function showNotices() {
 }
 
 /* ── 서식 도구 ── */
+// 휴대폰에서 도구 버튼을 누르는 순간 선택이 풀리는 경우, 방금 전 선택 범위로 되돌려 적용한다
+const MARK_CMDS = new Set(['bold', 'italic', 'underline', 'strike']);
+function restoreRange() {
+  const e = S.editor, r = S.lastRange;
+  if (e.state.selection.empty && r && r.doc === e.state.doc) e.commands.setTextSelection({from: r.from, to: r.to});
+}
+function rememberRange() {
+  if (!S?.editor) return;
+  const sel = S.editor.state.selection;
+  if (!sel.empty && !sel.node) S.lastRange = {from: sel.from, to: sel.to, doc: S.editor.state.doc};
+  else if (Date.now() - (S.toolDownAt || 0) > 900) S.lastRange = null; // 사용자가 직접 선택을 푼 경우만 잊는다
+}
 function exec(cmd) {
+  if (cmd === 'more') { const tb = S.root.querySelector('#stToolbar'); const on = !tb.classList.contains('show-more'); tb.classList.toggle('show-more', on); tb.querySelector('[data-cmd=more]').setAttribute('aria-expanded', String(on)); return; }
+  if (MARK_CMDS.has(cmd)) restoreRange();
   const e = S.editor, ch = e.chain().focus();
   switch (cmd) {
     case 'bold': ch.toggleBold().run(); break;
@@ -340,6 +357,7 @@ function popover(kind, anchor) {
     const list = kind === 'color' ? C.TEXT_COLORS : C.HIGHLIGHT_COLORS;
     pop.innerHTML = '<div class="st-swatches">' + list.map(c => `<button type="button" class="st-sw" data-v="${c.value}" style="${kind === 'color' ? 'color:' + c.value : 'background:' + c.value}" aria-label="${c.label}${kind === 'color' ? ' 글자색' : ''}" title="${c.label}">${kind === 'color' ? 'A' : '가'}</button>`).join('') + '</div><button type="button" class="st-mini" data-v="">색 없음</button>';
     pop.querySelectorAll('[data-v]').forEach(b => b.onclick = () => {
+      restoreRange();
       const v = b.dataset.v, ch = e.chain().focus();
       if (kind === 'color') (v ? ch.setColor(v) : ch.unsetColor()).run();
       else (v ? ch.setHighlight({color: v}) : ch.unsetHighlight()).run();
@@ -350,6 +368,7 @@ function popover(kind, anchor) {
     pop.innerHTML = `<label class="st-f"><span>링크 주소</span><input type="url" id="stLinkUrl" placeholder="https://" value="${C.esc(cur)}"></label><div class="st-row"><button type="button" class="st-mini" id="stLinkOk">적용</button><button type="button" class="st-mini" id="stLinkRm">링크 제거</button></div><small class="st-muted" id="stLinkMsg"></small>`;
     const inp = pop.querySelector('#stLinkUrl');
     const apply = () => {
+      restoreRange();
       const h = C.safeHref(inp.value.trim());
       if (!h) { pop.querySelector('#stLinkMsg').textContent = 'http(s) 또는 mailto 주소만 쓸 수 있어요'; return; }
       if (e.state.selection.empty && !e.isActive('link')) e.chain().focus().insertContent({type: 'text', text: h, marks: [{type: 'link', attrs: {href: h}}]}).run();
@@ -362,6 +381,7 @@ function popover(kind, anchor) {
     setTimeout(() => inp.focus(), 0);
   }
   pop.hidden = false;
+  if (S.root.classList.contains('is-docked')) { pop.style.left = ''; pop.style.top = ''; return; } // 모바일: 도구줄 바로 위에 붙여 표시
   const r = anchor.getBoundingClientRect(), pr = S.root.querySelector('.st-shell').getBoundingClientRect();
   pop.style.left = Math.max(8, Math.min(r.left - pr.left, pr.width - 260)) + 'px';
   pop.style.top = (r.bottom - pr.top + 4) + 'px';
@@ -637,7 +657,12 @@ function bindShell(root) {
   if (root.dataset.bound) return;
   root.dataset.bound = '1';
   // 서식 버튼을 눌러도 본문 커서·선택이 그대로 남도록(버튼이 포커스를 가져가지 않게)
-  for (const sel of ['#stToolbar', '#stCtx', '#stPop']) root.querySelector(sel).addEventListener('mousedown', ev => { if (ev.target.closest('button') && !ev.target.closest('#stLinkOk,#stLinkRm')) ev.preventDefault(); });
+  // 터치에서도 선택이 풀리지 않게 pointerdown 단계에서 막는다(click 은 그대로 발생)
+  for (const sel of ['#stToolbar', '#stCtx', '#stPop']) for (const type of ['pointerdown', 'mousedown']) root.querySelector(sel).addEventListener(type, ev => {
+    if (!ev.target.closest('button')) return;
+    if (S) S.toolDownAt = Date.now();
+    if (!ev.target.closest('#stLinkOk,#stLinkRm')) ev.preventDefault();
+  });
   root.querySelector('#stToolbar').addEventListener('click', ev => {
     const b = ev.target.closest('button'); if (!b || !S) return;
     if (b.dataset.pop) popover(b.dataset.pop, b); else if (b.dataset.cmd) exec(b.dataset.cmd);
@@ -661,7 +686,7 @@ function bindShell(root) {
   });
   root.querySelector('#stSave').onclick = () => save();
   root.querySelector('#stClose').onclick = () => closeEditor();
-  root.querySelector('#stFullBtn').onclick = ev => { const on = !root.classList.contains('is-full'); root.classList.toggle('is-full', on); ev.currentTarget.setAttribute('aria-pressed', String(on)); };
+  root.querySelector('#stFullBtn').onclick = ev => { const on = !root.classList.contains('is-full'); root.classList.toggle('is-full', on); if (S) S.userFull = on; ev.currentTarget.setAttribute('aria-pressed', String(on)); layout(); };
   root.querySelector('#stTocBtn').onclick = ev => { const nav = root.querySelector('#stEdToc'); nav.hidden = !nav.hidden; ev.currentTarget.setAttribute('aria-pressed', String(!nav.hidden)); renderEdToc(); };
   root.querySelector('#stAddRef').onclick = () => pickRecord('ref');
   root.querySelector('#stAddHyp').onclick = () => pickRecord('hyp');
@@ -682,12 +707,35 @@ function bindShell(root) {
   window.addEventListener('pagehide', () => { if (S) writeDraft(); });
   window.addEventListener('beforeunload', ev => { if (S && isDirty()) { writeDraft(); ev.preventDefault(); ev.returnValue = ''; } });
   const vv = window.visualViewport;
-  // 모바일 키보드·회전: 보이는 영역 높이에 맞춘다(키보드가 떠도 머리줄의 저장·닫기가 화면 안에 남게)
-  const fit = () => root.style.setProperty('--st-vh', (vv ? vv.height : window.innerHeight) + 'px');
-  vv?.addEventListener('resize', fit);
-  window.addEventListener('resize', fit);
-  window.addEventListener('orientationchange', () => setTimeout(fit, 200));
-  fit();
+  vv?.addEventListener('resize', layout);
+  vv?.addEventListener('scroll', layout);
+  window.addEventListener('resize', layout);
+  window.addEventListener('orientationchange', () => setTimeout(layout, 250));
+  layout();
+}
+
+// 휴대폰: 편집창을 지금 보이는 영역(키보드 제외)에 맞추고, 서식 도구줄은 아래(키보드 바로 위)에 붙인다.
+// 회전·키보드 열림/닫힘마다 다시 맞춘다.
+const MOBILE_Q = '(max-width: 760px), (max-height: 520px)';
+function layout() {
+  const root = document.getElementById('studyModal');
+  if (!root) return;
+  const vv = window.visualViewport;
+  const mobile = window.matchMedia(MOBILE_Q).matches;
+  root.style.setProperty('--st-vh', (vv ? vv.height : window.innerHeight) + 'px');
+  if (!root.classList.contains('on')) return;
+  if (!(S && S.userFull !== undefined)) root.classList.toggle('is-full', mobile);
+  if (mobile && vv) { root.style.top = vv.offsetTop + 'px'; root.style.height = vv.height + 'px'; root.style.bottom = 'auto'; }
+  else { root.style.top = ''; root.style.height = ''; root.style.bottom = ''; }
+  if (mobile !== root.classList.contains('is-docked')) {
+    root.classList.toggle('is-docked', mobile);
+    const dock = root.querySelector('#stDock'), wrap = root.querySelector('.st-edwrap');
+    for (const id of ['#stPop', '#stCtx', '#stToolbar']) {
+      const el = root.querySelector(id);
+      if (mobile) dock.append(el); else wrap.before(el);
+    }
+    const pop = root.querySelector('#stPop'); pop.style.left = ''; pop.style.top = '';
+  }
 }
 
 export async function openStudyEditor({bridge, store, id = null, prefill = null, newDraftId = null, offerDrafts = false}) {
@@ -707,7 +755,8 @@ export async function openStudyEditor({bridge, store, id = null, prefill = null,
   const noteId = id || newDraftId || store.newId();
   S = {bridge, store, root, id: noteId, stocks: [], assets: [], relAdd: [], relRemove: [], uploads: new Map(), pendingPaste: [], notices: [], saving: false};
   root.classList.add('on');
-  root.classList.toggle('is-full', window.matchMedia('(max-width: 760px), (max-height: 520px)').matches);
+  root.classList.toggle('is-full', window.matchMedia(MOBILE_Q).matches);
+  layout();
   document.documentElement.classList.add('st-open');
   S.editor = new Editor({
     element: root.querySelector('#stEditor'),
@@ -751,8 +800,8 @@ export async function openStudyEditor({bridge, store, id = null, prefill = null,
       }
     },
     onUpdate: () => { changed(); renderEdToc(); },
-    onSelectionUpdate: () => { updateToolbar(); updateContext(); },
-    onTransaction: () => updateToolbar()
+    onSelectionUpdate: () => { rememberRange(); updateToolbar(); updateContext(); },
+    onTransaction: () => { rememberRange(); updateToolbar(); }
   });
   const draft = lsGet(DRAFT_PREFIX + noteId);
   let useDraft = null;
@@ -778,6 +827,7 @@ export async function closeEditor() {
   S.editor.destroy();
   S = null;
   root.classList.remove('on', 'is-full');
+  root.style.top = ''; root.style.height = ''; root.style.bottom = '';
   root.querySelector('#stDialog').hidden = true;
   root.querySelector('#stPop').hidden = true;
   root.querySelectorAll('.st-notice').forEach(n => n.remove());
