@@ -79,6 +79,10 @@
    공부노트/아이디어, 원문 자동 복제 없음)를 단일 문서 쓰기로 원자적 처리.
    ④ "🕒 나중에" 통합 보기 — 기존 checks[](이제 모든 날짜+기한 없음도)와 공부노트 재검토를 한 목록으로,
    완료 처리는 기존 records_todos 완료마커 그대로 재사용(새 컬렉션·중복 메커니즘 없음). 달력 🔔에 reviewAt도 반영.
+   v7.28.1: ① 미업로드 사진 임시 저장(js/records-drafts.mjs, IndexedDB) — 새로고침해도 사진이 조용히 사라지지
+   않게, 상태 바뀔 때마다 저장하고 다시 열면 "이어서 쓰기/버리기"로 물어본다. 저장 불가 상황은 명확히 안내.
+   ② 일반 기록 전체 내보내기/복원(js/records-backup.mjs, 공부노트와 별개) — 사진 실제 파일(base64)·순서·
+   설명·대표사진·relations[]·checks[] 그대로 포함, 복원은 항상 새 기록(기존 기록 절대 덮어쓰지 않음).
    ══════════════════════════════════════════════════════════ */
 :root{
   --navy-900:#514936; --navy-800:#5c5340; --navy-700:#6b6049; --navy-600:#8a7d5e;
@@ -551,7 +555,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
-  <span class="ver">v7.28.0-0917-1600 · 서희타워</span>
+  <span class="ver">v7.28.1-0917-1830 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -4186,7 +4190,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.28.0-0917-1600 준비됨 — records / records_todos / records_meta 컬렉션 사용');
+console.log('[기록보관실] v7.28.1-0917-1830 준비됨 — records / records_todos / records_meta 컬렉션 사용');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
