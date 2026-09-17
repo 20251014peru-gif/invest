@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-09-17",
-  "generated_at": "2026-09-17T14:55:27+09:00",
+  "generated_at": "2026-09-17T20:17:28+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · VIX 17.71 pt(+4.4%) · 유가 WTI 101.77 $(-1.7%)"
+      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · VIX 15.93 pt(-6.1%) · 유가 WTI 100.48 $(-2.9%)"
     },
     {
       "k": "오늘 발표",
@@ -18,7 +18,7 @@
     },
     {
       "k": "산업·종목",
-      "t": "DART 20건(수주·공급계약 6) · 토론실 근거글 +0(적중 7) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
+      "t": "DART 22건(수주·공급계약 6) · 토론실 근거글 +0(적중 7) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
     },
     {
       "k": "미입력",
@@ -37,7 +37,7 @@
       "key": "credit_spread",
       "label": "신용 스프레드",
       "value": "0.66%p",
-      "sub": "주의 · 2026-09-16",
+      "sub": "주의 · 2026-09-17",
       "tone": "yellow"
     },
     {
@@ -87,29 +87,43 @@
     {
       "id": "vix",
       "name": "VIX",
-      "value": 17.71,
+      "value": 15.93,
       "unit": "pt",
       "prev": 16.96,
-      "delta": 0.75,
-      "delta_text": "+4.4%",
-      "judge": "중립",
+      "delta": -1.03,
+      "delta_text": "-6.1%",
+      "judge": "안정",
       "as_of": "2026-09-17",
       "cycle": "D",
-      "score": 4.422169811320755,
+      "score": 6.073113207547176,
       "group": "us"
     },
     {
       "id": "wti",
       "name": "유가 WTI",
-      "value": 101.77,
+      "value": 100.48,
       "unit": "$",
       "prev": 103.52,
-      "delta": -1.75,
-      "delta_text": "-1.7%",
+      "delta": -3.04,
+      "delta_text": "-2.9%",
       "judge": "",
       "as_of": "2026-09-17",
       "cycle": "D",
-      "score": 1.690494590417311,
+      "score": 2.9366306027820634,
+      "group": "world"
+    },
+    {
+      "id": "copper",
+      "name": "구리",
+      "value": 6.595,
+      "unit": "$/lb",
+      "prev": 6.4995,
+      "delta": 0.095,
+      "delta_text": "+1.5%",
+      "judge": "",
+      "as_of": "2026-09-17",
+      "cycle": "D",
+      "score": 1.4693437956765822,
       "group": "world"
     },
     {
@@ -141,32 +155,18 @@
       "group": "kr"
     },
     {
-      "id": "hsi",
-      "name": "항셍지수",
-      "value": 24472.78,
+      "id": "sox",
+      "name": "SOX 반도체",
+      "value": 11246.107,
       "unit": "pt",
-      "prev": 24713.78,
-      "delta": -241.0,
-      "delta_text": "-1.0%",
+      "prev": 11349.43,
+      "delta": -103.323,
+      "delta_text": "-0.9%",
       "judge": "중립",
       "as_of": "2026-09-17",
       "cycle": "D",
-      "score": 0.9751644629028826,
-      "group": "world"
-    },
-    {
-      "id": "gold",
-      "name": "금",
-      "value": 4334.6,
-      "unit": "$/oz",
-      "prev": 4377.2,
-      "delta": -42.6,
-      "delta_text": "-1.0%",
-      "judge": "",
-      "as_of": "2026-09-17",
-      "cycle": "D",
-      "score": 0.9732248926254102,
-      "group": "world"
+      "score": 0.9103805213125269,
+      "group": "us"
     }
   ],
   "releases": {
@@ -265,29 +265,43 @@
         {
           "id": "vix",
           "name": "VIX",
-          "value": 17.71,
+          "value": 15.93,
           "unit": "pt",
           "prev": 16.96,
-          "delta": 0.75,
-          "delta_text": "+4.4%",
-          "judge": "중립",
+          "delta": -1.03,
+          "delta_text": "-6.1%",
+          "judge": "안정",
           "as_of": "2026-09-17",
           "cycle": "D",
-          "score": 4.422169811320755,
+          "score": 6.073113207547176,
           "group": "us"
         },
         {
           "id": "wti",
           "name": "유가 WTI",
-          "value": 101.77,
+          "value": 100.48,
           "unit": "$",
           "prev": 103.52,
-          "delta": -1.75,
-          "delta_text": "-1.7%",
+          "delta": -3.04,
+          "delta_text": "-2.9%",
           "judge": "",
           "as_of": "2026-09-17",
           "cycle": "D",
-          "score": 1.690494590417311,
+          "score": 2.9366306027820634,
+          "group": "world"
+        },
+        {
+          "id": "copper",
+          "name": "구리",
+          "value": 6.595,
+          "unit": "$/lb",
+          "prev": 6.4995,
+          "delta": 0.095,
+          "delta_text": "+1.5%",
+          "judge": "",
+          "as_of": "2026-09-17",
+          "cycle": "D",
+          "score": 1.4693437956765822,
           "group": "world"
         },
         {
@@ -319,38 +333,24 @@
           "group": "kr"
         },
         {
-          "id": "hsi",
-          "name": "항셍지수",
-          "value": 24472.78,
+          "id": "sox",
+          "name": "SOX 반도체",
+          "value": 11246.107,
           "unit": "pt",
-          "prev": 24713.78,
-          "delta": -241.0,
-          "delta_text": "-1.0%",
+          "prev": 11349.43,
+          "delta": -103.323,
+          "delta_text": "-0.9%",
           "judge": "중립",
           "as_of": "2026-09-17",
           "cycle": "D",
-          "score": 0.9751644629028826,
-          "group": "world"
-        },
-        {
-          "id": "gold",
-          "name": "금",
-          "value": 4334.6,
-          "unit": "$/oz",
-          "prev": 4377.2,
-          "delta": -42.6,
-          "delta_text": "-1.0%",
-          "judge": "",
-          "as_of": "2026-09-17",
-          "cycle": "D",
-          "score": 0.9732248926254102,
-          "group": "world"
+          "score": 0.9103805213125269,
+          "group": "us"
         }
       ]
     },
     {
       "id": "2026-09-17/auto/flow",
-      "time": "10:39",
+      "time": "17:51",
       "who": "auto",
       "kind": "flow",
       "title": "공시·토론실 — 근거글 +0, 수주·공급계약 6",
@@ -358,7 +358,7 @@
     },
     {
       "id": "2026-09-17/auto/macro",
-      "time": "14:53",
+      "time": "20:15",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 35/36 수집",
