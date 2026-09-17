@@ -87,6 +87,12 @@
    서식 변경은 더 이상 안내하지 않고, 사진·본문 누락이나 링크 제거처럼 실제로 잃는 게 있을 때만 본문 밖
    고정된 한 자리에 접힌 요약으로 보여준다(붙여넣을 때마다 쌓이거나 확인 버튼을 누를 필요 없음, 펼치면 상세).
    누락 감지·위험 링크 제거 자체는 그대로.
+   v7.28.3: 공부노트 수정창(js/study/) — ① 저장 성공(서버 반영 확인) 시 자동으로 닫힘, 상세보기에서 열었으면
+   그 상세보기를 최신 내용으로 바로 갱신, 목록에서 열었으면 목록이 드러남. 저장 중 중복 클릭 방지(버튼
+   비활성화), 실패·충돌·이미지 업로드 미완료·로컬 초안 저장만으로는 안 닫힘. ② 상세보기 아래 "수정"을 눌러도
+   수정창이 항상 제목·저장 버튼이 보이는 맨 위에서 시작(이전 수정창의 스크롤을 이어받지 않음, 편집기
+   자동 포커스가 다시 스크롤을 내리지 않도록 처리) — 수정창 자신의 스크롤 영역만 초기화, 배경 페이지·작성
+   중 스크롤은 그대로.
    ══════════════════════════════════════════════════════════ */
 :root{
   --navy-900:#514936; --navy-800:#5c5340; --navy-700:#6b6049; --navy-600:#8a7d5e;
@@ -559,7 +565,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
-  <span class="ver">v7.28.2-0917-1900 · 서희타워</span>
+  <span class="ver">v7.28.3-0917-2000 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -1319,7 +1325,12 @@ var _studyApi = null;
 function studyApi(){
   if(!_studyApi){
     _studyApi = import('./js/study/study-app.mjs?v=7.28.0').then(function(m){
-      return m.init({db:db, storage:storage, records:function(){ return records; }, toast:toast, logBug:logBug, KINDS:KINDS, VERIFY_STATES:VERIFY_STATES, VERIFY_ORDER:VERIFY_ORDER, allStockNames:allStockNames, addStockToMaster:addStockToMaster});
+      /* v7.28.3: 저장 성공 시 편집창이 자동으로 닫힌다(study-editor.mjs) — 상세보기(pageModal)를 그 노트로
+         열어둔 채 위에서 수정했다면, 닫히면서 드러나는 상세보기가 새로 저장된 내용을 보여주도록 여기서
+         즉시 다시 그린다(Firestore 실시간 갱신을 기다리지 않음). 목록에서 열었을 땐 pageModal이 애초에
+         'on'이 아니므로 이 분기를 안 타고, 편집창이 닫히며 그 아래 목록이 그대로 드러난다. */
+      return m.init({db:db, storage:storage, records:function(){ return records; }, toast:toast, logBug:logBug, KINDS:KINDS, VERIFY_STATES:VERIFY_STATES, VERIFY_ORDER:VERIFY_ORDER, allStockNames:allStockNames, addStockToMaster:addStockToMaster,
+        onSaved:function(id){ if(PAGE_OPEN===id && document.getElementById('pageModal').classList.contains('on')) openPage(id, {fromRoute:true}); }});
     }).catch(function(e){ _studyApi=null; logBug('공부노트 모듈 로드 실패: '+e.message); toast('공부노트 기능을 불러오지 못했어요 — 연결 확인 후 새로고침해 주세요'); throw e; });
   }
   return _studyApi;
@@ -4194,7 +4205,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.28.2-0917-1900 준비됨 — records / records_todos / records_meta 컬렉션 사용');
+console.log('[기록보관실] v7.28.3-0917-2000 준비됨 — records / records_todos / records_meta 컬렉션 사용');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
