@@ -1,7 +1,7 @@
 import * as C from './followups-core.mjs';
 export function makeFollowupStore(db,storage){
   const col=db.collection('record_followups'),reviews=db.collection('record_followup_reviews');
-  const rows=s=>s.docs.map(d=>({id:d.id,...d.data()}));
+  const rows=s=>s.docs.map(d=>({...d.data(),id:d.id}));
   return {
     newId:()=>col.doc().id,
     read:async id=>{const s=await col.doc(id).get({source:'server'});return s.exists?{id:s.id,...s.data()}:null;},

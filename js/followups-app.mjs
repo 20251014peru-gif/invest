@@ -1,5 +1,5 @@
 import * as C from './followups-core.mjs';
-import {makeFollowupStore} from './followups-store.mjs';
+import {makeFollowupStore} from './followups-store.mjs?v=7.30.0.1';
 const uid=()=>crypto.randomUUID();
 const errorText=e=>({CONFLICT:'다른 기기에서 변경됐습니다. 입력은 그대로 두고, 새로 열어 최신 내용과 비교해 주세요.',RESULT_REQUIRED:'확인 결과를 한 줄 적어 주세요.',QUESTION_REQUIRED:'확인할 질문을 적어 주세요.',PAUSE_REASON_REQUIRED:'보류 이유를 결과 칸에 적어 주세요.',BAD_URL:'근거 링크는 http 또는 https 주소로 넣어 주세요.',TOO_LARGE:'내용이 너무 큽니다. 후속 확인으로 나눠 주세요.',IMAGE_SIZE:'사진은 한 장당 8MB까지 가능합니다.',IMAGE_TYPE:'PNG·JPG·GIF·WebP 사진을 선택해 주세요.'}[e.message]||'저장소 연결을 확인하고 다시 시도해 주세요. ('+(e.code||e.message)+')');
 const button=(text,action,cls='')=>'<button type="button" class="fu-button '+cls+'" data-fu="'+action+'">'+text+'</button>';
