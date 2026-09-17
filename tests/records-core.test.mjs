@@ -100,6 +100,23 @@ test('relationsHasType / makeRelation', () => {
   assert.ok(rel.createdAt > 0);
 });
 
+test('draftNeedsBlob: only non-stored items need their original file bytes kept for retry', () => {
+  assert.equal(R.draftNeedsBlob({status: 'stored'}), false);
+  assert.equal(R.draftNeedsBlob({status: 'uploading'}), true);
+  assert.equal(R.draftNeedsBlob({status: 'error'}), true);
+  assert.equal(R.draftNeedsBlob(null), false);
+});
+
+test('mergeDraftAttachments: appends draft-only items, current (already loaded) wins on id clash', () => {
+  const current = [{id: 'a', url: 'u-a', status: 'stored'}];
+  const draft = [{id: 'a', url: 'stale', status: 'stored'}, {id: 'b', url: 'u-b', status: 'uploading'}];
+  const merged = R.mergeDraftAttachments(current, draft);
+  assert.deepEqual(merged.map(x => x.id), ['a', 'b']);
+  assert.equal(merged[0].url, 'u-a'); // 현재(이미 기록에 저장된) 것을 임시 저장분으로 덮어쓰지 않음
+  assert.equal(R.mergeDraftAttachments([], null).length, 0);
+  assert.equal(R.mergeDraftAttachments(null, [{id: 'x'}]).length, 1);
+});
+
 test('attachmentStoragePath / extFromType / isPreviewableType', () => {
   assert.equal(R.attachmentStoragePath('2026-09-17', 'att_1', 'image/png'), 'records_images/2026-09-17/rec_att_1.png');
   assert.equal(R.extFromType('image/heic'), 'heic');

@@ -29,6 +29,19 @@ export function newAttachmentId() {
   return 'att_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
 }
 
+/* ── 미업로드 사진 임시 저장(js/records-drafts.mjs, IndexedDB) 관련 순수 로직 ──
+   실제 IndexedDB 접근은 하지 않는다 — "복원 시 뭘 합칠지/뭘 다시 올려야 하는지" 판단만 여기서 한다. */
+export function draftNeedsBlob(item) { return !!item && item.status !== 'stored'; }
+
+/* 이미 로드된 첨부(current, 전부 status:'stored')에 임시 저장분(draftItems)을 합친다 — id 중복이면
+   현재 것을 우선(예: 편집 중인 기록에 이미 저장된 첨부와 같은 id면 임시 저장분을 버림). */
+export function mergeDraftAttachments(current, draftItems) {
+  var ids = {};
+  (current || []).forEach(function (a) { if (a && a.id) ids[a.id] = 1; });
+  var toAdd = (draftItems || []).filter(function (a) { return a && a.id && !ids[a.id]; });
+  return (current || []).concat(toAdd);
+}
+
 export function attachmentStoragePath(kstDateStr, assetId, type) {
   return 'records_images/' + kstDateStr + '/rec_' + assetId + '.' + extFromType(type);
 }
