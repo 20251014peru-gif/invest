@@ -1446,7 +1446,7 @@ function draftsApi(){
 var FU = null, _fuReady = null;
 function followupsStart(){
   if(!db || !uid) return Promise.resolve();
-  if(!_fuReady) _fuReady=import('./js/followups-app.mjs?v=7.30.0').then(function(m){
+  if(!_fuReady) _fuReady=import('./js/followups-app.mjs?v=7.30.0.1').then(function(m){
     FU=m.init({db:db,storage:storage,records:function(){return records;},studyNeedsReview:studyNeedsReview,toast:toast,openRecord:goRecord,
       count:function(n){document.getElementById('cntLabel').textContent=n+'건';},
       changed:function(){renderKtabs();renderTodos();if(laterMode)renderLaterMode();if(PAGE_OPEN&&document.getElementById('pageModal').classList.contains('on'))FU.decoratePage(document.getElementById('pgBody'),PAGE_OPEN);}}); return FU;
