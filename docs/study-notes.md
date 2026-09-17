@@ -1,0 +1,99 @@
+# 📚 공부노트 · 서식 편집기 (기록보관실 v7.27)
+
+작성: 2026-09-17 · 코드: `records.html`, `js/study/`, 시험: `tests/study-core.test.mjs`, `tests/study-browser/`
+
+## 1. 사용법
+- **새 공부노트**: 기록보관실 → `📚 공부노트` 탭 → `＋ 새 공부노트` (다른 탭의 `＋ 기록 추가` 창에서도 `📚 공부노트 →`).
+  제목과 본문만 있어도 저장된다. 핵심 정리·정리 유형·주제·정리 상태는 위, 종목·산업·테마·기준일·재검토일·확인사항·출처·AI 해석·검증 상태는 `추가 속성`.
+- **서식 도구**: 문단/제목1~3, 굵게·기울임·밑줄·취소선, 글자색 6색·강조색 5색, 글머리표·번호·체크 목록과 들여쓰기(중첩), 인용, 구분선, 링크, 표(행·열 추가/삭제, 머리행, 셀 합치기), 이미지(폭 25/50/75/100%, 정렬, 대체 설명, 파일로 교체), 실행 취소/다시 실행, 제목 목차, 섹션 접기(▾), 전체 화면. `Ctrl+S` 저장, `Ctrl+K` 링크.
+- **읽기 화면**: 목록에서 노트를 누르면 서식 그대로 보이고, 제목 섹션 접기·목차 이동·`모두 펼치기/접기`를 쓴다. 주소가 `records.html#record=ID`로 바뀌어 새로고침·뒤로가기·공유가 된다.
+- **연결**: 편집창의 `＋ 참고 자료 연결`(관계 references) / `＋ 가설 연결`(idea 기록, 관련·뒷받침·상충 중 선택). 참고 자료로 연결해도 ‘뒷받침’은 자동으로 생기지 않는다. 상대 기록의 읽기 화면에 “이 자료를 참고한 기록”으로 역방향이 보이고, 제목을 누르면 이동한다. 삭제된 대상은 “삭제됐거나 찾을 수 없는 기록”으로 표시된다.
+- **MarkFlow 가져오기**: 공부노트 탭 → `📥 MarkFlow 가져오기` → MarkFlow `내보내기 → HTML(.html)` 또는 `Markdown(.md)` 파일 선택 → 보존/변환/누락 미리보기 → `편집창에서 열기` → 확인 후 `저장`. 자동 저장하지 않으며 MarkFlow 원본은 건드리지 않는다.
+- **노트 파일**: 읽기 화면 `⬇ 노트 파일로 내보내기`(서식 문서·본문·이미지 포함 .json) / 공부노트 탭 `♻ 노트 파일 복원`.
+
+## 2. 실제 MarkFlow 확인 결과 (20251014peru-gif.github.io)
+- 서비스 파일: `markflow.html` (화면 표시 v3.9.2 — `markflow/usability.js`가 v3.8 표기를 바꿈). 편집기는 **Toast UI Editor 3.2.2**(ProseMirror 기반) 인라인 번들.
+- 저장: 문서 = `{id, content(Markdown 문자열), updated, folder}`, localStorage `markflow_wysiwyg_v1` + IndexedDB `markflow_db`, 동기화는 GitHub Gist. 제목 필드 없음(첫 줄).
+- 독자 표기: 형광펜 `⟦1~5 글자⟧`, 이미지 크기/회전 `⟪w50 h300 r90⟫`(alt 안), 동영상 `⟦vid base64주소⟧`·`⟦vidfile:id⟧`, 이미지 base64 내장.
+- 내보내기: `.md`(표기 그대로), `.html`(편집 화면 HTML 그대로 — `span.mf-hlmark`, `span.mf-hl mf-hl-N`, `li.task-list-item`, base64 이미지). **문서 ID·수정 시각은 내보내기에 없다.**
+- 복사: ProseMirror 기본 복사 — `text/html`에 형광펜이 `⟦1…⟧` 글자로 남고 색·콜아웃 스타일은 없다.
+- `markflow/writer.js`(4.0.2) 등은 서비스 페이지가 불러오지 않는 파일이다.
+- 시험 자료: `tests/study-browser/fixtures/markflow-v392-*` 는 실제 markflow.html 에 시험 문서를 열고 그 앱의 내보내기·복사 기능으로 받은 결과.
+
+## 3. 편집기 선택
+MarkFlow 의 Toast UI 3.2.2 재사용은 택하지 않았다: 저장이 Markdown 이라 글자색·밑줄·이미지 크기를 담지 못하고(형광펜도 독자 표기), 표 편집이 제한적이며 2023년 이후 갱신이 없다.
+**TipTap 3.31.3 (ProseMirror)** 을 택했다.
+
+| 기준 | 판단 |
+|---|---|
+| 서식 범위 | 제목·강조·색·강조색·중첩/체크 목록·인용·표(합치기)·이미지·링크 전부 공식 확장 |
+| 문서 구조 보존 | 스키마 기반 JSON 문서가 기준본(Markdown 왕복 손실 없음) |
+| 붙여넣기 | 스키마가 곧 허용목록 + 추가 HTML 정리(`cleanHTML`) |
+| 접근성 | contenteditable + 표준 키보드 단축키, 도구 버튼 이름·눌림 상태 제공 |
+| 모바일 | 터치 선택·가상 키보드 지원, 편집창은 모바일에서 전체 화면 |
+| 크기 | 번들 489KB(gzip 152KB). **편집·가져오기 때만** 불러오고, 목록 화면은 추가 로딩 없음, 읽기 화면은 약 35KB(`study-core`+`study-view`)만 사용 |
+| 라이선스 | 전부 MIT (`js/study/vendor/THIRD_PARTY_LICENSES.md`) |
+| 유지보수 | `tools/study-editor/package.json` 버전 고정 → `npm ci && npm run build` 로 같은 파일 재생성(CI 가 일치 검사) |
+
+## 4. 저장 계약 (records 컬렉션, 기존 문서와 같은 곳)
+| 필드 | 내용 |
+|---|---|
+| `kind` | `study` |
+| `title` / `oneLiner` | 제목 / 핵심 정리 |
+| `studyType` | concept · topic_analysis · source_study · comparison |
+| `studyStatus` | learning · organized · needs_review (`verifyState` 와 별개, 자동 설정 없음) |
+| `topics` `industries` `themes` `stocks` | 문자열 배열 (산업·테마는 종목과 분리) |
+| `asOfDate` `reviewAt` | `YYYY-MM-DD` 또는 빈 값(미지정) |
+| `checks` | 기존 체크 캘린더 `{date, what, action}` 재사용 |
+| `userJudgment` / `aiInterpretation` | 내 판단 / AI 해석 분리 |
+| `source{name,url}` `link` `channel` | 기존 출처 필드 (없으면 빈 값 — 임의 생성 없음) |
+| `contentFormat` `contentVersion` | `tiptap-json`, `1` |
+| `contentDocJson` | **본문 기준본**: 문서 JSON 문자열. (Firestore 맵/배열 중첩 한도 20 때문에 문자열로 저장) |
+| `body` | 같은 저장 작업에서 만든 일반 텍스트 투영 — 검색·목록·구버전 화면(일지·통합분석실)용 |
+| `assets[]` | `{id, path, url, name, size, type, addedAt}` — 본문 이미지 노드는 `assetId` 로 참조 |
+| `origin` | `{app: records|markflow|…, format, documentId, url, fileName, fileHash(SHA-256), importedAt, version}` |
+| `relations[]` | 기존 형식 `{relationId, targetId, type, note, createdAt}` + 새 type `references` |
+| `studyRevision` `updatedAt` `createdAt` `date` `studyOperationId` | 수정 버전·시각(생성 시각·기록일은 최초값 유지)·재시도 중복 방지 |
+| `studyHistory[]` | 이전 판 최대 5개(아래 정책) |
+
+- 쓰기는 모두 `js/study/study-store.mjs` 트랜잭션: 서버 최신본의 `studyFingerprint`(버전+제목+본문+문서+판단)가 편집 시작 때와 다르면 **쓰지 않고** 비교 창을 띄운다. 새 문서는 `set`, 기존 문서는 소유 필드만 `update` → 알 수 없는 기존 필드 보존.
+- 관계는 트랜잭션 안에서 서버 목록에 “이번 편집에서 추가/삭제한 것만” 병합. 읽기 화면의 기존 `+ 연결`/`✕`도 트랜잭션 병합으로 바꿨다(다른 기기에서 붙인 연결 덮어쓰기 방지).
+- 구형 경로 보호: `openEdit()`(통합분석실 iframe 포함)은 공부노트를 전용 편집기로 연다. 구형 `저장` 버튼은 공부노트면 저장을 거부한다.
+- 크기: 저장 전 추정 크기 600KB 경고, 900KB 차단(필요하면 이전 판부터 줄임). 차단 시 내용은 이 기기 초안에 남는다. 본문이 문서 JSON 과 일반 텍스트로 두 번 들어가므로 실사용 한도는 대략 **텍스트 40만 바이트(한글 약 13만 자)**. 그 이상은 노트를 나누는 안내를 띄운다(분리 저장은 후속 과제).
+- 이전 판 정책: 저장 때 직전 판이 30분 이상 지났거나, MarkFlow 새 버전 반영·충돌 해결(내 내용 저장)·이전 판 되돌리기·파일 복원일 때만 1개 추가, 최대 5개.
+
+## 5. 초안·첨부
+- 초안: 이 기기 localStorage `records.study.draft.<노트ID>` (입력 0.8초 뒤 갱신). 상태줄에 “저장 안 됨 · 이 기기에 임시 보관 시각”으로 서버 저장과 구분. 다시 열면 이어 쓰기/버리기 선택, 그 사이 서버가 바뀌었으면 비교 표시.
+- 이미지: 파일 선택·끌어놓기·붙여넣기 → Firebase Storage `records_images/<KST날짜>/study_<assetId>.<ext>`(기존 이미지와 같은 경로 규칙, 8MB 제한). 본문·초안에 base64 를 남기지 않는다(저장 직전 `persistableDoc` 검사). 이미지 교체·삭제·노트 삭제 때도 **Storage 파일은 지우지 않는다**(이전 판·복원 대비). 고아 파일 정리는 후속 과제.
+- 외부 이미지: 붙여넣기/가져오기 때 복사를 시도해 성공하면 보관, CORS 등으로 막히면 `external`(보관 안 됨, 원본 주소 링크만)로 표시. `blob:`·주소 없음은 `missing`. 읽기 화면·편집창·저장 안내에 모두 드러난다.
+
+## 6. MarkFlow 가져오기 변환표
+| MarkFlow | 가져온 결과 |
+|---|---|
+| 제목 1~3 / 4~6 | 제목 1~3 / 제목 3 (변환 안내) |
+| 굵게·기울임·취소선·링크·인용·구분선·표·중첩 목록·체크 목록 | 그대로 |
+| 형광펜 `⟦N…⟧` · `span.mf-hl-N` | 강조색(같은 5색) |
+| 이미지 `⟪wNN⟫` | 폭 25/50/75/100% 중 가까운 값, 회전은 버림(안내) |
+| base64 이미지 | Storage 보관 |
+| `⟦vid 주소⟧` | “▶ 동영상” 링크 · `⟦vidfile⟧`(기기 저장 영상)은 누락 안내 |
+| 콜아웃(이모지 인용문) | 인용문(배경색은 MarkFlow 화면 전용이라 없음) |
+| Markdown 파일 | 글자색·밑줄 등 정보가 원래 없음 → 미리보기에 “완전 보존 아님” 표시 |
+
+- 같은 문서 판별: 파일 내용 SHA-256 또는 사용자가 적은 MarkFlow 문서 ID. **파일 이름으로는 판별하지 않는다.** 후보가 있으면 “기존 노트의 새 버전으로 반영(지금 내용은 이전 판)” / “별도 노트” 중 고른다.
+
+## 7. 비용
+- 새 유료 API·AI 호출 없음. 새 서버·호스팅 없음(GitHub Pages 그대로).
+- Firestore: 편집창 열기 1회 읽기, 저장 1회 트랜잭션(읽기 1 + 쓰기 1), 연결 변경 읽기 1 + 쓰기 1, 충돌 시 최신본 읽기 1. 새 실시간 구독 없음(기존 records 구독 재사용). 자동 서버 저장 없음(초안은 기기 로컬).
+- 문서 크기 측정(시험): 서식 시험 노트(표·이미지 6·연결 4) 약 10KB, MarkFlow 시험 문서 가져오기 약 14KB.
+- Storage: 이미지 1장당 원본 크기(최대 8MB). 재가져오기 시 이미지가 다시 올라간다.
+
+## 8. 시험
+- 단위: `node --test tests/study-core.test.mjs` (저장 계약·렌더러 XSS 차단·일반 텍스트 투영·충돌·이력·크기·관계 병합·MarkFlow 표기·백업).
+- 브라우저: `node tests/study-browser/server.cjs 8123` → `http://localhost:8123/records.html` (Firebase 대신 `firebase-mock.js` — 운영 데이터 접속 없음, `window.__mockFail='offline'` 로 끊김 재현) · 회귀 페이지 `http://localhost:8123/tests/study-browser/regression.html` (실제 MarkFlow v3.9.2 내보내기·복사 결과로 변환 검사).
+- CI: `.github/workflows/study-checks.yml`.
+
+## 9. 남은 과제
+- 본문 900KB 초과 노트의 분리 저장(하위 컬렉션)은 Firestore 보안 규칙 확인 후 설계.
+- 사용하지 않는 Storage 이미지 정리 도구.
+- MarkFlow 쪽 “보관실로 보내기” 버튼(이번 범위 제외).
+- 운영 Firestore·Storage 보안 규칙은 저장소에 없어 실제 쓰기 권한은 운영 화면에서 첫 저장으로 확인 필요.

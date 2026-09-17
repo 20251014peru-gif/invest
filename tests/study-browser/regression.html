@@ -1,0 +1,81 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>공부노트 편집기 회귀 시험</title>
+<!-- 실행: node tests/study-browser/server.cjs 8123 → http://localhost:8123/tests/study-browser/regression.html
+     실제 편집기 번들 + 실제 MarkFlow v3.9.2 내보내기/복사 결과(fixtures)로 붙여넣기·가져오기 변환을 검사한다. 운영 데이터 접속 없음. -->
+<style>body{font:14px/1.5 sans-serif;margin:20px}.ok{color:#2f7d5c}.bad{color:#b23b3b;font-weight:700}#sum{font-size:18px;font-weight:800}</style>
+<div id="sum">실행 중…</div><ol id="out"></ol>
+<script type="module">
+import {cleanHTML, htmlToDoc, Editor, extensions, convertMarkflowText} from '../../js/study/study-editor-kit.mjs';
+import {marked} from '../../js/study/vendor/study-editor-vendor.mjs';
+import * as C from '../../js/study/study-core.mjs';
+const out = document.getElementById('out');
+let pass = 0, fail = 0;
+const t = async (name, fn) => { try { await fn(); pass++; out.insertAdjacentHTML('beforeend', `<li class="ok">✔ ${C.esc(name)}</li>`); } catch (e) { fail++; out.insertAdjacentHTML('beforeend', `<li class="bad">✖ ${C.esc(name)} — ${C.esc(e.message)}</li>`); } };
+const eq = (a, b, m) => { if (JSON.stringify(a) !== JSON.stringify(b)) throw Error((m || '') + ' expected ' + JSON.stringify(b) + ' got ' + JSON.stringify(a)); };
+const ok = (v, m) => { if (!v) throw Error(m || 'assert'); };
+const fx = n => fetch('./fixtures/' + n).then(r => r.text());
+const marks = doc => { const a = []; C.walk(doc, n => { for (const m of n.marks || []) if (m.type === 'highlight') a.push(m.attrs.color + '=' + n.text); }); return a; };
+const imgOf = raw => /^data:image\//.test(raw) ? {'data-status': 'pending', src: raw} : /^https?:/.test(raw) ? {'data-status': 'pending', 'data-original-src': raw, src: raw} : {'data-status': 'missing', src: null};
+
+await t('MarkFlow v3.9.2 HTML 내보내기 → 서식 보존', async () => {
+  const rep = {converted: [], missing: []};
+  const doc = htmlToDoc(cleanHTML(await fx('markflow-v392-export.html'), {report: rep, onImage: imgOf}));
+  const s = C.docStats(doc);
+  eq([s.headings, s.tables, s.tasks, s.quotes, s.images, s.strike, s.bold, s.italic], [3, 1, 1, 1, 2, 1, 1, 1], '[제목,표,체크,인용,이미지,취소,굵게,기울임]');
+  eq(marks(doc), ['#fff2a8=노랑 형광펜 문장', '#bff0cb'.replace('bff0cb', 'bfe0ff') + '=파랑 형광펜']);
+  const text = C.docToPlainText(doc);
+  ok(text.includes('노랑 형광펜 문장 과 파랑 형광펜 표기.'), '형광펜 글자 손실');
+  ok(!/⟦|⟧|⟪/.test(text), 'MarkFlow 표기 잔존');
+  ok(text.includes('  - 하위 항목 A'), '중첩 목록');
+  eq(C.imagesOf(doc).map(i => i.width), ['50%', null]);
+});
+await t('MarkFlow v3.9.2 복사(클립보드 HTML) → 형광펜 표기 변환, 글자 손실 없음', async () => {
+  const el = document.createElement('div');
+  const ed = new Editor({element: el, extensions: extensions(), content: cleanHTML(await fx('markflow-v392-copy.html'), {onImage: imgOf})});
+  const n = convertMarkflowText(ed);
+  const doc = ed.getJSON();
+  ed.destroy();
+  eq(n, 3);
+  eq(marks(doc), ['#fff2a8=노랑 형광펜 문장', '#bfe0ff=파랑 형광펜']);
+  const text = C.docToPlainText(doc);
+  ok(text.includes('노랑 형광펜 문장 과 파랑 형광펜 표기.'), text.slice(0, 200));
+  ok(text.includes('▶ 동영상'), '동영상 링크');
+  ok(!/⟦|⟧/.test(text), '표기 잔존');
+});
+await t('한 문단 안 여러 형광펜 표기(평문) → 정확한 범위', async () => {
+  const el = document.createElement('div');
+  const ed = new Editor({element: el, extensions: extensions(), content: '<p>앞 ⟦2초록 표기⟧ 중간 ⟦4분홍⟧! ⟦5⟧끝</p>'});
+  convertMarkflowText(ed);
+  const doc = ed.getJSON(); ed.destroy();
+  eq(C.docToPlainText(doc), '앞 초록 표기 중간 분홍! 끝');
+  eq(marks(doc), ['#bff0cb=초록 표기', '#ffc9e2=분홍']);
+});
+await t('MarkFlow v3.9.2 Markdown 내보내기 → 가져오기(형광펜·이미지 크기·체크)', async () => {
+  const rep = {converted: [], missing: []};
+  const html = marked.parse(C.preprocessMarkflowMarkdown(await fx('markflow-v392-export.md'), rep), {gfm: true});
+  const doc = htmlToDoc(cleanHTML(html, {report: rep, onImage: imgOf}));
+  const s = C.docStats(doc);
+  eq([s.tables, s.tasks, s.images, s.highlights], [1, 1, 2, 2]);
+  ok(C.docToPlainText(doc).includes('[x] 확인 완료'), '체크 상태');
+  eq(C.imagesOf(doc)[0].width, '50%');
+});
+await t('위험 HTML 붙여넣기 → 실행·위험 속성·위험 링크 제거', async () => {
+  window.__x = 0;
+  const html = cleanHTML('<p onclick="window.__x=1">a<script>window.__x=2<\/script><a href="javascript:window.__x=3">b</a><a href="https://ok.example/">c</a><img src=x onerror="window.__x=4"><iframe src="https://e.example"></iframe><svg onload="window.__x=5"></svg><span style="color:rgb(255,0,0);position:fixed">d</span></p>', {onImage: imgOf});
+  ok(!/onclick|onerror|onload|script|iframe|svg|javascript:|position/i.test(html), html);
+  ok(html.includes('https://ok.example/'));
+  const doc = htmlToDoc(html);
+  const h = C.renderDocHTML(doc);
+  ok(!/javascript:|<script|onerror/i.test(h));
+  await new Promise(r => setTimeout(r, 50));
+  eq(window.__x, 0, '실행됨');
+});
+await t('저장본에는 data/blob 이미지 주소가 남지 않음', async () => {
+  const doc = htmlToDoc(cleanHTML('<p><img src="data:image/png;base64,AAAA"><img src="blob:https://x/y"></p>', {onImage: imgOf}));
+  const p = C.buildStudyPatch({title: 't'}, doc);
+  ok(!/data:|blob:/.test(p.contentDocJson));
+});
+document.getElementById('sum').innerHTML = fail ? `<span class="bad">실패 ${fail}</span> · 통과 ${pass}` : `<span class="ok">전부 통과 ${pass}</span>`;
+document.title = (fail ? 'FAIL ' : 'PASS ') + pass + '/' + (pass + fail);
+</script>

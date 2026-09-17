@@ -1,6 +1,6 @@
 import {safeUrl} from './research-core.mjs';
 export const DASH_RELEASE={version:'v021-20260914-064309-KST',summary:'통합 3페이지 작업공간 · 뉴스 목록 · 그래프·분석 내부 연결'};
-export const KINDS={indicator:'지표',news:'뉴스',idea:'분석',memo:'메모',chart:'차트',youtube:'유튜브',record:'기록'};
+export const KINDS={indicator:'지표',news:'뉴스',idea:'분석',memo:'메모',chart:'차트',youtube:'유튜브',study:'공부노트',record:'기록'};
 export const VIEWS={card:'카드',list:'목록',table:'표',board:'종류 보드',topic:'주제별',calendar:'달력',timeline:'타임라인',gallery:'갤러리'};
 export const strings=v=>Array.isArray(v)?v.filter(x=>typeof x==='string'&&x.trim()):[];
 export const finite=v=>typeof v==='number'&&Number.isFinite(v);
