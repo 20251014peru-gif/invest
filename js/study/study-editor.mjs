@@ -187,6 +187,8 @@ function refreshStatus() {
   else if (S.base) parts.push('서버 저장본');
   if (S.uploads.size) parts.push('이미지 보관 중 ' + S.uploads.size + '개');
   status(parts.join(' · '), S.lastError ? 'err' : (isDirty() ? 'dirty' : 'ok'));
+  const saveBtn = S.root.querySelector('#stSave');
+  if (saveBtn) saveBtn.disabled = S.saving; // 저장 중 중복 클릭 방지(저장 함수 자체도 S.saving 이면 다시 실행하지 않음)
 }
 
 /* ── 문서·비교 ── */
@@ -551,6 +553,11 @@ async function save() {
     if (res.level === 'warn') S.bridge.toast('저장했어요 · 노트 크기 ' + kb(res.bytes) + ' — 1MB 한도에 가까워지고 있어요');
     else S.bridge.toast(ext ? '저장했어요 · 보관되지 않은 외부 이미지 ' + ext + '개가 있어요' : '공부노트를 저장했어요');
     S.bridge.onSaved?.(S.id);
+    /* v7.28.3: 서버 저장이 실제로 성공했을 때만(로컬 초안 저장이 아니라) 자동으로 닫는다. 저장 중에 새로
+       붙여넣은 사진이 아직 업로드 중이면(드문 경합) 닫지 않고 그대로 열어 둔다 — closeEditor()의 확인
+       팝업 없이 조용히 유지. 상세보기 아래에서 열었다면 그 상세보기가, 목록에서 열었다면 목록이 이 편집창
+       뒤에 그대로 있으므로 닫기만 하면 되돌아간 것과 같다(상세보기 내용 자체는 bridge.onSaved 쪽에서 새로고침). */
+    if (!S.uploads.size) { S.saving = false; await closeEditor(); return; }
   } catch (e) {
     if (S !== session) return;
     if (e.message === 'CONFLICT') { S.lastError = '다른 기기에서 먼저 바뀜 — 비교 후 선택해 주세요'; S.operationId = null; conflictDialog(); }
@@ -759,6 +766,12 @@ export async function openStudyEditor({bridge, store, id = null, prefill = null,
   S = {bridge, store, root, id: noteId, stocks: [], assets: [], relAdd: [], relRemove: [], uploads: new Map(), pendingPaste: [], notices: [], saving: false};
   root.classList.add('on');
   root.classList.toggle('is-full', window.matchMedia(MOBILE_Q).matches);
+  /* v7.28.3: 이 DOM(#studyModal)은 열고 닫을 때마다 재사용되므로, 지난번 편집창의 스크롤 위치가 그대로
+     남아있다 — 상세보기 아래쪽에서 "수정"을 눌러도 항상 제목·저장 버튼이 보이는 맨 위에서 시작하도록
+     여기서 한 번 리셋한다(배경 페이지가 아니라 이 모달 자신의 스크롤 영역만). layout()이나 onUpdate 등
+     편집 중 반복 실행되는 곳에는 넣지 않는다 — 여기(연 시점)에서만 해야 작성 중 스크롤이 안 튄다. */
+  const scrollBox = root.querySelector('#stScroll');
+  if (scrollBox) scrollBox.scrollTop = 0;
   layout();
   document.documentElement.classList.add('st-open');
   S.editor = new Editor({
@@ -815,7 +828,16 @@ export async function openStudyEditor({bridge, store, id = null, prefill = null,
   }
   loadSession(base, useDraft, prefill);
   if (prefill) changed();
-  setTimeout(() => (base || prefill ? S?.editor?.commands.focus('start') : root.querySelector('#stTitle').focus()), 30);
+  /* 편집기 로딩·자동 포커스가 끝난 뒤에도 맨 위를 유지한다. TipTap 의 focus('start')는 기본적으로 포커스된
+     지점을 보이게 스크롤을 옮기므로 scrollIntoView:false 로 애초에 막고(v7.28.3에서 실측 — 이걸 안 주면
+     #stScroll 이 본문 중간까지 다시 밀렸다), 그래도 브라우저가 다음 페인트에서 스크롤을 조정할 수 있어
+     rAF 로 한 번 더 맨 위로 되돌린다(둘 다 여는 시점 한정 — 작성 중에는 안 건드림). */
+  setTimeout(() => {
+    if (base || prefill) S?.editor?.commands.focus('start', {scrollIntoView: false});
+    else root.querySelector('#stTitle').focus({preventScroll: true});
+    if (scrollBox) scrollBox.scrollTop = 0;
+    requestAnimationFrame(() => { if (scrollBox) scrollBox.scrollTop = 0; });
+  }, 30);
   return noteId;
 }
 
