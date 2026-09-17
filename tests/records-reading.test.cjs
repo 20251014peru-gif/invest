@@ -12,7 +12,8 @@ test('outline maps matching full sections without rewriting original',()=>{
   const items=R.outline(text);
   assert.equal(items.length,2);assert.equal(items[0].detail,'상세 A');assert.equal(items[1].detail,'상세 B');
   assert.equal(items[1].text,'요약 B');
-  assert.ok(R.bodyHTML(text).includes(text));
+  assert.ok(R.bodyHTML(text).includes('pg-source-overview'));
+  assert.equal(R.formattedHTML(text).replace(/<[^>]+>/g,''),text);
 });
 test('no sequential headings means no speculative split',()=>{
   assert.deepEqual(R.outline('01\nA\n03\nC'),[]);

@@ -4,7 +4,7 @@ import {commitStudy, mergeRelations, studyFingerprint} from './study-core.mjs';
 const EXT = {'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp', 'image/avif': 'avif', 'image/bmp': 'bmp'};
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
-export function makeStudyStore(db, storage, {now = () => Date.now(), kstDate} = {}) {
+export function makeStudyStore(db, storage, {now = () => Date.now(), kstDate, preserveChecks = () => false} = {}) {
   const col = () => db.collection('records');
   return {
     newId() { return col().doc().id; },
@@ -17,7 +17,7 @@ export function makeStudyStore(db, storage, {now = () => Date.now(), kstDate} = 
         const current = snap.exists ? snap.data() : null;
         if (current && operationId && current.studyOperationId === operationId) return {record: {id, ...current}, repeated: true, bytes: 0, level: 'ok'};
         const t = now();
-        const {result, bytes, level} = commitStudy(current, patch, expected, {now: t, reason, relations, date: kstDate ? kstDate(t) : ''});
+        const {result, bytes, level} = commitStudy(current, current && preserveChecks() ? {...patch, checks: current.checks || []} : patch, expected, {now: t, reason, relations, date: kstDate ? kstDate(t) : ''});
         result.studyOperationId = operationId || ('op_' + t);
         if (current) tx.update(ref, result); else tx.set(ref, result);
         return {record: {id, ...(current || {}), ...result}, repeated: false, bytes, level};
