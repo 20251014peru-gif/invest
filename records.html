@@ -67,6 +67,18 @@
    v7.27.1: 노트 파일 복원 시 파일에 이미지가 없고 원본에도 접근 불가하면 ‘보관됨’ 대신 누락 표시·개수 안내(조용한 이미지 손실 수정).
    v7.27.2: 휴대폰 편집창 — 도구줄을 키보드 위 하단에 고정·자주 쓰는 7개+더보기(가로 스크롤 없음), 도구를 눌러도 선택 유지,
    보이는 영역(키보드·회전)에 창 맞춤, 넓은 표는 표 안에서만 가로 스크롤.
+   v7.28: 가볍게 기록하고 연결하며 발전시키기(docs/records-lightweight-capture.md) —
+   ① 종류별 작성창 간소화: 본문+사진을 맨 위, 별점/액션/검증/AI해석/시나리오/체크는 "추가 속성"으로 접음(DOM은
+   유지해 값 손실 없음). 최소 저장 조건을 제목 필수→제목/본문/링크/사진 중 하나로 완화, 제목 빈 채 저장하면
+   1회만 자동 채움. "+ 기록 추가"가 지금 보는 탭 종류로 바로 열리도록 수정(예전엔 항상 유튜브로 열리던 버그).
+   ② 모든 종류 공통 다중 사진 첨부(js/records-core.mjs) — 여러 장 선택/붙여넣기/끌어놓기, 파일별 업로드 상태·
+   재시도, 순서(▲▼)·대표사진·설명, records_images/<날짜>/rec_<id> 경로(구버전 image/imagePath는 대표 사진
+   투영으로 계속 채움). 기록 삭제 때 Storage 자동 삭제 안 함(공부노트와 같은 정책으로 통일).
+   ③ 관계 신규 타입 derived_from(생각의 출발점)·synthesizes(정리에 사용) 추가(기존 5종 보존) — 상세 화면
+   "이어서 생각하기"(원본 안 바뀜, 새 메모/아이디어가 원본 참조)·"모아 정리하기"(여러 기록을 근거로 새
+   공부노트/아이디어, 원문 자동 복제 없음)를 단일 문서 쓰기로 원자적 처리.
+   ④ "🕒 나중에" 통합 보기 — 기존 checks[](이제 모든 날짜+기한 없음도)와 공부노트 재검토를 한 목록으로,
+   완료 처리는 기존 records_todos 완료마커 그대로 재사용(새 컬렉션·중복 메커니즘 없음). 달력 🔔에 reviewAt도 반영.
    ══════════════════════════════════════════════════════════ */
 :root{
   --navy-900:#514936; --navy-800:#5c5340; --navy-700:#6b6049; --navy-600:#8a7d5e;
@@ -258,6 +270,10 @@ a{color:inherit}
 .rcard .dt{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--sub2);background:#f4f2ea;border-radius:6px;padding:2px 7px}
 .rcard .re{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--warn);font-weight:700;margin-top:7px}
 .rcard .lk{font-size:10.5px;color:var(--navy-600);font-weight:700;margin-top:6px;display:inline-block}
+/* v7.28: 카드 대표 사진 — 첨부가 있는 기록만 표시, 여러 장이면 +N */
+.rcThumb{position:relative;width:100%;height:64px;border-radius:8px;overflow:hidden;margin-bottom:7px;background:#f4f2ea}
+.rcThumb img{width:100%;height:100%;object-fit:cover;display:block}
+.rcThumbN{position:absolute;bottom:3px;right:4px;background:rgba(20,18,10,.62);color:#fff;font-size:10px;font-weight:700;border-radius:999px;padding:1px 6px}
 
 /* ── 표보기 ── */
 table.rt{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
@@ -329,6 +345,20 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 .lrow .st3{display:flex;gap:4px;flex:0 0 auto}
 .lrow .re3{font-size:10.5px;color:var(--warn);font-weight:700;flex:0 0 auto}
 
+/* ── v7.28: "🕒 나중에" 통합 보기 ── */
+.laterBar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.laterChips{display:flex;flex-wrap:wrap;gap:6px}
+.laterRow{display:flex;align-items:center;gap:11px;padding:11px 14px;border-bottom:1px solid #f2f0e7;cursor:pointer}
+.laterRow:last-child{border-bottom:0}
+.laterRow:hover{background:#fbfaf6}
+.laterRow.done{opacity:.55}
+.laterAct{font-size:11px;font-weight:700;color:var(--navy-700);background:#eef3f8;border-radius:7px;padding:4px 8px;flex:0 0 auto;white-space:nowrap}
+.laterBody{flex:1;min-width:0}
+.laterTt{font-size:13.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.laterRow.done .laterTt{text-decoration:line-through;color:var(--sub2)}
+.laterSub{font-size:11.5px;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.laterRO{font-size:10.5px;color:var(--sub2);flex:0 0 auto}
+
 /* ── 채널별보기 (board 재사용) ── */
 .chcard{background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 11px;margin-bottom:8px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.03)}
 .chcard:hover{box-shadow:0 4px 10px rgba(11,29,51,.09)}
@@ -347,7 +377,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 .galgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
 .galcard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;box-shadow:0 1px 3px rgba(11,29,51,.05)}
 .galcard:hover{box-shadow:0 8px 20px rgba(11,29,51,.12);transform:translateY(-2px)}
-.galcard .cover{height:92px;display:flex;align-items:center;justify-content:center;font-size:34px;color:#fff}
+.galcard .cover{position:relative;height:92px;display:flex;align-items:center;justify-content:center;font-size:34px;color:#fff}
 .galcard .gb{padding:11px 13px}
 .galcard .gk{font-size:10.5px;font-weight:800;margin-bottom:4px}
 .galcard .gt{font-size:13px;font-weight:700;line-height:1.4;margin-bottom:5px;min-height:36px}
@@ -391,6 +421,40 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 .mfoot .save{flex:1;background:var(--navy-800);color:#fff;border:0;border-radius:10px;padding:12px;font-size:14px;font-weight:800;cursor:pointer}
 .mfoot .del2{background:#fbeaea;color:var(--warn);border:0;border-radius:10px;padding:12px 16px;font-size:13px;font-weight:800;cursor:pointer}
 
+/* ── v7.28: 종류 전환(더보기 뒤로 숨김) · 추가 속성 접기 · 다중 사진 첨부 ── */
+.kindSwitchRow{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.kindNow{font-size:13px;font-weight:800;color:var(--navy-800)}
+#moreFields{border:1px solid var(--line);border-radius:12px;margin-top:14px;background:#fbfaf6}
+#moreFields summary{cursor:pointer;padding:11px 14px;font-size:13px;font-weight:800;color:var(--sub);list-style:none;display:flex;align-items:center;gap:7px}
+#moreFields summary::-webkit-details-marker{display:none}
+#moreFields summary::before{content:'▸';font-size:11px;color:var(--sub2)}
+#moreFields[open] summary::before{content:'▾'}
+#moreFieldsBadge{font-size:11px;font-weight:700;color:var(--gold-dk);background:var(--gold-lt);border-radius:999px;padding:1px 9px}
+.moreFieldsBody{padding:2px 14px 14px}
+.attachBar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+.attHint{font-size:11.5px;color:var(--sub2)}
+.attDrop{border:1.5px dashed var(--line);border-radius:10px;padding:10px;text-align:center;font-size:11.5px;color:var(--sub2);margin-bottom:8px}
+.attDrop.dragOver{border-color:var(--navy-600);background:var(--gold-soft);color:var(--navy-700)}
+.attGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px}
+.attThumb{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;position:relative;display:flex;flex-direction:column}
+.attThumb.rep{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-lt)}
+.attThumb .attImgWrap{aspect-ratio:1/1;background:#f4f2ea;display:flex;align-items:center;justify-content:center;cursor:zoom-in;overflow:hidden}
+.attThumb .attImgWrap img{width:100%;height:100%;object-fit:cover}
+.attThumb .attNoprev{font-size:22px;color:var(--sub2)}
+.attThumb .attStatus{position:absolute;top:5px;left:5px;font-size:9.5px;font-weight:800;border-radius:999px;padding:2px 7px;color:#fff;background:var(--navy-700)}
+.attThumb .attStatus.err{background:var(--warn)}
+.attThumb .attStatus.ok{background:var(--good)}
+.attThumb .attStar{position:absolute;top:5px;right:5px;border:0;background:rgba(255,255,255,.85);color:var(--sub2);width:22px;height:22px;border-radius:50%;font-size:12px;cursor:pointer}
+.attThumb .attStar.on{color:var(--gold-dk)}
+.attThumb .attCap{border:0;border-top:1px solid var(--line2);font-size:11px;padding:5px 7px;width:100%;outline:0;font-family:inherit}
+.attThumb .attRow{display:flex;align-items:center;gap:3px;padding:4px 5px;border-top:1px solid var(--line2)}
+.attThumb .attRow button{flex:1;border:0;background:#f4f2ea;color:var(--sub);font-size:11px;border-radius:6px;padding:4px 2px;cursor:pointer}
+.attThumb .attRow button:hover{background:#ece9dc}
+.attThumb .attRow .attRm{color:var(--warn)}
+.attThumb .attErrNote{font-size:10px;color:var(--warn);padding:0 6px 5px}
+.attMsg{font-size:12px;color:var(--warn);margin-top:6px}
+.attMsg:empty{display:none}
+
 /* ── 종목관리 모달 ── */
 .stockMgrList{max-height:320px;overflow-y:auto;margin-bottom:12px}
 .smRow{display:flex;align-items:center;gap:9px;padding:8px 4px;border-bottom:1px solid #f2f0e7}
@@ -433,10 +497,10 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 .sdTradeInfo .frow2{margin-top:10px}
 
 /* ── 체크 캘린더 편집 줄 ── */
-.checkRow{display:grid;grid-template-columns:130px 1fr 1fr auto;gap:7px;margin-bottom:7px;align-items:center}
-@media(max-width:560px){.checkRow{grid-template-columns:1fr;gap:6px}}
-.checkRow input{border:1.5px solid var(--line);border-radius:8px;padding:7px 9px;font-size:12.5px;outline:0;font-family:inherit}
-.checkRow input:focus{border-color:var(--navy-600)}
+.checkRow{display:grid;grid-template-columns:126px 1fr 1fr 128px auto;gap:7px;margin-bottom:7px;align-items:center}
+@media(max-width:700px){.checkRow{grid-template-columns:1fr}}
+.checkRow input,.checkRow select{border:1.5px solid var(--line);border-radius:8px;padding:7px 9px;font-size:12.5px;outline:0;font-family:inherit}
+.checkRow input:focus,.checkRow select:focus{border-color:var(--navy-600)}
 .checkRow .rmRow{border:0;background:#fbeaea;color:var(--warn);border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:11px}
 
 /* ── 이미지 첨부 ── */
@@ -462,6 +526,14 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 .pg-checktbl th{font-size:11px;color:var(--sub);text-align:left;padding:6px 8px;background:#f4f2ea}
 .pg-checktbl td{font-size:12.5px;padding:7px 8px;border-bottom:1px solid #f2f0e7;vertical-align:top}
 .pg-h4{font-size:12px;font-weight:800;color:var(--sub);margin:4px 0 8px}
+/* v7.28: 관련 기록 연결/이어서 생각하기/모아 정리하기는 항상 페이지 보기(#pageModal) 위에서 열린다 —
+   같은 z-index면 DOM 순서상 나중에 오는 #pageModal 이 위로 그려져 가려지던 문제 수정(관련 연결도 마찬가지였음) */
+#relModal, #continueModal, #synthModal, #attZoomModal{z-index:9100}
+/* v7.28: 상세 화면 — 사진 여러 장 */
+.pg-attgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;margin-bottom:14px}
+.pg-attfig{margin:0;border-radius:10px;overflow:hidden;background:#f4f2ea;cursor:zoom-in}
+.pg-attfig img{width:100%;height:120px;object-fit:cover;display:block}
+.pg-attfig figcaption{font-size:10.5px;color:var(--sub);padding:4px 7px;background:#fff}
 
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy-900);color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.on{opacity:1}
@@ -471,7 +543,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
-  <span class="ver">v7.27.2-0917-1400 · 서희타워</span>
+  <span class="ver">v7.28.0-0917-1600 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -552,106 +624,128 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
   <div class="modal">
     <div class="mhd"><b id="mTitle">＋ 기록 추가</b><button class="x" id="mClose">✕</button></div>
     <div class="mbody">
-      <div class="frow">
-        <label>종류</label>
-        <div class="kindPick" id="kindPick"></div>
+      <div class="kindSwitchRow">
+        <span class="kindNow" id="kindNowLabel"></span>
+        <button type="button" class="mgrbtn tiny" id="kindSwitchBtn">⋯ 다른 종류로</button>
       </div>
-      <div class="frow"><label>날짜</label><input type="date" id="fDate" style="max-width:200px"></div>
-      <div class="frow">
-        <label>제목</label>
-        <input type="text" id="fTitle" placeholder="제목을 적어 주세요">
-      </div>
-      <div class="frow">
-        <label id="lblOneLiner">⚡ 핵심 1줄</label>
-        <input type="text" id="fOneLiner" placeholder="30초 판단 — 이 기록의 결론을 한 줄로">
-      </div>
-      <div class="frow" id="rowChannel">
-        <label id="lblChannel">채널 / 출처</label>
-        <input type="text" id="fChannel">
-      </div>
-      <div class="frow" id="rowLink">
-        <label id="lblLink">🔗 링크</label>
-        <input type="url" id="fLink" placeholder="https://...">
-      </div>
-      <div class="frow">
-        <label>🏷 종목</label>
-        <div class="stockTags" id="stockTagsBox"></div>
-        <div class="stockAdd">
-          <input type="text" id="stockInput" placeholder="종목명 입력 후 Enter (예: 엔비디아)" list="stockDatalist">
-          <datalist id="stockDatalist"></datalist>
-          <button type="button" class="go" id="stockAddBtn">추가</button>
+      <div class="kindPick" id="kindPick" style="display:none;margin-bottom:10px"></div>
+
+      <div id="primaryZone">
+        <div class="frow" id="rowTitle">
+          <label>제목 (선택 — 비워두면 자동으로 채워져요)</label>
+          <input type="text" id="fTitle" placeholder="제목을 적어 주세요">
+        </div>
+        <div class="frow" id="rowAttach">
+          <label>📷 사진 추가</label>
+          <div class="attachBar">
+            <button type="button" class="mgrbtn" id="attPickBtn">🖼 사진 선택</button>
+            <span class="attHint">여러 장 선택 · 붙여넣기 · 끌어놓기 가능</span>
+          </div>
+          <input type="file" id="fAttachInput" accept="image/*" multiple style="display:none">
+          <div class="attDrop" id="attDrop">사진을 여기로 끌어놓을 수 있어요 (PC)</div>
+          <div class="attGrid" id="attGrid"></div>
+          <div class="attMsg" id="attMsg"></div>
+        </div>
+        <div class="frow" id="rowBody">
+          <label id="lblBody">📄 본문</label>
+          <textarea id="fBody" placeholder="" style="min-height:160px"></textarea>
+        </div>
+        <div class="frow" id="rowOneLiner">
+          <label id="lblOneLiner">이유·배경 (선택)</label>
+          <input type="text" id="fOneLiner" placeholder="">
+        </div>
+        <div class="frow" id="rowLink">
+          <label id="lblLink">🔗 링크</label>
+          <input type="url" id="fLink" placeholder="https://...">
         </div>
       </div>
-      <div class="frow">
-        <label>🧩 주제 (선택) — 쉼표로 구분 (예: HBM, AI, 금리)</label>
-        <input type="text" id="fTopics" placeholder="HBM, AI, 금리">
-      </div>
-      <div class="frow2">
-        <div class="frow" id="rowAction"><label id="lblAction">🎯 액션</label>
-          <div class="actionPick" id="actionPick"></div>
-          <input type="text" id="fActionOther" placeholder="직접 입력…" style="display:none;margin-top:6px">
-        </div>
-        <div class="frow"><label id="lblStar">⭐ 볼 가치</label>
-          <div class="starRow" id="starRow">
-          <span data-s="1">★</span><span data-s="2">★</span><span data-s="3">★</span><span data-s="4">★</span><span data-s="5">★</span>
+
+      <details id="moreFields">
+        <summary>추가 속성 <span id="moreFieldsBadge"></span></summary>
+        <div class="moreFieldsBody">
+          <div class="frow"><label>날짜</label><input type="date" id="fDate" style="max-width:200px"></div>
+          <div class="frow" id="rowChannel">
+            <label id="lblChannel">채널 / 출처</label>
+            <input type="text" id="fChannel">
+          </div>
+          <div class="frow">
+            <label>🏷 종목</label>
+            <div class="stockTags" id="stockTagsBox"></div>
+            <div class="stockAdd">
+              <input type="text" id="stockInput" placeholder="종목명 입력 후 Enter (예: 엔비디아)" list="stockDatalist">
+              <datalist id="stockDatalist"></datalist>
+              <button type="button" class="go" id="stockAddBtn">추가</button>
+            </div>
+          </div>
+          <div class="frow">
+            <label>🧩 주제 (선택) — 쉼표로 구분 (예: HBM, AI, 금리)</label>
+            <input type="text" id="fTopics" placeholder="HBM, AI, 금리">
+          </div>
+          <div class="frow2">
+            <div class="frow" id="rowAction"><label id="lblAction">🎯 액션</label>
+              <div class="actionPick" id="actionPick"></div>
+              <input type="text" id="fActionOther" placeholder="직접 입력…" style="display:none;margin-top:6px">
+            </div>
+            <div class="frow"><label id="lblStar">⭐ 볼 가치</label>
+              <div class="starRow" id="starRow">
+              <span data-s="1">★</span><span data-s="2">★</span><span data-s="3">★</span><span data-s="4">★</span><span data-s="5">★</span>
+              </div>
+            </div>
+          </div>
+          <div class="frow">
+            <label>🔍 검증 상태 (선택)</label>
+            <select id="fVerify"></select>
+          </div>
+          <div class="frow">
+            <label>🤖 AI 해석 (선택) — AI가 해석한 것 (내 판단과 구분)</label>
+            <textarea id="fAiInterp" placeholder="AI가 이 자료를 어떻게 해석했는지 (있으면)" style="min-height:60px"></textarea>
+          </div>
+          <div class="frow">
+            <label>🙋 내 판단 (선택) — 내가 판단한 것</label>
+            <textarea id="fUserJudge" placeholder="이 자료를 보고 내가 내린 판단" style="min-height:60px"></textarea>
+          </div>
+          <div class="frow" id="scenarioBox" style="display:none">
+            <label>🧭 시나리오 — 상승·중립·하락 (아이디어 기록 전용, 투자 판단으로 발전시킬 때만)</label>
+            <textarea id="fScenCommon" placeholder="세 시나리오가 공통으로 보는 전제 (공통 사실)" style="min-height:50px"></textarea>
+            <div class="scenGrid">
+              <div class="scenCol"><b>📈 상승</b>
+                <textarea id="fScenUpDesc" placeholder="상승 시나리오 내용"></textarea>
+                <input type="text" id="fScenUpStrengthen" placeholder="강화 조건">
+                <input type="text" id="fScenUpInvalidate" placeholder="무효화 조건">
+              </div>
+              <div class="scenCol"><b>◾ 중립</b>
+                <textarea id="fScenNeutralDesc" placeholder="중립 시나리오 내용"></textarea>
+                <input type="text" id="fScenNeutralStrengthen" placeholder="강화 조건">
+                <input type="text" id="fScenNeutralInvalidate" placeholder="무효화 조건">
+              </div>
+              <div class="scenCol"><b>📉 하락</b>
+                <textarea id="fScenDownDesc" placeholder="하락 시나리오 내용"></textarea>
+                <input type="text" id="fScenDownStrengthen" placeholder="강화 조건">
+                <input type="text" id="fScenDownInvalidate" placeholder="무효화 조건">
+              </div>
+            </div>
+          </div>
+          <div class="frow">
+            <label>🕒 나중에 볼 것 — 언제 무엇을 확인할지</label>
+            <div id="checksBox"></div>
+            <button type="button" class="mgrbtn" id="checkAddBtn" style="margin-top:6px">＋ 확인일 추가</button>
           </div>
         </div>
-      </div>
-      <div class="frow">
-        <label>🔍 검증 상태 (선택)</label>
-        <select id="fVerify"></select>
-      </div>
-      <div class="frow">
-        <label>🤖 AI 해석 (선택) — AI가 해석한 것 (내 판단과 구분)</label>
-        <textarea id="fAiInterp" placeholder="AI가 이 자료를 어떻게 해석했는지 (있으면)" style="min-height:60px"></textarea>
-      </div>
-      <div class="frow">
-        <label>🙋 내 판단 (선택) — 내가 판단한 것</label>
-        <textarea id="fUserJudge" placeholder="이 자료를 보고 내가 내린 판단" style="min-height:60px"></textarea>
-      </div>
-      <div class="frow" id="scenarioBox" style="display:none">
-        <label>🧭 시나리오 — 상승·중립·하락 (아이디어 기록 전용)</label>
-        <textarea id="fScenCommon" placeholder="세 시나리오가 공통으로 보는 전제 (공통 사실)" style="min-height:50px"></textarea>
-        <div class="scenGrid">
-          <div class="scenCol"><b>📈 상승</b>
-            <textarea id="fScenUpDesc" placeholder="상승 시나리오 내용"></textarea>
-            <input type="text" id="fScenUpStrengthen" placeholder="강화 조건">
-            <input type="text" id="fScenUpInvalidate" placeholder="무효화 조건">
-          </div>
-          <div class="scenCol"><b>◾ 중립</b>
-            <textarea id="fScenNeutralDesc" placeholder="중립 시나리오 내용"></textarea>
-            <input type="text" id="fScenNeutralStrengthen" placeholder="강화 조건">
-            <input type="text" id="fScenNeutralInvalidate" placeholder="무효화 조건">
-          </div>
-          <div class="scenCol"><b>📉 하락</b>
-            <textarea id="fScenDownDesc" placeholder="하락 시나리오 내용"></textarea>
-            <input type="text" id="fScenDownStrengthen" placeholder="강화 조건">
-            <input type="text" id="fScenDownInvalidate" placeholder="무효화 조건">
-          </div>
-        </div>
-      </div>
-      <div class="frow">
-        <label id="lblBody">📄 본문 — 전체 요약을 통째로 붙여넣으세요</label>
-        <textarea id="fBody" placeholder="유튜브 요약기에서 만든 전체 요약을 여기에 붙여넣으면, 나중에 📄 페이지 보기에서 그대로 다시 볼 수 있어요" style="min-height:200px"></textarea>
-      </div>
-      <div class="frow">
-        <label>🖼 이미지 (선택) — 차트 캡처 등, 갤러리 보기에 표지로 쓰여요</label>
-        <div id="imgPreviewBox" style="display:none;margin-bottom:8px">
-          <img id="imgPreview" alt="">
-          <button type="button" class="mgrbtn" id="imgRemoveBtn">✕ 이미지 제거</button>
-        </div>
-        <input type="file" id="fImageInput" accept="image/*">
-        <div id="imgUploadStatus"></div>
-      </div>
-      <div class="frow">
-        <label>📅 체크 캘린더 — 언제 무엇을 확인할지</label>
-        <div id="checksBox"></div>
-        <button type="button" class="mgrbtn" id="checkAddBtn" style="margin-top:6px">＋ 확인일 추가</button>
-      </div>
+      </details>
     </div>
     <div class="mfoot">
       <button class="save" id="mSave">저장</button>
       <button class="del2" id="mDel" style="display:none">삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- 사진 확대보기 -->
+<div class="ovwrap" id="attZoomModal">
+  <div class="modal" style="max-width:min(92vw,900px);background:transparent;box-shadow:none">
+    <div class="mhd" style="border-radius:12px 12px 0 0"><b>사진</b><button class="x" id="attZoomClose">✕</button></div>
+    <div class="mbody" style="padding:0;text-align:center;background:#111;border-radius:0 0 12px 12px">
+      <img id="attZoomImg" alt="" style="max-width:100%;max-height:80vh;display:block;margin:0 auto">
     </div>
   </div>
 </div>
@@ -754,17 +848,64 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
       <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap">
         <label style="font-size:12.5px;color:var(--sub)">관계</label>
         <select id="relType" style="padding:5px 8px;border:1px solid var(--line);border-radius:7px;font-size:12.5px">
-          <option value="references">참고 자료 (references)</option>
-          <option value="supports">뒷받침 (supports)</option>
-          <option value="contradicts">반박/상충 (contradicts)</option>
-          <option value="same_event">같은 사건 (same_event)</option>
-          <option value="same_topic">같은 주제 (same_topic)</option>
-          <option value="related" selected>관련 (related)</option>
+          <option value="related" selected>관련 있어요</option>
+          <option value="references">참고했어요</option>
+          <option value="derived_from">생각의 출발점이에요</option>
+          <option value="supports">뒷받침해요</option>
+          <option value="contradicts">반대 근거예요</option>
         </select>
         <input type="text" id="relSearch" placeholder="제목·종목·주제·채널로 검색" style="flex:1 1 160px;padding:6px 10px;border:1px solid var(--line);border-radius:7px;font-size:12.5px">
       </div>
       <div id="relResults" style="max-height:340px;overflow:auto"></div>
     </div>
+  </div>
+</div>
+
+<!-- v7.28: 이어서 생각하기 — 원본은 바뀌지 않고 새 메모/아이디어가 원본을 참조 -->
+<div class="ovwrap" id="continueModal">
+  <div class="modal" style="max-width:520px">
+    <div class="mhd"><b>💭 이어서 생각하기</b><button class="x" id="contClose">✕</button></div>
+    <div class="mbody">
+      <div class="frow"><label>새 기록 종류</label>
+        <div class="kindPick" id="contKindPick">
+          <button type="button" data-k="memo" class="on">📝 메모</button>
+          <button type="button" data-k="idea">💡 아이디어</button>
+        </div>
+      </div>
+      <div class="frow"><label>제목 (선택 — 비워두면 자동으로 채워져요)</label><input type="text" id="contTitle" placeholder="제목"></div>
+      <div class="frow"><label>이어지는 생각</label><textarea id="contBody" style="min-height:140px" placeholder="여기서 이어지는 생각을 적어주세요"></textarea></div>
+      <div style="font-size:11.5px;color:var(--sub2)">저장하면 이 기록이 "출발점"으로 표시돼요. 원본은 바뀌지 않아요.</div>
+    </div>
+    <div class="mfoot"><button class="save" id="contSave">저장</button></div>
+  </div>
+</div>
+
+<!-- v7.28: 모아 정리하기 — 선택한 기록들을 근거로 새 공부노트/아이디어를 만든다(원문 자동 복제 없음) -->
+<div class="ovwrap" id="synthModal">
+  <div class="modal" style="max-width:560px">
+    <div class="mhd"><b>🧩 모아 정리하기</b><button class="x" id="synthClose">✕</button></div>
+    <div class="mbody">
+      <div class="frow">
+        <label>모을 기록</label>
+        <div class="stockTags" id="synthSrcBox"></div>
+        <input type="text" id="synthSearch" placeholder="제목·주제로 검색해서 추가">
+        <div id="synthResults" style="max-height:180px;overflow:auto;margin-top:6px"></div>
+      </div>
+      <div class="frow"><label>정리할 곳</label>
+        <div class="kindPick" id="synthKindPick">
+          <button type="button" data-k="study" class="on">📚 공부노트</button>
+          <button type="button" data-k="idea">💡 아이디어</button>
+        </div>
+      </div>
+      <div class="frow" id="synthIdeaFields" style="display:none">
+        <label>제목 (선택 — 비워두면 자동으로 채워져요)</label>
+        <input type="text" id="synthTitle" placeholder="제목" style="margin-bottom:8px">
+        <label>정리 내용</label>
+        <textarea id="synthBody" style="min-height:120px" placeholder="선택한 기록들을 보고 직접 정리해서 적어주세요"></textarea>
+      </div>
+      <div style="font-size:11.5px;color:var(--sub2)">선택한 원본은 수정·삭제되지 않아요. 원문을 그대로 복제하지 않으니 직접 정리해서 적어주세요.</div>
+    </div>
+    <div class="mfoot"><button class="save" id="synthSave">정리 시작</button></div>
   </div>
 </div>
 <div class="ovwrap" id="pageModal">
@@ -897,54 +1038,88 @@ const KINDS = {
 };
 const KIND_ORDER = ['youtube','news','idea','chart','memo'];
 
-/* ── 종류별 모달 필드 커스터마이즈 — 탭마다 성격이 달라서 라벨·항목을 따로 잡는다 ── */
+/* ── 종류별 모달 필드 커스터마이즈 — 탭마다 성격이 달라서 라벨·항목을 따로 잡는다 ──
+   v7.28: bodyLbl/bodyPh 는 "1차 화면"(작성창 맨 위) 문구로, oneLiner 는 idea 만 1차(이유·배경)이고
+   나머지는 "추가 속성" 안의 선택 필드(핵심 1줄)로 내려간다 — KIND_PRIMARY 가 배치를 결정. */
 const KIND_FIELDS = {
   youtube: {
-    oneLinerLbl:'⚡ 핵심 1줄', oneLinerPh:'30초 판단 — 이 기록의 결론을 한 줄로',
+    oneLinerLbl:'⚡ 핵심 1줄 (선택)', oneLinerPh:'30초 판단 — 이 기록의 결론을 한 줄로',
     showChannel:true, chBoxLbl:'📺 채널',
     showLink:true, linkLbl:'🔗 영상 링크',
     showAction:true, actionLbl:'🎯 액션', actionPh:'관망 / 매수검토 / 비중축소…',
     starLbl:'⭐ 볼 가치',
-    bodyLbl:'📄 본문 — 전체 요약을 통째로 붙여넣으세요',
-    bodyPh:'유튜브 요약기에서 만든 전체 요약을 여기에 붙여넣으면, 나중에 📄 페이지 보기에서 그대로 다시 볼 수 있어요'
+    bodyLbl:'📄 남겨둘 내용 (선택)',
+    bodyPh:'영상 요약이나 남겨두고 싶은 내용을 적어주세요 — 통째로 붙여넣어도 좋아요'
   },
   news: {
-    oneLinerLbl:'⚡ 핵심 1줄', oneLinerPh:'이 뉴스가 왜 중요한지 한 줄로',
+    oneLinerLbl:'⚡ 핵심 1줄 (선택)', oneLinerPh:'이 뉴스가 왜 중요한지 한 줄로',
     showChannel:true, chBoxLbl:'📰 매체',
     showLink:true, linkLbl:'🔗 기사 링크',
     showAction:true, actionLbl:'📈 호재/악재', actionPh:'호재 / 악재 / 중립…',
     starLbl:'⭐ 중요도',
-    bodyLbl:'📄 본문 — 기사 요약이나 관련 내용을 적어주세요',
-    bodyPh:'기사 내용, 배경, 관련 종목에 미칠 영향 등을 적어주세요'
+    bodyLbl:'📄 남겨둘 내용 (선택)',
+    bodyPh:'기사에서 남겨두고 싶은 내용이나 생각을 적어주세요'
   },
   idea: {
-    oneLinerLbl:'💡 핵심 가설', oneLinerPh:'이 아이디어의 결론을 한 줄로',
+    oneLinerLbl:'이유·배경 (선택)', oneLinerPh:'왜 이런 생각이 들었는지',
     showChannel:true, chBoxLbl:'출처(선택)',
     showLink:false, linkLbl:'🔗 참고 링크',
     showAction:true, actionLbl:'🎯 전략', actionPh:'분할매수 / 스크리닝 / 관망…',
     starLbl:'⭐ 확신도',
-    bodyLbl:'📄 근거 — 왜 그렇게 생각했는지',
-    bodyPh:'아이디어의 근거, 전제, 리스크 요인을 적어주세요'
+    bodyLbl:'💡 떠오른 생각',
+    bodyPh:'지금 떠오른 생각을 적어주세요'
   },
   chart: {
-    oneLinerLbl:'👁 관찰 포인트', oneLinerPh:'차트에서 눈에 띈 것을 한 줄로',
+    oneLinerLbl:'⚡ 핵심 1줄 (선택)', oneLinerPh:'차트에서 눈에 띈 것을 한 줄로',
     showChannel:false, chBoxLbl:'출처(선택)',
-    showLink:true, linkLbl:'🔗 이미지/차트 링크',
+    showLink:true, linkLbl:'🔗 출처 링크',
     showAction:true, actionLbl:'🔍 해석', actionPh:'수급 전환 / 패턴 완성 / 저항 돌파…',
     starLbl:'⭐ 신뢰도',
-    bodyLbl:'📄 분석 — 캡처에서 읽은 내용',
-    bodyPh:'수급·거래량·패턴 등 캡처에서 읽은 내용을 적어주세요'
+    bodyLbl:'👁 관찰·궁금한 점 (선택)',
+    bodyPh:'차트를 보고 관찰한 것이나 궁금한 점을 적어주세요'
   },
   memo: {
-    oneLinerLbl:'⚡ 핵심 1줄', oneLinerPh:'메모의 결론을 한 줄로 (선택)',
+    oneLinerLbl:'⚡ 핵심 1줄 (선택)', oneLinerPh:'메모의 결론을 한 줄로 (선택)',
     showChannel:false, chBoxLbl:'출처(선택)',
     showLink:false, linkLbl:'🔗 참고 링크',
     showAction:false, actionLbl:'🎯 액션', actionPh:'',
     starLbl:'⭐ 중요도',
-    bodyLbl:'📄 메모',
-    bodyPh:'자유롭게 적어주세요'
+    bodyLbl:'📝 내용',
+    bodyPh:'자유롭게 적어주세요 — 사진만 남겨도 괜찮아요'
   }
 };
+/* v7.28: 종류별 1차 화면 배치 — photoFirst 는 사진 섹션을 본문보다 위에,
+   showLinkPrimary/showReasonPrimary 는 링크·이유배경 행을 1차 화면에 남길지(아니면 "추가 속성"으로) 결정.
+   본문/사진은 모든 종류에서 항상 1차 화면(스펙: 사진 버튼은 어떤 작성창에서도 항상 접근 가능). */
+const KIND_PRIMARY = {
+  youtube: {photoFirst:false, showLinkPrimary:true,  showReasonPrimary:false},
+  news:    {photoFirst:false, showLinkPrimary:true,  showReasonPrimary:false},
+  idea:    {photoFirst:false, showLinkPrimary:false, showReasonPrimary:true},
+  chart:   {photoFirst:true,  showLinkPrimary:false, showReasonPrimary:false},
+  memo:    {photoFirst:false, showLinkPrimary:false, showReasonPrimary:false}
+};
+/* 1차 화면 안에서 rowTitle/rowAttach/rowBody/rowOneLiner/rowLink 를 종류에 맞는 순서로 재배치하고,
+   1차가 아닌 행은 "추가 속성"(#moreFields) 맨 앞으로 옮긴다 — 필드 자체(및 리스너)는 그대로 두고
+   DOM 위치만 옮기므로 값 read/write 코드는 손대지 않는다. */
+function layoutKindPrimary(kind){
+  var cfg = KIND_PRIMARY[kind] || KIND_PRIMARY.memo;
+  var zone = document.getElementById('primaryZone');
+  var more = document.querySelector('#moreFields .moreFieldsBody');
+  var rowTitle = document.getElementById('rowTitle');
+  var rowAttach = document.getElementById('rowAttach');
+  var rowBody = document.getElementById('rowBody');
+  var rowOneLiner = document.getElementById('rowOneLiner');
+  var rowLink = document.getElementById('rowLink');
+  var order = [rowTitle];
+  if(cfg.photoFirst) order.push(rowAttach);
+  order.push(rowBody);
+  if(!cfg.photoFirst) order.push(rowAttach);
+  if(cfg.showReasonPrimary){ order.push(rowOneLiner); rowOneLiner.style.display=''; }
+  else { more.insertBefore(rowOneLiner, more.firstChild); }
+  if(cfg.showLinkPrimary){ order.push(rowLink); }
+  else { more.insertBefore(rowLink, more.firstChild); }
+  order.forEach(function(el){ zone.appendChild(el); });
+}
 
 /* ══════════════════════════════════════════════════════════
    v5: 검증 상태 — 투자두뇌 구조 4번 원칙(확인된 사실~검증 필요)
@@ -1025,6 +1200,30 @@ function applyKindFields(kind){
   renderActionPick(kind, _curEditingAction);
   var scenBox = document.getElementById('scenarioBox');
   if(scenBox) scenBox.style.display = (kind==='idea') ? '' : 'none';
+  layoutKindPrimary(kind);
+  var km = KINDS[kind] || KINDS.memo;
+  var kn = document.getElementById('kindNowLabel');
+  if(kn) kn.textContent = km.i + ' ' + km.n;
+}
+/* v7.28: "기존 추가 정보 N개" 뱃지 — 추가 속성 패널을 열어보지 않아도 값이 있다는 걸 알려준다.
+   패널은 항상 같은 DOM(값 유지)이라 이 카운트는 표시용일 뿐, 저장 시 값 손실과는 무관하다. */
+function updateMoreFieldsBadge(r){
+  var badge = document.getElementById('moreFieldsBadge');
+  var more = document.getElementById('moreFields');
+  if(!badge || !more) return;
+  if(!r){ badge.textContent=''; more.open=false; return; }
+  var n = 0;
+  if(r.channel) n++;
+  if((r.stocks||[]).length) n++;
+  if((r.topics||[]).length) n++;
+  if(r.action) n++;
+  if(r.star) n++;
+  if(r.verifyState) n++;
+  if(r.aiInterpretation) n++;
+  if(r.userJudgment) n++;
+  if(r.scenarios && scenarioHasContent(r.scenarios)) n++;
+  if((r.checks||[]).length) n++;
+  badge.textContent = n ? ('기존 추가 정보 '+n+'개') : '';
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1048,19 +1247,28 @@ var curStock = '';
    v7.9에서 고친 "하이라이트 잔류" 버그의 근본 원인(두 상태가 한 변수에 얽혀 있던 것) 자체가 사라진다. */
 var stockMode = false;
 var curStockTab = ''; // 종목모드 안에서 특정 종목 하나를 골라 그 기록들을 보는 중이면 그 이름(빈 값=종목 목록 자체)
+/* v7.28: "🕒 나중에" — stockMode와 같은 방식의 독립 모드 스위치(실제 kind 아님). checks[](모든 날짜+기한
+   없음)와 공부노트 재검토 항목을 한 목록으로 모은다. 8개 보기와 무관한 전용 목록 하나만 그린다. */
+var laterMode = false;
+var laterDoneFilter = ''; // '' 전체(기본 미완료 위주) / 'undone' / 'done'
+var laterActionFilter = ''; // '' / lookup / think / reread / other
+var laterTopicFilter = '';
 var curVerify = ''; // v5: 검증상태 필터
 var curTopic = ''; // v7.15: Topic 필터 (stocks와 별개)
 var curQ = '';
 var DUE_SHOW=3, TODO_SHOW=4, dueExpanded=false, todoExpanded=false; // v7.16: 오늘 할 일 더보기/접기
 var hideDone = (function(){ try{ return localStorage.getItem('rec_hide_done')!=='0'; }catch(e){ return true; } })(); // v7.18 완료 숨김(기본 ON)
-var REL_SRC=''; var REL_TYPE_LBL={references:'참고 자료',supports:'뒷받침',contradicts:'반박/상충',same_event:'같은 사건',same_topic:'같은 주제',related:'관련'};
-var REL_REV_LBL={references:'이 자료를 참고한 기록',supports:'이 기록이 뒷받침받음',contradicts:'이 기록과 상충',same_event:'같은 사건',same_topic:'같은 주제',related:'관련'};
+var REL_SRC=''; var REL_TYPE_LBL={references:'참고 자료',supports:'뒷받침',contradicts:'반박/상충',same_event:'같은 사건',same_topic:'같은 주제',related:'관련',derived_from:'생각의 출발점',synthesizes:'정리에 사용한 자료'};
+var REL_REV_LBL={references:'이 자료를 참고한 기록',supports:'이 기록이 뒷받침받음',contradicts:'이 기록과 상충',same_event:'같은 사건',same_topic:'같은 주제',related:'관련',derived_from:'이 기록에서 생각이 이어짐',synthesizes:'이 기록이 정리에 포함됨'};
 var todayExpanded=false, TODAY_SHOW=5; // v7.19 오늘 할 일 통합 목록
 var curStar='', curChannel='', curDateRange=''; // v7.20~24 별표·출처·날짜 필터(기존 데이터만)
 var calYM = todayStr().slice(0,7);
 var EDIT = null; // 지금 수정 중인 기록 id (null이면 새로 추가)
 var pickedStocks = []; // 모달 안에서 고르는 중인 종목들
-var pickedImage = {url:'', path:''}; // 모달 안에서 고른 이미지 — Storage 업로드 후 URL만 기록에 저장(base64 금지)
+/* v7.28: 다중 사진 첨부 — 항목별 {id,path,url,name,size,type,caption,order,addedAt,status:'uploading'|'stored'|'error',note,file}
+   Storage 업로드 후 URL만 기록에 저장(base64 금지). 대표 사진(order 0)은 저장 때 image/imagePath 로도 투영해 구버전 소비 경로 호환. */
+var pickedAttachments = [];
+var ATT_MAX_CONCURRENT = 3; // 모바일에서 동시 업로드가 여러 장이면 멈추는 것 방지
 var PAGE_OPEN = null; // 지금 페이지 보기로 열려 있는 기록 id
 /* v7.27 공부노트 — 보기 상태(탭 복귀·새로고침 뒤에도 유지) */
 function _ssGet(k,d){ try{ var v=sessionStorage.getItem(k); return v==null?d:v; }catch(e){ return d; } }
@@ -1078,13 +1286,22 @@ function _recSig(r){ return r ? String(r.studyRevision||0)+'|'+(r.updatedAt||0)+
 var _studyApi = null;
 function studyApi(){
   if(!_studyApi){
-    _studyApi = import('./js/study/study-app.mjs?v=7.27.2').then(function(m){
+    _studyApi = import('./js/study/study-app.mjs?v=7.28.0').then(function(m){
       return m.init({db:db, storage:storage, records:function(){ return records; }, toast:toast, logBug:logBug, KINDS:KINDS, VERIFY_STATES:VERIFY_STATES, VERIFY_ORDER:VERIFY_ORDER, allStockNames:allStockNames, addStockToMaster:addStockToMaster});
     }).catch(function(e){ _studyApi=null; logBug('공부노트 모듈 로드 실패: '+e.message); toast('공부노트 기능을 불러오지 못했어요 — 연결 확인 후 새로고침해 주세요'); throw e; });
   }
   return _studyApi;
 }
 function studyDo(fn){ return studyApi().then(fn).catch(function(e){ logBug('공부노트 동작 실패: '+(e&&e.message)); }); }
+
+/* v7.28: 다중 첨부·최소저장조건·나중에볼것 순수 로직 모듈 — 즉시(eager) 불러온다(study처럼 클릭 시 지연 로드하지
+   않음: 오늘의 체크리스트 위젯이 페이지 로드 직후부터 이 모듈을 쓰기 때문). 모듈이 아직 안 왔을 때 호출되는
+   지점들은 각자 RC null 체크로 방어하고, 로드 완료 시 한 번 더 그려서 보강한다(첫 렌더가 늦지 않는다). */
+var RC = null;
+var _rcReady = import('./js/records-core.mjs?v=7.28.0').then(function(m){
+  RC = m;
+  try{ if(recordsLoaded){ render(); renderTodos(); } }catch(e){}
+}).catch(function(e){ logBug('records-core 로드 실패: '+e.message); });
 
 function startListeners(){
   if(!db) return;
@@ -1541,34 +1758,49 @@ setInterval(checkDayRollover, 60000);
    curView만 그대로 바꾸고 그 값을 render()가 stockMode 여부에 따라 "레코드"에 적용할지
    "종목 목록"에 적용할지 고를 뿐이라, 두 UI(탭 줄/아이콘 줄)가 서로 다른 상태를 각자 책임져서
    v7.9의 버그(한 값이 두 UI에 걸쳐 있어 한쪽 갱신을 빠뜨리면 하이라이트가 어긋나던 것) 자체가 구조적으로 없어짐 */
-var KTAB_ORDER = ['youtube','news','__stock__','study','idea','chart','memo']; // v7.27: 공부노트 탭
+var KTAB_ORDER = ['youtube','news','__stock__','study','idea','chart','memo','__later__']; // v7.27: 공부노트 탭, v7.28: 나중에 탭
+function laterCount(){
+  if(!RC) return 0;
+  return RC.collectDueChecks(records, todos, {onlyUndone:true}).length + RC.studyReviewItems(records, studyNeedsReview).length;
+}
 function renderKtabs(){
   var total = records.length;
-  var html = '<span class="ktab'+(curKind==='전체'&&!stockMode?' on':'')+'" data-k="전체">전체<span class="n">'+total+'</span></span>';
+  var html = '<span class="ktab'+(curKind==='전체'&&!stockMode&&!laterMode?' on':'')+'" data-k="전체">전체<span class="n">'+total+'</span></span>';
   KTAB_ORDER.forEach(function(k){
     if(k==='__stock__'){
       var sn = allStockNames().length;
       html += '<span class="ktab'+(stockMode?' on':'')+'" data-stocktabbtn="1">🏷 종목<span class="n">'+sn+'</span></span>';
       return;
     }
+    if(k==='__later__'){
+      html += '<span class="ktab'+(laterMode?' on':'')+'" data-latertabbtn="1">🕒 나중에<span class="n">'+laterCount()+'</span></span>';
+      return;
+    }
     var meta = KINDS[k];
     var n = records.filter(function(r){ return r.kind===k; }).length;
-    html += '<span class="ktab'+(curKind===k&&!stockMode?' on':'')+'" data-k="'+k+'">'+meta.i+' '+meta.n+'<span class="n">'+n+'</span></span>';
+    html += '<span class="ktab'+(curKind===k&&!stockMode&&!laterMode?' on':'')+'" data-k="'+k+'">'+meta.i+' '+meta.n+'<span class="n">'+n+'</span></span>';
   });
   var host = document.getElementById('ktabs');
   host.innerHTML = html;
   host.querySelectorAll('[data-k]').forEach(function(el){
     el.addEventListener('click', function(){
       curKind = el.getAttribute('data-k');
-      stockMode = false;
+      stockMode = false; laterMode = false;
       syncViewIcons(); render(); renderKtabs();
     });
   });
   var stockBtn = host.querySelector('[data-stocktabbtn]');
   if(stockBtn){
     stockBtn.addEventListener('click', function(){
-      stockMode = !stockMode;
+      stockMode = !stockMode; laterMode = false;
       if(!stockMode) curStockTab = ''; // 종목모드를 완전히 나갈 땐 드릴다운 상태도 같이 리셋
+      syncViewIcons(); render(); renderKtabs();
+    });
+  }
+  var laterBtn = host.querySelector('[data-latertabbtn]');
+  if(laterBtn){
+    laterBtn.addEventListener('click', function(){
+      laterMode = !laterMode; stockMode = false;
       syncViewIcons(); render(); renderKtabs();
     });
   }
@@ -1761,7 +1993,10 @@ function filtered(){
   if(curQ){
     var q = curQ.toLowerCase();
     arr = arr.filter(function(r){
-      var hay = [r.title,r.oneLiner,r.body,r.action,r.channel,(r.stocks||[]).join(' '),(r.topics||[]).join(' '),(r.industries||[]).join(' '),(r.themes||[]).join(' '),r.aiInterpretation,r.userJudgment].join(' ').toLowerCase();
+      /* v7.28: 사진 설명(caption)과 "나중에 볼 것"(checks[].what)도 검색에 포함 — 이미지 속 글자(OCR)는 대상 아님 */
+      var attCaps = (RC ? RC.getAttachments(r) : (r.attachments||[])).map(function(a){ return a.caption||''; }).join(' ');
+      var checkWhats = (r.checks||[]).map(function(c){ return c.what||''; }).join(' ');
+      var hay = [r.title,r.oneLiner,r.body,r.action,r.channel,(r.stocks||[]).join(' '),(r.topics||[]).join(' '),(r.industries||[]).join(' '),(r.themes||[]).join(' '),r.aiInterpretation,r.userJudgment,attCaps,checkWhats].join(' ').toLowerCase();
       return hay.indexOf(q)>=0;
     });
   }
@@ -1775,7 +2010,9 @@ function filtered(){
 function render(){
   /* v7.10: "🏷 종목" 모드는 curKind 필터·레코드 빈 상태 가드와 완전히 무관한 별도 화면이라
      맨 앞에서 분기 — 기존 레코드 렌더 경로는 한 줄도 안 바뀜(아래 그대로) */
+  document.getElementById('viewicons').style.display = laterMode ? 'none' : '';
   if(stockMode){ document.getElementById('btnAdd').textContent = '＋ 기록 추가'; renderStockMode(); return; }
+  if(laterMode){ document.getElementById('btnAdd').textContent = '＋ 기록 추가'; document.getElementById('btnClearFlt').style.display='none'; renderLaterMode(); return; }
   var arr = filtered();
   /* v6: 필터가 하나도 안 걸려있으면 필터해제 버튼을 숨김(눌러도 아무 일 안 일어나는 혼란 방지) */
   var hasFilter = (curKind!=='전체' || !!curStock || !!curVerify || !!curTopic || !!curQ || !!curStudyStatus);
@@ -1942,6 +2179,11 @@ function nextCheck(r){
   var future = list.filter(function(d){ return d>=t; });
   return future.length ? future[0] : list[list.length-1];
 }
+function cardThumbHTML(r){
+  var atts = RC ? RC.getAttachments(r) : (r.image ? [{url:r.image}] : []);
+  if(!atts.length) return '';
+  return '<div class="rcThumb"><img src="'+esc(atts[0].url)+'" alt="" loading="lazy">'+(atts.length>1?'<span class="rcThumbN">+'+(atts.length-1)+'</span>':'')+'</div>';
+}
 function cardOne(r){
   var k = KINDS[r.kind] || KINDS.memo;
   var stars = r.star ? ('<span class="star">'+'★'.repeat(r.star)+'</span>') : '';
@@ -1956,6 +2198,7 @@ function cardOne(r){
   if(isStudyRec(r)) scenTag += ' <span class="dt" style="background:#f3eefb;color:#6b46a8">'+esc(STUDY_STATUS_LBL[r.studyStatus||'learning']||'')+(r.asOfDate?' · 기준 '+esc(fmtDate(r.asOfDate)):'')+'</span>';
   return '<div class="rcard '+r.kind+'" data-open="'+esc(r.id)+'">'
     + '<button class="del" data-del="'+esc(r.id)+'">🗑</button>'
+    + cardThumbHTML(r)
     + '<div class="kind">'+k.i+' '+k.n+(r.channel?(' · '+esc(r.channel)):'')+' '+stars+vbadge+'</div>'
     + '<div class="title">'+esc(r.title||'')+'</div>'
     + sub
@@ -2036,6 +2279,126 @@ function boardHTML(arr){
         }).join('')
       + '</div>';
   }).join('') + '</div>';
+}
+
+/* ══════════════════════════════════════════════════════════
+   v7.28: "🕒 나중에" 통합 보기 — 자료 종류와 무관한 공통 보기.
+   기존 checks[](오늘의 체크리스트가 쓰던 것과 같은 dueKey/records_todos 완료마커 방식 재사용, 날짜 전체+빈 날짜
+   포함) + 공부노트 재검토(studyNeedsReview, 읽기 전용 행) 를 한 목록으로 모은다. 새 kind·새 컬렉션 없음.
+   ══════════════════════════════════════════════════════════ */
+var LATER_ACTION_LBL = {lookup:'🔎 알아보기', think:'💭 더 생각하기', reread:'📖 다시 읽기', '':'✅ 확인'};
+function laterAllItems(){
+  if(!RC) return [];
+  var checks = RC.collectDueChecks(records, todos, {}).map(function(x){
+    return {kind:'check', recordId:x.recordId, record:x.record, date:x.date, done:x.done, dueKey:x.dueKey,
+      followUpType:x.followUpType, label:(x.check.what||x.record.title||''), note:x.check.action||''};
+  });
+  var studyRows = RC.studyReviewItems(records, studyNeedsReview).map(function(x){
+    return {kind:'study', recordId:x.recordId, record:x.record, date:x.date, done:false, dueKey:'study#'+x.recordId,
+      followUpType:'reread', label:x.record.title||'(제목 없음)', note:'재검토', readOnly:true};
+  });
+  return checks.concat(studyRows);
+}
+function laterFilteredItems(){
+  var items = laterAllItems();
+  if(laterDoneFilter==='undone') items = items.filter(function(x){ return !x.done; });
+  else if(laterDoneFilter==='done') items = items.filter(function(x){ return x.done; });
+  if(laterActionFilter==='other') items = items.filter(function(x){ return !x.followUpType; });
+  else if(laterActionFilter) items = items.filter(function(x){ return x.followUpType===laterActionFilter; });
+  if(laterTopicFilter) items = items.filter(function(x){ return ((x.record&&x.record.topics)||[]).indexOf(laterTopicFilter)>=0; });
+  items.sort(function(a,b){
+    if(a.done!==b.done) return a.done?1:-1; // 완료는 맨 뒤
+    if(!a.date && !b.date) return 0;
+    if(!a.date) return -1; // 기한 없음을 앞쪽(놓치지 않게)
+    if(!b.date) return 1;
+    return a.date.localeCompare(b.date);
+  });
+  return items;
+}
+function laterMarkDone(item){
+  if(!db || item.readOnly) return;
+  db.collection('records_todos').add({date:todayStr(), done:true, text:item.label, dueKey:item.dueKey, createdAt:Date.now()})
+    .catch(function(e){ logBug('나중에 완료 표시 실패: '+e.message); toast('처리 실패 — 다시 시도해 주세요'); });
+}
+function laterReopen(item){
+  if(!db) return;
+  var docs = todos.filter(function(t){ return t.dueKey===item.dueKey && t.done; });
+  if(!docs.length) return;
+  Promise.all(docs.map(function(t){ return db.collection('records_todos').doc(t.id).delete(); }))
+    .catch(function(e){ logBug('나중에 다시 열기 실패: '+e.message); toast('처리 실패 — 다시 시도해 주세요'); });
+}
+function renderLaterMode(){
+  var host = document.getElementById('content');
+  var items = laterFilteredItems();
+  document.getElementById('cntLabel').textContent = items.length+'건';
+  document.getElementById('topStat').textContent = records.length+'건 기록됨';
+  var topics = _uniqVals('topics');
+  var chips = function(list, cur, attr){ return list.map(function(o){ return '<span class="fchip'+(cur===o[0]?' on':'')+'" data-'+attr+'="'+esc(o[0])+'">'+esc(o[1])+'</span>'; }).join(''); };
+  var toolbar = '<div class="laterBar">'
+    + '<div class="laterChips">'+chips([['','전체'],['undone','미완료'],['done','완료']], laterDoneFilter, 'ldone')+'</div>'
+    + '<div class="laterChips">'+chips([['','모든 행동'],['lookup','🔎 알아보기'],['think','💭 더 생각하기'],['reread','📖 다시 읽기'],['other','기타']], laterActionFilter, 'lact')+'</div>'
+    + (topics.length ? '<div class="laterChips">'+chips([['','모든 주제']].concat(topics.slice(0,12).map(function(t){return [t,'#'+t];})), laterTopicFilter, 'ltopic')+'</div>' : '')
+    + '</div>';
+  if(!items.length){
+    host.innerHTML = toolbar + '<div class="emptyState"><div class="ei">🕒</div>나중에 볼 것이 없어요 — 기록 상세에서 "🕒 나중에" 로 추가할 수 있어요</div>';
+    bindLaterClicks(host);
+    return;
+  }
+  var rows = items.map(function(it){
+    var k = KINDS[(it.record&&it.record.kind)||'memo'] || KINDS.memo;
+    var dateBadge = it.date ? ('<span class="dt">📅 '+fmtDate(it.date)+(it.date<todayStr()&&!it.done?' · 지남':'')+'</span>') : '<span class="dt" style="background:#f4f2ea">기한 없음</span>';
+    return '<div class="laterRow'+(it.done?' done':'')+'" data-later-rec="'+esc(it.recordId)+'">'
+      + '<span class="laterAct">'+(LATER_ACTION_LBL[it.followUpType]||LATER_ACTION_LBL['']) +'</span>'
+      + '<div class="laterBody"><div class="laterTt">'+esc(it.label)+'</div>'
+      + '<div class="laterSub">'+k.i+' '+esc(it.record?(it.record.title||''):'')+(it.note?(' · '+esc(it.note)):'')+'</div></div>'
+      + dateBadge
+      + (it.readOnly ? '<span class="laterRO">공부노트에서 관리</span>' : '<button type="button" class="mgrbtn tiny" data-later-toggle="'+esc(it.dueKey)+'">'+(it.done?'다시 열기':'완료')+'</button>')
+      + '</div>';
+  }).join('');
+  host.innerHTML = toolbar + '<div class="rlist">' + rows + '</div>';
+  bindLaterClicks(host);
+  host.querySelectorAll('[data-later-toggle]').forEach(function(btn){
+    btn.addEventListener('click', function(ev){
+      ev.stopPropagation();
+      var key = btn.getAttribute('data-later-toggle');
+      var it = items.find(function(x){ return x.dueKey===key; });
+      if(!it) return;
+      if(it.done) laterReopen(it); else laterMarkDone(it);
+    });
+  });
+}
+/* v7.28: 기록 상세에서 바로 "나중에 볼 것" 하나 추가 — 기존 checks[] 배열에 arrayUnion으로 더한다
+   (고유 id 를 매번 새로 만들어 붙이므로 arrayUnion 이 값 중복 판정을 할 일이 없다 = 동시 저장 충돌 없음) */
+function toggleLaterAddForm(recId){
+  var box = document.getElementById('laterAddForm');
+  if(!box) return;
+  if(box.style.display!=='none'){ box.style.display='none'; box.innerHTML=''; return; }
+  var FT = (RC && RC.FOLLOWUP_TYPES) || {lookup:'🔎 알아보기', think:'💭 더 생각하기', reread:'📖 다시 읽기'};
+  box.innerHTML = '<div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;background:#fbfaf6;border:1px solid var(--line);border-radius:10px;padding:10px">'
+    + '<select id="laterFtSel" style="padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-size:12.5px">'
+    + Object.keys(FT).map(function(k){ return '<option value="'+k+'">'+esc(FT[k])+'</option>'; }).join('')
+    + '</select>'
+    + '<input type="date" id="laterDateInp" style="padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-size:12.5px">'
+    + '<input type="text" id="laterWhatInp" placeholder="무엇을 (선택)" style="flex:1 1 140px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-size:12.5px">'
+    + '<button type="button" class="mgrbtn" id="laterAddConfirm">추가</button>'
+    + '</div>';
+  box.style.display = '';
+  document.getElementById('laterAddConfirm').addEventListener('click', function(){
+    if(!db) return;
+    var ft = document.getElementById('laterFtSel').value;
+    var date = document.getElementById('laterDateInp').value;
+    var what = document.getElementById('laterWhatInp').value.trim();
+    var item = {id:(RC?RC.newCheckId():('chk_'+Date.now().toString(36))), date:date, what:what, action:'', followUpType:ft};
+    db.collection('records').doc(recId).update({checks: firebase.firestore.FieldValue.arrayUnion(item)})
+      .then(function(){ toast('나중에 볼 것에 추가했습니다'); box.style.display='none'; box.innerHTML=''; })
+      .catch(function(e){ logBug('나중에 추가 실패: '+e.message); toast('추가 실패 — 다시 시도해 주세요'); });
+  });
+}
+function bindLaterClicks(host){
+  host.querySelectorAll('[data-ldone]').forEach(function(el){ el.addEventListener('click', function(){ laterDoneFilter = el.getAttribute('data-ldone'); render(); }); });
+  host.querySelectorAll('[data-lact]').forEach(function(el){ el.addEventListener('click', function(){ laterActionFilter = el.getAttribute('data-lact'); render(); }); });
+  host.querySelectorAll('[data-ltopic]').forEach(function(el){ el.addEventListener('click', function(){ laterTopicFilter = el.getAttribute('data-ltopic'); render(); }); });
+  host.querySelectorAll('[data-later-rec]').forEach(function(el){ el.addEventListener('click', function(){ openPage(el.getAttribute('data-later-rec'), {}); }); });
 }
 
 /* ── 종목모드(v7.10) 전용 헬퍼 — 전부 기존에 이미 있던 필드(records/stockMaster)에서만 계산,
@@ -2216,11 +2579,17 @@ function calHTML(arr){
   var days=new Date(y,m,0).getDate();
   var byDay={};
   arr.forEach(function(r){ var d=String(r.date||''); if(d.slice(0,7)===calYM){ var dd=+d.slice(8,10); (byDay[dd]=byDay[dd]||[]).push(r); } });
-  /* v6: 체크 캘린더(checks[].date)도 같이 표시 — 필터된 arr 기준 */
+  /* v6: 체크 캘린더(checks[].date)도 같이 표시 — 필터된 arr 기준
+     v7.28: 공부노트 재검토일(reviewAt)도 같은 🔔 자리에 합쳐서 보여준다(이전엔 달력이 checks[]만 읽어 reviewAt은 전혀 안 보였음) */
   var chkByDay={};
   arr.forEach(function(r){ (r.checks||[]).forEach(function(c){
     var d=String(c.date||''); if(d.slice(0,7)===calYM){ var dd=+d.slice(8,10); (chkByDay[dd]=chkByDay[dd]||[]).push({r:r,c:c}); }
   }); });
+  arr.forEach(function(r){
+    if(!isStudyRec(r) || !r.reviewAt) return;
+    var d=String(r.reviewAt); if(d.slice(0,7)!==calYM) return;
+    var dd=+d.slice(8,10); (chkByDay[dd]=chkByDay[dd]||[]).push({r:r, c:{what:'재검토: '+(r.title||''), action:''}, isReview:true});
+  });
   var t = todayStr();
   var h = '<div class="cal"><div class="calhd"><div class="nav"><button id="calPrev">‹</button></div><b>'+y+'년 '+m+'월</b><div class="nav"><button id="calNext">›</button></div></div>'
     + '<div class="calgrid">';
@@ -2253,6 +2622,8 @@ function openDayPopup(dateStr){
   var dayRecords = arr.filter(function(r){ return r.date===dateStr; });
   var dayChecks = [];
   arr.forEach(function(r){ (r.checks||[]).forEach(function(c){ if(c.date===dateStr) dayChecks.push({r:r, c:c}); }); });
+  /* v7.28: 달력 셀과 똑같이 공부노트 재검토일도 같이 보여준다 */
+  arr.forEach(function(r){ if(isStudyRec(r) && r.reviewAt===dateStr) dayChecks.push({r:r, c:{what:'재검토: '+(r.title||''), action:''}}); });
   var p = dateStr.split('-');
   var wd = ['일','월','화','수','목','금','토'][new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).getUTCDay()];
   document.getElementById('dayModalTitle').textContent = (+p[1])+'월 '+(+p[2])+'일 ('+wd+')';
@@ -2360,8 +2731,9 @@ function timeHTML(arr){
 function galHTML(arr){
   return '<div class="galgrid">' + arr.map(function(r){
     var k = KINDS[r.kind] || KINDS.memo;
-    var cover = r.image
-      ? '<div class="cover" style="background:'+k.c+'"><img src="'+esc(r.image)+'" alt="" loading="lazy"></div>'
+    var atts = RC ? RC.getAttachments(r) : (r.image ? [{url:r.image}] : []);
+    var cover = atts.length
+      ? '<div class="cover" style="background:'+k.c+'"><img src="'+esc(atts[0].url)+'" alt="" loading="lazy">'+(atts.length>1?'<span class="rcThumbN" style="bottom:6px;right:6px">+'+(atts.length-1)+'</span>':'')+'</div>'
       : '<div class="cover" style="background:'+k.c+'">'+k.i+'</div>';
     return '<div class="galcard" data-open="'+esc(r.id)+'">'
       + cover
@@ -2444,22 +2816,35 @@ function renderKindPick(activeKind){
     b.addEventListener('click', function(){
       host.querySelectorAll('button[data-k]').forEach(function(x){ x.classList.remove('on'); });
       b.classList.add('on');
-      applyKindFields(b.getAttribute('data-k'));
+      applyKindFields(b.getAttribute('data-k')); // fBody/첨부/주제 등은 건드리지 않아 그대로 남는다
+      host.style.display = 'none';
     });
   });
 }
 function curPickedKind(){
   var on = document.querySelector('#kindPick button.on');
-  return on ? on.getAttribute('data-k') : 'youtube';
+  return on ? on.getAttribute('data-k') : 'memo';
 }
+document.getElementById('kindSwitchBtn').addEventListener('click', function(){
+  var host = document.getElementById('kindPick');
+  host.style.display = (host.style.display==='none') ? '' : 'none';
+});
 
 /* ── 체크 캘린더(checks[]) 반복 편집줄 ── */
+/* v7.28: followUpType(알아보기/더 생각하기/다시 읽기) 은 새 항목에만 선택적으로 붙는다.
+   id 는 새로 만든 행에만 부여(checkAddBtn) — 기존(서버에서 불러온) 행은 id 없이 그대로 둬서
+   기존 dueKey(레코드id#인덱스) 완료표시(records_todos)와 어긋나지 않게 한다. */
 function checkRowHTML(c){
-  c = c || {date:'', what:'', action:''};
-  return '<div class="checkRow">'
+  c = c || {date:'', what:'', action:'', followUpType:''};
+  var FT = (RC && RC.FOLLOWUP_TYPES) || {lookup:'🔎 알아보기', think:'💭 더 생각하기', reread:'📖 다시 읽기'};
+  var opts = '<option value="">(일반 확인)</option>' + Object.keys(FT).map(function(k){
+    return '<option value="'+k+'"'+(c.followUpType===k?' selected':'')+'>'+esc(FT[k])+'</option>';
+  }).join('');
+  return '<div class="checkRow" data-cid="'+esc(c.id||'')+'">'
     + '<input type="date" class="cd" value="'+esc(c.date)+'">'
     + '<input type="text" class="cw" placeholder="확인할 것" value="'+esc(c.what)+'">'
     + '<input type="text" class="ca" placeholder="그때 할 행동" value="'+esc(c.action)+'">'
+    + '<select class="cft">'+opts+'</select>'
     + '<button type="button" class="rmRow">✕</button>'
     + '</div>';
 }
@@ -2472,7 +2857,14 @@ function collectChecks(){
     var date = row.querySelector('.cd').value;
     var what = row.querySelector('.cw').value.trim();
     var action = row.querySelector('.ca').value.trim();
-    if(date || what || action) out.push({date:date, what:what, action:action});
+    var ftEl = row.querySelector('.cft');
+    var ft = ftEl ? ftEl.value : '';
+    if(!(date || what || action || ft)) return;
+    var item = {date:date, what:what, action:action};
+    var cid = row.getAttribute('data-cid');
+    if(cid) item.id = cid;
+    if(ft) item.followUpType = ft;
+    out.push(item);
   });
   return out;
 }
@@ -2481,50 +2873,159 @@ document.getElementById('checksBox').addEventListener('click', function(ev){
   if(b) b.closest('.checkRow').remove();
 });
 document.getElementById('checkAddBtn').addEventListener('click', function(){
-  document.getElementById('checksBox').insertAdjacentHTML('beforeend', checkRowHTML());
+  var id = RC ? RC.newCheckId() : ('chk_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
+  document.getElementById('checksBox').insertAdjacentHTML('beforeend', checkRowHTML({id:id}));
 });
 
-/* ── 이미지 첨부 — Firebase Storage에 올리고 URL만 기록에 저장(localStorage/문서에 base64 넣지 않는다) ── */
-function showImagePreview(url){
-  var box = document.getElementById('imgPreviewBox'), img = document.getElementById('imgPreview');
-  if(url){ img.src = url; box.style.display = ''; }
-  else { img.src = ''; box.style.display = 'none'; }
+/* ══════════════════════════════════════════════════════════
+   v7.28: 다중 사진 첨부 — Firebase Storage에 올리고 URL만 기록에 저장(base64 금지).
+   study 편집기의 업로드 패턴(js/study/study-editor.mjs runUpload)을 그대로 본떴다 — 파일별 상태 관리,
+   동시 업로드 제한, 실패해도 파일은 그대로(재시도만), 삭제는 참조만 지우고 Storage 파일은 남긴다
+   (v7.28: 기존 removeRecord()의 즉시 Storage 삭제도 이번에 없앤다 — §10 참고).
+   ══════════════════════════════════════════════════════════ */
+function attExtFromType(type){
+  if(RC) return RC.extFromType(type);
+  var m = {'image/png':'png','image/jpeg':'jpg','image/gif':'gif','image/webp':'webp','image/avif':'avif','image/bmp':'bmp','image/heic':'heic','image/heif':'heif'};
+  return m[String(type||'').toLowerCase()] || 'img';
 }
-function setImgStatus(msg, isErr){
-  var s = document.getElementById('imgUploadStatus');
-  s.textContent = msg || '';
-  s.classList.toggle('err', !!isErr);
+function attNewId(){ return RC ? RC.newAttachmentId() : ('att_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8)); }
+function attIsPreviewable(type){ return RC ? RC.isPreviewableType(type) : /^image\/(png|jpeg|gif|webp|avif|bmp)$/.test(String(type||'').toLowerCase()); }
+
+function renderAttachGrid(){
+  var host = document.getElementById('attGrid');
+  if(!host) return;
+  var list = pickedAttachments.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); });
+  host.innerHTML = list.map(function(a, i){
+    var statusCls = a.status==='error' ? 'err' : (a.status==='stored' ? 'ok' : '');
+    var statusTxt = a.status==='uploading' ? '업로드 중…' : (a.status==='error' ? '실패' : '완료');
+    var img = attIsPreviewable(a.type) && (a.previewUrl||a.url)
+      ? '<img src="'+esc(a.previewUrl||a.url)+'" alt="">'
+      : '<span class="attNoprev">'+(a.status==='error'?'⚠':'🖼')+'</span>';
+    return '<div class="attThumb'+(i===0?' rep':'')+'" data-aid="'+esc(a.id)+'">'
+      + '<div class="attImgWrap" data-zoom="'+esc(a.previewUrl||a.url||'')+'">'+img+'</div>'
+      + '<span class="attStatus '+statusCls+'">'+statusTxt+'</span>'
+      + '<button type="button" class="attStar'+(i===0?' on':'')+'" data-star="'+esc(a.id)+'" title="대표 사진으로">★</button>'
+      + '<input type="text" class="attCap" data-cap="'+esc(a.id)+'" placeholder="설명(선택)" value="'+esc(a.caption||'')+'">'
+      + (a.status==='error' ? '<div class="attErrNote">'+esc(a.note||'업로드 실패')+'</div>' : '')
+      + '<div class="attRow">'
+      + (a.status==='error' ? '<button type="button" data-retry="'+esc(a.id)+'">재시도</button>' : '')
+      + '<button type="button" data-up="'+esc(a.id)+'"'+(i===0?' disabled':'')+'>▲</button>'
+      + '<button type="button" data-down="'+esc(a.id)+'"'+(i===list.length-1?' disabled':'')+'>▼</button>'
+      + '<button type="button" class="attRm" data-rm="'+esc(a.id)+'">✕</button>'
+      + '</div></div>';
+  }).join('');
+  attRenderMsg();
 }
-document.getElementById('fImageInput').addEventListener('change', function(ev){
-  var file = ev.target.files && ev.target.files[0];
-  if(!file) return;
-  if(!storage){ setImgStatus('이미지 저장소 연결 중입니다 — 잠시 후 다시 시도해 주세요', true); ev.target.value=''; return; }
-  if(!/^image\//.test(file.type)){ setImgStatus('이미지 파일만 올릴 수 있어요', true); ev.target.value=''; return; }
-  if(file.size > 8*1024*1024){ setImgStatus('8MB 이하 이미지만 올릴 수 있어요', true); ev.target.value=''; return; }
-  var oldPath = pickedImage.path; // 새 이미지로 교체하는 거면 옛것은 정리한다
-  var path = 'records_images/' + todayStr() + '/' + Date.now() + '_' + file.name.replace(/[^\w.\-가-힣]/g,'_');
-  setImgStatus('업로드 중…');
-  storage.ref(path).put(file).then(function(snap){
-    return snap.ref.getDownloadURL();
-  }).then(function(url){
-    pickedImage = {url:url, path:path};
-    showImagePreview(url);
-    setImgStatus('✔ 업로드 완료');
-    ev.target.value='';
-    if(oldPath) storage.ref(oldPath).delete().catch(function(e){ logBug('옛 이미지 정리 실패(무시): '+e.message); });
+function attRenderMsg(){
+  var msg = document.getElementById('attMsg');
+  if(!msg) return;
+  var uploading = pickedAttachments.filter(function(a){ return a.status==='uploading'; }).length;
+  var failed = pickedAttachments.filter(function(a){ return a.status==='error'; });
+  var parts = [];
+  if(uploading) parts.push(uploading+'장 업로드 중…');
+  if(failed.length) parts.push(failed.length+'장 업로드 실패 — 재시도하거나 제거한 뒤 저장해 주세요('+failed.map(function(a){return a.name||'사진';}).join(', ')+')');
+  msg.textContent = parts.join(' · ');
+}
+function attHasBlocking(){ return pickedAttachments.some(function(a){ return a.status==='uploading' || a.status==='error'; }); }
+
+function attStartUpload(entry){
+  if(!storage){ entry.status='error'; entry.note='이미지 저장소 연결 중입니다 — 잠시 후 다시 시도'; renderAttachGrid(); return; }
+  var path = RC ? RC.attachmentStoragePath(todayStr(), entry.id, entry.type) : ('records_images/'+todayStr()+'/rec_'+entry.id+'.'+attExtFromType(entry.type));
+  storage.ref(path).put(entry.file).then(function(snap){ return snap.ref.getDownloadURL(); }).then(function(url){
+    entry.status='stored'; entry.url=url; entry.path=path; entry.note='';
+    renderAttachGrid();
+    attPumpQueue();
   }).catch(function(e){
-    logBug('이미지 업로드 실패: '+e.message);
-    setImgStatus('업로드 실패: '+e.message, true);
-    ev.target.value='';
+    logBug('사진 업로드 실패: '+e.message);
+    entry.status='error'; entry.note=e.message||'업로드 실패';
+    renderAttachGrid();
+    attPumpQueue();
   });
+}
+function attPumpQueue(){
+  var active = pickedAttachments.filter(function(a){ return a.status==='uploading' && a._started; }).length;
+  pickedAttachments.filter(function(a){ return a.status==='uploading' && !a._started; }).forEach(function(a){
+    if(active >= ATT_MAX_CONCURRENT) return;
+    a._started = true; active++;
+    attStartUpload(a);
+  });
+}
+function attAddFiles(fileList){
+  var files = Array.prototype.slice.call(fileList||[]).filter(function(f){ return /^image\//i.test(f.type||''); });
+  if(!files.length){ if((fileList||[]).length) toast('이미지 파일만 첨부할 수 있어요'); return; }
+  var baseOrder = pickedAttachments.length ? Math.max.apply(null, pickedAttachments.map(function(a){return a.order||0;}))+1 : 0;
+  files.forEach(function(file, i){
+    if(file.size > (RC ? RC.MAX_IMAGE_BYTES : 8*1024*1024)){
+      toast('"'+file.name+'" — 8MB보다 커서 첨부할 수 없어요');
+      return;
+    }
+    var id = attNewId();
+    var entry = {id:id, path:'', url:'', name:file.name, size:file.size, type:file.type, caption:'', order:baseOrder+i, addedAt:Date.now(), status:'uploading', note:'', file:file, _started:false};
+    try{ entry.previewUrl = URL.createObjectURL(file); }catch(e){}
+    if(!attIsPreviewable(file.type)) entry.note = '이 형식은 미리보기를 지원하지 않을 수 있어요(업로드는 시도해요)';
+    pickedAttachments.push(entry);
+  });
+  renderAttachGrid();
+  attPumpQueue();
+}
+document.getElementById('attPickBtn').addEventListener('click', function(){ document.getElementById('fAttachInput').click(); });
+document.getElementById('fAttachInput').addEventListener('change', function(ev){ attAddFiles(ev.target.files); ev.target.value=''; });
+(function(){
+  var drop = document.getElementById('attDrop');
+  drop.addEventListener('dragover', function(ev){ ev.preventDefault(); drop.classList.add('dragOver'); });
+  drop.addEventListener('dragleave', function(){ drop.classList.remove('dragOver'); });
+  drop.addEventListener('drop', function(ev){
+    ev.preventDefault(); drop.classList.remove('dragOver');
+    if(ev.dataTransfer && ev.dataTransfer.files) attAddFiles(ev.dataTransfer.files);
+  });
+})();
+document.getElementById('recModal').addEventListener('paste', function(ev){
+  if(!document.getElementById('recModal').classList.contains('on')) return;
+  var items = (ev.clipboardData && ev.clipboardData.items) || [];
+  var files = [];
+  for(var i=0;i<items.length;i++){ if(/^image\//.test(items[i].type)){ var f=items[i].getAsFile(); if(f) files.push(f); } }
+  if(files.length){ attAddFiles(files); }
 });
-document.getElementById('imgRemoveBtn').addEventListener('click', function(){
-  var oldPath = pickedImage.path;
-  pickedImage = {url:'', path:''};
-  showImagePreview('');
-  setImgStatus('');
-  if(oldPath && storage) storage.ref(oldPath).delete().catch(function(e){ logBug('이미지 정리 실패(무시): '+e.message); });
+document.getElementById('attGrid').addEventListener('click', function(ev){
+  var t = ev.target;
+  var zoomEl = t.closest('[data-zoom]');
+  if(zoomEl && zoomEl.getAttribute('data-zoom')){ attZoom(zoomEl.getAttribute('data-zoom')); return; }
+  var rm = t.closest('[data-rm]'); if(rm){ pickedAttachments = pickedAttachments.filter(function(a){ return a.id!==rm.getAttribute('data-rm'); }); renderAttachGrid(); return; }
+  var retry = t.closest('[data-retry]'); if(retry){
+    var e2 = pickedAttachments.find(function(a){ return a.id===retry.getAttribute('data-retry'); });
+    if(e2){ e2.status='uploading'; e2._started=false; e2.note=''; renderAttachGrid(); attPumpQueue(); }
+    return;
+  }
+  var star = t.closest('[data-star]'); if(star){
+    var sid = star.getAttribute('data-star');
+    var min = pickedAttachments.length ? Math.min.apply(null, pickedAttachments.map(function(a){return a.order||0;})) : 0;
+    pickedAttachments.forEach(function(a){ a.order = (a.id===sid) ? (min-1) : a.order; });
+    renderAttachGrid();
+    return;
+  }
+  var up = t.closest('[data-up]'); if(up && !up.disabled){ attSwapOrder(up.getAttribute('data-up'), -1); return; }
+  var down = t.closest('[data-down]'); if(down && !down.disabled){ attSwapOrder(down.getAttribute('data-down'), 1); return; }
 });
+document.getElementById('attGrid').addEventListener('input', function(ev){
+  var cap = ev.target.closest('[data-cap]'); if(!cap) return;
+  var a = pickedAttachments.find(function(x){ return x.id===cap.getAttribute('data-cap'); });
+  if(a) a.caption = cap.value;
+});
+function attSwapOrder(id, dir){
+  var list = pickedAttachments.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); });
+  var idx = list.findIndex(function(a){ return a.id===id; });
+  var swapWith = idx + dir;
+  if(idx<0 || swapWith<0 || swapWith>=list.length) return;
+  var tmp = list[idx].order; list[idx].order = list[swapWith].order; list[swapWith].order = tmp;
+  renderAttachGrid();
+}
+function attZoom(url){
+  if(!url) return;
+  document.getElementById('attZoomImg').src = url;
+  document.getElementById('attZoomModal').classList.add('on');
+}
+document.getElementById('attZoomClose').addEventListener('click', function(){ document.getElementById('attZoomModal').classList.remove('on'); });
+document.getElementById('attZoomModal').addEventListener('click', function(ev){ if(ev.target.id==='attZoomModal') document.getElementById('attZoomModal').classList.remove('on'); });
 
 /* v5: 시나리오 폼 채우기/읽기 — idea 전용, 값 없으면 빈 칸으로 */
 function fillScenarioForm(scen){
@@ -2569,14 +3070,22 @@ function normTopics(str){
 function reverseRelations(id){
   return (records||[]).filter(function(x){ return (x.relations||[]).some(function(rl){ return rl && rl.targetId===id; }); });
 }
+/* v7.28: "+ 기록 추가"가 지금 보고 있는 탭 종류로 바로 열리도록(예전엔 항상 youtube로 열리던 버그 수정).
+   "전체"에서 누르면 메모로 즉시 시작 — 스펙: 종류 선택을 먼저 완료해야 한다는 인상을 주지 않는다. */
+function defaultAddKind(){
+  if(KINDS[curKind] && curKind!=='study') return curKind;
+  return 'memo';
+}
 function openAdd(){
   if(curKind==='study' && !IN_WORKSPACE){ studyDo(function(api){ return api.newNote(); }); return; }
-  EDIT = null; pickedStocks = [];
+  EDIT = null; pickedStocks = []; pickedAttachments = [];
   document.getElementById('mTitle').textContent = '＋ 기록 추가';
   document.getElementById('mDel').style.display = 'none';
   _curEditingAction = '';
-  renderKindPick('youtube');
-  applyKindFields('youtube');
+  var startKind = defaultAddKind();
+  renderKindPick(startKind);
+  applyKindFields(startKind);
+  document.getElementById('kindPick').style.display = 'none';
   document.getElementById('fDate').value = todayStr();
   document.getElementById('fTitle').value = '';
   document.getElementById('fOneLiner').value = '';
@@ -2591,9 +3100,8 @@ function openAdd(){
   renderChecksBox([]);
   setStar(0);
   renderStockTags();
-  pickedImage = {url:'', path:''};
-  showImagePreview('');
-  setImgStatus('');
+  renderAttachGrid();
+  updateMoreFieldsBadge(null);
   resetModalPos(document.querySelector('#recModal .modal'));
   document.getElementById('recModal').classList.add('on');
   setTimeout(function(){ document.getElementById('fTitle').focus(); }, 60);
@@ -2610,6 +3118,7 @@ function openEdit(id){
   _curEditingAction = r.action||'';
   renderKindPick(r.kind);
   applyKindFields(r.kind);
+  document.getElementById('kindPick').style.display = 'none';
   document.getElementById('fDate').value = r.date||todayStr();
   document.getElementById('fTitle').value = r.title||'';
   document.getElementById('fOneLiner').value = r.oneLiner||'';
@@ -2624,9 +3133,11 @@ function openEdit(id){
   renderChecksBox(r.checks && r.checks.length ? r.checks : (r.checkDate ? [{date:r.checkDate, what:'', action:''}] : []));
   setStar(r.star||0);
   renderStockTags();
-  pickedImage = {url:r.image||'', path:r.imagePath||''};
-  showImagePreview(r.image||'');
-  setImgStatus('');
+  pickedAttachments = (RC ? RC.getAttachments(r) : (r.attachments||(r.image?[{id:'legacy',path:r.imagePath||'',url:r.image,name:'',size:0,type:'',caption:'',order:0,addedAt:r.createdAt||0,status:'stored',legacy:true}]:[]))).map(function(a,i){
+    return {id:a.id||('legacy_'+i), path:a.path||'', url:a.url||'', name:a.name||'', size:a.size||0, type:a.type||'', caption:a.caption||'', order:(a.order!=null?a.order:i), addedAt:a.addedAt||0, status:'stored', note:'', legacy:!!a.legacy};
+  });
+  renderAttachGrid();
+  updateMoreFieldsBadge(r);
   resetModalPos(document.querySelector('#recModal .modal'));
   document.getElementById('recModal').classList.add('on');
 }
@@ -2667,27 +3178,46 @@ document.querySelectorAll('#starRow span').forEach(function(s){
 
 document.getElementById('mSave').addEventListener('click', function(){
   if(!db){ toast('연결 중입니다 — 잠시 뒤 다시 눌러 주세요'); return; }
-  var title = document.getElementById('fTitle').value.trim();
-  if(!title){ toast('제목을 적어 주세요'); return; }
   var _ed = EDIT ? records.find(function(x){ return x.id===EDIT; }) : null;
   if(_ed && isStudyRec(_ed)){ toast('공부노트는 공부노트 편집창에서 수정해 주세요 — 서식이 손상되지 않도록 저장을 막았어요'); return; }
+  if(attHasBlocking()){ attRenderMsg(); toast('사진 업로드가 끝나지 않았어요 — 완료를 기다리거나 실패한 사진을 재시도/제거해 주세요'); return; }
+  var title = document.getElementById('fTitle').value.trim();
+  var body = document.getElementById('fBody').value;
+  var link = document.getElementById('fLink').value.trim();
+  var kind = curPickedKind();
+  /* v7.28: 최소 저장 조건 — 제목/본문/링크/사진 중 하나만 있어도 저장(완전히 빈 기록만 차단).
+     제목이 비었으면 저장 시 1회만 자동 채움(본문 첫 줄 → 사진만 있으면 "사진 기록·날짜" → 링크 도메인 → 종류명),
+     사용자가 이미 적은 제목은 절대 덮지 않는다. */
+  var draftShape = {title:title, body:body, link:link, attachmentsCount:pickedAttachments.length};
+  var isEmpty = RC ? RC.isEmptyRecordDraft(draftShape) : (!title && !body.trim() && !link && !pickedAttachments.length);
+  if(isEmpty){ toast('내용이나 사진, 링크 중 하나는 있어야 저장할 수 있어요'); return; }
+  var dateStr = document.getElementById('fDate').value || todayStr();
+  if(!title){
+    title = RC ? RC.autoTitle({body:body, attachmentsCount:pickedAttachments.length, link:link, kindLabel:(KINDS[kind]||{}).n, dateStr:dateStr})
+               : ((body.split(/\r?\n/).map(function(s){return s.trim();}).filter(Boolean)[0]) || (KINDS[kind]||{}).n || '기록');
+  }
+  var attForSave = pickedAttachments.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); }).map(function(a,i){
+    return {id:a.id, path:a.path||'', url:a.url||'', name:a.name||'', size:a.size||0, type:a.type||'', caption:(a.caption||'').trim(), order:i, addedAt:a.addedAt||Date.now()};
+  });
+  var cover = RC ? RC.coverProjection(attForSave) : {image:(attForSave[0]&&attForSave[0].url)||'', imagePath:(attForSave[0]&&attForSave[0].path)||''};
   var data = {
-    kind: curPickedKind(),
-    date: document.getElementById('fDate').value || todayStr(),
+    kind: kind,
+    date: dateStr,
     title: title,
     oneLiner: document.getElementById('fOneLiner').value.trim(),
     channel: document.getElementById('fChannel').value.trim(),
-    link: document.getElementById('fLink').value.trim(),
+    link: link,
     stocks: pickedStocks.slice(),
     action: readActionValue(),
-    body: document.getElementById('fBody').value,
+    body: body,
     checks: collectChecks(),
     star: +(document.getElementById('starRow').getAttribute('data-val')||0),
-    image: pickedImage.url || '',
-    imagePath: pickedImage.path || '',
+    attachments: attForSave,
+    image: cover.image,
+    imagePath: cover.imagePath,
     verifyState: document.getElementById('fVerify').value || '',
     topics: normTopics(document.getElementById('fTopics').value),
-    source: { name: document.getElementById('fChannel').value.trim(), url: document.getElementById('fLink').value.trim() },
+    source: { name: document.getElementById('fChannel').value.trim(), url: link },
     aiInterpretation: document.getElementById('fAiInterp').value.trim(),
     userJudgment: document.getElementById('fUserJudge').value.trim(),
     schemaVer: 2
@@ -2719,16 +3249,12 @@ document.getElementById('mDel').addEventListener('click', function(){
   removeRecord(EDIT);
   closeModal();
 });
+/* v7.28: 기록 삭제 때 Storage 사진을 더 이상 즉시 지우지 않는다 — 공부노트와 같은 정책(자동 영구 삭제 없음,
+   실수로 지운 기록을 나중에 되돌릴 여지를 남긴다). 안 쓰는 파일 정리는 후속 과제(§9). */
 function removeRecord(id){
   if(!db) return;
-  var r = records.find(function(x){ return x.id===id; });
   db.collection('records').doc(id).delete()
-    .then(function(){
-      toast('지웠습니다');
-      if(r && r.imagePath && storage){
-        storage.ref(r.imagePath).delete().catch(function(e){ logBug('이미지 정리 실패(무시): '+e.message); });
-      }
-    })
+    .then(function(){ toast('지웠습니다'); })
     .catch(function(e){ logBug('삭제 실패: '+e.message); toast('삭제 실패 — 콘솔을 확인해 주세요'); });
 }
 
@@ -2780,6 +3306,133 @@ function delRelation(srcId,targetId,type){
     .catch(function(e){ logBug('관계 삭제 실패: '+e.message); toast('연결 삭제 실패 — 다시 시도해 주세요'); });
   openPage(srcId, {fromRoute:true});
 }
+
+/* ══════════════════════════════════════════════════════════
+   v7.28: 기록을 발전시키는 세 가지 행동 — ② 이어서 생각하기 (원본은 그대로, 새 기록이 원본을 참조)
+   ══════════════════════════════════════════════════════════ */
+var CONT_SRC = '', CONT_NEW_ID = '';
+function openContinueModal(srcId){
+  if(!db) return;
+  CONT_SRC = srcId;
+  CONT_NEW_ID = db.collection('records').doc().id; // 미리 한 번만 생성 — 재시도해도 같은 문서라 중복 생성 안 됨
+  document.getElementById('contTitle').value = '';
+  document.getElementById('contBody').value = '';
+  document.querySelectorAll('#contKindPick button').forEach(function(b,i){ b.classList.toggle('on', i===0); });
+  document.getElementById('contSave').disabled = false;
+  resetModalPos(document.querySelector('#continueModal .modal'));
+  document.getElementById('continueModal').classList.add('on');
+  setTimeout(function(){ document.getElementById('contBody').focus(); }, 60);
+}
+document.getElementById('contClose').addEventListener('click', function(){ document.getElementById('continueModal').classList.remove('on'); });
+document.getElementById('contKindPick').addEventListener('click', function(ev){
+  var b = ev.target.closest('button[data-k]'); if(!b) return;
+  document.querySelectorAll('#contKindPick button').forEach(function(x){ x.classList.remove('on'); });
+  b.classList.add('on');
+});
+document.getElementById('contSave').addEventListener('click', function(){
+  var btn = document.getElementById('contSave');
+  if(btn.disabled || !db || !CONT_SRC) return;
+  var body = document.getElementById('contBody').value;
+  var title = document.getElementById('contTitle').value.trim();
+  if(!body.trim() && !title){ toast('이어지는 생각을 적어주세요'); return; }
+  var kindBtn = document.querySelector('#contKindPick button.on');
+  var kind = kindBtn ? kindBtn.getAttribute('data-k') : 'memo';
+  if(!title) title = RC ? RC.autoTitle({body:body, kindLabel:(KINDS[kind]||{}).n, dateStr:todayStr()}) : ((body.split(/\r?\n/)[0]||'').trim().slice(0,40) || (KINDS[kind]||{}).n || '기록');
+  var rel = RC ? RC.makeRelation(CONT_SRC,'derived_from','') : {relationId:'rel_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), targetId:CONT_SRC, type:'derived_from', note:'', createdAt:Date.now()};
+  var data = {kind:kind, date:todayStr(), title:title, oneLiner:'', channel:'', link:'', stocks:[], action:'', body:body, checks:[], star:0, attachments:[], image:'', imagePath:'', verifyState:'', topics:[], source:{name:'',url:''}, aiInterpretation:'', userJudgment:'', schemaVer:2, relations:[rel], createdAt:Date.now()};
+  btn.disabled = true;
+  db.collection('records').doc(CONT_NEW_ID).set(data).then(function(){
+    toast('이어서 생각을 기록했습니다');
+    document.getElementById('continueModal').classList.remove('on');
+    openPage(CONT_NEW_ID, {});
+  }).catch(function(e){ logBug('이어서 생각하기 저장 실패: '+e.message); toast('저장 실패 — 다시 시도해 주세요'); btn.disabled=false; });
+});
+
+/* ══════════════════════════════════════════════════════════
+   v7.28: 기록을 발전시키는 세 가지 행동 — ③ 모아 정리하기 (선택한 기록을 근거로 새 공부노트/아이디어,
+   원문 자동 복제·AI 요약 없음. 원본은 수정하지 않는다)
+   ══════════════════════════════════════════════════════════ */
+var SYNTH_SRC_IDS = [];
+function openSynthModal(seedId){
+  SYNTH_SRC_IDS = seedId ? [seedId] : [];
+  document.getElementById('synthSearch').value = '';
+  document.getElementById('synthTitle').value = '';
+  document.getElementById('synthBody').value = '';
+  document.querySelectorAll('#synthKindPick button').forEach(function(b,i){ b.classList.toggle('on', i===0); });
+  document.getElementById('synthIdeaFields').style.display = 'none';
+  document.getElementById('synthSave').disabled = false;
+  renderSynthSrcBox();
+  renderSynthResults('');
+  resetModalPos(document.querySelector('#synthModal .modal'));
+  document.getElementById('synthModal').classList.add('on');
+}
+function renderSynthSrcBox(){
+  document.getElementById('synthSrcBox').innerHTML = SYNTH_SRC_IDS.map(function(id){
+    var r = records.find(function(x){ return x.id===id; });
+    return '<span class="stockTag">'+esc(r?(r.title||'(제목 없음)'):'(삭제된 기록)')+'<button type="button" data-synrm="'+esc(id)+'">✕</button></span>';
+  }).join('');
+  document.getElementById('synthSrcBox').querySelectorAll('[data-synrm]').forEach(function(b){
+    b.addEventListener('click', function(){
+      SYNTH_SRC_IDS = SYNTH_SRC_IDS.filter(function(x){ return x!==b.getAttribute('data-synrm'); });
+      renderSynthSrcBox(); renderSynthResults(document.getElementById('synthSearch').value);
+    });
+  });
+}
+function renderSynthResults(q){
+  q = (q||'').toLowerCase();
+  var host = document.getElementById('synthResults');
+  if(!q){ host.innerHTML = ''; return; }
+  var list = records.filter(function(r){
+    if(SYNTH_SRC_IDS.indexOf(r.id)>=0) return false;
+    var hay = [r.title,r.oneLiner,(r.topics||[]).join(' '),(r.stocks||[]).join(' ')].join(' ').toLowerCase();
+    return hay.indexOf(q)>=0;
+  }).slice(0,30);
+  host.innerHTML = list.length ? list.map(function(r){ var k=KINDS[r.kind]||KINDS.memo;
+    return '<div class="relPick" data-synadd="'+esc(r.id)+'" style="padding:7px 9px;border-bottom:1px solid var(--line);cursor:pointer;font-size:12.5px">'+k.i+' '+esc(r.title||'(제목 없음)')+'</div>';
+  }).join('') : '<div style="font-size:12px;color:var(--sub2);padding:6px 2px">일치하는 기록이 없어요</div>';
+  host.querySelectorAll('[data-synadd]').forEach(function(el){
+    el.addEventListener('click', function(){
+      var id = el.getAttribute('data-synadd');
+      if(SYNTH_SRC_IDS.indexOf(id)<0) SYNTH_SRC_IDS.push(id);
+      renderSynthSrcBox(); renderSynthResults(document.getElementById('synthSearch').value);
+    });
+  });
+}
+document.getElementById('synthSearch').addEventListener('input', function(e){ renderSynthResults(e.target.value.trim()); });
+document.getElementById('synthClose').addEventListener('click', function(){ document.getElementById('synthModal').classList.remove('on'); });
+document.getElementById('synthKindPick').addEventListener('click', function(ev){
+  var b = ev.target.closest('button[data-k]'); if(!b) return;
+  document.querySelectorAll('#synthKindPick button').forEach(function(x){ x.classList.remove('on'); });
+  b.classList.add('on');
+  document.getElementById('synthIdeaFields').style.display = (b.getAttribute('data-k')==='idea') ? '' : 'none';
+});
+document.getElementById('synthSave').addEventListener('click', function(){
+  var btn = document.getElementById('synthSave');
+  if(btn.disabled) return;
+  if(!SYNTH_SRC_IDS.length){ toast('모을 기록을 1개 이상 선택해 주세요'); return; }
+  var kindBtn = document.querySelector('#synthKindPick button.on');
+  var kind = kindBtn ? kindBtn.getAttribute('data-k') : 'study';
+  var relAdd = SYNTH_SRC_IDS.map(function(id){ return RC ? RC.makeRelation(id,'synthesizes','') : {relationId:'rel_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), targetId:id, type:'synthesizes', note:'', createdAt:Date.now()}; });
+  if(kind==='study'){
+    document.getElementById('synthModal').classList.remove('on');
+    studyDo(function(api){ return api.newNoteWithRelations(relAdd.map(function(r){ return {targetId:r.targetId, type:r.type}; })); });
+    return;
+  }
+  var body = document.getElementById('synthBody').value;
+  var title = document.getElementById('synthTitle').value.trim();
+  if(!body.trim() && !title){ toast('정리 내용을 적어주세요'); return; }
+  if(!title) title = RC ? RC.autoTitle({body:body, kindLabel:'아이디어', dateStr:todayStr()}) : ((body.split(/\r?\n/)[0]||'').trim().slice(0,40) || '아이디어');
+  if(!db) return;
+  var newId = db.collection('records').doc().id;
+  var data = {kind:'idea', date:todayStr(), title:title, oneLiner:'', channel:'', link:'', stocks:[], action:'', body:body, checks:[], star:0, attachments:[], image:'', imagePath:'', verifyState:'', topics:[], source:{name:'',url:''}, aiInterpretation:'', userJudgment:'', schemaVer:2, relations:relAdd, createdAt:Date.now()};
+  btn.disabled = true;
+  db.collection('records').doc(newId).set(data).then(function(){
+    toast('정리 기록을 만들었습니다');
+    document.getElementById('synthModal').classList.remove('on');
+    openPage(newId, {});
+  }).catch(function(e){ logBug('모아 정리하기 저장 실패: '+e.message); toast('저장 실패 — 다시 시도해 주세요'); btn.disabled=false; });
+});
+
 function _sysRow(k,v){ return '<tr><td style="color:var(--sub);font-size:11.5px;padding:3px 10px 3px 0;white-space:nowrap;vertical-align:top">'+k+'</td><td style="font-size:12.5px;padding:3px 0">'+v+'</td></tr>'; }
 function _sysBadge(t,c){ var col={ok:'#2f7d5c',wait:'#b59022',warn:'#b59022',err:'#b23b3b',na:'#9a9484'}[c]||'#777'; return '<span style="color:'+col+';font-weight:700">'+t+'</span>'; }
 function _kstShort(ms){ return new Date(ms+9*3600*1000).toISOString().slice(5,19).replace('T',' '); }
@@ -2938,11 +3591,12 @@ function openPage(id, opts){
   }
 
   var checks = (r.checks||[]).slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
-  var checkTbl = '';
+  var checkTbl = '<div class="pg-h4">🕒 나중에 볼 것 <button type="button" id="laterAddBtn" style="'+actBtnCss+'">+ 추가</button></div>'
+    + '<div id="laterAddForm" style="display:none;margin-bottom:12px"></div>';
   if(checks.length){
-    checkTbl = '<div class="pg-h4">📅 체크 캘린더</div><table class="pg-checktbl"><tr><th>날짜</th><th>확인할 것</th><th>그때 할 행동</th></tr>'
+    checkTbl += '<table class="pg-checktbl"><tr><th>날짜</th><th>확인할 것</th><th>행동</th><th>그때 할 일</th></tr>'
       + checks.map(function(c){
-          return '<tr><td>'+esc(c.date||'')+'</td><td>'+esc(c.what||'')+'</td><td>'+esc(c.action||'')+'</td></tr>';
+          return '<tr><td>'+esc(c.date||'기한 없음')+'</td><td>'+esc(c.what||'')+'</td><td>'+esc((c.followUpType&&LATER_ACTION_LBL[c.followUpType])||'')+'</td><td>'+esc(c.action||'')+'</td></tr>';
         }).join('') + '</table>';
   }
 
@@ -2953,10 +3607,21 @@ function openPage(id, opts){
   var _rev = []; (records||[]).forEach(function(x){ (x.relations||[]).forEach(function(rl){ if(rl && rl.targetId===r.id) _rev.push({rec:x,type:rl.type||'related'}); }); });
   var relFwd = _fwd.map(function(o){ var ki=o.rec?(KINDS[o.rec.kind]||KINDS.memo).i:'⚠'; return '<div style="font-size:12.5px;margin:3px 0">'+ki+' '+(o.rec?'<button type="button" class="st-link" data-goto="'+esc(o.rec.id)+'">'+esc(o.rec.title||'(제목 없음)')+'</button>':'<b style="color:var(--warn)">삭제됐거나 찾을 수 없는 기록</b> <span style="color:var(--sub2);font-size:11px">ID '+esc(o.id)+'</span>')+' <span style="color:var(--sub2)">↳ '+esc(REL_TYPE_LBL[o.type]||o.type||'관련')+'</span> <span class="relDel" data-del="'+esc(o.id)+'" data-deltype="'+esc(o.type)+'" role="button" tabindex="0" aria-label="연결 해제" style="color:var(--warn);cursor:pointer;margin-left:5px">✕</span></div>'; }).join('');
   var relRev = _rev.map(function(o){ return '<div style="font-size:12px;color:var(--sub);margin:3px 0">← '+(KINDS[o.rec.kind]||KINDS.memo).i+' <button type="button" class="st-link" data-goto="'+esc(o.rec.id)+'">'+esc(o.rec.title||'(제목 없음)')+'</button> <span style="color:var(--sub2);font-size:11px">('+esc(REL_REV_LBL[o.type]||'이 기록을 참조')+')</span></div>'; }).join('');
-  var relationsHtml = '<div class="pg-h4">🔗 연결된 기록 <button type="button" id="relAddBtn" style="font-size:11.5px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:2px 9px;cursor:pointer;font-weight:400;margin-left:4px">+ 연결</button></div>' + ((relFwd||relRev) ? relFwd+relRev : '<div style="font-size:12px;color:var(--sub2)">아직 연결된 기록이 없어요</div>');
+  /* v7.28: 기록을 발전시키는 세 행동 — 관련 기록 연결(기존)·이어서 생각하기·모아 정리하기 */
+  var actBtnCss = 'font-size:11.5px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:2px 9px;cursor:pointer;font-weight:400;margin-left:4px';
+  var relationsHtml = '<div class="pg-h4">🔗 연결된 기록'
+    + ' <button type="button" id="relAddBtn" style="'+actBtnCss+'">+ 연결</button>'
+    + ' <button type="button" id="contBtn" style="'+actBtnCss+'">💭 이어서 생각하기</button>'
+    + ' <button type="button" id="synthBtn" style="'+actBtnCss+'">🧩 모아 정리하기</button>'
+    + '</div>' + ((relFwd||relRev) ? relFwd+relRev : '<div style="font-size:12px;color:var(--sub2)">아직 연결된 기록이 없어요</div>');
   var bodyHtml = (r.body||r.summary) ? '<details><summary class="pg-h4" style="cursor:pointer">'+esc(f.bodyLbl)+' (펼치기)</summary><div class="pg-body">'+esc(r.body||(r.summary||''))+'</div></details>' : '';
+  /* v7.28: 사진 여러 장을 전부 보여준다(대표 사진만 아니라) — 설명(caption)도 함께 */
+  var pgAtts = RC ? RC.getAttachments(r) : (r.image ? [{url:r.image}] : []);
+  var pgAttsHtml = pgAtts.length ? '<div class="pg-attgrid">' + pgAtts.map(function(a){
+    return '<figure class="pg-attfig" data-zoom="'+esc(a.url)+'"><img src="'+esc(a.url)+'" alt="" loading="lazy">'+(a.caption?'<figcaption>'+esc(a.caption)+'</figcaption>':'')+'</figure>';
+  }).join('') + '</div>' : '';
   var html = ''
-    + (r.image ? '<img src="'+esc(r.image)+'" alt="" style="width:100%;max-height:360px;object-fit:cover;border-radius:12px;margin-bottom:14px;display:block">' : '')
+    + pgAttsHtml
     + '<h2 style="font-size:19px;font-weight:800;margin:0 0 12px;line-height:1.4">'+esc(r.title||'')+'</h2>'
     + (r.oneLiner ? '<div class="pg-oneliner">'+esc(f.oneLinerLbl)+': '+esc(r.oneLiner)+'</div>' : '')
     + '<div class="pg-meta">'+meta+'</div>'
@@ -2970,6 +3635,10 @@ function openPage(id, opts){
 
   document.getElementById('pgBody').innerHTML = html;
   var _rab=document.getElementById('relAddBtn'); if(_rab) _rab.addEventListener('click', function(){ openRelModal(id); });
+  var _cb=document.getElementById('contBtn'); if(_cb) _cb.addEventListener('click', function(){ openContinueModal(id); });
+  var _sb=document.getElementById('synthBtn'); if(_sb) _sb.addEventListener('click', function(){ openSynthModal(id); });
+  document.querySelectorAll('#pgBody [data-zoom]').forEach(function(el){ el.addEventListener('click', function(){ attZoom(el.getAttribute('data-zoom')); }); });
+  var _lab=document.getElementById('laterAddBtn'); if(_lab) _lab.addEventListener('click', function(){ toggleLaterAddForm(id); });
   document.querySelectorAll('#pgBody .relDel').forEach(function(el){ el.addEventListener('click', function(){ delRelation(id, el.getAttribute('data-del'), el.getAttribute('data-deltype')); }); });
   document.querySelectorAll('#pgBody [data-goto]').forEach(function(el){ el.addEventListener('click', function(){ goRecord(el.getAttribute('data-goto')); }); });
   resetModalPos(document.querySelector('#pageModal .modal'));
@@ -3122,7 +3791,8 @@ function renderCustomFields(fields){
    같은 항목이 중복으로 쌓이지 않게. 종목마다 필요한 게 다르므로 강제로 채우지 않음(눌러야만 생김)
    v7.6: 배당수익률·동종업계 비교 같은 "지표성" 항목 대신, 나중에 판단을 다시 복기할 때(추론) 도움이
    되는 항목으로 교체 — 왜 샀는지/뭐가 틀리면 틀린 건지/다음에 뭘 봐야 하는지가 남아야 나중에 도움됨 */
-var CF_PRESETS = ['매수사유','핵심가정','반증조건','촉매','확신도','리스크','손절가','매도조건','목표비중','진입전략','재평가시점','메모'];
+/* v7.28: "관심 이유"를 맨 앞에 — 아직 사지 않은(관심만 있는) 종목도 가볍게 한 줄 남길 수 있게 */
+var CF_PRESETS = ['관심 이유','매수사유','핵심가정','반증조건','촉매','확신도','리스크','손절가','매도조건','목표비중','진입전략','재평가시점','메모'];
 function renderCfPresets(fields){
   var host = document.getElementById('sdCfPresets');
   if(!host) return;
@@ -3243,7 +3913,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.27.2-0917-1400 준비됨 — records / records_todos / records_meta 컬렉션 사용');
+console.log('[기록보관실] v7.28.0-0917-1600 준비됨 — records / records_todos / records_meta 컬렉션 사용');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
