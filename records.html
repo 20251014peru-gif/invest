@@ -454,6 +454,13 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 .attThumb .attErrNote{font-size:10px;color:var(--warn);padding:0 6px 5px}
 .attMsg{font-size:12px;color:var(--warn);margin-top:6px}
 .attMsg:empty{display:none}
+/* v7.28.1: 미업로드 사진 임시 저장(초안) 배너/상태줄 */
+.attDraftBanner{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--gold-soft);border:1px solid #e6d9b0;border-radius:9px;padding:8px 11px;margin-bottom:8px;font-size:12px;color:#6b5a1e}
+.attDraftBanner button{border:1px solid #e6d9b0;background:#fff;border-radius:7px;padding:4px 10px;font-size:11.5px;font-weight:700;cursor:pointer;color:#6b5a1e}
+.attDraftBanner button.primary{background:var(--navy-800);color:#fff;border-color:var(--navy-800)}
+.attDraftStatus{font-size:10.5px;color:var(--sub2);margin-top:5px}
+.attDraftStatus.err{color:var(--warn);font-weight:700}
+.attDraftStatus:empty{display:none}
 
 /* ── 종목관리 모달 ── */
 .stockMgrList{max-height:320px;overflow-y:auto;margin-bottom:12px}
@@ -643,8 +650,10 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
           </div>
           <input type="file" id="fAttachInput" accept="image/*" multiple style="display:none">
           <div class="attDrop" id="attDrop">사진을 여기로 끌어놓을 수 있어요 (PC)</div>
+          <div id="attDraftBanner" class="attDraftBanner" style="display:none"></div>
           <div class="attGrid" id="attGrid"></div>
           <div class="attMsg" id="attMsg"></div>
+          <div class="attDraftStatus" id="attDraftStatus"></div>
         </div>
         <div class="frow" id="rowBody">
           <label id="lblBody">📄 본문</label>
@@ -1298,10 +1307,20 @@ function studyDo(fn){ return studyApi().then(fn).catch(function(e){ logBug('공�
    않음: 오늘의 체크리스트 위젯이 페이지 로드 직후부터 이 모듈을 쓰기 때문). 모듈이 아직 안 왔을 때 호출되는
    지점들은 각자 RC null 체크로 방어하고, 로드 완료 시 한 번 더 그려서 보강한다(첫 렌더가 늦지 않는다). */
 var RC = null;
-var _rcReady = import('./js/records-core.mjs?v=7.28.0').then(function(m){
+var _rcReady = import('./js/records-core.mjs?v=7.28.1').then(function(m){
   RC = m;
   try{ if(recordsLoaded){ render(); renderTodos(); } }catch(e){}
 }).catch(function(e){ logBug('records-core 로드 실패: '+e.message); });
+
+/* v7.28.1: 미업로드 사진 임시 저장(IndexedDB) — 작성창을 열 때만 필요하므로 지연 로드 */
+var DR = null, _drReady = null;
+function draftsApi(){
+  if(!_drReady){
+    _drReady = import('./js/records-drafts.mjs?v=7.28.1').then(function(m){ DR=m; return m; })
+      .catch(function(e){ DR=null; _drReady=null; throw e; });
+  }
+  return _drReady;
+}
 
 function startListeners(){
   if(!db) return;
@@ -2915,6 +2934,7 @@ function renderAttachGrid(){
       + '</div></div>';
   }).join('');
   attRenderMsg();
+  attScheduleDraftSave(); // v7.28.1: 목록이 바뀔 때마다(추가/제거/재시도/대표사진/순서/업로드 상태변화) 이 기기에 다시 임시 저장
 }
 function attRenderMsg(){
   var msg = document.getElementById('attMsg');
@@ -3010,6 +3030,7 @@ document.getElementById('attGrid').addEventListener('input', function(ev){
   var cap = ev.target.closest('[data-cap]'); if(!cap) return;
   var a = pickedAttachments.find(function(x){ return x.id===cap.getAttribute('data-cap'); });
   if(a) a.caption = cap.value;
+  attScheduleDraftSave();
 });
 function attSwapOrder(id, dir){
   var list = pickedAttachments.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); });
@@ -3024,6 +3045,84 @@ function attZoom(url){
   document.getElementById('attZoomImg').src = url;
   document.getElementById('attZoomModal').classList.add('on');
 }
+
+/* ══════════════════════════════════════════════════════════
+   v7.28.1: 미업로드 사진 임시 저장(js/records-drafts.mjs, IndexedDB) — 새로고침해도 사진이
+   조용히 사라지지 않게. 이미 Storage에 올라간(status:'stored') 첨부는 URL만(작아서 안전), 아직
+   안 올라갔거나(업로드 중) 실패한 첨부는 재시도할 수 있도록 원본 파일(Blob)까지 같이 보관한다.
+   보관에 실패하면(사생활 보호 모드·용량 초과 등) #attDraftStatus 에 그 사실을 명확히 남긴다
+   (조용히 무시하지 않는다 — 새로고침하면 그 사진은 실제로 사라진다는 걸 미리 알려주는 것).
+   ══════════════════════════════════════════════════════════ */
+function attCurrentDraftId(){ return EDIT || 'new'; }
+var _attDraftTimer = null;
+function attScheduleDraftSave(){
+  clearTimeout(_attDraftTimer);
+  _attDraftTimer = setTimeout(attSaveDraftNow, 600);
+}
+function attSetDraftStatus(msg, isErr){
+  var el = document.getElementById('attDraftStatus');
+  if(!el) return;
+  el.textContent = msg||'';
+  el.classList.toggle('err', !!isErr);
+}
+function attSaveDraftNow(){
+  if(!document.getElementById('recModal').classList.contains('on')) return; // 모달이 닫힌 뒤 지연 실행된 타이머 방어
+  var draftId = attCurrentDraftId();
+  if(!pickedAttachments.length){
+    draftsApi().then(function(api){ return api.deleteDraft(draftId); }).catch(function(){});
+    attSetDraftStatus('');
+    return;
+  }
+  var items = pickedAttachments.map(function(a){
+    var base = {id:a.id, path:a.path||'', url:a.url||'', name:a.name||'', size:a.size||0, type:a.type||'', caption:a.caption||'', order:a.order||0, addedAt:a.addedAt||Date.now(), status:a.status};
+    if(a.status!=='stored' && a.file) base.blob = a.file; // 아직 Storage에 없는 파일만 원본 바이트를 같이 보관(재시도용)
+    return base;
+  });
+  draftsApi().then(function(api){ return api.saveDraft(draftId, {kind:curPickedKind(), items:items}); })
+    .then(function(){ attSetDraftStatus('📎 이 기기에 임시 보관됨 · '+hhmm(new Date())); })
+    .catch(function(e){
+      logBug('사진 임시 저장 실패: '+(e&&e.message));
+      attSetDraftStatus('⚠ 이 기기에 임시 저장할 수 없어요 — 새로고침하면 지금 사진은 다시 선택해야 해요', true);
+    });
+}
+function hhmm(d){ return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+/* 저장(#mSave) 성공 뒤에는 더 이상 필요 없는 임시분을 지운다 — 실패하면 다음 저장 성공 때 다시 시도(치명적이지 않음) */
+function attClearDraftAfterSave(){
+  draftsApi().then(function(api){ return api.deleteDraft(attCurrentDraftId()); }).catch(function(){});
+}
+/* 작성창을 열 때(openAdd/openEdit) 저장 안 된 사진 임시분이 있으면 이어서 쓸지 물어본다.
+   "이어서 쓰기": 이미 Storage에 올라간 것(blob 없음)은 URL 그대로 복원, 안 올라간/실패한 것은 재업로드 큐에 다시 올림.
+   "새로 시작": 임시분을 지우고 지금 화면 그대로 둔다. */
+function attCheckDraftOnOpen(draftId){
+  draftsApi().then(function(api){ return api.loadDraft(draftId); }).then(function(draft){
+    if(attCurrentDraftId()!==draftId) return; // 그 사이 모달이 닫혔거나 다른 기록으로 바뀌었으면 무시
+    if(!draft || !draft.items || !draft.items.length) return;
+    var banner = document.getElementById('attDraftBanner');
+    if(!banner) return;
+    banner.style.display = '';
+    banner.innerHTML = '📎 저장하지 못하고 남아있던 사진 '+draft.items.length+'장이 있어요 — 이어서 쓸까요?'
+      + '<button type="button" class="primary" id="attDraftResume">이어서 쓰기</button>'
+      + '<button type="button" id="attDraftDiscard">버리기</button>';
+    document.getElementById('attDraftResume').addEventListener('click', function(){
+      var restored = draft.items.map(function(it){
+        var e = {id:it.id, path:it.path||'', url:it.url||'', name:it.name||'', size:it.size||0, type:it.type||'', caption:it.caption||'', order:it.order||0, addedAt:it.addedAt||Date.now(), status:it.status, note:'', _started:false};
+        if(it.status!=='stored' && it.blob){ e.file=it.blob; e.status='uploading'; try{ e.previewUrl=URL.createObjectURL(it.blob); }catch(err){} }
+        else if(it.status!=='stored' && !it.blob){ e.status='error'; e.note='새로고침 전 파일이 사라졌어요 — 다시 선택해 주세요'; }
+        return e;
+      });
+      pickedAttachments = RC ? RC.mergeDraftAttachments(pickedAttachments, restored) : pickedAttachments.concat(restored.filter(function(r){ return !pickedAttachments.some(function(p){return p.id===r.id;}); }));
+      banner.style.display='none'; banner.innerHTML='';
+      renderAttachGrid();
+      attPumpQueue();
+      toast('이어서 씁니다 — 업로드가 남은 사진은 다시 올리는 중이에요');
+    });
+    document.getElementById('attDraftDiscard').addEventListener('click', function(){
+      draftsApi().then(function(api){ return api.deleteDraft(draftId); }).catch(function(){});
+      banner.style.display='none'; banner.innerHTML='';
+    });
+  }).catch(function(e){ logBug('임시 저장 확인 실패(무시): '+(e&&e.message)); });
+}
+window.addEventListener('pagehide', function(){ if(document.getElementById('recModal').classList.contains('on')) attSaveDraftNow(); });
 document.getElementById('attZoomClose').addEventListener('click', function(){ document.getElementById('attZoomModal').classList.remove('on'); });
 document.getElementById('attZoomModal').addEventListener('click', function(ev){ if(ev.target.id==='attZoomModal') document.getElementById('attZoomModal').classList.remove('on'); });
 
@@ -3102,9 +3201,11 @@ function openAdd(){
   renderStockTags();
   renderAttachGrid();
   updateMoreFieldsBadge(null);
+  resetAttDraftBanner();
   resetModalPos(document.querySelector('#recModal .modal'));
   document.getElementById('recModal').classList.add('on');
   setTimeout(function(){ document.getElementById('fTitle').focus(); }, 60);
+  attCheckDraftOnOpen('new');
 }
 function openEdit(id){
   var r = records.find(function(x){ return x.id===id; });
@@ -3138,8 +3239,15 @@ function openEdit(id){
   });
   renderAttachGrid();
   updateMoreFieldsBadge(r);
+  resetAttDraftBanner();
   resetModalPos(document.querySelector('#recModal .modal'));
   document.getElementById('recModal').classList.add('on');
+  attCheckDraftOnOpen(id);
+}
+function resetAttDraftBanner(){
+  var banner = document.getElementById('attDraftBanner');
+  if(banner){ banner.style.display='none'; banner.innerHTML=''; }
+  attSetDraftStatus('');
 }
 function closeModal(){ document.getElementById('recModal').classList.remove('on'); }
 document.getElementById('mClose').addEventListener('click', closeModal);
@@ -3234,12 +3342,12 @@ document.getElementById('mSave').addEventListener('click', function(){
   pickedStocks.forEach(function(s){ addStockToMaster(s); });
   if(EDIT){
     db.collection('records').doc(EDIT).update(data)
-      .then(function(){ toast('수정했습니다'); closeModal(); })
+      .then(function(){ attClearDraftAfterSave(); toast('수정했습니다'); closeModal(); })
       .catch(function(e){ logBug('수정 실패: '+e.message); toast('저장 실패 — 콘솔을 확인해 주세요'); });
   } else {
     data.createdAt = Date.now();
     db.collection('records').add(data)
-      .then(function(){ toast('기록했습니다'); closeModal(); })
+      .then(function(){ attClearDraftAfterSave(); toast('기록했습니다'); closeModal(); })
       .catch(function(e){ logBug('추가 실패: '+e.message); toast('저장 실패 — 콘솔을 확인해 주세요'); });
   }
 });
