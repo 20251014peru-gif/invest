@@ -173,7 +173,7 @@ var firebaseConfig = {
     return '<div class="e"><div class="ti">'+esc(e.title)+'<span class="id">'+esc(e.id)+'</span></div>'+body+'</div>';
   }
   function fmtV(v,u){ if(v==null)return '—'; var s=Math.abs(v)>=1000?Number(v).toLocaleString('ko-KR',{maximumFractionDigits:0}):String(Math.round(v*100)/100); return s+(u==='%'||u==='%p'?u:(u?' '+u:'')); }
-  var REC_KINDS={youtube:['📺','유튜브'],news:['📰','뉴스'],idea:['💡','아이디어'],chart:['📈','차트'],memo:['📝','메모']};
+  var REC_KINDS={youtube:['📺','유튜브'],news:['📰','뉴스'],idea:['💡','아이디어'],chart:['📈','차트'],memo:['📝','메모'],study:['📚','공부노트']};
   function recEntry(r){
     try{
       var k=REC_KINDS[r.kind]||['📄',String(r.kind||'기록')];

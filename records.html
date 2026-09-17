@@ -8,9 +8,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="js/study/study.css?v=7.27">
 <style>
 /* ══════════════════════════════════════════════════════════
-   🗂 투자 기록보관실  v7.26-0911-1250
+   🗂 투자 기록보관실  v7.27-0917-1150
    업무일지(worklog)와 한눈에 구분되도록 네이비×골드 테마로 짰다.
    업무일지의 8뷰 엔진(카드·표·보드·달력)을 새 창고(records)에
    맞게 다시 짠 것 — worklog_entries 와는 완전히 분리된 컬렉션.
@@ -59,13 +60,17 @@
    사이 하나의 탭으로**(전체·유튜브·뉴스·🏷종목·아이디어·차트·메모, 총 7개 탭). 실제 kind 값은
    아니고 누르면 curView가 'stock'으로 바뀌는 특수 탭 — 다시 누르거나 다른 탭을 누르면 누르기
    직전 보기로 돌아감(v7.7의 보기아이콘 줄 버튼은 제거)
+   v7.27: 📚 공부노트(kind=study) — 서식 편집기(js/study/, TipTap 번들 버전 고정)·서식 보존 읽기 화면·목차/섹션 접기·
+   참고 자료/가설 양방향 연결·이 기기 초안·다른 기기 변경 충돌 비교·MarkFlow HTML/Markdown 가져오기·노트 파일 내보내기/복원.
+   본문 기준본은 contentDocJson(문서 JSON), body 는 검색·구버전 화면용 일반 텍스트 투영. 구형 편집창은 공부노트를 열지 않음.
+   기록 상세 주소(#record=ID)로 새로고침·뒤로가기 가능. 연결 추가/삭제는 트랜잭션으로 서버 최신 목록에 병합.
    ══════════════════════════════════════════════════════════ */
 :root{
   --navy-900:#514936; --navy-800:#5c5340; --navy-700:#6b6049; --navy-600:#8a7d5e;
   --gold:#d4ad32; --gold-dk:#b59022; --gold-lt:#f8efd0; --gold-soft:#fff8e5; --champagne:#f4ead0;
   --bg:#fbfaf5; --card:#fff; --line:#ebe4d3; --line2:#f1ecdf;
   --txt:#2f2f2c; --sub:#77736a; --sub2:#a49c88;
-  --k-youtube:#2c5f8a; --k-news:#0f766e; --k-idea:#9c7c17; --k-chart:#8a3a3a; --k-memo:#64748b;
+  --k-youtube:#2c5f8a; --k-news:#0f766e; --k-idea:#9c7c17; --k-chart:#8a3a3a; --k-memo:#64748b; --k-study:#6b46a8;
   --good:#2f7d5c; --warn:#b23b3b;
 }
 *{box-sizing:border-box}
@@ -153,7 +158,7 @@ a{color:inherit}
 .toolbar{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 10px;margin-bottom:16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .toolbar #ktabs,.toolbar #stockPicker,.toolbar #verifyPicker,.toolbar #topicPicker,.toolbar #starPicker,.toolbar #channelPicker{display:contents}
 .toolbar #cntLabel{margin-left:auto}
-.viewicons{display:flex;gap:4px;background:#f1efe6;border-radius:8px;padding:3px}
+.viewicons{display:flex;gap:4px;background:#f1efe6;border-radius:8px;padding:3px;flex-wrap:wrap;max-width:100%}
 .vicon{width:36px;height:31px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14.5px;color:var(--sub);border:0;background:none;cursor:pointer}
 .vicon.on{background:#fff;color:var(--navy-700);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .fchip{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12.5px;color:#555;background:#fff;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
@@ -235,10 +240,10 @@ a{color:inherit}
 @media(max-width:520px){.grid{grid-template-columns:1fr}}
 .rcard{background:#fff;border:1px solid var(--line);border-left:4px solid var(--k-youtube);border-radius:10px;padding:12px 13px 11px;position:relative;box-shadow:0 1px 2px rgba(11,29,51,.04);cursor:pointer}
 .rcard:hover{box-shadow:0 6px 16px rgba(11,29,51,.09);transform:translateY(-1px)}
-.rcard.news{border-left-color:var(--k-news)} .rcard.idea{border-left-color:var(--k-idea)} .rcard.chart{border-left-color:var(--k-chart)} .rcard.memo{border-left-color:var(--k-memo)}
+.rcard.news{border-left-color:var(--k-news)} .rcard.idea{border-left-color:var(--k-idea)} .rcard.chart{border-left-color:var(--k-chart)} .rcard.memo{border-left-color:var(--k-memo)} .rcard.study{border-left-color:var(--k-study)}
 .rcard .del{position:absolute;top:9px;right:9px;background:#fbeaea;color:#b23b3b;border:0;border-radius:7px;width:23px;height:23px;font-size:11px;cursor:pointer}
 .rcard .kind{font-size:10.5px;font-weight:800;color:var(--k-youtube);margin-bottom:5px;display:flex;align-items:center;gap:5px}
-.rcard.news .kind{color:var(--k-news)} .rcard.idea .kind{color:var(--k-idea)} .rcard.chart .kind{color:var(--k-chart)} .rcard.memo .kind{color:var(--k-memo)}
+.rcard.news .kind{color:var(--k-news)} .rcard.idea .kind{color:var(--k-idea)} .rcard.chart .kind{color:var(--k-chart)} .rcard.memo .kind{color:var(--k-memo)} .rcard.study .kind{color:var(--k-study)}
 .rcard .star{color:var(--gold)}
 .rcard .title{font-weight:700;font-size:13.5px;line-height:1.4;padding-right:20px;margin-bottom:5px;min-height:38px}
 .rcard .oneLine{font-size:11.5px;color:var(--sub);line-height:1.4;margin-bottom:7px}
@@ -261,7 +266,7 @@ table.rt tr:hover td{background:#fffaf0}
 .colrz:hover::after{background:var(--gold);width:4px;right:4px}
 table.rt tr:last-child td{border-bottom:0}
 table.rt .k{display:inline-block;font-size:10.5px;font-weight:800;border-radius:6px;padding:2px 8px;color:#fff}
-.k.youtube{background:var(--k-youtube)} .k.news{background:var(--k-news)} .k.idea{background:var(--k-idea)} .k.chart{background:var(--k-chart)} .k.memo{background:var(--k-memo)}
+.k.youtube{background:var(--k-youtube)} .k.news{background:var(--k-news)} .k.idea{background:var(--k-idea)} .k.chart{background:var(--k-chart)} .k.memo{background:var(--k-memo)} .k.study{background:var(--k-study)}
 table.rt .stag2{font-size:11px;background:var(--gold-lt);color:var(--gold-dk);border-radius:6px;padding:1px 7px;font-weight:700;margin-right:3px;display:inline-block}
 table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
@@ -439,6 +444,8 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 /* ── 페이지 보기(노션식 읽기 화면) ── */
 .pageModalBox .mbody{padding:22px 26px 10px}
+.pageModalBox.study{max-width:1080px!important}
+@media(max-width:760px){.pageModalBox .mbody{padding:16px 14px 8px}}
 .pg-oneliner{background:var(--gold-lt);border:1px solid #e8d9a6;border-radius:12px;padding:14px 16px;font-size:14.5px;font-weight:700;color:#5a4712;margin-bottom:16px;line-height:1.5}
 .pg-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center}
 .pg-meta .m1{font-size:12px;background:#f4f2ea;border-radius:8px;padding:5px 11px;color:var(--sub);font-weight:700}
@@ -461,7 +468,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
-  <span class="ver">v7.26-0911-1250 · 서희타워</span>
+  <span class="ver">v7.27-0917-1150 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -502,6 +509,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
   <div class="toolbar" id="toolbar">
     <div class="ktabs" id="ktabs"></div>
     <div class="viewicons" id="viewicons">
+      <button type="button" class="vicon" data-v="study" title="공부노트 목록 — 제목·핵심 정리·주제·종목·기준일·상태" hidden>📚</button>
       <button type="button" class="vicon" data-v="card" title="카드 — 핵심 파악">▦</button>
       <button type="button" class="vicon" data-v="list" title="리스트 — 빠른 탐색">☰</button>
       <button type="button" class="vicon" data-v="table" title="표 — 비교">≣</button>
@@ -743,6 +751,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
       <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap">
         <label style="font-size:12.5px;color:var(--sub)">관계</label>
         <select id="relType" style="padding:5px 8px;border:1px solid var(--line);border-radius:7px;font-size:12.5px">
+          <option value="references">참고 자료 (references)</option>
           <option value="supports">뒷받침 (supports)</option>
           <option value="contradicts">반박/상충 (contradicts)</option>
           <option value="same_event">같은 사건 (same_event)</option>
@@ -880,7 +889,8 @@ const KINDS = {
   news:    {i:'📰', n:'뉴스',   c:'var(--k-news)',    chLabel:'출처'},
   idea:    {i:'💡', n:'아이디어', c:'var(--k-idea)',  chLabel:'출처(선택)'},
   chart:   {i:'📈', n:'차트',   c:'var(--k-chart)',   chLabel:'출처(선택)'},
-  memo:    {i:'📝', n:'메모',   c:'var(--k-memo)',    chLabel:'출처(선택)'}
+  memo:    {i:'📝', n:'메모',   c:'var(--k-memo)',    chLabel:'출처(선택)'},
+  study:   {i:'📚', n:'공부노트', c:'var(--k-study)',  chLabel:'출처(선택)'}  // v7.27: 전용 서식 편집기(js/study) — 구형 편집창에서는 열지 않음
 };
 const KIND_ORDER = ['youtube','news','idea','chart','memo'];
 
@@ -1040,7 +1050,8 @@ var curTopic = ''; // v7.15: Topic 필터 (stocks와 별개)
 var curQ = '';
 var DUE_SHOW=3, TODO_SHOW=4, dueExpanded=false, todoExpanded=false; // v7.16: 오늘 할 일 더보기/접기
 var hideDone = (function(){ try{ return localStorage.getItem('rec_hide_done')!=='0'; }catch(e){ return true; } })(); // v7.18 완료 숨김(기본 ON)
-var REL_SRC=''; var REL_TYPE_LBL={supports:'뒷받침',contradicts:'반박/상충',same_event:'같은 사건',same_topic:'같은 주제',related:'관련'};
+var REL_SRC=''; var REL_TYPE_LBL={references:'참고 자료',supports:'뒷받침',contradicts:'반박/상충',same_event:'같은 사건',same_topic:'같은 주제',related:'관련'};
+var REL_REV_LBL={references:'이 자료를 참고한 기록',supports:'이 기록이 뒷받침받음',contradicts:'이 기록과 상충',same_event:'같은 사건',same_topic:'같은 주제',related:'관련'};
 var todayExpanded=false, TODAY_SHOW=5; // v7.19 오늘 할 일 통합 목록
 var curStar='', curChannel='', curDateRange=''; // v7.20~24 별표·출처·날짜 필터(기존 데이터만)
 var calYM = todayStr().slice(0,7);
@@ -1048,6 +1059,29 @@ var EDIT = null; // 지금 수정 중인 기록 id (null이면 새로 추가)
 var pickedStocks = []; // 모달 안에서 고르는 중인 종목들
 var pickedImage = {url:'', path:''}; // 모달 안에서 고른 이미지 — Storage 업로드 후 URL만 기록에 저장(base64 금지)
 var PAGE_OPEN = null; // 지금 페이지 보기로 열려 있는 기록 id
+/* v7.27 공부노트 — 보기 상태(탭 복귀·새로고침 뒤에도 유지) */
+function _ssGet(k,d){ try{ var v=sessionStorage.getItem(k); return v==null?d:v; }catch(e){ return d; } }
+function _lsGet(k,d){ try{ var v=localStorage.getItem(k); return v==null?d:v; }catch(e){ return d; } }
+var studyView = _lsGet('rec_study_view','study');   // 공부노트 탭에서 쓰는 보기(기본: 공부노트 목록)
+var studyQuick = _ssGet('rec_study_quick','all');   // all / topic / stock / review
+var studySort = _lsGet('rec_study_sort','updated'); // updated / asOf / review / title
+var curStudyStatus = '';
+var IN_WORKSPACE = /[?&]workspace=1/.test(location.search); // 통합분석실 iframe 안(주소 이동 안 함)
+var recordsLoaded = false, _routeDone = false, PAGE_SIG = '', _restoreScrollY = 0;
+(function restoreUi(){ try{ var u=JSON.parse(sessionStorage.getItem('rec_ui')||'null'); if(u && !IN_WORKSPACE){ if(u.kind && (u.kind==='전체' || KINDS[u.kind])) curKind=u.kind; _restoreScrollY=u.scrollY||0; } }catch(e){} })();
+window.addEventListener('pagehide', function(){ if(IN_WORKSPACE) return; try{ sessionStorage.setItem('rec_ui', JSON.stringify({kind:curKind, scrollY:window.scrollY})); }catch(e){} });
+function isStudyRec(r){ return !!r && (r.kind==='study' || r.contentFormat==='tiptap-json'); }
+function _recSig(r){ return r ? String(r.studyRevision||0)+'|'+(r.updatedAt||0)+'|'+JSON.stringify(r.relations||[]) : ''; }
+var _studyApi = null;
+function studyApi(){
+  if(!_studyApi){
+    _studyApi = import('./js/study/study-app.mjs?v=7.27').then(function(m){
+      return m.init({db:db, storage:storage, records:function(){ return records; }, toast:toast, logBug:logBug, KINDS:KINDS, VERIFY_STATES:VERIFY_STATES, VERIFY_ORDER:VERIFY_ORDER, allStockNames:allStockNames, addStockToMaster:addStockToMaster});
+    }).catch(function(e){ _studyApi=null; logBug('공부노트 모듈 로드 실패: '+e.message); toast('공부노트 기능을 불러오지 못했어요 — 연결 확인 후 새로고침해 주세요'); throw e; });
+  }
+  return _studyApi;
+}
+function studyDo(fn){ return studyApi().then(fn).catch(function(e){ logBug('공부노트 동작 실패: '+(e&&e.message)); }); }
 
 function startListeners(){
   if(!db) return;
@@ -1055,6 +1089,12 @@ function startListeners(){
     records = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
     _diag.recv.records={at:Date.now(),n:records.length,cache:!!(snap.metadata&&snap.metadata.fromCache),pending:!!(snap.metadata&&snap.metadata.hasPendingWrites)};
     render(); renderTodos(); renderKtabs(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker(); renderTopicChips(); renderStarPicker(); renderChannelSel(); renderMiniSummary(); renderActiveFilters();
+    if(!recordsLoaded){ recordsLoaded=true; if(_restoreScrollY) setTimeout(function(){ window.scrollTo(0, _restoreScrollY); }, 60); }
+    if(!_routeDone){ _routeDone=true; routeFromHash(); }
+    else if(PAGE_OPEN && document.getElementById('pageModal').classList.contains('on')){
+      var _po=records.find(function(x){ return x.id===PAGE_OPEN; });
+      if(_po && isStudyRec(_po) && _recSig(_po)!==PAGE_SIG) openPage(PAGE_OPEN, {fromRoute:true});
+    }
   }, function(e){ logBug('records 구독 실패: '+e.message); });
 
   db.collection('records_todos').where('date','>=', histCutoffStr()).orderBy('date').onSnapshot(function(snap){
@@ -1498,7 +1538,7 @@ setInterval(checkDayRollover, 60000);
    curView만 그대로 바꾸고 그 값을 render()가 stockMode 여부에 따라 "레코드"에 적용할지
    "종목 목록"에 적용할지 고를 뿐이라, 두 UI(탭 줄/아이콘 줄)가 서로 다른 상태를 각자 책임져서
    v7.9의 버그(한 값이 두 UI에 걸쳐 있어 한쪽 갱신을 빠뜨리면 하이라이트가 어긋나던 것) 자체가 구조적으로 없어짐 */
-var KTAB_ORDER = ['youtube','news','__stock__','idea','chart','memo'];
+var KTAB_ORDER = ['youtube','news','__stock__','study','idea','chart','memo']; // v7.27: 공부노트 탭
 function renderKtabs(){
   var total = records.length;
   var html = '<span class="ktab'+(curKind==='전체'&&!stockMode?' on':'')+'" data-k="전체">전체<span class="n">'+total+'</span></span>';
@@ -1518,7 +1558,7 @@ function renderKtabs(){
     el.addEventListener('click', function(){
       curKind = el.getAttribute('data-k');
       stockMode = false;
-      render(); renderKtabs();
+      syncViewIcons(); render(); renderKtabs();
     });
   });
   var stockBtn = host.querySelector('[data-stocktabbtn]');
@@ -1526,20 +1566,26 @@ function renderKtabs(){
     stockBtn.addEventListener('click', function(){
       stockMode = !stockMode;
       if(!stockMode) curStockTab = ''; // 종목모드를 완전히 나갈 땐 드릴다운 상태도 같이 리셋
-      render(); renderKtabs();
+      syncViewIcons(); render(); renderKtabs();
     });
   }
 }
 document.getElementById('viewicons').querySelectorAll('.vicon').forEach(function(b){
   b.addEventListener('click', function(){
-    curView = b.getAttribute('data-v');
-    try{ localStorage.setItem('rec_view', curView); }catch(e){}
+    var v = b.getAttribute('data-v');
+    if(curKind==='study' && !stockMode){ studyView = v; try{ localStorage.setItem('rec_study_view', v); }catch(e){} }
+    else { if(v==='study') return; curView = v; try{ localStorage.setItem('rec_view', curView); }catch(e){} }
     syncViewIcons(); render();
   });
 });
 function syncViewIcons(){
+  var inStudy = curKind==='study' && !stockMode;
+  var active = inStudy ? studyView : curView;
   document.querySelectorAll('.vicon').forEach(function(b){
-    b.classList.toggle('on', b.getAttribute('data-v')===curView);
+    var v=b.getAttribute('data-v');
+    if(v==='study') b.hidden = !inStudy;
+    b.classList.toggle('on', v===active);
+    b.setAttribute('aria-pressed', String(v===active));
   });
 }
 function renderStockPicker(){
@@ -1615,7 +1661,9 @@ function renderChannelSel(){
   host.innerHTML='<select id="channelSel" style="padding:5px 10px;border:1px solid '+(curChannel?'var(--navy-700)':'var(--line)')+';border-radius:999px;font-size:12px;color:'+(curChannel?'var(--navy-700)':'#555')+';font-weight:'+(curChannel?'700':'400')+';background:#fff;cursor:pointer"><option value="">📡 출처 전체</option>'+list.map(function(c){ return '<option value="'+esc(c)+'"'+(curChannel===c?' selected':'')+'>'+esc(c)+' ('+chs[c]+')</option>'; }).join('')+'</select>';
   var sel=document.getElementById('channelSel'); if(sel) sel.addEventListener('change', function(){ curChannel=sel.value; render(); renderChannelSel(); });
 }
-var FKLABEL={stock:'종목',topic:'주제',star:'별점',verify:'검증',channel:'출처',date:'날짜'};
+var FKLABEL={stock:'종목',topic:'주제',star:'별점',verify:'검증',channel:'출처',date:'날짜',studyStatus:'정리 상태'};
+var STUDY_STATUS_LBL={learning:'공부 중',organized:'정리 완료',needs_review:'재검토 필요'};
+var STUDY_TYPE_LBL={concept:'개념 정리',topic_analysis:'주제 분석',source_study:'자료 공부',comparison:'비교 정리'};
 function _uniqVals(field){ var m={}; records.forEach(function(r){ if(field==='stocks'||field==='topics'){ (r[field]||[]).forEach(function(x){ if(x) m[x]=(m[x]||0)+1; }); } else if(r[field]){ m[r[field]]=(m[r[field]]||0)+1; } }); return Object.keys(m).sort(function(a,b){ return m[b]-m[a]; }); }
 function filterOptions(kind){
   var o=[];
@@ -1624,6 +1672,7 @@ function filterOptions(kind){
   else if(kind==='verify'){ o.push({label:'전체',on:!curVerify,apply:function(){curVerify='';}}); VERIFY_ORDER.forEach(function(k){ if(records.some(function(r){return r.verifyState===k;})) o.push({label:VERIFY_STATES[k].n,on:curVerify===k,apply:function(){curVerify=k;}}); }); }
   else if(kind==='channel'){ o.push({label:'전체',on:!curChannel,apply:function(){curChannel='';}}); _uniqVals('channel').forEach(function(c){ o.push({label:c,on:curChannel===c,apply:function(){curChannel=c;}}); }); }
   else if(kind==='stock'){ o.push({label:'전체',on:!curStock,apply:function(){curStock='';}}); _uniqVals('stocks').forEach(function(c){ o.push({label:c,on:curStock===c,apply:function(){curStock=c;}}); }); }
+  else if(kind==='studyStatus'){ o.push({label:'전체',on:!curStudyStatus,apply:function(){curStudyStatus='';}}); Object.keys(STUDY_STATUS_LBL).forEach(function(k){ o.push({label:STUDY_STATUS_LBL[k],on:curStudyStatus===k,apply:function(){curStudyStatus=k;}}); }); }
   else if(kind==='topic'){ o.push({label:'전체',on:!curTopic,apply:function(){curTopic='';}}); _uniqVals('topics').forEach(function(c){ o.push({label:c,on:curTopic&&curTopic.toLowerCase()===String(c).toLowerCase(),apply:function(){curTopic=c;}}); }); }
   return o;
 }
@@ -1649,6 +1698,7 @@ function renderActiveFilters(){
   if(curVerify) act.push([(VERIFY_STATES[curVerify]||{}).n||curVerify,function(){curVerify='';}]);
   if(curChannel) act.push([curChannel,function(){curChannel='';}]);
   if(curDateRange) act.push([curDateRange==='today'?'오늘':'최근'+curDateRange+'일',function(){curDateRange='';}]);
+  if(curStudyStatus) act.push([STUDY_STATUS_LBL[curStudyStatus]||curStudyStatus,function(){curStudyStatus='';}]);
   if(!act.length){ host.innerHTML=''; return; }
   host._act=act;
   host.innerHTML='<b style="color:var(--gold-dk)">필터 '+act.length+'</b>'
@@ -1674,14 +1724,14 @@ function renderVerifyPicker(){
   });
 }
 document.getElementById('btnClearFlt').addEventListener('click', function(){
-  curKind='전체'; curStock=''; curVerify=''; curTopic=''; curStar=''; curChannel=''; curDateRange=''; curQ=''; document.getElementById('searchBar').value='';
+  curKind='전체'; curStock=''; curVerify=''; curTopic=''; curStar=''; curChannel=''; curDateRange=''; curQ=''; curStudyStatus=''; syncViewIcons(); document.getElementById('searchBar').value='';
   render(); renderKtabs(); renderStockPicker(); renderVerifyPicker(); renderTopicChips(); renderStarPicker(); renderChannelSel(); renderActiveFilters();
 });
 document.getElementById('btnFilter').addEventListener('click', function(){
   var pop=document.getElementById('filterPop'); if(!pop) return;
   if(pop.style.display==='block' && pop._mode==='menu'){ pop.style.display='none'; return; }
   pop._mode='menu';
-  pop.innerHTML=['stock','topic','star','verify','channel','date'].map(function(k){ return '<div class="fkItem" data-k="'+k+'" style="padding:6px 10px;font-size:12.5px;cursor:pointer;border-radius:6px">'+FKLABEL[k]+' ▸</div>'; }).join('');
+  pop.innerHTML=['stock','topic','star','verify','channel','date'].concat(curKind==='study'?['studyStatus']:[]).map(function(k){ return '<div class="fkItem" data-k="'+k+'" style="padding:6px 10px;font-size:12.5px;cursor:pointer;border-radius:6px">'+FKLABEL[k]+' ▸</div>'; }).join('');
   var r=this.getBoundingClientRect(); pop.style.left=Math.min(r.left,window.innerWidth-215)+'px'; pop.style.top=(r.bottom+window.scrollY+5)+'px'; pop.style.display='block';
   pop.querySelectorAll('.fkItem').forEach(function(el){ el.addEventListener('click', function(ev){ ev.stopPropagation(); openFilterPop(el.getAttribute('data-k'), document.getElementById('btnFilter')); }); });
 });
@@ -1703,11 +1753,12 @@ function filtered(){
   if(curTopic){ var _tp = curTopic.toLowerCase(); arr = arr.filter(function(r){ return (r.topics||[]).some(function(t){ return String(t).toLowerCase()===_tp; }); }); }
   if(curStar){ arr = arr.filter(function(r){ return curStar==='none' ? !((r.star||0)>0) : (r.star||0)>=(+curStar); }); }
   if(curChannel){ arr = arr.filter(function(r){ return (r.channel||'')===curChannel; }); }
+  if(curStudyStatus){ arr = arr.filter(function(r){ return isStudyRec(r) && (r.studyStatus||'learning')===curStudyStatus; }); }
   if(curDateRange){ if(curDateRange==='today'){ var _t=todayStr(); arr=arr.filter(function(r){ return r.date===_t; }); } else { var _d=kstNow(); _d.setDate(_d.getDate()-(curDateRange==='7'?7:30)); var _lim=_d.toISOString().slice(0,10); arr=arr.filter(function(r){ return (r.date||'')>=_lim; }); } }
   if(curQ){
     var q = curQ.toLowerCase();
     arr = arr.filter(function(r){
-      var hay = [r.title,r.oneLiner,r.body,r.action,r.channel,(r.stocks||[]).join(' '),(r.topics||[]).join(' '),r.aiInterpretation,r.userJudgment].join(' ').toLowerCase();
+      var hay = [r.title,r.oneLiner,r.body,r.action,r.channel,(r.stocks||[]).join(' '),(r.topics||[]).join(' '),(r.industries||[]).join(' '),(r.themes||[]).join(' '),r.aiInterpretation,r.userJudgment].join(' ').toLowerCase();
       return hay.indexOf(q)>=0;
     });
   }
@@ -1721,14 +1772,16 @@ function filtered(){
 function render(){
   /* v7.10: "🏷 종목" 모드는 curKind 필터·레코드 빈 상태 가드와 완전히 무관한 별도 화면이라
      맨 앞에서 분기 — 기존 레코드 렌더 경로는 한 줄도 안 바뀜(아래 그대로) */
-  if(stockMode){ renderStockMode(); return; }
+  if(stockMode){ document.getElementById('btnAdd').textContent = '＋ 기록 추가'; renderStockMode(); return; }
   var arr = filtered();
   /* v6: 필터가 하나도 안 걸려있으면 필터해제 버튼을 숨김(눌러도 아무 일 안 일어나는 혼란 방지) */
-  var hasFilter = (curKind!=='전체' || !!curStock || !!curVerify || !!curTopic || !!curQ);
+  var hasFilter = (curKind!=='전체' || !!curStock || !!curVerify || !!curTopic || !!curQ || !!curStudyStatus);
   document.getElementById('btnClearFlt').style.display = hasFilter ? '' : 'none';
   document.getElementById('cntLabel').textContent = arr.length+'건';
   document.getElementById('topStat').textContent = records.length+'건 기록됨';
+  document.getElementById('btnAdd').textContent = curKind==='study' ? '＋ 새 공부노트' : '＋ 기록 추가';
   var host = document.getElementById('content');
+  if(curKind==='study'){ renderStudyTab(host, arr); return; }
   if(!arr.length){
     host.innerHTML = '<div class="emptyState"><div class="ei">🗂</div>아직 기록이 없어요. <b>＋ 기록 추가</b>로 시작해보세요</div>';
     return;
@@ -1796,6 +1849,72 @@ syncViewIcons();
 
 function fmtDate(d){ if(!d) return ''; var p=d.split('-'); return p[1]+'-'+p[2]; }
 
+/* ── v7.27 공부노트 탭 — 빠른 보기(전체/주제별/종목별/재검토) + 공부노트 목록 또는 기존 8개 보기 ── */
+function studyNeedsReview(r){ return isStudyRec(r) && (r.studyStatus==='needs_review' || (!!r.reviewAt && r.reviewAt<=todayStr())); }
+function studySorted(arr){
+  var a=arr.slice();
+  var emptyLast=function(x,y,dir){ if(!x&&!y) return 0; if(!x) return 1; if(!y) return -1; return dir*x.localeCompare(y); };
+  if(studySort==='asOf') a.sort(function(x,y){ return emptyLast(x.asOfDate,y.asOfDate,-1); });
+  else if(studySort==='review') a.sort(function(x,y){ return emptyLast(x.reviewAt,y.reviewAt,1); });
+  else if(studySort==='title') a.sort(function(x,y){ return String(x.title||'').localeCompare(String(y.title||''),'ko'); });
+  else a.sort(function(x,y){ return (y.updatedAt||y.createdAt||0)-(x.updatedAt||x.createdAt||0); });
+  return a;
+}
+function studyListHTML(arr){
+  return '<div class="st-list"><table><thead><tr><th>제목</th><th>핵심 정리</th><th>주제</th><th>종목</th><th>자료 기준일</th><th>정리 상태</th></tr></thead><tbody>'
+    + arr.map(function(r){
+        var st=r.studyStatus||'learning';
+        return '<tr data-open="'+esc(r.id)+'" tabindex="0"><td data-l="제목"><div class="st-t">'+esc(r.title||'(제목 없음)')+'</div><small style="color:var(--sub2)">'+esc(STUDY_TYPE_LBL[r.studyType]||'')+'</small></td>'
+          + '<td data-l="핵심 정리"><div class="st-o">'+esc(r.oneLiner||'')+'</div></td>'
+          + '<td data-l="주제">'+(r.topics||[]).map(function(t){ return '<span class="stag" style="background:#eef3fb;margin:1px">#'+esc(t)+'</span>'; }).join(' ')+'</td>'
+          + '<td data-l="종목">'+(r.stocks||[]).map(function(t){ return '<span class="stag" style="margin:1px">'+esc(t)+'</span>'; }).join(' ')+'</td>'
+          + '<td data-l="자료 기준일" style="white-space:nowrap">'+(r.asOfDate?esc(r.asOfDate):'<span style="color:var(--sub2)">미지정</span>')+'</td>'
+          + '<td data-l="정리 상태"><span class="st-badge '+esc(st)+'">'+esc(STUDY_STATUS_LBL[st]||st)+'</span>'+(r.reviewAt?'<br><small style="color:'+(r.reviewAt<=todayStr()?'var(--warn)':'var(--sub2)')+'">재검토 '+esc(r.reviewAt)+'</small>':'')+'</td></tr>';
+      }).join('')
+    + '</tbody></table></div>';
+}
+function renderStudyTab(host, arr){
+  var all = arr.length, rev = arr.filter(studyNeedsReview).length;
+  var q = [['all','전체 공부노트 '+all],['topic','주제별'],['stock','종목별'],['review','재검토할 노트 '+rev]];
+  var bar = '<div class="st-quick" role="group" aria-label="공부노트 빠른 보기">'
+    + q.map(function(x){ return '<button type="button" class="fchip'+(studyQuick===x[0]?' on':'')+'" data-sq="'+x[0]+'" aria-pressed="'+(studyQuick===x[0])+'">'+x[1]+'</button>'; }).join('')
+    + '<label style="font-size:12px;color:var(--sub);margin-left:6px">정렬 <select id="studySortSel" style="border:1px solid var(--line);border-radius:7px;padding:4px 6px;font-size:12px">'
+    + [['updated','최근 수정'],['asOf','자료 기준일'],['review','재검토일'],['title','제목']].map(function(o){ return '<option value="'+o[0]+'"'+(studySort===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')
+    + '</select></label><span style="flex:1"></span>'
+    + '<button type="button" class="mgrbtn" data-studyact="import">📥 MarkFlow 가져오기</button>'
+    + '<button type="button" class="mgrbtn" data-studyact="restore">♻ 노트 파일 복원</button></div>';
+  if(studyQuick==='review') arr = arr.filter(studyNeedsReview);
+  arr = studySorted(arr);
+  document.getElementById('cntLabel').textContent = arr.length+'건';
+  var body;
+  if(!arr.length){
+    body = '<div class="emptyState"><div class="ei">📚</div>'+(studyQuick==='review'?'재검토할 노트가 없어요':'아직 공부노트가 없어요. <b>＋ 새 공부노트</b>로 쓰거나 <b>📥 MarkFlow 가져오기</b>로 옮겨오세요')+'</div>';
+  } else if(studyQuick==='topic' || studyQuick==='stock'){
+    var field = studyQuick==='topic' ? 'topics' : 'stocks', groups={}, order=[];
+    arr.forEach(function(r){ var ks=(r[field]&&r[field].length)?r[field]:['(미지정)']; ks.forEach(function(k){ if(!groups[k]){ groups[k]=[]; order.push(k); } groups[k].push(r); }); });
+    order.sort(function(a,b){ if(a==='(미지정)') return 1; if(b==='(미지정)') return -1; return groups[b].length-groups[a].length || a.localeCompare(b,'ko'); });
+    body = order.map(function(k){ return '<div class="st-group-h">'+(studyQuick==='topic'?'🧩 ':'🏷 ')+esc(k)+' <span style="color:var(--sub2);font-weight:600">'+groups[k].length+'</span></div>'+studyViewHTML(groups[k]); }).join('');
+  } else body = studyViewHTML(arr);
+  host.innerHTML = bar + body;
+  host.querySelectorAll('[data-sq]').forEach(function(b){ b.addEventListener('click', function(){ studyQuick=b.getAttribute('data-sq'); try{ sessionStorage.setItem('rec_study_quick', studyQuick); }catch(e){} render(); }); });
+  var ss=document.getElementById('studySortSel'); if(ss) ss.addEventListener('change', function(){ studySort=ss.value; try{ localStorage.setItem('rec_study_sort', studySort); }catch(e){} render(); });
+  host.querySelectorAll('[data-studyact]').forEach(function(b){ b.addEventListener('click', function(){ var a=b.getAttribute('data-studyact'); studyDo(function(api){ return a==='import'?api.openImport():api.openRestore(); }); }); });
+  host.querySelectorAll('tr[data-open]').forEach(function(tr){ tr.addEventListener('keydown', function(ev){ if(ev.key==='Enter'){ openPage(tr.getAttribute('data-open')); } }); });
+  bindContentClicks();
+}
+function studyViewHTML(arr){
+  var v = studyView;
+  if(v==='card') return cardHTML(arr);
+  if(v==='list') return listHTML(arr);
+  if(v==='table') return tableHTML(arr);
+  if(v==='board') return boardHTML(arr);
+  if(v==='ch') return chHTML(arr);
+  if(v==='cal') return calHTML(arr);
+  if(v==='time') return timeHTML(arr);
+  if(v==='gal') return galHTML(arr);
+  return studyListHTML(arr);
+}
+
 /* ── 카드보기 (날짜별 그룹) ── */
 function cardHTML(arr){
   var groups = {}, order = [];
@@ -1831,6 +1950,7 @@ function cardOne(r){
   var vbadge = vs ? (' <span class="vbadge" style="background:'+vs.c+'">'+vs.n+'</span>') : '';
   var scenTag = (r.scenarios && r.scenarios.commonFacts) ? ' <span class="dt" style="background:#fff;border:1px solid var(--k-idea);color:var(--k-idea)">🧭 시나리오</span>' : '';
   var judge = r.userJudgment ? ('<div class="oneLine" style="color:var(--navy-700);font-size:11.5px">🙋 '+esc(String(r.userJudgment).slice(0,50))+'</div>') : '';
+  if(isStudyRec(r)) scenTag += ' <span class="dt" style="background:#f3eefb;color:#6b46a8">'+esc(STUDY_STATUS_LBL[r.studyStatus||'learning']||'')+(r.asOfDate?' · 기준 '+esc(fmtDate(r.asOfDate)):'')+'</span>';
   return '<div class="rcard '+r.kind+'" data-open="'+esc(r.id)+'">'
     + '<button class="del" data-del="'+esc(r.id)+'">🗑</button>'
     + '<div class="kind">'+k.i+' '+k.n+(r.channel?(' · '+esc(r.channel)):'')+' '+stars+vbadge+'</div>'
@@ -2314,10 +2434,12 @@ function renderKindPick(activeKind){
   host.innerHTML = KIND_ORDER.map(function(k){
     var meta = KINDS[k];
     return '<button type="button" data-k="'+k+'" class="'+(activeKind===k?'on':'')+'">'+meta.i+' '+meta.n+'</button>';
-  }).join('');
-  host.querySelectorAll('button').forEach(function(b){
+  }).join('') + ((EDIT || IN_WORKSPACE) ? '' : '<button type="button" data-studynew="1" title="서식 편집기로 공부노트 쓰기">📚 공부노트 →</button>');
+  var sn = host.querySelector('[data-studynew]');
+  if(sn) sn.addEventListener('click', function(){ closeModal(); studyDo(function(api){ return api.newNote(); }); });
+  host.querySelectorAll('button[data-k]').forEach(function(b){
     b.addEventListener('click', function(){
-      host.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+      host.querySelectorAll('button[data-k]').forEach(function(x){ x.classList.remove('on'); });
       b.classList.add('on');
       applyKindFields(b.getAttribute('data-k'));
     });
@@ -2445,6 +2567,7 @@ function reverseRelations(id){
   return (records||[]).filter(function(x){ return (x.relations||[]).some(function(rl){ return rl && rl.targetId===id; }); });
 }
 function openAdd(){
+  if(curKind==='study' && !IN_WORKSPACE){ studyDo(function(api){ return api.newNote(); }); return; }
   EDIT = null; pickedStocks = [];
   document.getElementById('mTitle').textContent = '＋ 기록 추가';
   document.getElementById('mDel').style.display = 'none';
@@ -2475,6 +2598,9 @@ function openAdd(){
 function openEdit(id){
   var r = records.find(function(x){ return x.id===id; });
   if(!r) return;
+  /* v7.27: 공부노트는 서식 문서가 기준본 — 구형 textarea 편집창으로 body만 덮어쓰면 두 본문이 어긋나므로 항상 전용 편집기로 연다
+     (통합분석실 iframe 의 openEdit 호출도 여기로 온다) */
+  if(isStudyRec(r)){ studyDo(function(api){ return api.openEditor(id); }); return; }
   EDIT = id; pickedStocks = (r.stocks||[]).slice();
   document.getElementById('mTitle').textContent = '기록 수정';
   document.getElementById('mDel').style.display = '';
@@ -2540,6 +2666,8 @@ document.getElementById('mSave').addEventListener('click', function(){
   if(!db){ toast('연결 중입니다 — 잠시 뒤 다시 눌러 주세요'); return; }
   var title = document.getElementById('fTitle').value.trim();
   if(!title){ toast('제목을 적어 주세요'); return; }
+  var _ed = EDIT ? records.find(function(x){ return x.id===EDIT; }) : null;
+  if(_ed && isStudyRec(_ed)){ toast('공부노트는 공부노트 편집창에서 수정해 주세요 — 서식이 손상되지 않도록 저장을 막았어요'); return; }
   var data = {
     kind: curPickedKind(),
     date: document.getElementById('fDate').value || todayStr(),
@@ -2607,7 +2735,7 @@ function removeRecord(id){
 function renderRelResults(q){
   var host=document.getElementById('relResults'); if(!host) return;
   var src=records.find(function(x){ return x.id===REL_SRC; });
-  var linked={}; ((src&&src.relations)||[]).forEach(function(rl){ linked[rl.targetId]=1; });
+  var linked={}, _rt=(document.getElementById('relType')||{}).value||'related'; ((src&&src.relations)||[]).forEach(function(rl){ if((rl.type||'related')===_rt) linked[rl.targetId]=1; });
   q=(q||'').toLowerCase();
   var list=records.filter(function(r){
     if(r.id===REL_SRC || linked[r.id]) return false;
@@ -2626,21 +2754,28 @@ function openRelModal(srcId){
   document.getElementById('relModal').classList.add('on');
 }
 function closeRelModal(){ document.getElementById('relModal').classList.remove('on'); }
+/* v7.27: 연결 변경은 트랜잭션으로 서버 최신 relations 에 병합 — 다른 기기·공부노트 편집기에서 붙인 연결을 덮어쓰지 않는다 */
+function mutateRelations(srcId, fn){
+  var ref=db.collection('records').doc(srcId);
+  return db.runTransaction(function(tx){ return tx.get(ref).then(function(s){ if(!s.exists) throw new Error('기록 없음'); var rels=fn((s.data().relations||[]).slice()); tx.update(ref,{relations:rels}); return rels; }); });
+}
 function addRelation(srcId,targetId,type){
   var r=records.find(function(x){ return x.id===srcId; }); if(!r||!db) return;
-  var rels=(r.relations||[]).slice();
-  if(rels.some(function(x){ return x.targetId===targetId; })) return;
-  rels.push({relationId:'rel_'+Date.now(), targetId:targetId, type:type||'related', note:'', createdAt:Date.now()});
-  r.relations=rels;
-  db.collection('records').doc(srcId).update({relations:rels}).catch(function(e){ logBug('관계 저장 실패: '+e.message); });
-  closeRelModal(); openPage(srcId);
+  type=type||'related';
+  if((r.relations||[]).some(function(x){ return x.targetId===targetId && (x.type||'related')===type; })) return;
+  var item={relationId:'rel_'+Date.now(), targetId:targetId, type:type, note:'', createdAt:Date.now()};
+  r.relations=(r.relations||[]).concat(item);
+  mutateRelations(srcId, function(rels){ if(!rels.some(function(x){ return x.targetId===targetId && (x.type||'related')===type; })) rels.push(item); return rels; })
+    .catch(function(e){ logBug('관계 저장 실패: '+e.message); toast('연결 저장 실패 — 다시 시도해 주세요'); });
+  closeRelModal(); openPage(srcId, {fromRoute:true});
 }
-function delRelation(srcId,targetId){
+function delRelation(srcId,targetId,type){
   var r=records.find(function(x){ return x.id===srcId; }); if(!r||!db) return;
-  var rels=(r.relations||[]).filter(function(x){ return x.targetId!==targetId; });
-  r.relations=rels;
-  db.collection('records').doc(srcId).update({relations:rels}).catch(function(e){ logBug('관계 삭제 실패: '+e.message); });
-  openPage(srcId);
+  var match=function(x){ return x.targetId===targetId && (!type || (x.type||'related')===type); };
+  r.relations=(r.relations||[]).filter(function(x){ return !match(x); });
+  mutateRelations(srcId, function(rels){ return rels.filter(function(x){ return !match(x); }); })
+    .catch(function(e){ logBug('관계 삭제 실패: '+e.message); toast('연결 삭제 실패 — 다시 시도해 주세요'); });
+  openPage(srcId, {fromRoute:true});
 }
 function _sysRow(k,v){ return '<tr><td style="color:var(--sub);font-size:11.5px;padding:3px 10px 3px 0;white-space:nowrap;vertical-align:top">'+k+'</td><td style="font-size:12.5px;padding:3px 0">'+v+'</td></tr>'; }
 function _sysBadge(t,c){ var col={ok:'#2f7d5c',wait:'#b59022',warn:'#b59022',err:'#b23b3b',na:'#9a9484'}[c]||'#777'; return '<span style="color:'+col+';font-weight:700">'+t+'</span>'; }
@@ -2710,13 +2845,66 @@ function showSysReport(){
   document.getElementById('sysRepTa').value=buildSysReport();
   document.getElementById('sysCopyBtn').addEventListener('click', function(){ var ta=document.getElementById('sysRepTa'); ta.select(); function done(){ document.getElementById('sysCopyMsg').textContent='복사됨'; } try{ navigator.clipboard.writeText(ta.value).then(done,function(){ try{document.execCommand('copy');done();}catch(_){document.getElementById('sysCopyMsg').textContent='복사 실패 — 직접 선택하세요';} }); }catch(e){ try{document.execCommand('copy');done();}catch(_){document.getElementById('sysCopyMsg').textContent='복사 실패 — 직접 선택하세요';} } });
 }
-function openPage(id){
+/* v7.27: 기록 상세 주소 — #record=ID (새로고침·뒤로가기·공유 가능). 통합분석실 iframe 안에서는 주소를 바꾸지 않음 */
+function setRecordHash(id){
+  if(IN_WORKSPACE) return;
+  var h = id ? '#record='+encodeURIComponent(id) : '';
+  if(location.hash===h) return;
+  if(id) history.pushState({rec:id}, '', location.pathname+location.search+h);
+  else history.replaceState(null, '', location.pathname+location.search);
+}
+function routeFromHash(){
+  if(IN_WORKSPACE) return;
+  var m = location.hash.match(/^#record=(.+)$/);
+  var modal = document.getElementById('pageModal');
+  if(!m){ if(modal.classList.contains('on')){ modal.classList.remove('on'); PAGE_OPEN=null; } return; }
+  var id; try{ id=decodeURIComponent(m[1]); }catch(e){ id=m[1]; }
+  if(records.some(function(x){ return x.id===id; })) openPage(id, {fromRoute:true});
+  else if(recordsLoaded) showMissingPage(id);
+}
+function showMissingPage(id){
+  PAGE_OPEN = null;
+  document.querySelector('#pageModal .modal').classList.remove('study');
+  document.getElementById('pgKindTitle').textContent = '⚠ 기록 없음';
+  document.getElementById('pgBody').innerHTML = '<div class="emptyState"><div class="ei">⚠</div>삭제됐거나 찾을 수 없는 기록입니다.<br><small style="color:var(--sub2)">ID '+esc(id)+'</small></div>';
+  resetModalPos(document.querySelector('#pageModal .modal'));
+  document.getElementById('pageModal').classList.add('on');
+}
+window.addEventListener('popstate', routeFromHash);
+function goRecord(id){
+  if(records.some(function(x){ return x.id===id; })) openPage(id); else { setRecordHash(id); showMissingPage(id); }
+}
+function openPage(id, opts){
+  opts = opts || {};
   var r = records.find(function(x){ return x.id===id; });
   if(!r) return;
   PAGE_OPEN = id;
+  if(!opts.fromRoute) setRecordHash(id);
   var k = KINDS[r.kind] || KINDS.memo;
   var f = KIND_FIELDS[r.kind] || KIND_FIELDS.memo;
   document.getElementById('pgKindTitle').textContent = k.i+' '+k.n;
+  var _pm = document.querySelector('#pageModal .modal');
+  _pm.classList.toggle('study', isStudyRec(r));
+  document.getElementById('pgCopy').textContent = '📋 전체 복사';
+  if(isStudyRec(r)){
+    PAGE_SIG = _recSig(r);
+    var pgb = document.getElementById('pgBody');
+    var wasOpen = document.getElementById('pageModal').classList.contains('on') && pgb.getAttribute('data-rec')===id;
+    var keepTop = wasOpen ? pgb.parentElement.scrollTop : 0;
+    if(!wasOpen){ pgb.innerHTML = '<div class="emptyState">📚 공부노트를 여는 중…</div>'; resetModalPos(_pm); }
+    pgb.setAttribute('data-rec', id);
+    document.getElementById('pageModal').classList.add('on');
+    studyDo(function(api){
+      if(PAGE_OPEN!==id) return;
+      var cur = records.find(function(x){ return x.id===id; }) || r;
+      pgb.innerHTML = '<div class="st-row" style="justify-content:flex-end;margin-bottom:6px"><button type="button" class="st-mini" id="stExportBtn">⬇ 노트 파일로 내보내기</button></div>' + api.renderPage(cur);
+      api.bindPage(pgb, {onGoto: goRecord});
+      document.getElementById('stExportBtn').addEventListener('click', function(){ api.exportNote(id).catch(function(e){ toast('내보내기 실패: '+e.message); }); });
+      if(wasOpen) pgb.parentElement.scrollTop = keepTop;
+    });
+    return;
+  }
+  document.getElementById('pgBody').removeAttribute('data-rec');
 
   var meta = '<span class="m1">📅 '+esc(r.date||'')+'</span>';
   if(r.channel) meta += '<span class="m1">'+esc(f.chBoxLbl.replace('(선택)',''))+': '+esc(r.channel)+'</span>';
@@ -2757,10 +2945,11 @@ function openPage(id){
 
   var topicsHtml = (r.topics && r.topics.length) ? '<div class="pg-stocks">'+r.topics.map(function(t){ return '<span class="stag" style="background:#eef3fb">#'+esc(t)+'</span>'; }).join('')+'</div>' : '';
   var judgeHtml = (r.aiInterpretation ? '<div class="pg-h4">🤖 AI 해석</div><div class="pg-body">'+esc(r.aiInterpretation)+'</div>' : '') + (r.userJudgment ? '<div class="pg-h4">🙋 내 판단</div><div class="pg-body">'+esc(r.userJudgment)+'</div>' : '');
-  var _fwd = (r.relations||[]).map(function(rl){ var t=(records||[]).find(function(x){return x.id===rl.targetId;}); return t?{rec:t,type:rl.type||'related',dir:'→'}:null; }).filter(Boolean);
-  var _rev = reverseRelations(r.id).map(function(t){ return {rec:t,type:'',dir:'←'}; });
-  var relFwd = _fwd.map(function(o){ return '<div style="font-size:12.5px;margin:3px 0"><b>'+esc(o.rec.title||'')+'</b> <span style="color:var(--sub2)">↳ '+esc(REL_TYPE_LBL[o.type]||o.type||'관련')+'</span> <span class="relDel" data-del="'+esc(o.rec.id)+'" style="color:var(--warn);cursor:pointer;margin-left:5px">✕</span></div>'; }).join('');
-  var relRev = _rev.map(function(o){ return '<div style="font-size:12px;color:var(--sub);margin:3px 0">← '+esc(o.rec.title||'')+' <span style="color:var(--sub2);font-size:11px">(이 기록을 참조)</span></div>'; }).join('');
+  /* v7.27: 연결 대상이 삭제·누락돼도 조용히 숨기지 않고 표시, 제목을 누르면 그 기록으로 이동(양방향) */
+  var _fwd = (r.relations||[]).filter(Boolean).map(function(rl){ var t=(records||[]).find(function(x){return x.id===rl.targetId;}); return {rec:t||null,id:rl.targetId,type:rl.type||'related'}; });
+  var _rev = []; (records||[]).forEach(function(x){ (x.relations||[]).forEach(function(rl){ if(rl && rl.targetId===r.id) _rev.push({rec:x,type:rl.type||'related'}); }); });
+  var relFwd = _fwd.map(function(o){ var ki=o.rec?(KINDS[o.rec.kind]||KINDS.memo).i:'⚠'; return '<div style="font-size:12.5px;margin:3px 0">'+ki+' '+(o.rec?'<button type="button" class="st-link" data-goto="'+esc(o.rec.id)+'">'+esc(o.rec.title||'(제목 없음)')+'</button>':'<b style="color:var(--warn)">삭제됐거나 찾을 수 없는 기록</b> <span style="color:var(--sub2);font-size:11px">ID '+esc(o.id)+'</span>')+' <span style="color:var(--sub2)">↳ '+esc(REL_TYPE_LBL[o.type]||o.type||'관련')+'</span> <span class="relDel" data-del="'+esc(o.id)+'" data-deltype="'+esc(o.type)+'" role="button" tabindex="0" aria-label="연결 해제" style="color:var(--warn);cursor:pointer;margin-left:5px">✕</span></div>'; }).join('');
+  var relRev = _rev.map(function(o){ return '<div style="font-size:12px;color:var(--sub);margin:3px 0">← '+(KINDS[o.rec.kind]||KINDS.memo).i+' <button type="button" class="st-link" data-goto="'+esc(o.rec.id)+'">'+esc(o.rec.title||'(제목 없음)')+'</button> <span style="color:var(--sub2);font-size:11px">('+esc(REL_REV_LBL[o.type]||'이 기록을 참조')+')</span></div>'; }).join('');
   var relationsHtml = '<div class="pg-h4">🔗 연결된 기록 <button type="button" id="relAddBtn" style="font-size:11.5px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:2px 9px;cursor:pointer;font-weight:400;margin-left:4px">+ 연결</button></div>' + ((relFwd||relRev) ? relFwd+relRev : '<div style="font-size:12px;color:var(--sub2)">아직 연결된 기록이 없어요</div>');
   var bodyHtml = (r.body||r.summary) ? '<details><summary class="pg-h4" style="cursor:pointer">'+esc(f.bodyLbl)+' (펼치기)</summary><div class="pg-body">'+esc(r.body||(r.summary||''))+'</div></details>' : '';
   var html = ''
@@ -2778,7 +2967,8 @@ function openPage(id){
 
   document.getElementById('pgBody').innerHTML = html;
   var _rab=document.getElementById('relAddBtn'); if(_rab) _rab.addEventListener('click', function(){ openRelModal(id); });
-  document.querySelectorAll('#pgBody .relDel').forEach(function(el){ el.addEventListener('click', function(){ delRelation(id, el.getAttribute('data-del')); }); });
+  document.querySelectorAll('#pgBody .relDel').forEach(function(el){ el.addEventListener('click', function(){ delRelation(id, el.getAttribute('data-del'), el.getAttribute('data-deltype')); }); });
+  document.querySelectorAll('#pgBody [data-goto]').forEach(function(el){ el.addEventListener('click', function(){ goRecord(el.getAttribute('data-goto')); }); });
   resetModalPos(document.querySelector('#pageModal .modal'));
   document.getElementById('pageModal').classList.add('on');
 }
@@ -2788,17 +2978,23 @@ document.getElementById('btnSysCheck').addEventListener('click', openSysCheck);
 document.getElementById('sysClose').addEventListener('click', function(){ document.getElementById('sysModal').classList.remove('on'); });
 document.getElementById('pgClose').addEventListener('click', function(){
   document.getElementById('pageModal').classList.remove('on');
+  PAGE_OPEN = null; setRecordHash('');
 });
 document.getElementById('pgEdit').addEventListener('click', function(){
   if(!PAGE_OPEN) return;
+  var _r = records.find(function(x){ return x.id===PAGE_OPEN; });
+  if(_r && isStudyRec(_r)){ openEdit(PAGE_OPEN); return; } // 공부노트: 읽기 화면은 두고 위에 편집창을 연다(저장 뒤 읽기 화면 자동 갱신)
   document.getElementById('pageModal').classList.remove('on');
+  setRecordHash('');
   openEdit(PAGE_OPEN);
 });
 document.getElementById('pgDel').addEventListener('click', function(){
   if(!PAGE_OPEN) return;
-  if(!confirm('이 기록을 지울까요?')) return;
+  var _dr = records.find(function(x){ return x.id===PAGE_OPEN; });
+  if(!confirm(_dr && isStudyRec(_dr) ? '이 공부노트를 지울까요? 연결된 기록에서는 ‘찾을 수 없는 기록’으로 표시되고, 첨부 이미지 파일은 복구용으로 남겨 둡니다.' : '이 기록을 지울까요?')) return;
   removeRecord(PAGE_OPEN);
   document.getElementById('pageModal').classList.remove('on');
+  PAGE_OPEN = null; setRecordHash('');
 });
 document.getElementById('pgCopy').addEventListener('click', function(){
   var r = records.find(function(x){ return x.id===PAGE_OPEN; });
@@ -3044,7 +3240,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.26-0911-1250 준비됨 — records / records_todos / records_meta 컬렉션 사용');
+console.log('[기록보관실] v7.27-0917-1150 준비됨 — records / records_todos / records_meta 컬렉션 사용');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════

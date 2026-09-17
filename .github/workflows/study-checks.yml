@@ -1,0 +1,24 @@
+name: Study notes checks
+on:
+  pull_request:
+    paths: ['records.html', 'journal.html', 'js/study/**', 'js/research-tools.mjs', 'js/research-dashboard-core.mjs', 'tests/study-*.mjs', 'tests/study-browser/**', 'tools/study-editor/**', '.github/workflows/study-checks.yml']
+  push:
+    paths: ['records.html', 'journal.html', 'js/study/**', 'js/research-tools.mjs', 'js/research-dashboard-core.mjs', 'tests/study-*.mjs', 'tests/study-browser/**', 'tools/study-editor/**', '.github/workflows/study-checks.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/study-*.test.mjs tests/research*.mjs
+      - run: for f in js/study/*.mjs js/study/vendor/*.mjs; do node --check "$f"; done
+      - name: records.html inline script parses
+        run: node -e "const s=require('fs').readFileSync('records.html','utf8');const m=[...s.matchAll(/<script>([\s\S]*?)<\/script>/g)];if(!m.length)throw Error('no inline script');for(const x of m)new Function(x[1]);console.log('inline scripts',m.length)"
+      - name: vendored editor bundle matches pinned build
+        run: |
+          cd tools/study-editor && npm ci --no-audit --no-fund && npm run build
+          cd ../.. && git diff --exit-code -- js/study/vendor/study-editor-vendor.mjs

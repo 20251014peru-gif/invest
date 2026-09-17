@@ -1,0 +1,19 @@
+{
+  "name": "study-editor-build",
+  "private": true,
+  "description": "기록보관실 공부노트 편집기 번들 빌드 (TipTap/ProseMirror + marked). 결과물 js/study/vendor/study-editor-vendor.mjs 를 커밋한다.",
+  "scripts": { "build": "node build.mjs" },
+  "devDependencies": {
+    "@tiptap/core": "3.31.3",
+    "@tiptap/pm": "3.31.3",
+    "@tiptap/starter-kit": "3.31.3",
+    "@tiptap/extension-table": "3.31.3",
+    "@tiptap/extension-image": "3.31.3",
+    "@tiptap/extension-text-style": "3.31.3",
+    "@tiptap/extension-highlight": "3.31.3",
+    "@tiptap/extension-list": "3.31.3",
+    "@tiptap/extensions": "3.31.3",
+    "marked": "18.0.13",
+    "esbuild": "0.28.2"
+  }
+}
