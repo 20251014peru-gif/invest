@@ -78,6 +78,7 @@ function shell(bridge) {
     <div class="st-toolbar" role="toolbar" aria-label="서식 도구" id="stToolbar">${TOOLBAR}</div>
     <div class="st-pop" id="stPop" hidden></div>
     <div class="st-ctx" id="stCtx" hidden></div>
+    <details class="st-notice" id="stPasteNotice"></details>
     <div class="st-edwrap">
       <nav class="st-edtoc" id="stEdToc" aria-label="목차" hidden></nav>
       <div class="st-editor" id="stEditor"></div>
@@ -300,16 +301,15 @@ function flushPendingPaste() {
   const list = S.pendingPaste.splice(0);
   for (const p of list) if (findImage(a => a.tempId === p.tid)) runUpload(p.tid, p.get, p.meta);
 }
+/* v7.28.2: 본문 밖 고정된 한 자리(#stPasteNotice)에만 표시 — 붙여넣을 때마다 새 상자를 쌓지 않고,
+   이 세션에서 있었던 안내를 접힌 요약 한 줄로 모아두고 필요할 때만 펼쳐본다. 확인 버튼으로 닫을 필요가
+   없다(다음 편집에 방해되지 않는 조용한 자리) — 노트를 닫으면 비운다(closeEditor). */
 function showNotices() {
-  if (!S || !S.notices.length) return;
+  const box = S?.root?.querySelector('#stPasteNotice');
+  if (!box) return;
+  if (!S.notices.length) { box.removeAttribute('open'); box.innerHTML = ''; return; }
   const uniq = [...new Set(S.notices)];
-  S.notices = [];
-  const box = document.createElement('div');
-  box.className = 'st-notice';
-  box.setAttribute('role', 'alert');
-  box.innerHTML = '<b>붙여넣기·첨부 안내</b><ul>' + uniq.map(n => '<li>' + C.esc(n) + '</li>').join('') + '</ul><button type="button" class="st-mini">확인</button>';
-  box.querySelector('button').onclick = () => box.remove();
-  S.root.querySelector('.st-edwrap').before(box);
+  box.innerHTML = '<summary>⚠ 붙여넣기 안내 ' + uniq.length + '건 — 사진·본문 누락 또는 링크 제거</summary><ul>' + uniq.map(n => '<li>' + C.esc(n) + '</li>').join('') + '</ul>';
 }
 
 /* ── 서식 도구 ── */
@@ -767,11 +767,15 @@ export async function openStudyEditor({bridge, store, id = null, prefill = null,
     content: C.emptyDoc(),
     editorProps: {
       attributes: {class: 'st-prose', 'aria-label': '공부노트 본문', role: 'textbox', 'aria-multiline': 'true'},
+      /* v7.28.2: 안내는 "사진·본문 누락"과 "링크 제거"만 남긴다 — 색상 매핑, 제목 단계 조정, MarkFlow 표기
+         변환 같은 사소한 서식 변경은 정상 동작이라 안내하지 않는다(누락 감지 자체는 그대로 report.missing 에 쌓임).
+         report.converted 는 MarkFlow 가져오기 미리보기(study-import.mjs)가 계속 쓰므로 그대로 채운다 — 여기서
+         "안내로 띄울지"만 바꿨다. */
       transformPastedHTML: html => {
-        const report = {converted: [], missing: []};
+        const report = {converted: [], missing: [], linksRemoved: []};
         const out = cleanHTML(html, {report, onImage: raw => pasteImageRule(raw)});
-        if (report.converted.length) S.notices.push('서식 변환: ' + [...new Set(report.converted)].join(', '));
         report.missing.forEach(m => S.notices.push(m));
+        if (report.linksRemoved.length) S.notices.push('링크 연결이 제거됨: ' + [...new Set(report.linksRemoved)].filter(Boolean).slice(0, 5).join(', ') || '허용되지 않은 주소');
         return out;
       },
       handlePaste: (view, event) => {
@@ -779,14 +783,10 @@ export async function openStudyEditor({bridge, store, id = null, prefill = null,
         const html = dt?.getData('text/html');
         const files = dt?.files?.length ? [...dt.files] : [];
         if (!html && files.some(f => /^image\//.test(f.type))) { insertFiles(files); return true; }
-        // ProseMirror 는 transformPastedHTML 을 handlePaste 보다 먼저 부른다 → 서식 유무는 클립보드 형식으로 판단
-        const plain = !html && (dt?.getData('text/plain') || '').trim().length > 0;
         setTimeout(() => {
           if (!S) return;
-          const mf = convertMarkflowText(S.editor);
+          convertMarkflowText(S.editor); // 형광펜·동영상 표기 변환 — 사소한 서식 변경이라 안내하지 않음
           flushPendingPaste();
-          if (plain) S.notices.push('복사한 곳이 서식 정보를 주지 않아 글자만 붙여넣었어요');
-          if (mf) S.notices.push('MarkFlow 표기(형광펜·동영상) ' + mf + '개를 강조색·링크로 바꿈');
           showNotices();
         }, 0);
         return false;
@@ -833,7 +833,7 @@ export async function closeEditor() {
   root.style.top = ''; root.style.height = ''; root.style.bottom = '';
   root.querySelector('#stDialog').hidden = true;
   root.querySelector('#stPop').hidden = true;
-  root.querySelectorAll('.st-notice').forEach(n => n.remove());
+  const notice = root.querySelector('#stPasteNotice'); if (notice) { notice.removeAttribute('open'); notice.innerHTML = ''; }
   document.documentElement.classList.remove('st-open');
   if (dirty) bridge.toast('저장하지 않은 내용은 이 기기에만 임시 보관했어요(다른 기기에는 보이지 않음)');
   bridge.onClosed?.();

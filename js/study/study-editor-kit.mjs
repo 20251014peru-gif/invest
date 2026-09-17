@@ -199,7 +199,7 @@ export function cleanHTML(html, {report, onImage} = {}) {
       if (at.name === 'style' && (tag === 'span' || tag === 'mark') && /^(color|background-color):#[0-9a-f]{6}$/.test(at.value)) continue;
       if (!keep.includes(at.name)) el.removeAttribute(at.name);
     }
-    if (tag === 'a') { const h = safeHref(el.getAttribute('href')); if (h) el.setAttribute('href', h); else { el.removeAttribute('href'); if (el.getAttribute('href') === null && report && el.textContent) report.converted.push('허용되지 않은 링크 주소 → 글자만'); } }
+    if (tag === 'a') { const h = safeHref(el.getAttribute('href')); if (h) el.setAttribute('href', h); else { const hadHref = el.hasAttribute('href'); el.removeAttribute('href'); if (hadHref && report && el.textContent) { report.converted.push('허용되지 않은 링크 주소 → 글자만'); report.linksRemoved?.push(el.textContent.trim().slice(0, 40)); } } }
     if (tag === 'input' && el.getAttribute('type') !== 'checkbox') el.remove();
   });
   return body.innerHTML;
