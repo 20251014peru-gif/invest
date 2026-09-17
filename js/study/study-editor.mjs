@@ -150,6 +150,9 @@ function fillForm(root, f) {
   $(root, '#stSrcUrl').value = f.sourceUrl ?? f.source?.url ?? f.link ?? '';
   $(root, '#stChecks').innerHTML = '';
   (f.checks || []).forEach(c => addCheckRow(root, c));
+  const managed = S.bridge.followupsReady?.() && S.bridge.records().some(r => r.id === S.id);
+  root.querySelector('#stCheckAdd').hidden = !!managed;
+  if (managed) { $(root, '#stChecks').innerHTML = '<p class="st-hint">확인 항목은 기록보관실의 확인·복기에서 관리합니다. 기존 질문은 보존됩니다.</p>'; }
   renderStocks(root);
 }
 function formFromRecord(r) { return {...r, sourceName: r.source?.name ?? r.channel ?? '', sourceUrl: r.source?.url ?? r.link ?? ''}; }

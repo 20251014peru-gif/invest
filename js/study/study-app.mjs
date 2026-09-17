@@ -1,14 +1,14 @@
 // 기록보관실(records.html) ↔ 공부노트 모듈 연결점. 읽기 화면은 가볍게, 편집기·가져오기는 필요할 때만 불러온다.
 import * as core from './study-core.mjs';
-import {makeStudyStore} from './study-store.mjs';
+import {makeStudyStore} from './study-store.mjs?v=7.30.0';
 import {renderStudyPage, bindStudyPage, relationListHTML} from './study-view.mjs';
 
 export const STUDY_RELEASE = {version: 'study-1.0-20260917', summary: '공부노트 · 서식 편집기 · MarkFlow 가져오기'};
 
 export function init(bridge) {
   const kstDate = t => new Date(t + 9 * 3600000).toISOString().slice(0, 10);
-  const store = makeStudyStore(bridge.db, bridge.storage, {kstDate});
-  const editorMod = () => import('./study-editor.mjs');
+  const store = makeStudyStore(bridge.db, bridge.storage, {kstDate, preserveChecks: () => !!bridge.followupsReady?.()});
+  const editorMod = () => import('./study-editor.mjs?v=7.30.0');
   const importMod = () => import('./study-import.mjs');
   const openEditor = async (id, opts = {}) => (await editorMod()).openStudyEditor({bridge, store, id, ...opts});
   return {

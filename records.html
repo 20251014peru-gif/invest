@@ -591,14 +591,15 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy-900);color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.on{opacity:1}
 </style>
-<link rel="stylesheet" href="js/records-reading.css?v=7.29.1">
-<script src="js/records-reading.js?v=7.29.1"></script>
+<link rel="stylesheet" href="js/records-reading.css?v=7.30.0">
+<link rel="stylesheet" href="js/followups.css?v=7.30.0">
+<script src="js/records-reading.js?v=7.30.0"></script>
 </head>
 <body>
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
-  <span class="ver">v7.29.1 · 서희타워</span>
+  <span class="ver">v7.30.0 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -1409,12 +1410,12 @@ function _recSig(r){ return r ? String(r.studyRevision||0)+'|'+(r.updatedAt||0)+
 var _studyApi = null;
 function studyApi(){
   if(!_studyApi){
-    _studyApi = import('./js/study/study-app.mjs?v=7.28.0').then(function(m){
+    _studyApi = import('./js/study/study-app.mjs?v=7.30.0').then(function(m){
       /* v7.28.3: 저장 성공 시 편집창이 자동으로 닫힌다(study-editor.mjs) — 상세보기(pageModal)를 그 노트로
          열어둔 채 위에서 수정했다면, 닫히면서 드러나는 상세보기가 새로 저장된 내용을 보여주도록 여기서
          즉시 다시 그린다(Firestore 실시간 갱신을 기다리지 않음). 목록에서 열었을 땐 pageModal이 애초에
          'on'이 아니므로 이 분기를 안 타고, 편집창이 닫히며 그 아래 목록이 그대로 드러난다. */
-      return m.init({db:db, storage:storage, records:function(){ return records; }, toast:toast, logBug:logBug, KINDS:KINDS, VERIFY_STATES:VERIFY_STATES, VERIFY_ORDER:VERIFY_ORDER, allStockNames:allStockNames, addStockToMaster:addStockToMaster,
+      return m.init({db:db, storage:storage, followupsReady:function(){return !!(FU&&FU.ready);}, records:function(){ return records; }, toast:toast, logBug:logBug, KINDS:KINDS, VERIFY_STATES:VERIFY_STATES, VERIFY_ORDER:VERIFY_ORDER, allStockNames:allStockNames, addStockToMaster:addStockToMaster,
         onSaved:function(id){ if(PAGE_OPEN===id && document.getElementById('pageModal').classList.contains('on')) openPage(id, {fromRoute:true}); }});
     }).catch(function(e){ _studyApi=null; logBug('공부노트 모듈 로드 실패: '+e.message); toast('공부노트 기능을 불러오지 못했어요 — 연결 확인 후 새로고침해 주세요'); throw e; });
   }
@@ -1441,12 +1442,25 @@ function draftsApi(){
   return _drReady;
 }
 
+/* v7.30: 확인 결과·이력의 기준 저장소. 기존 records/todos는 전환 원본으로 보존. */
+var FU = null, _fuReady = null;
+function followupsStart(){
+  if(!db || !uid) return Promise.resolve();
+  if(!_fuReady) _fuReady=import('./js/followups-app.mjs?v=7.30.0').then(function(m){
+    FU=m.init({db:db,storage:storage,records:function(){return records;},studyNeedsReview:studyNeedsReview,toast:toast,openRecord:goRecord,
+      count:function(n){document.getElementById('cntLabel').textContent=n+'건';},
+      changed:function(){renderKtabs();renderTodos();if(laterMode)renderLaterMode();if(PAGE_OPEN&&document.getElementById('pageModal').classList.contains('on'))FU.decoratePage(document.getElementById('pgBody'),PAGE_OPEN);}}); return FU;
+  });
+  return _fuReady.then(function(api){return api.start();}).catch(function(e){logBug('확인·복기 연결: '+e.message);});
+}
+function openFollowup(id,prefill){if(FU&&FU.ready){FU.open(id,prefill);return;}followupsStart().then(function(){if(FU)FU.open(id,prefill);});}
 function startListeners(){
   if(!db) return;
   db.collection('records').orderBy('date','desc').onSnapshot(function(snap){
     records = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
     _diag.recv.records={at:Date.now(),n:records.length,cache:!!(snap.metadata&&snap.metadata.fromCache),pending:!!(snap.metadata&&snap.metadata.hasPendingWrites)};
     render(); renderTodos(); renderKtabs(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker(); renderTopicChips(); renderStarPicker(); renderChannelSel(); renderMiniSummary(); renderActiveFilters();
+    followupsStart();
     if(!recordsLoaded){ recordsLoaded=true; if(_restoreScrollY) setTimeout(function(){ window.scrollTo(0, _restoreScrollY); }, 60); }
     if(!_routeDone){ _routeDone=true; routeFromHash(); }
     else if(PAGE_OPEN && document.getElementById('pageModal').classList.contains('on')){
@@ -1596,7 +1610,7 @@ function renderTodos(){
   var host = document.getElementById('todoList'); if(!host) return;
   var t = todayStr();
   var dueItems=[], todoItems=[];
-  records.forEach(function(r){ (r.checks||[]).forEach(function(c,i){ if(c.date!==t) return; var key=r.id+'#'+i; if(todos.some(function(x){ return x.dueKey===key && x.done; })) return; dueItems.push({title:(c.what||r.title||''), recId:r.id, dueKey:key}); }); });
+  if(FU && FU.ready) FU.pending.forEach(function(x){if(x.dueAt && x.dueAt<=t)dueItems.push({title:x.question,recId:(x.sourceIds||[])[0]||'',dueKey:x.id});});
   todayTodos().forEach(function(td){ if(td.dueKey) return; if(td.done) return; todoItems.push({id:td.id, title:(td.text||''), templateId:td.templateId}); });
   var todayCountEl = document.getElementById('todayCount'); if(todayCountEl) todayCountEl.textContent = (dueItems.length+todoItems.length);
   if(!todoItems.length && !dueItems.length){ host.innerHTML = '<div class="emptyMini">오늘 할 일이 없어요 — 위 [＋ 할 일]로 추가</div>'; return; }
@@ -1622,11 +1636,9 @@ function renderTodos(){
   host.querySelectorAll('[data-due]').forEach(function(row){
     var key=row.getAttribute('data-due'), rec=row.getAttribute('data-rec');
     row.querySelector('.dueChk').addEventListener('change', function(){
-      if(!db) return;
-      db.collection('records_todos').add({date:t, done:true, text:row.querySelector('.dueTitle').textContent, dueKey:key, createdAt:Date.now()})
-        .catch(function(e){ logBug('확인예정 완료 저장 실패: '+e.message); });
+      row.querySelector('.dueChk').checked=false;openFollowup(key);
     });
-    row.querySelector('.dueTitle').addEventListener('click', function(){ openPage(rec); });
+    row.querySelector('.dueTitle').addEventListener('click', function(){ openFollowup(key); });
   });
   host.querySelectorAll('[data-id]').forEach(function(row){
     var id = row.getAttribute('data-id');
@@ -1905,10 +1917,8 @@ setInterval(checkDayRollover, 60000);
    "종목 목록"에 적용할지 고를 뿐이라, 두 UI(탭 줄/아이콘 줄)가 서로 다른 상태를 각자 책임져서
    v7.9의 버그(한 값이 두 UI에 걸쳐 있어 한쪽 갱신을 빠뜨리면 하이라이트가 어긋나던 것) 자체가 구조적으로 없어짐 */
 var KTAB_ORDER = ['youtube','news','__stock__','study','idea','chart','memo','__later__']; // v7.27: 공부노트 탭, v7.28: 나중에 탭
-function laterCount(){
-  if(!RC) return 0;
-  return RC.collectDueChecks(records, todos, {onlyUndone:true}).length + RC.studyReviewItems(records, studyNeedsReview).length;
-}
+function laterCount(){ return FU&&FU.ready?FU.pending.length:'…'; }
+
 function renderKtabs(){
   var total = records.length;
   var html = '<span class="ktab'+(curKind==='전체'&&!stockMode&&!laterMode?' on':'')+'" data-k="전체">전체<span class="n">'+total+'</span></span>';
@@ -1919,7 +1929,7 @@ function renderKtabs(){
       return;
     }
     if(k==='__later__'){
-      html += '<span class="ktab'+(laterMode?' on':'')+'" data-latertabbtn="1">🕒 나중에<span class="n">'+laterCount()+'</span></span>';
+      html += '<span class="ktab'+(laterMode?' on':'')+'" data-latertabbtn="1">🔎 확인·복기<span class="n">'+laterCount()+'</span></span>';
       return;
     }
     var meta = KINDS[k];
@@ -2109,6 +2119,7 @@ document.getElementById('btnClearFlt').addEventListener('click', function(){
   render(); renderKtabs(); renderStockPicker(); renderVerifyPicker(); renderTopicChips(); renderStarPicker(); renderChannelSel(); renderActiveFilters();
 });
 document.getElementById('btnFilter').addEventListener('click', function(){
+  if(laterMode){var d=document.querySelector('.fu-filter');if(d)d.open=!d.open;return;}
   var pop=document.getElementById('filterPop'); if(!pop) return;
   if(pop.style.display==='block' && pop._mode==='menu'){ pop.style.display='none'; return; }
   pop._mode='menu';
@@ -2158,7 +2169,7 @@ function render(){
      맨 앞에서 분기 — 기존 레코드 렌더 경로는 한 줄도 안 바뀜(아래 그대로) */
   document.getElementById('viewicons').style.display = laterMode ? 'none' : '';
   if(stockMode){ document.getElementById('btnAdd').textContent = '＋ 기록 추가'; renderStockMode(); return; }
-  if(laterMode){ document.getElementById('btnAdd').textContent = '＋ 기록 추가'; document.getElementById('btnClearFlt').style.display='none'; renderLaterMode(); return; }
+  if(laterMode){ document.getElementById('btnAdd').textContent = '＋ 확인할 질문'; document.getElementById('btnClearFlt').style.display='none'; renderLaterMode(); return; }
   var arr = filtered();
   /* v6: 필터가 하나도 안 걸려있으면 필터해제 버튼을 숨김(눌러도 아무 일 안 일어나는 혼란 방지) */
   var hasFilter = (curKind!=='전체' || !!curStock || !!curVerify || !!curTopic || !!curQ || !!curStudyStatus);
@@ -2427,125 +2438,12 @@ function boardHTML(arr){
   }).join('') + '</div>';
 }
 
-/* ══════════════════════════════════════════════════════════
-   v7.28: "🕒 나중에" 통합 보기 — 자료 종류와 무관한 공통 보기.
-   기존 checks[](오늘의 체크리스트가 쓰던 것과 같은 dueKey/records_todos 완료마커 방식 재사용, 날짜 전체+빈 날짜
-   포함) + 공부노트 재검토(studyNeedsReview, 읽기 전용 행) 를 한 목록으로 모은다. 새 kind·새 컬렉션 없음.
-   ══════════════════════════════════════════════════════════ */
-var LATER_ACTION_LBL = {lookup:'🔎 알아보기', think:'💭 더 생각하기', reread:'📖 다시 읽기', '':'✅ 확인'};
-function laterAllItems(){
-  if(!RC) return [];
-  var checks = RC.collectDueChecks(records, todos, {}).map(function(x){
-    return {kind:'check', recordId:x.recordId, record:x.record, date:x.date, done:x.done, dueKey:x.dueKey,
-      followUpType:x.followUpType, label:(x.check.what||x.record.title||''), note:x.check.action||''};
-  });
-  var studyRows = RC.studyReviewItems(records, studyNeedsReview).map(function(x){
-    return {kind:'study', recordId:x.recordId, record:x.record, date:x.date, done:false, dueKey:'study#'+x.recordId,
-      followUpType:'reread', label:x.record.title||'(제목 없음)', note:'재검토', readOnly:true};
-  });
-  return checks.concat(studyRows);
-}
-function laterFilteredItems(){
-  var items = laterAllItems();
-  if(laterDoneFilter==='undone') items = items.filter(function(x){ return !x.done; });
-  else if(laterDoneFilter==='done') items = items.filter(function(x){ return x.done; });
-  if(laterActionFilter==='other') items = items.filter(function(x){ return !x.followUpType; });
-  else if(laterActionFilter) items = items.filter(function(x){ return x.followUpType===laterActionFilter; });
-  if(laterTopicFilter) items = items.filter(function(x){ return ((x.record&&x.record.topics)||[]).indexOf(laterTopicFilter)>=0; });
-  items.sort(function(a,b){
-    if(a.done!==b.done) return a.done?1:-1; // 완료는 맨 뒤
-    if(!a.date && !b.date) return 0;
-    if(!a.date) return -1; // 기한 없음을 앞쪽(놓치지 않게)
-    if(!b.date) return 1;
-    return a.date.localeCompare(b.date);
-  });
-  return items;
-}
-function laterMarkDone(item){
-  if(!db || item.readOnly) return;
-  db.collection('records_todos').add({date:todayStr(), done:true, text:item.label, dueKey:item.dueKey, createdAt:Date.now()})
-    .catch(function(e){ logBug('나중에 완료 표시 실패: '+e.message); toast('처리 실패 — 다시 시도해 주세요'); });
-}
-function laterReopen(item){
-  if(!db) return;
-  var docs = todos.filter(function(t){ return t.dueKey===item.dueKey && t.done; });
-  if(!docs.length) return;
-  Promise.all(docs.map(function(t){ return db.collection('records_todos').doc(t.id).delete(); }))
-    .catch(function(e){ logBug('나중에 다시 열기 실패: '+e.message); toast('처리 실패 — 다시 시도해 주세요'); });
-}
+/* v7.30: 확인·복기. 기존 질문/완료 표식은 보존하고 새 컬렉션에서 결과·이력을 관리한다. */
 function renderLaterMode(){
-  var host = document.getElementById('content');
-  var items = laterFilteredItems();
-  document.getElementById('cntLabel').textContent = items.length+'건';
-  document.getElementById('topStat').textContent = records.length+'건 기록됨';
-  var topics = _uniqVals('topics');
-  var chips = function(list, cur, attr){ return list.map(function(o){ return '<span class="fchip'+(cur===o[0]?' on':'')+'" data-'+attr+'="'+esc(o[0])+'">'+esc(o[1])+'</span>'; }).join(''); };
-  var toolbar = '<div class="laterBar">'
-    + '<div class="laterChips">'+chips([['','전체'],['undone','미완료'],['done','완료']], laterDoneFilter, 'ldone')+'</div>'
-    + '<div class="laterChips">'+chips([['','모든 행동'],['lookup','🔎 알아보기'],['think','💭 더 생각하기'],['reread','📖 다시 읽기'],['other','기타']], laterActionFilter, 'lact')+'</div>'
-    + (topics.length ? '<div class="laterChips">'+chips([['','모든 주제']].concat(topics.slice(0,12).map(function(t){return [t,'#'+t];})), laterTopicFilter, 'ltopic')+'</div>' : '')
-    + '</div>';
-  if(!items.length){
-    host.innerHTML = toolbar + '<div class="emptyState"><div class="ei">🕒</div>나중에 볼 것이 없어요 — 기록 상세에서 "🕒 나중에" 로 추가할 수 있어요</div>';
-    bindLaterClicks(host);
-    return;
-  }
-  var rows = items.map(function(it){
-    var k = KINDS[(it.record&&it.record.kind)||'memo'] || KINDS.memo;
-    var dateBadge = it.date ? ('<span class="dt">📅 '+fmtDate(it.date)+(it.date<todayStr()&&!it.done?' · 지남':'')+'</span>') : '<span class="dt" style="background:#f4f2ea">기한 없음</span>';
-    return '<div class="laterRow'+(it.done?' done':'')+'" data-later-rec="'+esc(it.recordId)+'">'
-      + '<span class="laterAct">'+(LATER_ACTION_LBL[it.followUpType]||LATER_ACTION_LBL['']) +'</span>'
-      + '<div class="laterBody"><div class="laterTt">'+esc(it.label)+'</div>'
-      + '<div class="laterSub">'+k.i+' '+esc(it.record?(it.record.title||''):'')+(it.note?(' · '+esc(it.note)):'')+'</div></div>'
-      + dateBadge
-      + (it.readOnly ? '<span class="laterRO">공부노트에서 관리</span>' : '<button type="button" class="mgrbtn tiny" data-later-toggle="'+esc(it.dueKey)+'">'+(it.done?'다시 열기':'완료')+'</button>')
-      + '</div>';
-  }).join('');
-  host.innerHTML = toolbar + '<div class="rlist">' + rows + '</div>';
-  bindLaterClicks(host);
-  host.querySelectorAll('[data-later-toggle]').forEach(function(btn){
-    btn.addEventListener('click', function(ev){
-      ev.stopPropagation();
-      var key = btn.getAttribute('data-later-toggle');
-      var it = items.find(function(x){ return x.dueKey===key; });
-      if(!it) return;
-      if(it.done) laterReopen(it); else laterMarkDone(it);
-    });
-  });
+  var host=document.getElementById('content');
+  if(FU) FU.render(host,curQ); else host.innerHTML='<div class="emptyState">확인 기록을 연결하는 중입니다…</div>';
 }
-/* v7.28: 기록 상세에서 바로 "나중에 볼 것" 하나 추가 — 기존 checks[] 배열에 arrayUnion으로 더한다
-   (고유 id 를 매번 새로 만들어 붙이므로 arrayUnion 이 값 중복 판정을 할 일이 없다 = 동시 저장 충돌 없음) */
-function toggleLaterAddForm(recId){
-  var box = document.getElementById('laterAddForm');
-  if(!box) return;
-  if(box.style.display!=='none'){ box.style.display='none'; box.innerHTML=''; return; }
-  var FT = (RC && RC.FOLLOWUP_TYPES) || {lookup:'🔎 알아보기', think:'💭 더 생각하기', reread:'📖 다시 읽기'};
-  box.innerHTML = '<div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;background:#fbfaf6;border:1px solid var(--line);border-radius:10px;padding:10px">'
-    + '<select id="laterFtSel" style="padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-size:12.5px">'
-    + Object.keys(FT).map(function(k){ return '<option value="'+k+'">'+esc(FT[k])+'</option>'; }).join('')
-    + '</select>'
-    + '<input type="date" id="laterDateInp" style="padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-size:12.5px">'
-    + '<input type="text" id="laterWhatInp" placeholder="무엇을 (선택)" style="flex:1 1 140px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-size:12.5px">'
-    + '<button type="button" class="mgrbtn" id="laterAddConfirm">추가</button>'
-    + '</div>';
-  box.style.display = '';
-  document.getElementById('laterAddConfirm').addEventListener('click', function(){
-    if(!db) return;
-    var ft = document.getElementById('laterFtSel').value;
-    var date = document.getElementById('laterDateInp').value;
-    var what = document.getElementById('laterWhatInp').value.trim();
-    var item = {id:(RC?RC.newCheckId():('chk_'+Date.now().toString(36))), date:date, what:what, action:'', followUpType:ft};
-    db.collection('records').doc(recId).update({checks: firebase.firestore.FieldValue.arrayUnion(item)})
-      .then(function(){ toast('나중에 볼 것에 추가했습니다'); box.style.display='none'; box.innerHTML=''; })
-      .catch(function(e){ logBug('나중에 추가 실패: '+e.message); toast('추가 실패 — 다시 시도해 주세요'); });
-  });
-}
-function bindLaterClicks(host){
-  host.querySelectorAll('[data-ldone]').forEach(function(el){ el.addEventListener('click', function(){ laterDoneFilter = el.getAttribute('data-ldone'); render(); }); });
-  host.querySelectorAll('[data-lact]').forEach(function(el){ el.addEventListener('click', function(){ laterActionFilter = el.getAttribute('data-lact'); render(); }); });
-  host.querySelectorAll('[data-ltopic]').forEach(function(el){ el.addEventListener('click', function(){ laterTopicFilter = el.getAttribute('data-ltopic'); render(); }); });
-  host.querySelectorAll('[data-later-rec]').forEach(function(el){ el.addEventListener('click', function(){ openPage(el.getAttribute('data-later-rec'), {}); }); });
-}
+function toggleLaterAddForm(recId){openFollowup(null,{sourceIds:[recId]});}
 
 /* ── 종목모드(v7.10) 전용 헬퍼 — 전부 기존에 이미 있던 필드(records/stockMaster)에서만 계산,
    새로 지어낸 값 없음. stockRecords는 v7.6의 stockDirHTML 안에 있던 필터링을 재사용 가능하게 뺀 것뿐 */
@@ -2995,9 +2893,13 @@ function checkRowHTML(c){
     + '</div>';
 }
 function renderChecksBox(checks){
-  document.getElementById('checksBox').innerHTML = (checks||[]).map(checkRowHTML).join('');
+  var host=document.getElementById('checksBox');
+  document.getElementById('checkAddBtn').style.display=(EDIT && FU && FU.ready)?'none':'';
+  if(EDIT && FU && FU.ready){host.innerHTML='<p style="font-size:12px">확인 항목은 ‘확인·복기’에서 관리합니다. 기존 질문은 그대로 보존됩니다.</p>';return;}
+  host.innerHTML = (checks||[]).map(checkRowHTML).join('');
 }
 function collectChecks(){
+  if(EDIT && FU && FU.ready){var r=records.find(function(x){return x.id===EDIT;});return r&&r.checks?r.checks:[];}
   var out = [];
   document.querySelectorAll('#checksBox .checkRow').forEach(function(row){
     var date = row.querySelector('.cd').value;
@@ -3526,7 +3428,7 @@ function resetAttDraftBanner(){
 }
 function closeModal(){ document.getElementById('recModal').classList.remove('on'); }
 document.getElementById('mClose').addEventListener('click', closeModal);
-document.getElementById('btnAdd').addEventListener('click', openAdd);
+document.getElementById('btnAdd').addEventListener('click', function(){if(laterMode)openFollowup();else openAdd();});
 
 function renderStockTags(){
   document.getElementById('stockTagsBox').innerHTML = pickedStocks.map(function(s){
@@ -3945,7 +3847,9 @@ function openPage(id, opts){
       var cur = records.find(function(x){ return x.id===id; }) || r;
       pgb.innerHTML = '<div class="st-row" style="justify-content:flex-end;margin-bottom:6px"><button type="button" class="st-mini" id="stExportBtn">⬇ 노트 파일로 내보내기</button></div>' + api.renderPage(cur);
       RecordReading.studyTabs(pgb);
+      RecordReading.prepare(pgb);
       RecordReading.bind(pgb);
+      if(FU)FU.decoratePage(pgb,id);
       if(wasOpen){ var tab=pgb.querySelector('[data-readtab="'+tabToKeep+'"]'); if(tab) tab.click(); }
       api.bindPage(pgb, {onGoto: goRecord});
       document.getElementById('stExportBtn').addEventListener('click', function(){ api.exportNote(id).catch(function(e){ toast('내보내기 실패: '+e.message); }); });
@@ -4025,7 +3929,9 @@ function openPage(id, opts){
     + RecordReading.tabsHTML(bodyHtml + pgAttsHtml + judgeHtml + scenHtml, relationsHtml, checkTbl);
 
   document.getElementById('pgBody').innerHTML = html;
+  RecordReading.prepare(document.getElementById('pgBody'));
   RecordReading.bind(document.getElementById('pgBody'));
+  if(FU)FU.decoratePage(document.getElementById('pgBody'),id);
   if(continuing){ var tab=document.querySelector('#pgBody [data-readtab="'+tabToKeep+'"]'); if(tab) tab.click(); }
   var _rab=document.getElementById('relAddBtn'); if(_rab) _rab.addEventListener('click', function(){ openRelModal(id); });
   var _cb=document.getElementById('contBtn'); if(_cb) _cb.addEventListener('click', function(){ openContinueModal(id); });
@@ -4310,7 +4216,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.29.0-0917-2100 준비됨 — records / records_todos / records_meta 컬렉션 사용');
+console.log('[기록보관실] v7.30.0 준비됨 — 기록·확인·복기');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
