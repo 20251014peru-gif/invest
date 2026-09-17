@@ -158,6 +158,11 @@ function download(name, text) {
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
 }
+// CORS 없이도 확인되도록 img 로드로 판별(8초 제한)
+function imageReachable(url) {
+  if (!C.safeImageUrl(url)) return Promise.resolve(false);
+  return new Promise(res => { const i = new Image(); const t = setTimeout(() => res(false), 8000); i.onload = () => { clearTimeout(t); res(i.naturalWidth > 0); }; i.onerror = () => { clearTimeout(t); res(false); }; i.src = url; });
+}
 const blobToDataUrl = b => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(b); });
 
 export async function exportNote({bridge, store, id}) {
@@ -195,16 +200,22 @@ export function openRestore({bridge, store, openEditor}) {
       $(root, '#stResGo').disabled = true;
       const same = root.querySelector('input[name=stResMode]:checked')?.value === 'same';
       const assets = [];
+      let reuploaded = 0, linked = 0, lost = 0;
+      const prog = $(root, '#stResProg');
       for (const a of b.record.assets || []) {
         if (b.images?.[a.id]) {
-          try { const blob = await (await fetch(b.images[a.id])).blob(); const na = await store.uploadImage(blob, {name: a.name}); C.walk(doc, n => { if (n.type === 'image' && n.attrs?.assetId === a.id) Object.assign(n.attrs, {assetId: na.id, src: na.url, status: 'stored'}); }); assets.push(na); continue; } catch { /* 경로 유지 */ }
+          try { const blob = await (await fetch(b.images[a.id])).blob(); const na = await store.uploadImage(blob, {name: a.name}); C.walk(doc, n => { if (n.type === 'image' && n.attrs?.assetId === a.id) Object.assign(n.attrs, {assetId: na.id, src: na.url, status: 'stored'}); }); assets.push(na); reuploaded++; continue; } catch { /* 아래에서 원본 주소 확인 */ }
         }
-        assets.push(a);
+        // 파일에 이미지가 없으면 원본 주소가 지금 열리는지 확인 — 열리지 않으면 ‘보관됨’으로 두지 않고 누락 표시
+        if (prog) prog.textContent = '원본 이미지 확인 중…';
+        if (await imageReachable(a.url)) { assets.push(a); linked++; continue; }
+        C.walk(doc, n => { if (n.type === 'image' && n.attrs?.assetId === a.id) Object.assign(n.attrs, {status: 'missing', src: null, note: '백업 파일에 이미지가 없고 원본 이미지에도 접근할 수 없음'}); });
+        lost++;
       }
       const rec = b.record;
       closeImport();
       await openEditor(same ? exists.id : null, {prefill: {doc, assets, reason: same ? 'backup' : 'edit', origin: {...(rec.origin || {}), restoredFrom: 'backup', restoredAt: new Date().toISOString()}, form: {...rec, sourceName: rec.source?.name || '', sourceUrl: rec.source?.url || ''}}});
-      bridge.toast('복원 내용을 편집창에 열었어요 — [저장]을 눌러야 반영됩니다');
+      bridge.toast('복원 내용을 편집창에 열었어요 — [저장]을 눌러야 반영됩니다' + ((b.record.assets || []).length ? ` · 이미지: 파일에서 다시 보관 ${reuploaded} · 원본 주소 연결 ${linked} · 복원 불가 ${lost}` : ''));
     };
   };
 }
