@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="js/study/study.css?v=7.27">
 <style>
 /* ══════════════════════════════════════════════════════════
-   🗂 투자 기록보관실  v7.27-0917-1150
+   🗂 투자 기록보관실  v7.27.1-0917-1330
    업무일지(worklog)와 한눈에 구분되도록 네이비×골드 테마로 짰다.
    업무일지의 8뷰 엔진(카드·표·보드·달력)을 새 창고(records)에
    맞게 다시 짠 것 — worklog_entries 와는 완전히 분리된 컬렉션.
@@ -64,6 +64,7 @@
    참고 자료/가설 양방향 연결·이 기기 초안·다른 기기 변경 충돌 비교·MarkFlow HTML/Markdown 가져오기·노트 파일 내보내기/복원.
    본문 기준본은 contentDocJson(문서 JSON), body 는 검색·구버전 화면용 일반 텍스트 투영. 구형 편집창은 공부노트를 열지 않음.
    기록 상세 주소(#record=ID)로 새로고침·뒤로가기 가능. 연결 추가/삭제는 트랜잭션으로 서버 최신 목록에 병합.
+   v7.27.1: 노트 파일 복원 시 파일에 이미지가 없고 원본에도 접근 불가하면 ‘보관됨’ 대신 누락 표시·개수 안내(조용한 이미지 손실 수정).
    ══════════════════════════════════════════════════════════ */
 :root{
   --navy-900:#514936; --navy-800:#5c5340; --navy-700:#6b6049; --navy-600:#8a7d5e;
@@ -468,7 +469,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
-  <span class="ver">v7.27-0917-1150 · 서희타워</span>
+  <span class="ver">v7.27.1-0917-1330 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -1075,7 +1076,7 @@ function _recSig(r){ return r ? String(r.studyRevision||0)+'|'+(r.updatedAt||0)+
 var _studyApi = null;
 function studyApi(){
   if(!_studyApi){
-    _studyApi = import('./js/study/study-app.mjs?v=7.27').then(function(m){
+    _studyApi = import('./js/study/study-app.mjs?v=7.27.1').then(function(m){
       return m.init({db:db, storage:storage, records:function(){ return records; }, toast:toast, logBug:logBug, KINDS:KINDS, VERIFY_STATES:VERIFY_STATES, VERIFY_ORDER:VERIFY_ORDER, allStockNames:allStockNames, addStockToMaster:addStockToMaster});
     }).catch(function(e){ _studyApi=null; logBug('공부노트 모듈 로드 실패: '+e.message); toast('공부노트 기능을 불러오지 못했어요 — 연결 확인 후 새로고침해 주세요'); throw e; });
   }
@@ -3240,7 +3241,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.27-0917-1150 준비됨 — records / records_todos / records_meta 컬렉션 사용');
+console.log('[기록보관실] v7.27.1-0917-1330 준비됨 — records / records_todos / records_meta 컬렉션 사용');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
