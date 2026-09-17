@@ -58,8 +58,12 @@ html.st-open,html.st-open body{overflow:hidden}
 .st-editor{flex:1;min-width:0;border:1px solid var(--line,#ebe4d3);border-radius:12px;background:#fff;min-height:55vh}
 .st-editor .ProseMirror{outline:0;padding:18px 22px 60px;min-height:55vh}
 .st-editor .ProseMirror p.is-editor-empty:first-child::before{content:attr(data-placeholder);color:#b9b2a0;float:left;height:0;pointer-events:none}
-.st-notice{background:#fff8e5;border:1px solid #f0dc93;border-radius:10px;padding:8px 12px;margin:6px 0;font-size:12.5px}
-.st-notice ul{margin:4px 0 6px 18px;padding:0}
+/* v7.28.2: 붙여넣기 안내 — 본문 밖 고정된 한 자리, 접힌 요약 한 줄(펼쳐야 목록이 보임), 내용 없으면 숨김 */
+.st-notice{background:#fff8e5;border:1px solid #f0dc93;border-radius:9px;margin:6px 0;font-size:12.5px}
+.st-notice:empty{display:none;border:0;margin:0}
+.st-notice summary{cursor:pointer;padding:7px 12px;list-style:none;font-weight:700;color:#7a5b00}
+.st-notice summary::-webkit-details-marker{display:none}
+.st-notice ul{margin:0 0 8px;padding:0 12px 0 26px}
 
 /* 본문(편집·읽기 공통) */
 .st-prose{font-size:15px;line-height:1.75;color:#2a2f3a;overflow-wrap:anywhere}
