@@ -1,9 +1,32 @@
 {
   "schema": "calendar/1",
   "version": "v 20260907-2300",
-  "computed_at": "2026-09-17T20:15:47+09:00",
-  "today": "2026-09-17",
-  "due_today": [],
+  "computed_at": "2026-09-18T01:32:28+09:00",
+  "today": "2026-09-18",
+  "due_today": [
+    {
+      "id": "fed_sep",
+      "name": "연준 경제전망·점도표(SEP)",
+      "tier": "quarter",
+      "date": "2026-09-18",
+      "time": "",
+      "period": "2026Q3",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "auto": false,
+      "note": "분기 FOMC 둘째 날 새벽 3시 KST(추정, 일정표 확인)"
+    },
+    {
+      "id": "krx_flow",
+      "name": "KRX 외국인·기관 주간 순매수",
+      "tier": "month",
+      "date": "2026-09-18",
+      "time": "18:00",
+      "period": "2026-W38",
+      "url": "https://data.krx.co.kr/",
+      "auto": false,
+      "note": "매주 금요일 장 마감 후. 자동 수집 실험 전까지 수동 · optional=미입력 경고 안 함"
+    }
+  ],
   "upcoming": [
     {
       "id": "fed_sep",
@@ -70,6 +93,28 @@
       "url": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/",
       "auto": false,
       "note": "매월 1영업일 밤 11시 KST"
+    },
+    {
+      "id": "krx_flow",
+      "name": "KRX 외국인·기관 주간 순매수",
+      "tier": "month",
+      "date": "2026-10-02",
+      "time": "18:00",
+      "period": "2026-W40",
+      "url": "https://data.krx.co.kr/",
+      "auto": false,
+      "note": "매주 금요일 장 마감 후. 자동 수집 실험 전까지 수동 · optional=미입력 경고 안 함"
+    },
+    {
+      "id": "us_jobs",
+      "name": "미국 고용보고서",
+      "tier": "auto",
+      "date": "2026-10-02",
+      "time": "21:30",
+      "period": "2026-09",
+      "url": "https://www.bls.gov/news.release/empsit.toc.htm",
+      "auto": true,
+      "note": "매월 첫 금요일 21:30 KST(여름엔 21:30, 겨울 22:30)"
     }
   ],
   "missing": [],
