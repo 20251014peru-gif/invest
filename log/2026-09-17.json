@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-09-17",
-  "generated_at": "2026-09-17T09:14:18+09:00",
+  "generated_at": "2026-09-17T14:55:27+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · VIX 17.71 pt(+4.4%) · 유가 WTI 101.6 $(-1.9%)"
+      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · VIX 17.71 pt(+4.4%) · 유가 WTI 101.77 $(-1.7%)"
     },
     {
       "k": "오늘 발표",
@@ -18,7 +18,7 @@
     },
     {
       "k": "산업·종목",
-      "t": "DART 22건(수주·공급계약 8) · 토론실 근거글 +0(적중 7) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
+      "t": "DART 20건(수주·공급계약 6) · 토론실 근거글 +0(적중 7) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
     },
     {
       "k": "미입력",
@@ -101,29 +101,15 @@
     {
       "id": "wti",
       "name": "유가 WTI",
-      "value": 101.6,
+      "value": 101.77,
       "unit": "$",
       "prev": 103.52,
-      "delta": -1.92,
-      "delta_text": "-1.9%",
+      "delta": -1.75,
+      "delta_text": "-1.7%",
       "judge": "",
       "as_of": "2026-09-17",
       "cycle": "D",
-      "score": 1.8547140649149938,
-      "group": "world"
-    },
-    {
-      "id": "gold",
-      "name": "금",
-      "value": 4305.5,
-      "unit": "$/oz",
-      "prev": 4377.2,
-      "delta": -71.7,
-      "delta_text": "-1.6%",
-      "judge": "",
-      "as_of": "2026-09-17",
-      "cycle": "D",
-      "score": 1.6380334460385595,
+      "score": 1.690494590417311,
       "group": "world"
     },
     {
@@ -141,32 +127,46 @@
       "group": "kr"
     },
     {
-      "id": "sox",
-      "name": "SOX 반도체",
-      "value": 11246.107,
-      "unit": "pt",
-      "prev": 11349.43,
-      "delta": -103.323,
-      "delta_text": "-0.9%",
-      "judge": "중립",
+      "id": "usdkrw",
+      "name": "원달러 환율",
+      "value": 1368.3,
+      "unit": "원",
+      "prev": 1353.3,
+      "delta": 15.0,
+      "delta_text": "+1.1%",
+      "judge": "우호",
       "as_of": "2026-09-17",
       "cycle": "D",
-      "score": 0.9103805213125269,
-      "group": "us"
+      "score": 1.108401684770561,
+      "group": "kr"
     },
     {
-      "id": "sp500",
-      "name": "S&P500",
-      "value": 7551.81,
+      "id": "hsi",
+      "name": "항셍지수",
+      "value": 24472.78,
       "unit": "pt",
-      "prev": 7608.31,
-      "delta": -56.5,
-      "delta_text": "-0.7%",
+      "prev": 24713.78,
+      "delta": -241.0,
+      "delta_text": "-1.0%",
       "judge": "중립",
       "as_of": "2026-09-17",
       "cycle": "D",
-      "score": 0.7426090682424874,
-      "group": "us"
+      "score": 0.9751644629028826,
+      "group": "world"
+    },
+    {
+      "id": "gold",
+      "name": "금",
+      "value": 4334.6,
+      "unit": "$/oz",
+      "prev": 4377.2,
+      "delta": -42.6,
+      "delta_text": "-1.0%",
+      "judge": "",
+      "as_of": "2026-09-17",
+      "cycle": "D",
+      "score": 0.9732248926254102,
+      "group": "world"
     }
   ],
   "releases": {
@@ -279,29 +279,15 @@
         {
           "id": "wti",
           "name": "유가 WTI",
-          "value": 101.6,
+          "value": 101.77,
           "unit": "$",
           "prev": 103.52,
-          "delta": -1.92,
-          "delta_text": "-1.9%",
+          "delta": -1.75,
+          "delta_text": "-1.7%",
           "judge": "",
           "as_of": "2026-09-17",
           "cycle": "D",
-          "score": 1.8547140649149938,
-          "group": "world"
-        },
-        {
-          "id": "gold",
-          "name": "금",
-          "value": 4305.5,
-          "unit": "$/oz",
-          "prev": 4377.2,
-          "delta": -71.7,
-          "delta_text": "-1.6%",
-          "judge": "",
-          "as_of": "2026-09-17",
-          "cycle": "D",
-          "score": 1.6380334460385595,
+          "score": 1.690494590417311,
           "group": "world"
         },
         {
@@ -319,50 +305,64 @@
           "group": "kr"
         },
         {
-          "id": "sox",
-          "name": "SOX 반도체",
-          "value": 11246.107,
-          "unit": "pt",
-          "prev": 11349.43,
-          "delta": -103.323,
-          "delta_text": "-0.9%",
-          "judge": "중립",
+          "id": "usdkrw",
+          "name": "원달러 환율",
+          "value": 1368.3,
+          "unit": "원",
+          "prev": 1353.3,
+          "delta": 15.0,
+          "delta_text": "+1.1%",
+          "judge": "우호",
           "as_of": "2026-09-17",
           "cycle": "D",
-          "score": 0.9103805213125269,
-          "group": "us"
+          "score": 1.108401684770561,
+          "group": "kr"
         },
         {
-          "id": "sp500",
-          "name": "S&P500",
-          "value": 7551.81,
+          "id": "hsi",
+          "name": "항셍지수",
+          "value": 24472.78,
           "unit": "pt",
-          "prev": 7608.31,
-          "delta": -56.5,
-          "delta_text": "-0.7%",
+          "prev": 24713.78,
+          "delta": -241.0,
+          "delta_text": "-1.0%",
           "judge": "중립",
           "as_of": "2026-09-17",
           "cycle": "D",
-          "score": 0.7426090682424874,
-          "group": "us"
+          "score": 0.9751644629028826,
+          "group": "world"
+        },
+        {
+          "id": "gold",
+          "name": "금",
+          "value": 4334.6,
+          "unit": "$/oz",
+          "prev": 4377.2,
+          "delta": -42.6,
+          "delta_text": "-1.0%",
+          "judge": "",
+          "as_of": "2026-09-17",
+          "cycle": "D",
+          "score": 0.9732248926254102,
+          "group": "world"
         }
       ]
     },
     {
       "id": "2026-09-17/auto/flow",
-      "time": "08:40",
+      "time": "10:39",
       "who": "auto",
       "kind": "flow",
-      "title": "공시·토론실 — 근거글 +0, 수주·공급계약 8",
+      "title": "공시·토론실 — 근거글 +0, 수주·공급계약 6",
       "text": "SK하이닉스 \"ADR과 국내주가 갭차이 분석\"(중) · SK하이닉스 \"자사주 매입 시작\"(상) · SK하이닉스 \"자사주 매입 시작\"(상)"
     },
     {
       "id": "2026-09-17/auto/macro",
-      "time": "09:12",
+      "time": "14:53",
       "who": "auto",
       "kind": "macro",
-      "title": "지표 갱신 — 36/36 수집",
-      "text": "전부 정상"
+      "title": "지표 갱신 — 35/36 수집",
+      "text": "실패: 한국 국고채 10년"
     }
   ],
   "_정직": "자동 초안. 달님 기록(결론·헤드라인·시나리오·보고서 판정·종목 판단)은 Firestore invest_journal/<date>, invest_records 에 있음"
