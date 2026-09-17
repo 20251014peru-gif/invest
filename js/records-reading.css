@@ -1,0 +1,30 @@
+/* v7.29.1: 위젯은 목록의 폭을 차지하지 않고 오른쪽에서 잠시 펼친다. */
+.recLayout{display:block}
+.recSide{position:fixed;right:0;top:12px;bottom:12px;width:min(340px,calc(100vw - 42px));box-sizing:border-box;padding:12px;background:var(--bg,#faf9f4);border:1px solid var(--line);border-radius:16px 0 0 16px;box-shadow:-6px 0 24px #0002;z-index:500;overflow-y:auto;overscroll-behavior:contain;transform:translateX(105%);visibility:hidden;transition:transform .2s ease,visibility .2s;gap:12px}
+.recSide.is-open{transform:translateX(0);visibility:visible}
+.widgetEdge{position:fixed;right:0;top:40%;z-index:499;border:1px solid var(--line);border-right:0;border-radius:12px 0 0 12px;background:#fff7dc;padding:15px 7px;writing-mode:vertical-rl;cursor:pointer;color:var(--sub);font-weight:700;box-shadow:0 2px 8px #0001}
+.widgetDrawerHead{display:flex;justify-content:space-between;align-items:center}
+.widgetDrawerHead button{border:1px solid var(--line);border-radius:8px;background:white;cursor:pointer;padding:8px 12px}
+/* 상세보기의 세로 스크롤은 모달 하나만 사용한다. */
+body:has(#pageModal.on){overflow:hidden}
+#pageModal{overflow:hidden;padding:24px 16px}
+#pageModal .pageModalBox{max-width:1080px!important;max-height:calc(100dvh - 48px);overscroll-behavior:contain;scroll-behavior:auto}
+#pageModal .pg-body{max-height:none;overflow:visible;overflow-wrap:anywhere}
+#pageModal .mfoot{flex-wrap:wrap}
+#pageModal .pg-attgrid{margin-top:16px}
+.pg-readtabs,.pg-readswitch{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}
+.pg-readtabs{border-bottom:1px solid var(--line);padding-bottom:10px}
+.pg-readtabs button,.pg-readswitch button{background:white;border:1px solid var(--line);border-radius:10px;padding:10px 16px;color:var(--sub);cursor:pointer;font:inherit}
+.pg-readtabs [aria-selected="true"],.pg-readswitch [aria-pressed="true"]{background:#f5e4a2;border-color:#d5b640;color:#453b24;font-weight:700}
+#pageModal [hidden]{display:none!important}
+.pg-outline{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pg-outline-card{text-align:left;display:flex;flex-direction:column;gap:8px;background:#fffdf6;border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;font:inherit;min-width:0;overflow-wrap:anywhere}
+.pg-outline-card span{color:var(--sub);font-size:13px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.pg-outline-card[aria-expanded="true"]{border-color:#b79a39;background:#fff5d3}
+.pg-outline-detail{margin-top:16px}.pg-outline-detail h3{font-size:16px}
+.pg-readhint{font-size:12px;color:var(--sub2)}
+#pageModal .pg-checktbl{table-layout:fixed;width:100%}
+#pageModal .pg-checktbl td,#pageModal .pg-checktbl th{overflow-wrap:anywhere}
+@media(max-width:820px){.recSide{width:min(340px,calc(100vw - 42px))}}
+@media(max-width:600px){#pageModal{padding:8px}#pageModal .pageModalBox{max-height:calc(100dvh - 16px)}#pageModal .mbody{padding:16px}.pg-outline{grid-template-columns:1fr}.pg-readtabs button{padding:10px}.widgetEdge{padding:12px 6px}}
+@media(prefers-reduced-motion:reduce){.recSide{transition:none}}
