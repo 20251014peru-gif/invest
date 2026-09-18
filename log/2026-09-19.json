@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-09-19",
-  "generated_at": "2026-09-19T02:00:50+09:00",
+  "generated_at": "2026-09-19T04:30:08+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · SOX 반도체 11,720 pt(+1.0%) · VIX 15.43 pt(-0.8%)"
+      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · VIX 14.96 pt(-3.9%) · KOSPI 6,894 pt(+2.7%)"
     },
     {
       "k": "오늘 발표",
@@ -18,7 +18,7 @@
     },
     {
       "k": "산업·종목",
-      "t": "DART 54건(수주·공급계약 2) · 토론실 근거글 +0(적중 7) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
+      "t": "DART 55건(수주·공급계약 3) · 토론실 근거글 +0(적중 7) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
     },
     {
       "k": "미입력",
@@ -43,9 +43,9 @@
     {
       "key": "kospi",
       "label": "코스피",
-      "value": "6,715",
-      "sub": "-0.04% · 2026-09-17",
-      "tone": "red"
+      "value": "6,894",
+      "sub": "2.66% · 2026-09-18",
+      "tone": "green"
     },
     {
       "key": "us10y",
@@ -85,46 +85,74 @@
       "group": "kr"
     },
     {
-      "id": "sox",
-      "name": "SOX 반도체",
-      "value": 11720.37,
-      "unit": "pt",
-      "prev": 11599.492,
-      "delta": 120.878,
-      "delta_text": "+1.0%",
-      "judge": "중립",
-      "as_of": "2026-09-19",
-      "cycle": "D",
-      "score": 1.0420973608154618,
-      "group": "us"
-    },
-    {
       "id": "vix",
       "name": "VIX",
-      "value": 15.43,
+      "value": 14.96,
       "unit": "pt",
       "prev": 15.56,
-      "delta": -0.13,
-      "delta_text": "-0.8%",
+      "delta": -0.6,
+      "delta_text": "-3.9%",
       "judge": "안정",
       "as_of": "2026-09-19",
       "cycle": "D",
-      "score": 0.8354755784061746,
+      "score": 3.856041131105396,
+      "group": "us"
+    },
+    {
+      "id": "kospi",
+      "name": "KOSPI",
+      "value": 6894.23,
+      "unit": "pt",
+      "prev": 6715.41,
+      "delta": 178.82,
+      "delta_text": "+2.7%",
+      "judge": "강",
+      "as_of": "2026-09-18",
+      "cycle": "D",
+      "score": 2.6628307132401403,
+      "group": "kr"
+    },
+    {
+      "id": "sox",
+      "name": "SOX 반도체",
+      "value": 11767.111,
+      "unit": "pt",
+      "prev": 11599.492,
+      "delta": 167.619,
+      "delta_text": "+1.4%",
+      "judge": "중립",
+      "as_of": "2026-09-19",
+      "cycle": "D",
+      "score": 1.4450546627386838,
       "group": "us"
     },
     {
       "id": "wti",
       "name": "유가 WTI",
-      "value": 96.15,
+      "value": 95.5,
       "unit": "$",
       "prev": 96.82,
-      "delta": -0.67,
-      "delta_text": "-0.7%",
+      "delta": -1.32,
+      "delta_text": "-1.4%",
       "judge": "",
       "as_of": "2026-09-19",
       "cycle": "D",
-      "score": 0.6920057839289274,
+      "score": 1.3633546787853679,
       "group": "world"
+    },
+    {
+      "id": "kosdaq",
+      "name": "KOSDAQ",
+      "value": 827.12,
+      "unit": "pt",
+      "prev": 822.18,
+      "delta": 4.94,
+      "delta_text": "+0.6%",
+      "judge": "중립",
+      "as_of": "2026-09-18",
+      "cycle": "D",
+      "score": 0.6008416648422553,
+      "group": "kr"
     },
     {
       "id": "m2",
@@ -139,34 +167,6 @@
       "cycle": "M",
       "score": 0.4447290094829344,
       "group": "us"
-    },
-    {
-      "id": "kr_lead",
-      "name": "선행지수순환변동치",
-      "value": 104.2,
-      "unit": "pt",
-      "prev": 103.8,
-      "delta": 0.4,
-      "delta_text": "+0.4%",
-      "judge": "",
-      "as_of": "2026-07",
-      "cycle": "M",
-      "score": 0.3853564547206221,
-      "group": "kr"
-    },
-    {
-      "id": "copper",
-      "name": "구리",
-      "value": 6.6915,
-      "unit": "$/lb",
-      "prev": 6.671,
-      "delta": 0.02,
-      "delta_text": "+0.3%",
-      "judge": "",
-      "as_of": "2026-09-19",
-      "cycle": "D",
-      "score": 0.3073002548343471,
-      "group": "world"
     }
   ],
   "releases": {
@@ -276,46 +276,74 @@
           "group": "kr"
         },
         {
-          "id": "sox",
-          "name": "SOX 반도체",
-          "value": 11720.37,
-          "unit": "pt",
-          "prev": 11599.492,
-          "delta": 120.878,
-          "delta_text": "+1.0%",
-          "judge": "중립",
-          "as_of": "2026-09-19",
-          "cycle": "D",
-          "score": 1.0420973608154618,
-          "group": "us"
-        },
-        {
           "id": "vix",
           "name": "VIX",
-          "value": 15.43,
+          "value": 14.96,
           "unit": "pt",
           "prev": 15.56,
-          "delta": -0.13,
-          "delta_text": "-0.8%",
+          "delta": -0.6,
+          "delta_text": "-3.9%",
           "judge": "안정",
           "as_of": "2026-09-19",
           "cycle": "D",
-          "score": 0.8354755784061746,
+          "score": 3.856041131105396,
+          "group": "us"
+        },
+        {
+          "id": "kospi",
+          "name": "KOSPI",
+          "value": 6894.23,
+          "unit": "pt",
+          "prev": 6715.41,
+          "delta": 178.82,
+          "delta_text": "+2.7%",
+          "judge": "강",
+          "as_of": "2026-09-18",
+          "cycle": "D",
+          "score": 2.6628307132401403,
+          "group": "kr"
+        },
+        {
+          "id": "sox",
+          "name": "SOX 반도체",
+          "value": 11767.111,
+          "unit": "pt",
+          "prev": 11599.492,
+          "delta": 167.619,
+          "delta_text": "+1.4%",
+          "judge": "중립",
+          "as_of": "2026-09-19",
+          "cycle": "D",
+          "score": 1.4450546627386838,
           "group": "us"
         },
         {
           "id": "wti",
           "name": "유가 WTI",
-          "value": 96.15,
+          "value": 95.5,
           "unit": "$",
           "prev": 96.82,
-          "delta": -0.67,
-          "delta_text": "-0.7%",
+          "delta": -1.32,
+          "delta_text": "-1.4%",
           "judge": "",
           "as_of": "2026-09-19",
           "cycle": "D",
-          "score": 0.6920057839289274,
+          "score": 1.3633546787853679,
           "group": "world"
+        },
+        {
+          "id": "kosdaq",
+          "name": "KOSDAQ",
+          "value": 827.12,
+          "unit": "pt",
+          "prev": 822.18,
+          "delta": 4.94,
+          "delta_text": "+0.6%",
+          "judge": "중립",
+          "as_of": "2026-09-18",
+          "cycle": "D",
+          "score": 0.6008416648422553,
+          "group": "kr"
         },
         {
           "id": "m2",
@@ -330,34 +358,6 @@
           "cycle": "M",
           "score": 0.4447290094829344,
           "group": "us"
-        },
-        {
-          "id": "kr_lead",
-          "name": "선행지수순환변동치",
-          "value": 104.2,
-          "unit": "pt",
-          "prev": 103.8,
-          "delta": 0.4,
-          "delta_text": "+0.4%",
-          "judge": "",
-          "as_of": "2026-07",
-          "cycle": "M",
-          "score": 0.3853564547206221,
-          "group": "kr"
-        },
-        {
-          "id": "copper",
-          "name": "구리",
-          "value": 6.6915,
-          "unit": "$/lb",
-          "prev": 6.671,
-          "delta": 0.02,
-          "delta_text": "+0.3%",
-          "judge": "",
-          "as_of": "2026-09-19",
-          "cycle": "D",
-          "score": 0.3073002548343471,
-          "group": "world"
         }
       ]
     },
@@ -366,12 +366,12 @@
       "time": "08:40",
       "who": "auto",
       "kind": "flow",
-      "title": "공시·토론실 — 근거글 +0, 수주·공급계약 2",
+      "title": "공시·토론실 — 근거글 +0, 수주·공급계약 3",
       "text": "SK하이닉스 \"ADR과 국내주가 갭차이 분석\"(중) · SK하이닉스 \"자사주 매입 시작\"(상) · SK하이닉스 \"자사주 매입 시작\"(상)"
     },
     {
       "id": "2026-09-19/auto/macro",
-      "time": "01:59",
+      "time": "04:28",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 36/36 수집",
