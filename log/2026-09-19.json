@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-09-19",
-  "generated_at": "2026-09-19T04:30:08+09:00",
+  "generated_at": "2026-09-19T07:27:12+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · VIX 14.96 pt(-3.9%) · KOSPI 6,894 pt(+2.7%)"
+      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · VIX 14.81 pt(-4.8%) · SOX 반도체 11,922 pt(+2.8%)"
     },
     {
       "k": "오늘 발표",
@@ -50,8 +50,8 @@
     {
       "key": "us10y",
       "label": "미 10년물",
-      "value": "5.01%",
-      "sub": "부담 · 2026-09-16",
+      "value": "4.94%",
+      "sub": "부담 · 2026-09-17",
       "tone": "green"
     }
   ],
@@ -87,15 +87,29 @@
     {
       "id": "vix",
       "name": "VIX",
-      "value": 14.96,
+      "value": 14.81,
       "unit": "pt",
       "prev": 15.56,
-      "delta": -0.6,
-      "delta_text": "-3.9%",
+      "delta": -0.75,
+      "delta_text": "-4.8%",
       "judge": "안정",
       "as_of": "2026-09-19",
       "cycle": "D",
-      "score": 3.856041131105396,
+      "score": 4.820051413881748,
+      "group": "us"
+    },
+    {
+      "id": "sox",
+      "name": "SOX 반도체",
+      "value": 11921.686,
+      "unit": "pt",
+      "prev": 11599.492,
+      "delta": 322.194,
+      "delta_text": "+2.8%",
+      "judge": "강",
+      "as_of": "2026-09-19",
+      "cycle": "D",
+      "score": 2.7776561249406395,
       "group": "us"
     },
     {
@@ -113,31 +127,31 @@
       "group": "kr"
     },
     {
-      "id": "sox",
-      "name": "SOX 반도체",
-      "value": 11767.111,
-      "unit": "pt",
-      "prev": 11599.492,
-      "delta": 167.619,
-      "delta_text": "+1.4%",
-      "judge": "중립",
-      "as_of": "2026-09-19",
-      "cycle": "D",
-      "score": 1.4450546627386838,
-      "group": "us"
-    },
-    {
       "id": "wti",
       "name": "유가 WTI",
-      "value": 95.5,
+      "value": 95.47,
       "unit": "$",
       "prev": 96.82,
-      "delta": -1.32,
+      "delta": -1.35,
       "delta_text": "-1.4%",
       "judge": "",
       "as_of": "2026-09-19",
       "cycle": "D",
-      "score": 1.3633546787853679,
+      "score": 1.3943400123941276,
+      "group": "world"
+    },
+    {
+      "id": "copper",
+      "name": "구리",
+      "value": 6.7155,
+      "unit": "$/lb",
+      "prev": 6.671,
+      "delta": 0.044,
+      "delta_text": "+0.7%",
+      "judge": "",
+      "as_of": "2026-09-19",
+      "cycle": "D",
+      "score": 0.6670664068355466,
       "group": "world"
     },
     {
@@ -153,20 +167,6 @@
       "cycle": "D",
       "score": 0.6008416648422553,
       "group": "kr"
-    },
-    {
-      "id": "m2",
-      "name": "미 M2",
-      "value": 23218.0,
-      "unit": "십억$",
-      "prev": 23115.2,
-      "delta": 102.8,
-      "delta_text": "+0.4%",
-      "judge": "",
-      "as_of": "2026-07-01",
-      "cycle": "M",
-      "score": 0.4447290094829344,
-      "group": "us"
     }
   ],
   "releases": {
@@ -278,15 +278,29 @@
         {
           "id": "vix",
           "name": "VIX",
-          "value": 14.96,
+          "value": 14.81,
           "unit": "pt",
           "prev": 15.56,
-          "delta": -0.6,
-          "delta_text": "-3.9%",
+          "delta": -0.75,
+          "delta_text": "-4.8%",
           "judge": "안정",
           "as_of": "2026-09-19",
           "cycle": "D",
-          "score": 3.856041131105396,
+          "score": 4.820051413881748,
+          "group": "us"
+        },
+        {
+          "id": "sox",
+          "name": "SOX 반도체",
+          "value": 11921.686,
+          "unit": "pt",
+          "prev": 11599.492,
+          "delta": 322.194,
+          "delta_text": "+2.8%",
+          "judge": "강",
+          "as_of": "2026-09-19",
+          "cycle": "D",
+          "score": 2.7776561249406395,
           "group": "us"
         },
         {
@@ -304,31 +318,31 @@
           "group": "kr"
         },
         {
-          "id": "sox",
-          "name": "SOX 반도체",
-          "value": 11767.111,
-          "unit": "pt",
-          "prev": 11599.492,
-          "delta": 167.619,
-          "delta_text": "+1.4%",
-          "judge": "중립",
-          "as_of": "2026-09-19",
-          "cycle": "D",
-          "score": 1.4450546627386838,
-          "group": "us"
-        },
-        {
           "id": "wti",
           "name": "유가 WTI",
-          "value": 95.5,
+          "value": 95.47,
           "unit": "$",
           "prev": 96.82,
-          "delta": -1.32,
+          "delta": -1.35,
           "delta_text": "-1.4%",
           "judge": "",
           "as_of": "2026-09-19",
           "cycle": "D",
-          "score": 1.3633546787853679,
+          "score": 1.3943400123941276,
+          "group": "world"
+        },
+        {
+          "id": "copper",
+          "name": "구리",
+          "value": 6.7155,
+          "unit": "$/lb",
+          "prev": 6.671,
+          "delta": 0.044,
+          "delta_text": "+0.7%",
+          "judge": "",
+          "as_of": "2026-09-19",
+          "cycle": "D",
+          "score": 0.6670664068355466,
           "group": "world"
         },
         {
@@ -344,20 +358,6 @@
           "cycle": "D",
           "score": 0.6008416648422553,
           "group": "kr"
-        },
-        {
-          "id": "m2",
-          "name": "미 M2",
-          "value": 23218.0,
-          "unit": "십억$",
-          "prev": 23115.2,
-          "delta": 102.8,
-          "delta_text": "+0.4%",
-          "judge": "",
-          "as_of": "2026-07-01",
-          "cycle": "M",
-          "score": 0.4447290094829344,
-          "group": "us"
         }
       ]
     },
@@ -371,7 +371,7 @@
     },
     {
       "id": "2026-09-19/auto/macro",
-      "time": "04:28",
+      "time": "07:25",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 36/36 수집",
