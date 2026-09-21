@@ -1,6 +1,12 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import * as C from '../js/followups-core.mjs';
+test('future study review dates appear in the canonical schedule before becoming overdue',async()=>{
+  const source=[{id:'study',kind:'study',title:'미래 재검토',reviewAt:'2099-12-31',stocks:['A']}];
+  const before=JSON.stringify(source),items=await C.legacyItems(source,[],()=>false);
+  assert.equal(items.length,1);assert.equal(items[0].dueAt,'2099-12-31');assert.equal(JSON.stringify(source),before);
+  assert.equal(C.filterItems(items,{q:'A'}).length,1);
+});
 test('full-period legacy completion survives >14 days and duplicate questions retain separate IDs',async()=>{
   const records=[{id:'r',title:'원본',checks:[{what:'확인',date:'2020-01-01'},{what:'확인',date:'2020-01-01'}]}];
   const rows=await C.legacyItems(records,[{id:'old',dueKey:'r#0',done:true,date:'2020-01-01',createdAt:1}]);

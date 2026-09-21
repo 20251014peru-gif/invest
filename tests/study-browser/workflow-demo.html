@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>투자기록 보관실 · 통합 화면 시험</title>
+<style>body{margin:0;font:14px system-ui;background:#fbfaf5}header{padding:12px 18px;background:#fff4ce;border-bottom:1px solid #ddc676;line-height:1.6}iframe{display:block;width:100%;height:calc(100dvh - 76px);border:0}button{padding:7px 12px;margin-left:12px;border:1px solid #bea563;border-radius:7px;background:white;cursor:pointer}</style>
+<header><b>예시 자료로 보는 개발 시험 화면</b> · 실제 투자 자료와 연결되지 않습니다.<br>종목 정보 수정 · 기록 남기기 · 확인할 질문 · 출력 보기를 눌러보세요. <button id="reset" disabled>예시 다시 채우기</button><span id="status"></span></header>
+<iframe id="app" title="투자기록 보관실 시험 화면"></iframe>
+<script>
+(async()=>{
+ const status=document.getElementById('status'),frame=document.getElementById('app');
+ try{
+  // Refuse to embed a production records.html. The test server alone supplies this probe.
+  const probe=await fetch('/__test/firebase-mock.js');if(!probe.ok||!(await probe.text()).includes('window.__mockReset'))throw Error('Node 시험 서버에서 열어주세요.');
+  frame.src='/records.html';
+  await new Promise((resolve,reject)=>{let attempts=0;const t=setInterval(()=>{if(frame.contentWindow.__mockReset&&frame.contentWindow.FU?.ready){clearInterval(t);resolve();}else if(++attempts>150){clearInterval(t);reject(Error('시험 화면 연결 시간 초과'));}},100);});
+  const today=new Date(Date.now()+9*3600000).toISOString().slice(0,10),later=new Date(Date.now()+9*3600000+7*86400000).toISOString().slice(0,10);
+  const seed={records:{demo1:{kind:'memo',title:'실적 발표 전 확인할 점',date:today,body:'예시 자료입니다.\n매출 증가가 이익률 개선으로 이어지는지 확인한다.\n다음 발표에서는 영업이익률과 재고를 함께 본다.',stocks:['가상전자'],checks:[{id:'margin',what:'영업이익률이 회복됐는가?',date:later,action:'15% 이상이면 기존 가정을 유지'}]},demo2:{kind:'idea',title:'관심 종목으로 편입한 이유',date:today,body:'예시 자료입니다. 수주 증가가 매출로 연결되는지 다음 분기에 확인할 계획이다.',stocks:['가상산업']}},records_meta:{stocks:{list:[{name:'가상전자',status:'보유',quantity:'10',avgCost:'50000',customFields:[{label:'관심 이유',value:'수익성 회복을 확인하며 보유'},{label:'반증조건',value:'두 분기 연속 이익률이 하락하면 재검토'},{label:'리스크',value:'재고 증가와 환율 변동'}],thesisLog:[{date:today,text:'관찰할 지표를 이익률과 재고로 정했다.'}]},{name:'가상산업',status:'관심',customFields:[{label:'관심 이유',value:'신규 수주가 매출로 이어지는지 관찰'}]}]},checklist_templates:{list:[]}}};
+  async function reset(){const w=frame.contentWindow;w.__mockReset(seed);await w.followupsStart();w.stockMode=true;w.laterMode=false;w.curView='list';w.curStockTab='가상전자';w.syncViewIcons();w.renderKtabs();w.render();}
+  await reset();document.getElementById('reset').disabled=false;document.getElementById('reset').onclick=()=>{if(confirm('시험 화면에서 입력한 내용을 예시 자료로 되돌릴까요?'))reset();};
+ }catch(e){status.textContent=' · '+e.message;}
+})();
+</script></html>

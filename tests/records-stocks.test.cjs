@@ -39,3 +39,17 @@ test('field merge preserves other devices appends and refuses same-field overwri
   assert.equal(base.quantity,'2');assert.equal(base.thesisLog.length,1);assert.equal(base.targetPrice,'110');
   assert.throws(()=>S.mergeFields(base,original,{quantity:'3'}),/다른 기기/);
 });
+test('questions match exact stock or original source tags, stay deduplicated and do not cross stocks',()=>{
+  const records=[{id:'r',stocks:['A']}],items=[{id:'both',stocks:['A'],sourceIds:['r'],state:'open',question:'q',dueAt:'2026-10-01'},
+    {id:'direct',stocks:['A'],state:'working',dueAt:'2026-09-30'}, {id:'other',stocks:['AA'],state:'open',dueAt:'2026-09-01'},
+    {id:'closed',stocks:['A'],state:'done',dueAt:'2026-09-01'},{id:'paused',stocks:['A'],state:'paused',dueAt:'2026-09-01'}];
+  assert.deepEqual(S.schedules(items,records,{stock:'A'}).map(x=>x.id),['direct','both']);
+  assert.deepEqual(S.schedules(items,records).map(x=>x.id),['both']);
+  assert.deepEqual(S.schedules(items,[],{all:true}).map(x=>x.id),['other','direct','both']);
+  const s=S.summary('A',null,[],items);assert.equal(s.hasContent,true);assert.equal(s.pending.length,2);
+  assert.equal(S.directory(['A'],()=>null,[],'q',true,items).length,1);
+});
+test('summary uses saved reason and never mistakes latest automatic change for current thesis',()=>{
+  const item={quantity:0,status:'관심',customFields:[{label:'관심 이유',value:'이유'},{label:'반증조건',value:'조건'}],thesisLog:[{text:'목표가 수정',auto:true}]};
+  const info=S.overview(item);assert.equal(info.reason.value,'이유');assert.equal(info.core.find(x=>x.label==='보유수량').value,'0');assert.deepEqual(info.details,[{label:'반증조건',value:'조건'}]);
+});
