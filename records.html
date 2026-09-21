@@ -600,10 +600,11 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
-  <span class="ver">v7.31.0 · 서희타워</span>
+  <span class="ver">v7.31.1 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
+  <button class="navbtn gold" id="authBtn" type="button">🔐 본인 Google 로그인</button>
   <button class="navbtn" id="btnStockMgr">🏷 종목 관리</button>
   <button class="navbtn" id="btnRecRestore" title="기록 파일(⬇ 내보내기로 받은 .json)을 새 기록으로 복원">♻ 기록 복원</button>
   <button class="navbtn" id="btnSysCheck">⚙ 시스템 점검 <span id="sysBadge" style="display:none;background:var(--warn);color:#fff;border-radius:999px;padding:0 6px;font-size:10.5px;margin-left:2px">0</span></button>
@@ -1041,18 +1042,40 @@ const firebaseConfig = {
   projectId: "my-system-25497",
   storageBucket: "my-system-25497.firebasestorage.app"
 };
-let db=null, uid=null, storage=null;
+let db=null, uid=null, storage=null, authUser=null, authReady=false, _listenersStarted=false;
+function isGoogleUser(u){
+  return !!(u && (u.providerData||[]).some(function(p){return p && p.providerId==='google.com';}));
+}
+function renderAuth(u){
+  var b=document.getElementById('authBtn'); if(!b)return;
+  ['btnStockMgr','btnRecRestore','btnAdd'].forEach(function(id){var el=document.getElementById(id);if(el)el.disabled=!isGoogleUser(u);});
+  if(isGoogleUser(u)){ b.textContent='✓ 본인 로그인'; b.classList.remove('gold'); b.title=u.email||''; }
+  else { b.textContent='🔐 본인 Google 로그인'; b.classList.add('gold'); b.title='기록을 불러오려면 본인 Google 계정으로 로그인하세요'; }
+}
+function loginOwner(){
+  var b=document.getElementById('authBtn'); b.disabled=true;
+  var auth=firebase.auth(), provider=new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({prompt:'select_account'});
+  var begin=isGoogleUser(auth.currentUser)?Promise.resolve():auth.signOut();
+  return begin.then(function(){return auth.signInWithPopup(provider);}).catch(function(e){
+    if(e && e.code!=='auth/popup-closed-by-user'){logBug('Google 로그인 실패: '+e.message);toast('Google 로그인 실패 — 다시 눌러주세요');}
+  }).finally(function(){b.disabled=false;});
+}
 try{
   firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
   try{ storage = firebase.storage(); }catch(e){ logBug('storage 초기화 실패: '+e.message); }
-  firebase.auth().signInAnonymously().catch(function(e){ logBug('익명로그인 실패: '+e.message); });
   firebase.auth().onAuthStateChanged(function(u){
-    uid = u ? u.uid : null;
-    _diag.auth={at:Date.now(),signedIn:!!u};
-    if(u){ startListeners(); }
+    authReady=true;
+    authUser=u; uid=isGoogleUser(u)?u.uid:null;
+    _diag.auth={at:Date.now(),signedIn:!!uid,provider:isGoogleUser(u)?'google.com':(u?'other':'none')};
+    renderAuth(u);
+    if(u && !isGoogleUser(u)){ firebase.auth().signOut().catch(function(e){logBug('익명 세션 정리 실패: '+e.message);}); return; }
+    if(uid && !_listenersStarted){ _listenersStarted=true; startListeners(); }
+    else if(!uid){ render(); }
   });
 }catch(e){ logBug('firebase 초기화 실패: '+e.message); }
+document.getElementById('authBtn').addEventListener('click',function(){ if(!isGoogleUser(authUser))loginOwner(); });
 
 /* ── KST 시간 (worklog 관행: new Date() 직접 쓰지 않는다) ── */
 function kstNow(){
@@ -1469,7 +1492,7 @@ function followupsStart(){
 }
 function openFollowup(id,prefill){if(FU&&FU.ready){FU.open(id,prefill);return;}followupsStart().then(function(){if(FU)FU.open(id,prefill);});}
 function startListeners(){
-  if(!db) return;
+  if(!db || !uid) return;
   db.collection('records').orderBy('date','desc').onSnapshot(function(snap){
     recordLoadState('기록');
     records = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
@@ -2198,6 +2221,12 @@ function render(){
   /* v7.10: "🏷 종목" 모드는 curKind 필터·레코드 빈 상태 가드와 완전히 무관한 별도 화면이라
      맨 앞에서 분기 — 기존 레코드 렌더 경로는 한 줄도 안 바뀜(아래 그대로) */
   document.getElementById('viewicons').style.display = laterMode ? 'none' : '';
+  if(authReady && !uid){
+    document.getElementById('topStat').textContent='로그인 필요';
+    document.getElementById('cntLabel').textContent='';
+    document.getElementById('content').innerHTML='<div class="emptyState"><div class="ei">🔐</div><b>자료는 서버에 그대로 있습니다.</b><br>상단의 <b>본인 Google 로그인</b>을 누르면 기록을 다시 불러옵니다.</div>';
+    return;
+  }
   document.getElementById('btnFilter').style.display=stockMode?'none':'';
   document.getElementById('activeFilters').style.display=stockMode?'none':'inline-flex';
   if(stockMode){ document.getElementById('btnAdd').textContent = '＋ 기록 추가'; renderStockMode(); return; }
@@ -3801,7 +3830,7 @@ function openSysCheck(){
   function recvLine(k,label){ var r=_diag.recv[k]; if(!r) return _sysRow(label,_sysBadge('대기 중/미검증','wait')); return _sysRow(label,_sysBadge('확인됨','ok')+' <span style="color:var(--sub2);font-size:11px">'+_kstShort(r.at)+' · '+r.n+'건'+(r.cache?' · 캐시':'')+(r.pending?' · 쓰기대기':'')+'</span>'); }
   var B=_sysSec('B. 연결·저장 상태','<table style="width:100%;border-collapse:collapse">'
     +_sysRow('Firebase 초기화', db?_sysBadge('확인됨','ok'):_sysBadge('오류','err'))
-    +_sysRow('로그인(익명)', (typeof uid!=='undefined'&&uid)?_sysBadge('확인됨','ok'):_sysBadge('대기 중/미검증','wait'))
+    +_sysRow('본인 Google 로그인', (typeof uid!=='undefined'&&uid)?_sysBadge('확인됨','ok'):_sysBadge('필요','wait'))
     +recvLine('records','records 수신')+recvLine('todos','records_todos 수신')
     +recvLine('stocks','records_meta/stocks 수신')+recvLine('checklist','records_meta/checklist 수신')
     +_sysRow('저장 상태', _diag.save?esc(_diag.save):_sysBadge('해당 없음','na')+' <span style="color:var(--sub2);font-size:11px">(이 세션 관찰 범위)</span>')
@@ -4304,7 +4333,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.31.0 준비됨 — 종목별 누적 기록');
+console.log('[기록보관실] v7.31.1 준비됨 — 본인 로그인·종목별 누적 기록');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
