@@ -1,0 +1,52 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><title>종목 누적 회귀 시험</title>
+<style>body{font:14px sans-serif}iframe{width:100%;height:800px;border:1px solid #ddd}.bad{color:red}.ok{color:green}</style>
+<h1 id="result">실행 중</h1><pre id="checks"></pre><iframe src="/records.html" id="app"></iframe>
+<script>
+(async function(){
+ const frame=document.getElementById('app');
+ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+ async function until(fn){for(let i=0;i<150;i++){if(fn())return;await sleep(40);}throw Error('timeout');}
+ await until(()=>frame.contentWindow.__mockReset&&frame.contentWindow.recordsLoaded&&frame.contentWindow.RC&&frame.contentWindow.FU?.ready);
+ const w=frame.contentWindow,d=w.document, results=[];
+ function check(v,label){if(!v)throw Error(label);results.push('PASS '+label);document.getElementById('checks').textContent=results.join('\n');}
+ const seed={records:{r:{kind:'memo',title:'연결된 원문',body:'원본 내용 보존',date:'2026-09-20',stocks:['검증 종목 A','검증 종목 B'],createdAt:100}},records_meta:{stocks:{list:[
+   {name:'검증 종목 A',thesisLog:[{date:'2026-09-21',text:'같은 날 먼저 쓴 내용'},{date:'2026-09-21',text:'같은 날 나중에 쓴 내용'}]},
+   {name:'검증 종목 B',quantity:'2',customFields:[{label:'관심 이유',value:'검증용 내용'}]},
+   {name:'정보만 있는 종목',status:'관심'},'빈 종목'
+ ]},checklist_templates:{list:[]}}};
+ w.__mockReset(seed); await sleep(60);
+ const original=JSON.stringify(w.__mockDump());
+ d.querySelector('[data-stocktabbtn]').click();d.querySelector('[data-v="table"]').click();
+ check(d.querySelectorAll('.stockDirectory [data-stocktab]').length===3,'내용 없는 종목 기본 제외');
+ check(d.querySelector('.stockDirectory [data-stocktab]').dataset.stocktab==='검증 종목 A','내용 최신순');
+ check(d.querySelector('.stockDirectory').textContent.includes('3건'),'연결 원문과 투자논지 합산');
+ d.querySelector('[data-stocktab="검증 종목 A"]').click();
+ check(d.querySelector('#content tr[data-open] td:nth-child(3)').textContent==='같은 날 나중에 쓴 내용','같은 날 늦게 추가한 이력이 맨 위');
+ d.querySelector('#content tr[data-open]').click();
+ check(d.querySelector('#stockLogModal.on #stockLogText').textContent==='같은 날 나중에 쓴 내용','이력 원문 열기');d.querySelector('#stockLogClose').click();
+ d.querySelector('[data-stocknav="검증 종목 B"]').click();
+ check(w.curStockTab==='검증 종목 B','다음 종목 바로 보기');
+ d.querySelector('[data-stockback]').click();check(w.curStockTab==='','전체 종목 바로 복귀');
+ d.querySelector('#stockOnlyContent').click();check(d.querySelectorAll('.stockDirectory [data-stocktab]').length===4,'이름만 있는 종목도 선택 가능');
+ check(JSON.stringify(w.__mockDump())===original,'조회 중 원본 데이터 불변');
+ d.querySelector('[data-stocktab="정보만 있는 종목"]').click();check(d.querySelector('.stockSummary').textContent.includes('관심'),'연결 기록 없어도 기존 정보 표시');
+ d.querySelector('#stockAddRecord').click();check(w.pickedStocks[0]==='정보만 있는 종목','새 기록에 종목 자동 연결');w.closeModal();
+ w.navigateStock('검증 종목 A');d.querySelector('[data-stockopen]').click();
+ w.__mockFail='offline';d.querySelector('#sdThesisInput').value='실패해도 입력 보존';d.querySelector('#sdThesisAddBtn').click();await until(()=>!w._stockSaving);
+ check(d.querySelector('#sdThesisInput').value==='실패해도 입력 보존','저장 실패 입력 보존');
+ check(d.querySelector('#stockSaveStatus').textContent.includes('저장되지 않았습니다'),'실패 표시');
+ w.__mockFail='';d.querySelector('#sdThesisAddBtn').click();await until(()=>!w._stockSaving);
+ check(d.querySelector('#sdThesisInput').value==='','성공 후 입력 비움');
+ check(w.stockSummary('검증 종목 A').total===4,'새 이력 즉시 반영');
+ await Promise.all([w.appendThesisLog('검증 종목 A','연속 A'),w.appendThesisLog('검증 종목 A','연속 B')]);
+ check(w.stockSummary('검증 종목 A').history===5,'연속 저장 이력 손실 없음');
+ d.querySelector('#sdClose').click();w.openStockDetail('검증 종목 B');
+ d.querySelector('#sdQty').value='3';
+ const remote=w.__mockDump();remote.records_meta.stocks.list.find(x=>x.name==='검증 종목 B').quantity='99';w.__mockReset(remote);
+ d.querySelector('#sdSaveFields').click();await until(()=>!w._stockSaving);
+ check(w.stockItemOf('검증 종목 B').quantity==='99'&&d.querySelector('#sdQty').value==='3','같은 필드 충돌 거절, 서버와 입력 보존');
+ check(JSON.stringify(w.__mockDump().records)===JSON.stringify(seed.records),'일반 기록 원문 보존');
+ d.querySelector('#sdClose').click();w.__mockReset(seed);w.stockOnlyContent=true;w.curView='table';w.navigateStock('');
+ document.getElementById('result').textContent=results.length+'개 통과 · 운영 데이터 접속 없음';document.getElementById('result').className='ok';
+})().catch(e=>{document.getElementById('result').textContent='실패: '+e.message;document.getElementById('result').className='bad';});
+</script></html>
