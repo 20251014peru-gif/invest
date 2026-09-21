@@ -54,8 +54,13 @@
   var uploads=[];
   window.__mockUploads=uploads;
   var storage={ ref:function(path){ return { put:function(blob,meta){ var f=fail(); if(f) return f; return fetch('/__test/upload?path='+encodeURIComponent(path),{method:'POST',headers:{'content-type':(meta&&meta.contentType)||blob.type||'application/octet-stream'},body:blob}).then(function(r){ if(!r.ok) throw new Error('upload '+r.status); return r.json(); }).then(function(j){ uploads.push({path:path,size:blob.size,url:j.url}); return {ref:{getDownloadURL:function(){ return Promise.resolve(j.url); }}}; }); }, delete:function(){ uploads.push({deleted:path}); return Promise.resolve(); } }; } };
-  var user={uid:'test-user'};
-  var auth={ currentUser:user, signInAnonymously:function(){ return Promise.resolve({user:user}); }, onAuthStateChanged:function(cb){ setTimeout(function(){ cb(user); },0); return function(){}; } };
+  var user={uid:'test-user',email:'test@example.com',providerData:[{providerId:'google.com'}],getIdToken:function(){return Promise.resolve('test-token');}};
+  var authListeners=[];
+  var auth={ currentUser:user,
+    signInAnonymously:function(){ return Promise.resolve({user:user}); },
+    signInWithPopup:function(){this.currentUser=user;authListeners.forEach(function(cb){cb(user);});return Promise.resolve({user:user});},
+    signOut:function(){this.currentUser=null;authListeners.forEach(function(cb){cb(null);});return Promise.resolve();},
+    onAuthStateChanged:function(cb){authListeners.push(cb);setTimeout(function(){ cb(auth.currentUser); },0);return function(){authListeners=authListeners.filter(function(x){return x!==cb;});};} };
   var app={ firestore:function(){ return firestore; }, auth:function(){ return auth; }, storage:function(){ return storage; } };
   window.firebase={ apps:[], initializeApp:function(){ this.apps.push(app); return app; }, app:function(){ return app; }, firestore:function(){ return firestore; }, storage:function(){ return storage; }, auth:function(){ return auth; } };
   /* firebase.firestore 는 호출도 되고(인스턴스 얻기) firebase.firestore.FieldValue 처럼 정적 속성도 있는 실제 SDK 모양을 흉내 */
@@ -64,6 +69,7 @@
     arrayRemove: function(){ return {__fv:'arrayRemove', items:Array.prototype.slice.call(arguments)}; },
     delete: function(){ return {__fv:'delete'}; }
   };
+  window.firebase.auth.GoogleAuthProvider = function(){ this.setCustomParameters=function(){}; };
   window.__mockReset=function(data){ save(data||{}); notify(); };
   window.__mockDump=function(){ return load(); };
   console.log('[시험] Firebase 대역 사용 중 — 운영 데이터 접속 없음');
