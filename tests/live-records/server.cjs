@@ -3,6 +3,11 @@ const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'../..'),port=Number(process.argv[2]||8925);
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8'};
 http.createServer((req,res)=>{
+  if(req.url==='/__backup'&&req.method==='POST'){
+    if(req.headers.origin!=='http://localhost:'+port){res.writeHead(403).end();return;}
+    const chunks=[];let size=0;req.on('data',b=>{size+=b.length;if(size>64*1024*1024)req.destroy();else chunks.push(b);});
+    req.on('end',()=>{try{const body=Buffer.concat(chunks),data=JSON.parse(body);if(data.format!=='records-deployment-snapshot/v1'||data.project!=='my-system-25497')throw Error('format');const dir=path.join(root,'test-results/live-deployment');fs.mkdirSync(dir,{recursive:true});const filename='snapshot-'+Date.now()+'.json';fs.writeFileSync(path.join(dir,filename),body,{flag:'wx'});res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({file:'test-results/live-deployment/'+filename}));}catch(_){res.writeHead(400).end();}});return;
+  }
   let name;try{name=decodeURIComponent(new URL(req.url,'http://localhost').pathname).replace(/^\//,'');}catch(_){res.writeHead(400).end();return;}
   const file=path.resolve(root,name);
   if(!file.startsWith(root+path.sep)||!(name==='records.html'||name==='tools/records-snapshot.html'||name.startsWith('js/'))){res.writeHead(404).end();return;}

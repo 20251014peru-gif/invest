@@ -1506,7 +1506,7 @@ function startListeners(){
     if(!_routeDone){ _routeDone=true; routeFromHash(); }
     else if(PAGE_OPEN && document.getElementById('pageModal').classList.contains('on')){
       var _po=records.find(function(x){ return x.id===PAGE_OPEN; });
-      if(_po && isStudyRec(_po) && _recSig(_po)!==PAGE_SIG) openPage(PAGE_OPEN, {fromRoute:true});
+      if(_po && _recSig(_po)!==PAGE_SIG) openPage(PAGE_OPEN, {fromRoute:true});
     }
   }, function(e){ logBug('records 구독 실패: '+e.message); recordLoadState('기록',e); });
 
@@ -3904,6 +3904,7 @@ function openPage(id, opts){
   var readTopToKeep = continuing ? document.querySelector('#pageModal .modal').scrollTop : 0;
   recordWidgets.close();
   PAGE_OPEN = id;
+  PAGE_SIG = _recSig(r);
   if(!opts.fromRoute) setRecordHash(id);
   var k = KINDS[r.kind] || KINDS.memo;
   var f = KIND_FIELDS[r.kind] || KIND_FIELDS.memo;
@@ -3912,7 +3913,6 @@ function openPage(id, opts){
   _pm.classList.toggle('study', isStudyRec(r));
   document.getElementById('pgCopy').textContent = '📋 전체 복사';
   if(isStudyRec(r)){
-    PAGE_SIG = _recSig(r);
     var pgb = document.getElementById('pgBody');
     var wasOpen = continuing && pgb.getAttribute('data-rec')===id;
     var keepTop = wasOpen ? pgb.parentElement.scrollTop : 0;

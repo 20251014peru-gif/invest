@@ -68,14 +68,22 @@
       }).join(' '),s.followups.map(function(x){return [x.question,x.result,x.expectation].join(' ');}).join(' ')].join(' ').toLocaleLowerCase().includes(q);
     }).sort(function(a,b){return Number(b.hasContent)-Number(a.hasContent)||newest(a.entries[0]||{},b.entries[0]||{})||a.name.localeCompare(b.name,'ko');});
   }
+  // Firestore map key order differs between query snapshots and transaction reads.
+  // Field identity must compare content, while preserving meaningful array order.
+  function sameValue(a,b){
+    function stable(v){return JSON.stringify(v,function(_,x){
+      return x&&typeof x==='object'&&!Array.isArray(x)?Object.keys(x).sort().reduce(function(o,k){o[k]=x[k];return o;},{}):x;
+    });}
+    return stable(a)===stable(b);
+  }
   function mergeFields(base,original,edits){
     Object.keys(edits).forEach(function(k){
-      if(JSON.stringify(edits[k])===JSON.stringify(original[k]))return;
-      if(JSON.stringify(base[k])!==JSON.stringify(original[k]))throw new Error('다른 기기에서 같은 항목을 변경했습니다. 입력을 복사한 뒤 다시 열어 비교해 주세요.');
+      if(sameValue(edits[k],original[k]))return;
+      if(!sameValue(base[k],original[k]))throw new Error('다른 기기에서 같은 항목을 변경했습니다. 입력을 복사한 뒤 다시 열어 비교해 주세요.');
       base[k]=edits[k];
     });
   }
-  var api={millis:millis,kstDate:kstDate,newest:newest,fields:fields,logs:logs,entries:entries,summary:summary,directory:directory,mergeFields:mergeFields,followupsFor:followupsFor,pending:pending,schedules:schedules,overview:overview};
+  var api={millis:millis,kstDate:kstDate,newest:newest,fields:fields,logs:logs,entries:entries,summary:summary,directory:directory,mergeFields:mergeFields,sameValue:sameValue,followupsFor:followupsFor,pending:pending,schedules:schedules,overview:overview};
   if(typeof module==='object'&&module.exports)module.exports=api;
   else root.RecordStocks=api;
 })(typeof window!=='undefined'?window:globalThis);
