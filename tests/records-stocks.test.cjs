@@ -39,6 +39,16 @@ test('field merge preserves other devices appends and refuses same-field overwri
   assert.equal(base.quantity,'2');assert.equal(base.thesisLog.length,1);assert.equal(base.targetPrice,'110');
   assert.throws(()=>S.mergeFields(base,original,{quantity:'3'}),/다른 기기/);
 });
+test('Firestore map key order never creates a false save conflict, but real photo changes do',()=>{
+  const original={body:'before',source:{name:'source',url:'https://example.com'},attachments:[{id:'photo',caption:'before',order:0}]};
+  const latest={body:'before',source:{url:'https://example.com',name:'source'},attachments:[{order:0,caption:'before',id:'photo'}]};
+  assert.equal(S.sameValue(original,latest),true);
+  S.mergeFields(latest,original,{body:'after',attachments:[{id:'photo',order:0,caption:'edited'}]});
+  assert.equal(latest.body,'after');assert.equal(latest.attachments[0].caption,'edited');
+  assert.throws(()=>S.mergeFields(latest,original,{attachments:[{id:'photo',caption:'other edit',order:0}]}),/다른 기기/);
+  assert.equal(S.sameValue(['photo1','photo2'],['photo2','photo1']),false);
+  assert.equal(S.sameValue(undefined,null),false);
+});
 test('questions match exact stock or original source tags, stay deduplicated and do not cross stocks',()=>{
   const records=[{id:'r',stocks:['A']}],items=[{id:'both',stocks:['A'],sourceIds:['r'],state:'open',question:'q',dueAt:'2026-10-01'},
     {id:'direct',stocks:['A'],state:'working',dueAt:'2026-09-30'}, {id:'other',stocks:['AA'],state:'open',dueAt:'2026-09-01'},

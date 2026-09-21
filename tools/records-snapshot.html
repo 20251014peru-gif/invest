@@ -8,7 +8,17 @@
 <p><button id="snapshot" disabled>서버 자료·사진 백업 내려받기</button></p>
 <p>백업 파일을 선택하면 현재 서버와 원본 문서를 대조합니다.<br><input id="compare" type="file" accept="application/json" disabled></p>
 <pre id="status" role="status">대기 중</pre>
+<details><summary>백업 원문 보기 (개인 자료)</summary><pre id="snapshotText"></pre></details>
 <small>기록보관실의 5개 컬렉션만 대상으로 합니다. 다른 프로그램이나 Firebase 프로젝트 전체 백업은 아닙니다. 자료를 읽는 동안 여러 기기에서 변경하면 단일 시점의 백업이 아닐 수 있으므로 대조 후 사용하세요.</small>
+<script>
+if(location.protocol==='file:'){
+  document.getElementById('auth').textContent='웹 주소로 열어주세요';
+  document.getElementById('login').disabled=true;
+  document.getElementById('status').textContent='PC 파일을 직접 열면 Google 로그인과 백업 기능이 실행되지 않습니다.';
+  var link=document.createElement('a');link.href='https://20251014peru-gif.github.io/invest/records.html';link.textContent='투자 기록보관실 웹 화면 열기';
+  document.getElementById('status').appendChild(document.createElement('br'));document.getElementById('status').appendChild(link);
+}
+</script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>

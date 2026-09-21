@@ -57,6 +57,11 @@ const output=path.resolve(process.env.TEST_OUTPUT_DIR||'test-results/records-wor
     await p.evaluate(async()=>{await db.collection('records').doc('r').update({body:'다른 기기의 본문'});});await p.locator('#mSave').click();await p.waitForFunction(()=>!_recordSaving);
     assert.equal(await p.locator('#fBody').inputValue(),'충돌 중 내 입력');assert.equal(await p.evaluate(()=>__mockDump().records.r.body),'다른 기기의 본문');
     p.once('dialog',d=>d.accept());await p.locator('#mClose').click();await p.waitForSelector('body:not(.rw-active)');
+    // A server snapshot arriving after the editor closes must refresh the ordinary reader too.
+    await p.evaluate(()=>openPage('r'));await p.waitForSelector('#pageModal.on');
+    await p.evaluate(async()=>{await db.collection('records').doc('r').update({body:'서버에서 뒤늦게 도착한 최종 본문',updatedAt:Date.now()+1000});});
+    await p.waitForFunction(()=>document.getElementById('pgBody').textContent.includes('서버에서 뒤늦게 도착한 최종 본문'));
+    await p.locator('#pgClose').click();
     // Reader -> editor -> reader returns to the source without stacking dialogs.
     await p.evaluate(()=>openPage('r'));await p.locator('#pgEdit').click();await p.waitForSelector('body.rw-active');assert.ok(!await p.locator('#pageModal').isVisible());await p.locator('#mClose').click();await p.waitForSelector('body:not(.rw-active)');assert.ok(await p.locator('#pageModal').isVisible());await p.locator('#pgClose').click();
     await p.setViewportSize({width:390,height:844});await p.evaluate(()=>{curView='list';render();});await p.screenshot({path:path.join(output,'mobile.png'),fullPage:true});

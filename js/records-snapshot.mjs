@@ -36,8 +36,14 @@ el('snapshot').onclick=async()=>{
   try{
     const collections=await read(),photos=await imagesFor(collections),sha256=await hash(stable(collections));
     const backup={format:'records-deployment-snapshot/v1',project:config.projectId,exportedAt:new Date().toISOString(),collections,...photos,sha256};
+    el('snapshotText').textContent=JSON.stringify(backup);
+    let localBackup='';
+    if(location.hostname==='localhost'&&location.port==='8925'){
+      const r=await fetch('/__backup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(backup)});
+      if(!r.ok)throw Error('개발 PC 백업 저장 실패');localBackup=(await r.json()).file;
+    }
     const url=URL.createObjectURL(new Blob([JSON.stringify(backup)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='records-snapshot-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);
-    say({result:photos.missing.length?'사진 일부 누락 — 누락 확인 필요':'서버 원본·사진 백업 완료',counts:Object.fromEntries(names.map(n=>[n,Object.keys(collections[n]).length])),images:Object.keys(photos.images).length,missingImages:photos.missing.length,sha256});
+    say({result:photos.missing.length?'사진 일부 누락 — 누락 확인 필요':'서버 원본·사진 백업 완료',counts:Object.fromEntries(names.map(n=>[n,Object.keys(collections[n]).length])),images:Object.keys(photos.images).length,missingImages:photos.missing.length,sha256,...(localBackup?{localBackup}:{})});
   }catch(e){say('백업 실패: '+e.message);}finally{busy(false);}
 };
 el('compare').onchange=async event=>{

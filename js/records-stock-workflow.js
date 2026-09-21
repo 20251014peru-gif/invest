@@ -85,11 +85,11 @@ async function saveRecordForm(data){
       var snap=await tx.get(ref);
       if(original){
         if(!snap.exists)throw Error('다른 기기에서 삭제한 기록입니다. 입력을 복사한 뒤 새 기록으로 보관해 주세요.');
-        var edits={};Object.keys(data).forEach(function(k){if(k!=='checks'&&JSON.stringify(data[k])!==JSON.stringify(original[k]))edits[k]=data[k];});
+        var edits={};Object.keys(data).forEach(function(k){if(k!=='checks'&&!RecordStocks.sameValue(data[k],original[k]))edits[k]=data[k];});
         var latest=snap.data();RecordStocks.mergeFields(latest,original,edits);tx.update(ref,Object.assign({},edits,{updatedAt:at}));
       }else if(snap.exists){
         var saved=snap.data();
-        if(Object.keys(data).some(function(k){return JSON.stringify(saved[k])!==JSON.stringify(data[k]);}))throw Error('앞선 저장이 이미 접수되었습니다. 입력을 복사하고 기록을 다시 열어 비교해 주세요.');
+        if(Object.keys(data).some(function(k){return !RecordStocks.sameValue(saved[k],data[k]);}))throw Error('앞선 저장이 이미 접수되었습니다. 입력을 복사하고 기록을 다시 열어 비교해 주세요.');
       }else tx.set(ref,Object.assign({},data,{createdAt:at,updatedAt:at}));
     });
     attClearDraftAfterSave();_recordBaseline='';toast('기록을 저장했습니다');closeModal(true);
