@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="js/study/study.css?v=7.27.2">
+<link rel="stylesheet" href="js/records-stocks.css?v=7.31.0">
 <style>
 /* ══════════════════════════════════════════════════════════
    🗂 투자 기록보관실  v7.27.2-0917-1400
@@ -599,7 +600,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
-  <span class="ver">v7.30.0 · 서희타워</span>
+  <span class="ver">v7.31.0 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -843,6 +844,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
     <div class="mhd"><b id="sdName">종목명</b><button class="x" id="sdClose">✕</button></div>
     <div class="mbody">
       <div class="sdMetaRow"><span id="sdCount">0건 기록됨</span></div>
+      <div id="stockSaveStatus" class="stockSaveStatus" role="status"></div>
 
       <!-- v7.5: 이 창의 중심을 "정해진 4칸 채우기"에서 "종목마다 원하는 정보를 쌓는 곳"으로 —
            추가 정보를 맨 위 · 항상 보이게, 상태/목표가/보유수량/매수단가는 아래로 접어둠 -->
@@ -1007,7 +1009,12 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
   </div>
 </div>
 
+<div class="ovwrap" id="stockLogModal" role="dialog" aria-modal="true" aria-labelledby="stockLogTitle">
+  <div class="modal" style="max-width:760px"><div class="mhd"><b id="stockLogTitle"></b><button class="x" id="stockLogClose" aria-label="이력 닫기">✕</button></div><div class="mbody"><div id="stockLogDate" class="stockTotals"></div><div id="stockLogText" class="stockLogText"></div></div></div>
+</div>
+<div id="recordLoadError" role="alert" hidden style="position:fixed;bottom:16px;left:16px;right:16px;z-index:90;background:#fff4e2;border:1px solid #c28e34;border-radius:10px;padding:14px;color:#754d13"></div>
 <div class="toast" id="toast"></div>
+<script src="js/records-stocks.js?v=7.31.0"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -1053,7 +1060,7 @@ function kstNow(){
   var utc = now.getTime() + now.getTimezoneOffset()*60000;
   return new Date(utc + 9*3600000);
 }
-function todayStr(){ return kstNow().toISOString().slice(0,10); }
+function todayStr(){ return RecordStocks.kstDate(Date.now()); }
 /* v6: 오늘로부터 n일 전 날짜 문자열 — Date.UTC 고정 연산(KST에서 하루 밀리는 사고 방지) */
 function daysAgoStr(n){
   var p = todayStr().split('-');
@@ -1319,6 +1326,13 @@ function updateMoreFieldsBadge(r){
 var records = [];      // records 컬렉션 (kind: youtube/news/idea/chart/memo)
 var todos = [];        // records_todos 컬렉션 (최근 HIST_DAYS일치 — 오늘 체크리스트 + 이력표에 같이 씀)
 var stockMaster = [];  // 종목 마스터 목록 (records_meta/stocks 문서)
+var recordLoadErrors={};
+function recordLoadState(key,error){
+  if(error)recordLoadErrors[key]=error.message;else delete recordLoadErrors[key];
+  var el=document.getElementById('recordLoadError');
+  el.hidden=!Object.keys(recordLoadErrors).length;
+  el.textContent=Object.keys(recordLoadErrors).join(' · ')+' 자료를 불러오지 못했습니다. 0건 표시는 자료가 없다는 뜻이 아닙니다. 접근 권한과 연결을 확인해 주세요. (상단 시스템 점검에서 상세 확인)';
+}
 var checklistTemplates = []; // v6: 반복 체크리스트 항목 (records_meta/checklist_templates 문서)
 var _pendingTemplateAdds = {}; // v6: 같은 (날짜+항목) 중복 생성 방지용 클라이언트측 가드
 var HIST_DAYS = 14; // v6: 이력표에 보여줄 최근 일수
@@ -1457,6 +1471,7 @@ function openFollowup(id,prefill){if(FU&&FU.ready){FU.open(id,prefill);return;}f
 function startListeners(){
   if(!db) return;
   db.collection('records').orderBy('date','desc').onSnapshot(function(snap){
+    recordLoadState('기록');
     records = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
     _diag.recv.records={at:Date.now(),n:records.length,cache:!!(snap.metadata&&snap.metadata.fromCache),pending:!!(snap.metadata&&snap.metadata.hasPendingWrites)};
     render(); renderTodos(); renderKtabs(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker(); renderTopicChips(); renderStarPicker(); renderChannelSel(); renderMiniSummary(); renderActiveFilters();
@@ -1467,7 +1482,7 @@ function startListeners(){
       var _po=records.find(function(x){ return x.id===PAGE_OPEN; });
       if(_po && isStudyRec(_po) && _recSig(_po)!==PAGE_SIG) openPage(PAGE_OPEN, {fromRoute:true});
     }
-  }, function(e){ logBug('records 구독 실패: '+e.message); });
+  }, function(e){ logBug('records 구독 실패: '+e.message); recordLoadState('기록',e); });
 
   db.collection('records_todos').where('date','>=', histCutoffStr()).orderBy('date').onSnapshot(function(snap){
     todos = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
@@ -1478,10 +1493,12 @@ function startListeners(){
   }, function(e){ logBug('todos 구독 실패: '+e.message); });
 
   db.collection('records_meta').doc('stocks').onSnapshot(function(doc){
+    recordLoadState('종목 정보');
     stockMaster = (doc.exists && doc.data().list) ? doc.data().list : [];
     _diag.recv.stocks={at:Date.now(),n:stockMaster.length,cache:!!(doc.metadata&&doc.metadata.fromCache)};
     renderStockPicker(); renderStockDatalist();
-  }, function(e){ logBug('종목마스터 구독 실패: '+e.message); });
+    renderKtabs(); if(stockMode) render();
+  }, function(e){ logBug('종목마스터 구독 실패: '+e.message); recordLoadState('종목 정보',e); });
 
   db.collection('records_meta').doc('checklist_templates').onSnapshot(function(doc){
     checklistTemplates = (doc.exists && doc.data().list) ? doc.data().list : [];
@@ -1511,36 +1528,49 @@ function allStockNames(){
 function stockCount(name){
   return records.filter(function(r){ return (r.stocks||[]).indexOf(name)>=0; }).length;
 }
-function saveStockMaster(list){
-  if(!db) return;
-  db.collection('records_meta').doc('stocks').set({list:list}, {merge:true})
-    .catch(function(e){ logBug('종목 저장 실패: '+e.message); });
+var stockWriteQueue = Promise.resolve();
+function changeStockMaster(change){
+  var task = stockWriteQueue.catch(function(){}).then(function(){
+    if(!db || !uid) throw new Error('서버 연결을 확인해 주세요.');
+    var ref=db.collection('records_meta').doc('stocks');
+    return db.runTransaction(function(tx){
+      return tx.get(ref).then(function(doc){
+        var list=doc.exists ? (doc.data().list||[]) : [];
+        change(list);
+        tx.set(ref,{list:list},{merge:true});
+        return list;
+      });
+    }).then(function(){ renderStockPicker(); renderStockDatalist(); renderKtabs(); if(stockMode)render(); });
+  });
+  stockWriteQueue=task;
+  return task;
 }
 function addStockToMaster(name){
   name = String(name||'').trim();
-  if(!name) return;
-  if(allStockNames().indexOf(name)>=0) return;
-  var list = stockMaster.slice(); list.push(name);
-  saveStockMaster(list);
+  if(!name) return Promise.resolve();
+  if(stockMaster.some(function(s){return stockName(s)===name;}))return Promise.resolve();
+  return changeStockMaster(function(list){
+    if(!list.some(function(s){return stockName(s)===name;}))list.push(name);
+  }).catch(function(e){ logBug('종목 추가 실패: '+e.message); toast('종목 추가 실패: '+e.message); throw e; });
 }
 /* v7.1: stockMaster 안의 종목 하나를 안전하게 고쳐서 한 번에 저장 — 같은 클릭 안에서 필드저장+이력추가를
    따로따로 저장하면(각자 옛 stockMaster 스냅샷에서 시작해) 서로 덮어쓰는 경합이 생기므로, 반드시 이 함수로
    한 번의 mutatorFn 안에서 필요한 변경을 전부 적용한 뒤 한 번만 저장한다 */
 function mutateStockItem(name, mutatorFn){
-  var list = stockMaster.map(function(s){ return s; });
-  var idx = -1;
-  for(var i=0;i<list.length;i++){ if(stockName(list[i])===name){ idx=i; break; } }
-  var base = (idx>=0 && typeof list[idx]==='object' && list[idx]) ? Object.assign({}, list[idx]) : {name:name};
-  mutatorFn(base);
-  if(idx>=0) list[idx] = base; else list.push(base);
-  saveStockMaster(list);
+  return changeStockMaster(function(list){
+    var idx = list.findIndex(function(s){return stockName(s)===name;});
+    var base = idx>=0 && typeof list[idx]==='object' && list[idx] ? Object.assign({},list[idx]) : {name:name};
+    mutatorFn(base);
+    if(idx>=0)list[idx]=base; else list.push(base);
+  });
 }
 /* v7.1: 투자논지 이력에 한 줄 추가(항상 append만 — 기존 줄은 절대 지우거나 고치지 않음) */
 function appendThesisLog(name, text, auto){
   if(!text) return;
-  mutateStockItem(name, function(base){
+  var at=Date.now();
+  return mutateStockItem(name, function(base){
     var log = (base.thesisLog||[]).slice();
-    log.push({date: todayStr(), text: text, auto: !!auto});
+    log.push({date: RecordStocks.kstDate(at), at:at, text: text, auto: !!auto});
     base.thesisLog = log;
   });
 }
@@ -1948,9 +1978,9 @@ function renderKtabs(){
   var stockBtn = host.querySelector('[data-stocktabbtn]');
   if(stockBtn){
     stockBtn.addEventListener('click', function(){
-      stockMode = !stockMode; laterMode = false;
-      if(!stockMode) curStockTab = ''; // 종목모드를 완전히 나갈 땐 드릴다운 상태도 같이 리셋
-      syncViewIcons(); render(); renderKtabs();
+      stockMode = true; laterMode = false;
+      navigateStock('');
+      syncViewIcons(); renderKtabs();
     });
   }
   var laterBtn = host.querySelector('[data-latertabbtn]');
@@ -2168,6 +2198,8 @@ function render(){
   /* v7.10: "🏷 종목" 모드는 curKind 필터·레코드 빈 상태 가드와 완전히 무관한 별도 화면이라
      맨 앞에서 분기 — 기존 레코드 렌더 경로는 한 줄도 안 바뀜(아래 그대로) */
   document.getElementById('viewicons').style.display = laterMode ? 'none' : '';
+  document.getElementById('btnFilter').style.display=stockMode?'none':'';
+  document.getElementById('activeFilters').style.display=stockMode?'none':'inline-flex';
   if(stockMode){ document.getElementById('btnAdd').textContent = '＋ 기록 추가'; renderStockMode(); return; }
   if(laterMode){ document.getElementById('btnAdd').textContent = '＋ 확인할 질문'; document.getElementById('btnClearFlt').style.display='none'; renderLaterMode(); return; }
   var arr = filtered();
@@ -2196,20 +2228,43 @@ function render(){
 /* v7.10: 종목모드 렌더 — curStockTab이 비어있으면(레벨1) "종목 목록 자체"를 curView 방식으로,
    특정 종목이 골라져 있으면(레벨2) 그 종목의 기록들을 "기존 레코드 렌더 함수 그대로" curView 방식으로.
    레벨2는 새 함수가 하나도 없다 — records를 그 종목으로만 filter해서 cardHTML/listHTML/...에 그대로 넘긴다 */
+var stockOnlyContent=true, stockListScroll=0;
+function stockSummary(name){ return RecordStocks.summary(name,stockItemOf(name),records); }
+function stockEntries(name){ return RecordStocks.entries(name,stockItemOf(name),records); }
+function stockDirectory(){ return RecordStocks.directory(allStockNames(),stockItemOf,records,curQ,stockOnlyContent); }
+function stockCountText(name){ var s=stockSummary(name); return s.total ? s.total+'건' : (s.fields.length?'정보 '+s.fields.length+'개':'내용 없음'); }
+function navigateStock(name){
+  if(!curStockTab && name)stockListScroll=window.scrollY;
+  curStockTab=name;
+  render();
+  requestAnimationFrame(function(){ if(name)document.getElementById('content').scrollIntoView({block:'start'}); else window.scrollTo(0,stockListScroll); });
+}
+function stockNavigation(names){
+  var i=names.indexOf(curStockTab), current=curStockTab;
+  var options=names.slice(); if(current && i<0)options.unshift(current);
+  return '<nav class="stockNav" aria-label="종목 탐색"><button type="button" class="stockAll" data-stockback="1">☷ 전체 종목</button>'
+    + '<select id="stockQuickSelect" aria-label="바로 볼 종목"><option value="">전체 종목 목록</option>'
+    + options.map(function(n){return '<option value="'+esc(n)+'"'+(n===current?' selected':'')+'>'+esc(n)+'</option>';}).join('')+'</select>'
+    + '<button type="button" data-stocknav="'+esc(names[i-1]||'')+'"'+(i<=0?' disabled':'')+' aria-label="이전 종목">← <span class="stockNavLabel">이전</span></button>'
+    + '<button type="button" data-stocknav="'+esc(names[i+1]||'')+'"'+(i<0||i>=names.length-1?' disabled':'')+' aria-label="다음 종목"><span class="stockNavLabel">다음</span> →</button></nav>';
+}
 function renderStockMode(){
   var host = document.getElementById('content');
   document.getElementById('btnClearFlt').style.display = 'none'; // 종목모드엔 kind 필터 개념이 없음
-  var names = allStockNames();
-  if(curStockTab && names.indexOf(curStockTab)>=0){
+  var directory=stockDirectory(), names=directory.map(function(s){return s.name;});
+  var nav=stockNavigation(names);
+  if(curStockTab && allStockNames().indexOf(curStockTab)>=0){
     var name = curStockTab;
-    var recs = stockRecords(name);
-    document.getElementById('cntLabel').textContent = recs.length+'건';
+    var summary=stockSummary(name), recs = summary.entries;
+    document.getElementById('cntLabel').textContent = stockCountText(name);
     document.getElementById('topStat').textContent = records.length+'건 기록됨';
-    var head = '<div class="stockFocusHd"><b style="font-size:15px">🏷 '+esc(name)+'</b>'
+    var head = nav+'<div class="stockFocusHd"><b style="font-size:15px">🏷 '+esc(name)+'</b>'
       + '<span><button type="button" class="infoBtn" data-stockopen="'+esc(name)+'">📋 정보 보기/입력</button> '
-      + '<button type="button" class="infoBtn" data-stockback="1" style="background:var(--sub2)">← 종목 목록으로</button></span></div>';
+      + '<button type="button" class="infoBtn" id="stockAddRecord">＋ 이 종목에 기록</button></span></div>'
+      + '<div class="stockTotals">연결 기록 '+summary.linked+'건 · 투자논지/정보 변경 '+summary.history+'건 · 최신 날짜순'+(curQ?' · 종목 선택 후에는 전체 이력을 표시합니다':'')+'</div>'
+      + (summary.fields.length?'<div class="stockSummary">'+summary.fields.map(function(f){return '<div><b>'+esc(f.label)+'</b>'+esc(f.value)+'</div>';}).join('')+'</div>':'');
     if(!recs.length){
-      host.innerHTML = head + '<div class="emptyState"><div class="ei">🗂</div>아직 이 종목과 연결된 기록이 없어요 — 위 버튼으로 정보만 먼저 넣어둘 수 있어요</div>';
+      host.innerHTML = head + '<div class="emptyMini">'+(summary.fields.length?'저장된 정보는 위에 표시됩니다.':'아직 저장된 내용이 없습니다.')+' ‘이 종목에 기록’이나 ‘정보 보기/입력’에서 새 내용을 남기면 이곳에 쌓입니다.</div>';
       bindContentClicks();
       return;
     }
@@ -2222,14 +2277,16 @@ function renderStockMode(){
     else if(curView==='cal') body = calHTML(recs);
     else if(curView==='time') body = timeHTML(recs);
     else if(curView==='gal') body = galHTML(recs);
-    host.innerHTML = head + body;
+    host.innerHTML = head + '<div class="stockFeed">'+body+'</div>';
     bindContentClicks();
     return;
   }
   document.getElementById('cntLabel').textContent = names.length+'개 종목';
   document.getElementById('topStat').textContent = records.length+'건 기록됨';
+  var options=nav+'<div class="stockOptions"><label><input type="checkbox" id="stockOnlyContent"'+(stockOnlyContent?' checked':'')+'> 내용 있는 종목만</label><span>'+names.length+' / '+allStockNames().length+'개 · 내용 있는 종목 우선 · 최신 날짜순</span></div>';
   if(!names.length){
-    host.innerHTML = '<div class="emptyState"><div class="ei">🏷</div>아직 등록된 종목이 없어요. "종목 관리"에서 추가해보세요</div>';
+    host.innerHTML = options+'<div class="emptyMini">표시할 종목이 없습니다. 검색어를 지우거나 ‘내용 있는 종목만’을 해제해 보세요.</div>';
+    bindContentClicks();
     return;
   }
   if(curView==='card') host.innerHTML = stockCardHTML(names);
@@ -2240,6 +2297,7 @@ function renderStockMode(){
   else if(curView==='cal') host.innerHTML = stockCalHTML(names);
   else if(curView==='time') host.innerHTML = stockTimeHTML(names);
   else if(curView==='gal') host.innerHTML = stockGalHTML(names);
+  host.innerHTML=options+host.innerHTML;
   bindContentClicks();
 }
 syncViewIcons();
@@ -2354,7 +2412,7 @@ function cardOne(r){
   var judge = r.userJudgment ? ('<div class="oneLine" style="color:var(--navy-700);font-size:11.5px">🙋 '+esc(String(r.userJudgment).slice(0,50))+'</div>') : '';
   if(isStudyRec(r)) scenTag += ' <span class="dt" style="background:#f3eefb;color:#6b46a8">'+esc(STUDY_STATUS_LBL[r.studyStatus||'learning']||'')+(r.asOfDate?' · 기준 '+esc(fmtDate(r.asOfDate)):'')+'</span>';
   return '<div class="rcard '+r.kind+'" data-open="'+esc(r.id)+'">'
-    + '<button class="del" data-del="'+esc(r.id)+'">🗑</button>'
+    + (r._stockLog?'':'<button class="del" data-del="'+esc(r.id)+'">🗑</button>')
     + cardThumbHTML(r)
     + '<div class="kind">'+k.i+' '+k.n+(r.channel?(' · '+esc(r.channel)):'')+' '+stars+vbadge+'</div>'
     + '<div class="title">'+esc(r.title||'')+'</div>'
@@ -2449,16 +2507,12 @@ function toggleLaterAddForm(recId){openFollowup(null,{sourceIds:[recId]});}
    새로 지어낸 값 없음. stockRecords는 v7.6의 stockDirHTML 안에 있던 필터링을 재사용 가능하게 뺀 것뿐 */
 function stockRecords(name){
   return records.filter(function(r){ return (r.stocks||[]).indexOf(name)>=0; })
-    .sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+    .sort(RecordStocks.newest);
 }
 /* 이 종목과 관련된 활동 중 가장 최근 날짜 — 관련기록 날짜 + 투자논지 이력 날짜(thesisLog) 중 최댓값.
    원래 있던 날짜 필드들을 모아 max만 취하는 것이라 새 필드가 필요 없다 */
 function stockLastActivity(name){
-  var dates = stockRecords(name).map(function(r){ return r.date||''; });
-  var item = stockItemOf(name);
-  if(item && item.thesisLog) item.thesisLog.forEach(function(t){ if(t && t.date) dates.push(t.date); });
-  dates = dates.filter(Boolean).sort();
-  return dates.length ? dates[dates.length-1] : '';
+  return stockSummary(name).last;
 }
 /* 이 종목의 관련기록 중 가장 많이 나온 channel(record.channel) — "종목 채널별보기"용 그룹 기준 */
 function stockMainChannel(name){
@@ -2483,10 +2537,10 @@ function stockCoverImage(name){
 function stockCardHTML(names){
   return '<div class="stockDirGrid">' + names.map(function(n){
     var item = stockItemOf(n);
-    var badge = (item && item.status) ? '<span class="badge '+esc(item.status)+'">'+esc(item.status)+'</span>' : '<span class="emptyMini" style="padding:0">정보 없음</span>';
+    var badge = (item && item.status) ? '<span class="badge '+esc(item.status)+'">'+esc(item.status)+'</span>' : '<span class="emptyMini" style="padding:0">'+(stockSummary(n).hasContent?'내용 있음':'내용 없음')+'</span>';
     return '<div class="stockDirCard" data-stocktab="'+esc(n)+'">'
-      + '<div class="nm"><span>🏷 '+esc(n)+'</span><span class="n">'+stockCount(n)+'건</span></div>'
-      + badge
+      + '<div class="nm"><span>🏷 '+esc(n)+'</span><span class="n">'+stockCountText(n)+'</span></div>'
+      + badge + '<div class="stockPreview">'+esc(stockSummary(n).preview)+'</div>'
       + '</div>';
   }).join('') + '</div>';
 }
@@ -2497,27 +2551,20 @@ function stockListHTML(names){
     return '<div class="lrow" data-stocktab="'+esc(n)+'">'
       + '<span class="dot2" style="background:var(--gold-dk)"></span>'
       + '<span class="tt3">🏷 '+esc(n)+'</span>'
-      + '<span class="ol3">'+((item&&item.status)?esc(item.status):'')+'</span>'
-      + '<span class="st3">'+stockCount(n)+'건</span>'
+      + '<span class="ol3">'+esc(stockSummary(n).preview)+'</span>'
+      + '<span class="st3">'+stockCountText(n)+'</span>'
       + (last ? '<span class="re3">🕒 '+esc(fmtDate(last))+'</span>' : '')
       + '</div>';
   }).join('') + '</div>';
 }
 function stockTableHTML(names){
-  var rows = names.map(function(n){
-    var item = stockItemOf(n) || {};
-    var last = stockLastActivity(n);
-    return '<tr data-stocktab="'+esc(n)+'">'
-      + '<td>🏷 '+esc(n)+'</td>'
-      + '<td>'+(item.status?esc(item.status):'-')+'</td>'
-      + '<td>'+(item.quantity!=null&&item.quantity!==''?esc(String(item.quantity)):'')+'</td>'
-      + '<td>'+(item.avgCost!=null&&item.avgCost!==''?esc(String(item.avgCost)):'')+'</td>'
-      + '<td>'+(item.targetPrice!=null&&item.targetPrice!==''?esc(String(item.targetPrice)):'')+'</td>'
-      + '<td>'+stockCount(n)+'건</td>'
-      + '<td>'+(last?esc(last):'-')+'</td>'
-      + '</tr>';
-  }).join('');
-  return '<div style="overflow-x:auto"><table class="rt"><tr><th>종목</th><th>상태</th><th>보유수량</th><th>매수단가</th><th>목표가</th><th>기록수</th><th>최근 활동일</th></tr>'+rows+'</table></div>';
+  return '<table class="stockDirectory"><thead><tr><th>종목</th><th>최근 내용</th><th>누적 내용</th><th>최근 날짜 ↓</th></tr></thead><tbody>'+names.map(function(n){
+    var s=stockSummary(n), item=stockItemOf(n)||{};
+    return '<tr data-stocktab="'+esc(n)+'" tabindex="0"><td><b>'+esc(n)+'</b>'+(item.status?'<small>'+esc(item.status)+'</small>':'')+'</td>'
+      + '<td><div class="stockPreview">'+esc(s.preview||'아직 내용이 없습니다')+'</div></td>'
+      + '<td>'+stockCountText(n)+(s.total?'<small>연결 '+s.linked+' · 이력 '+s.history+'</small>':'')+'</td>'
+      + '<td>'+esc(s.last||'날짜 미기록')+'</td></tr>';
+  }).join('')+'</tbody></table>';
 }
 function stockBoardHTML(names){
   var order = ['보유','관심','청산','미설정'];
@@ -2534,7 +2581,7 @@ function stockBoardHTML(names){
           var last = stockLastActivity(n);
           return '<div class="bcard" data-stocktab="'+esc(n)+'">'
             + '<div class="kk" style="color:var(--gold-dk)">🏷 '+esc(n)+'</div>'
-            + '<div class="tt">'+stockCount(n)+'건</div>'
+            + '<div class="tt">'+stockCountText(n)+'</div>'
             + '<div class="dd">'+(last?('최근 '+fmtDate(last)):'활동 없음')+'</div>'
             + '</div>';
         }).join('')
@@ -2554,7 +2601,7 @@ function stockChHTML(names){
       + cols[ch].map(function(n){
           return '<div class="chcard" data-stocktab="'+esc(n)+'">'
             + '<div class="kk" style="color:var(--gold-dk)">🏷 '+esc(n)+'</div>'
-            + '<div class="tt">'+stockCount(n)+'건</div>'
+            + '<div class="tt">'+stockCountText(n)+'</div>'
             + '</div>';
         }).join('')
       + '</div>';
@@ -2595,7 +2642,7 @@ function stockTimeHTML(names){
     return '<div class="tlItem" data-stocktab="'+esc(x.n)+'">'
       + '<div class="tlHd">'+(x.last?fmtDate(x.last):'활동 없음')+((item&&item.status)?(' · '+esc(item.status)):'')+'</div>'
       + '<div class="tlTitle">🏷 '+esc(x.n)+'</div>'
-      + '<div class="tlSub">'+stockCount(x.n)+'건의 관련 기록</div>'
+      + '<div class="tlSub">'+stockCountText(x.n)+' 누적 기록</div>'
       + '</div>';
   }).join('') + '</div>';
 }
@@ -2609,9 +2656,9 @@ function stockGalHTML(names){
     return '<div class="galcard" data-stocktab="'+esc(n)+'">'
       + coverHtml
       + '<div class="gb">'
-      + '<div class="gk" style="color:var(--gold-dk)">'+((item&&item.status)?esc(item.status):'정보 없음')+'</div>'
+      + '<div class="gk" style="color:var(--gold-dk)">'+((item&&item.status)?esc(item.status):(stockSummary(n).hasContent?'내용 있음':'내용 없음'))+'</div>'
       + '<div class="gt">🏷 '+esc(n)+'</div>'
-      + '<div class="go2">'+stockCount(n)+'건</div>'
+      + '<div class="go2">'+stockCountText(n)+'</div>'
       + '</div></div>';
   }).join('') + '</div>';
 }
@@ -2790,10 +2837,25 @@ function galHTML(arr){
 }
 
 function bindContentClicks(){
+  var quick=document.getElementById('stockQuickSelect');
+  if(quick)quick.addEventListener('change',function(){navigateStock(quick.value);});
+  var only=document.getElementById('stockOnlyContent');
+  if(only)only.addEventListener('change',function(){stockOnlyContent=only.checked;render();});
+  var add=document.getElementById('stockAddRecord');
+  if(add)add.addEventListener('click',openAdd);
+  document.querySelectorAll('#content [data-stocknav]').forEach(function(el){el.addEventListener('click',function(){navigateStock(el.getAttribute('data-stocknav'));});});
   document.querySelectorAll('#content [data-open]').forEach(function(el){
     el.addEventListener('click', function(ev){
       if(ev.target.closest('[data-noopen]')) return;
-      openPage(el.getAttribute('data-open'));
+      var id=el.getAttribute('data-open');
+      var entry=stockMode && curStockTab ? stockEntries(curStockTab).find(function(r){return r.id===id && r._stockLog;}) : null;
+      if(entry){
+        document.getElementById('stockLogTitle').textContent=curStockTab+' · '+entry.title;
+        document.getElementById('stockLogDate').textContent=entry.date||'날짜 미기록';
+        document.getElementById('stockLogText').textContent=entry.body;
+        document.getElementById('stockLogModal').classList.add('on');
+        document.querySelector('#stockLogModal .modal').scrollTop=0;
+      }else openPage(id);
     });
   });
   document.querySelectorAll('#content [data-del]').forEach(function(el){
@@ -2815,16 +2877,16 @@ function bindContentClicks(){
   document.querySelectorAll('#content [data-stocktab]').forEach(function(el){
     el.addEventListener('click', function(ev){
       ev.stopPropagation();
-      curStockTab = el.getAttribute('data-stocktab');
-      render();
+      navigateStock(el.getAttribute('data-stocktab'));
     });
+    el.setAttribute('tabindex','0');
+    el.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();navigateStock(el.getAttribute('data-stocktab'));}});
   });
   /* v7.10: 종목모드 레벨2 헤더의 "← 종목 목록으로" — 그 종목만 벗어나고 종목모드 자체는 유지 */
   document.querySelectorAll('#content [data-stockback]').forEach(function(el){
     el.addEventListener('click', function(ev){
       ev.stopPropagation();
-      curStockTab = '';
-      render();
+      navigateStock('');
     });
   });
   /* v7.6: 종목 목록 카드 — 누르면 바로 종목 상세(정보 누적 창)로 */
@@ -2838,6 +2900,8 @@ function bindContentClicks(){
   if(pv) pv.addEventListener('click', function(){ shiftMonth(-1); });
   if(nx) nx.addEventListener('click', function(){ shiftMonth(1); });
 }
+document.getElementById('stockLogClose').addEventListener('click',function(){document.getElementById('stockLogModal').classList.remove('on');});
+document.getElementById('stockLogModal').addEventListener('keydown',function(e){if(e.key==='Escape')document.getElementById('stockLogModal').classList.remove('on');});
 function shiftMonth(n){
   var y=+calYM.slice(0,4), m=+calYM.slice(5,7);
   m += n; if(m<1){m=12;y--;} if(m>12){m=1;y++;}
@@ -3351,12 +3415,12 @@ function defaultAddKind(){
   return 'memo';
 }
 function openAdd(){
-  if(curKind==='study' && !IN_WORKSPACE){ studyDo(function(api){ return api.newNote(); }); return; }
-  EDIT = null; pickedStocks = []; pickedAttachments = [];
+  if(curKind==='study' && !stockMode && !IN_WORKSPACE){ studyDo(function(api){ return api.newNote(); }); return; }
+  EDIT = null; pickedStocks = stockMode && curStockTab ? [curStockTab] : []; pickedAttachments = [];
   document.getElementById('mTitle').textContent = '＋ 기록 추가';
   document.getElementById('mDel').style.display = 'none';
   _curEditingAction = '';
-  var startKind = defaultAddKind();
+  var startKind = stockMode ? 'memo' : defaultAddKind();
   renderKindPick(startKind);
   applyKindFields(startKind);
   document.getElementById('kindPick').style.display = 'none';
@@ -4009,22 +4073,25 @@ document.getElementById('smClose').addEventListener('click', function(){
   document.getElementById('stockModal').classList.remove('on');
 });
 function renderStockMgr(){
-  var names = allStockNames();
+  var names = RecordStocks.directory(allStockNames(),stockItemOf,records,'',false).map(function(s){return s.name;});
   var host = document.getElementById('stockMgrList');
   if(!names.length){ host.innerHTML = '<div class="emptyMini">아직 등록된 종목이 없어요</div>'; return; }
   host.innerHTML = names.map(function(n){
-    var c = stockCount(n);
-    return '<div class="smRow"><span class="nm" data-detail="'+esc(n)+'">'+esc(n)+'</span><span class="cnt2">'+c+'건</span>'
-      + (c===0 ? '<button class="rm" data-rm="'+esc(n)+'">✕ 삭제</button>' : '')
+    var s = stockSummary(n);
+    return '<div class="smRow"><span class="nm" data-detail="'+esc(n)+'">'+esc(n)+'</span><span class="cnt2">'+stockCountText(n)+'</span>'
+      + (!s.hasContent ? '<button class="rm" data-rm="'+esc(n)+'">✕ 삭제</button>' : '')
       + '</div>';
   }).join('');
   host.querySelectorAll('[data-rm]').forEach(function(b){
     b.addEventListener('click', function(ev){
       ev.stopPropagation();
       var name = b.getAttribute('data-rm');
-      var list = stockMaster.filter(function(s){ return stockName(s)!==name; });
-      saveStockMaster(list);
-      setTimeout(renderStockMgr, 300);
+      stockSaveAction(b,function(){return changeStockMaster(function(list){
+        var i=list.findIndex(function(s){return stockName(s)===name;});
+        if(i<0)return;
+        if(RecordStocks.summary(name,list[i],records).hasContent)throw new Error('내용이 있는 종목은 삭제할 수 없습니다.');
+        list.splice(i,1);
+      });},renderStockMgr);
     });
   });
   /* v7.1: 이름을 누르면 종목 상세(정보 누적) 모달 */
@@ -4036,20 +4103,35 @@ document.getElementById('stockMgrAddBtn').addEventListener('click', function(){
   var inp = document.getElementById('stockMgrInput');
   var v = inp.value.trim();
   if(!v) return;
-  addStockToMaster(v);
-  inp.value='';
-  setTimeout(renderStockMgr, 300);
+  stockSaveAction(document.getElementById('stockMgrAddBtn'),function(){return addStockToMaster(v);},function(){inp.value='';renderStockMgr();});
 });
 
 /* ══════════════════════════════════════════════════════════
    v7.1: 종목 상세(정보 누적) — 목표가·보유수량·매수단가·상태 + 투자논지 이력 + 관련 기록
    ══════════════════════════════════════════════════════════ */
-var _sdCurName = null;
+var _sdCurName = null, _sdOriginal = {}, _stockSaving=false;
+function stockSaveAction(button,work,done){
+  if(_stockSaving)return Promise.resolve(false);
+  _stockSaving=true; button.disabled=true;
+  var controls=Array.from(document.querySelectorAll('#stockDetailModal input,#stockDetailModal select,#stockDetailModal button'));
+  var disabled=controls.map(function(el){return el===button?false:el.disabled;});
+  controls.forEach(function(el){el.disabled=true;});
+  var status=document.getElementById('stockSaveStatus'); status.textContent='서버에 저장 중…';
+  return Promise.resolve().then(work).then(function(){
+    status.textContent=''; toast('서버에 저장했습니다'); if(done)done(); return true;
+  }).catch(function(e){
+    status.textContent='저장되지 않았습니다. 입력은 그대로 남아 있습니다. '+e.message;
+    logBug('종목 저장 실패: '+e.message); toast('저장 실패 — 입력을 유지했습니다'); return false;
+  }).finally(function(){_stockSaving=false;button.disabled=false;controls.forEach(function(el,i){el.disabled=disabled[i];});});
+}
 function openStockDetail(name){
+  if(_stockSaving){toast('현재 저장을 마친 뒤 열어주세요');return;}
   _sdCurName = name;
   document.getElementById('sdName').textContent = '🏷 '+name;
-  document.getElementById('sdCount').textContent = stockCount(name)+'건 기록됨';
+  document.getElementById('sdCount').textContent = stockCountText(name)+' · 연결 기록과 투자논지를 종목 화면에서 함께 볼 수 있어요';
   var item = stockItemOf(name) || {};
+  _sdOriginal=JSON.parse(JSON.stringify(typeof item==='object'?item:{}));
+  document.getElementById('stockSaveStatus').textContent='';
   document.getElementById('sdStatus').value = item.status || '';
   document.getElementById('sdTarget').value = item.targetPrice != null ? item.targetPrice : '';
   document.getElementById('sdQty').value = item.quantity != null ? item.quantity : '';
@@ -4060,6 +4142,7 @@ function openStockDetail(name){
   renderRelatedRecords(name);
   resetModalPos(document.querySelector('#stockDetailModal .modal'));
   document.getElementById('stockDetailModal').classList.add('on');
+  document.querySelector('#stockDetailModal .modal').scrollTop=0;
 }
 /* v7.4: 목표가·보유수량·매수단가처럼 미리 정해둔 항목 말고, 종목마다 원하는 항목을 이름 붙여
    자유롭게 추가하는 "추가 정보". 값 수정은 💾 저장 버튼으로 한번에(자동이력 diff 포함),
@@ -4075,18 +4158,20 @@ function renderCustomFields(fields){
   host.querySelectorAll('.cfDel').forEach(function(b){
     b.addEventListener('click', function(){
       if(!_sdCurName) return;
+      if(stockHasUnsavedFields()){toast('수정 중인 항목을 먼저 저장해 주세요');return;}
       var idx = +b.getAttribute('data-idx');
-      mutateStockItem(_sdCurName, function(base){
+      var name=_sdCurName, expected=fields[idx], at=Date.now();
+      stockSaveAction(b,function(){return mutateStockItem(name, function(base){
         var list = (base.customFields||[]).slice();
+        if(JSON.stringify(list[idx])!==JSON.stringify(expected))throw new Error('다른 기기에서 항목을 변경했습니다. 다시 열어 확인해 주세요.');
         var removed = list.splice(idx,1)[0];
         base.customFields = list;
         if(removed){
           var log = (base.thesisLog||[]).slice();
-          log.push({date: todayStr(), text: '항목 삭제: '+removed.label+(removed.value?('('+removed.value+')'):''), auto:true});
+          log.push({date: RecordStocks.kstDate(at), at:at, text: '항목 삭제: '+removed.label+(removed.value?('('+removed.value+')'):''), auto:true});
           base.thesisLog = log;
         }
-      });
-      setTimeout(function(){ openStockDetail(_sdCurName); }, 300);
+      });},function(){stockRefreshFields(name);});
     });
   });
 }
@@ -4113,15 +4198,14 @@ function renderCfPresets(fields){
 function renderThesisLog(log){
   var host = document.getElementById('sdThesisLog');
   if(!log.length){ host.innerHTML = '<div class="emptyMini">아직 남긴 논지가 없어요</div>'; return; }
-  var sorted = log.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); }); // 최신이 위로(13번 원칙)
+  var sorted = RecordStocks.logs({thesisLog:log});
   host.innerHTML = sorted.map(function(x){
-    return '<div class="thesisLogItem'+(x.auto?' auto':'')+'"><span class="d">'+esc(fmtDate(x.date))+'</span>'+esc(x.text)+'</div>';
+    return '<div class="thesisLogItem'+(x.auto?' auto':'')+'"><span class="d">'+esc(x.date||'날짜 미기록')+'</span>'+esc(x.text)+'</div>';
   }).join('');
 }
 function renderRelatedRecords(name){
   var host = document.getElementById('sdRelatedRecords');
-  var recs = records.filter(function(r){ return (r.stocks||[]).indexOf(name)>=0; })
-    .sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+  var recs = stockRecords(name);
   if(!recs.length){ host.innerHTML = '<div class="emptyMini">아직 관련 기록이 없어요</div>'; return; }
   host.innerHTML = recs.slice(0,20).map(function(r){
     var k = KINDS[r.kind] || KINDS.memo;
@@ -4141,66 +4225,70 @@ function renderRelatedRecords(name){
 document.getElementById('sdClose').addEventListener('click', function(){
   document.getElementById('stockDetailModal').classList.remove('on');
 });
+function refreshStockDetail(name){
+  if(_sdCurName!==name)return;
+  var item=stockItemOf(name)||{};
+  // Keep unsaved edits in other fields while refreshing the append-only history.
+  renderThesisLog(item.thesisLog||[]);
+  document.getElementById('sdCount').textContent=stockCountText(name)+' · 누적 내용';
+  renderRelatedRecords(name);
+}
+function stockAutoLog(base,text,at){
+  var log=(base.thesisLog||[]).slice();
+  log.push({date:RecordStocks.kstDate(at),at:at,text:text,auto:true});base.thesisLog=log;
+}
+function stockRefreshFields(name){
+  refreshStockDetail(name);
+  if(_sdCurName!==name)return;
+  var item=stockItemOf(name)||{};
+  _sdOriginal=JSON.parse(JSON.stringify(item));
+  [['status','sdStatus'],['targetPrice','sdTarget'],['quantity','sdQty'],['avgCost','sdAvgCost']].forEach(function(f){document.getElementById(f[1]).value=item[f[0]]==null?'':item[f[0]];});
+  renderCustomFields(item.customFields||[]);renderCfPresets(item.customFields||[]);
+}
 document.getElementById('sdSaveFields').addEventListener('click', function(){
-  if(!_sdCurName) return;
-  var item = stockItemOf(_sdCurName) || {};
-  var newTarget = document.getElementById('sdTarget').value.trim();
-  var newQty = document.getElementById('sdQty').value.trim();
-  var newAvg = document.getElementById('sdAvgCost').value.trim();
-  var newStatus = document.getElementById('sdStatus').value;
-  /* v7.1 레드팀 대응: 값이 바뀌면 지우지 않고 투자논지 이력에 "무엇이 얼마→얼마로 바뀜"을 자동으로 한 줄 남김 */
-  var changes = [];
-  if(newTarget !== String(item.targetPrice==null?'':item.targetPrice)) changes.push('목표가 '+(item.targetPrice||'-')+' → '+(newTarget||'-'));
-  if(newQty !== String(item.quantity==null?'':item.quantity)) changes.push('보유수량 '+(item.quantity||'-')+' → '+(newQty||'-'));
-  if(newAvg !== String(item.avgCost==null?'':item.avgCost)) changes.push('매수단가 '+(item.avgCost||'-')+' → '+(newAvg||'-'));
-  if(newStatus !== (item.status||'')) changes.push('상태 '+(item.status||'-')+' → '+(newStatus||'-'));
-  /* v7.4: 추가정보(커스텀 필드) 값도 같이 diff — 항목 이름/순서는 안 바꾸고 값만 반영 */
-  var oldCf = item.customFields || [];
-  var cfInputs = document.querySelectorAll('#sdCustomFields .cfVal');
-  var newCf = oldCf.map(function(f, i){
-    var inp = cfInputs[i];
-    var newVal = inp ? inp.value.trim() : (f.value||'');
-    if(newVal !== (f.value||'')) changes.push(f.label+' '+(f.value||'-')+' → '+(newVal||'-'));
-    return {label: f.label, value: newVal};
+  if(!_sdCurName)return;
+  var name=_sdCurName, item=_sdOriginal, edits={}, changes=[], at=Date.now();
+  [['targetPrice','sdTarget','목표가'],['quantity','sdQty','보유수량'],['avgCost','sdAvgCost','매수단가'],['status','sdStatus','상태']].forEach(function(f){
+    var value=document.getElementById(f[1]).value.trim(), old=item[f[0]]==null?'':String(item[f[0]]);
+    if(value!==old){edits[f[0]]=value;changes.push(f[2]+' '+(old||'-')+' → '+(value||'-'));}
   });
-  mutateStockItem(_sdCurName, function(base){
-    base.targetPrice = newTarget; base.quantity = newQty; base.avgCost = newAvg; base.status = newStatus;
-    base.customFields = newCf;
-    if(changes.length){
-      var log = (base.thesisLog||[]).slice();
-      log.push({date: todayStr(), text: changes.join(' · '), auto:true});
-      base.thesisLog = log;
-    }
+  var changedCf=false;
+  var newCf=(item.customFields||[]).map(function(f,i){
+    var inp=document.querySelector('#sdCustomFields .cfVal[data-idx="'+i+'"]');
+    var value=inp?inp.value.trim():String(f.value||'');
+    if(value!==String(f.value||'')){changedCf=true;changes.push(f.label+' '+(f.value||'-')+' → '+(value||'-'));}
+    return Object.assign({},f,{value:value});
   });
-  toast('저장했습니다');
-  setTimeout(function(){ openStockDetail(_sdCurName); }, 300);
+  if(changedCf)edits.customFields=newCf;
+  if(!changes.length){toast('변경한 내용이 없습니다');return;}
+  stockSaveAction(this,function(){return mutateStockItem(name,function(base){
+    RecordStocks.mergeFields(base,item,edits);stockAutoLog(base,changes.join(' · '),at);
+  });},function(){stockRefreshFields(name);});
 });
 document.getElementById('sdCfAddBtn').addEventListener('click', function(){
-  if(!_sdCurName) return;
-  var labelInp = document.getElementById('sdCfLabel');
-  var valInp = document.getElementById('sdCfValue');
-  var label = labelInp.value.trim();
-  var value = valInp.value.trim();
-  if(!label){ toast('항목 이름을 먼저 적어주세요'); return; }
-  mutateStockItem(_sdCurName, function(base){
-    var list = (base.customFields||[]).slice();
-    list.push({label:label, value:value});
-    base.customFields = list;
-    var log = (base.thesisLog||[]).slice();
-    log.push({date: todayStr(), text: '항목 추가: '+label+(value?(' = '+value):''), auto:true});
-    base.thesisLog = log;
-  });
-  labelInp.value=''; valInp.value='';
-  setTimeout(function(){ openStockDetail(_sdCurName); }, 300);
+  if(!_sdCurName)return;
+  var name=_sdCurName, labelInp=document.getElementById('sdCfLabel'), valInp=document.getElementById('sdCfValue');
+  var label=labelInp.value.trim(), value=valInp.value.trim(), at=Date.now();
+  if(!label){toast('항목 이름을 먼저 적어주세요');return;}
+  // Preserve outstanding value edits by asking for their normal save first.
+  if(stockHasUnsavedFields()){toast('수정 중인 항목을 먼저 저장해 주세요');return;}
+  stockSaveAction(this,function(){return mutateStockItem(name,function(base){
+    var list=(base.customFields||[]).slice();
+    if(list.some(function(f){return f.label===label;}))throw new Error('같은 이름의 항목이 있습니다. 기존 항목을 수정해 주세요.');
+    list.push({label:label,value:value});base.customFields=list;
+    stockAutoLog(base,'항목 추가: '+label+(value?' = '+value:''),at);
+  });},function(){labelInp.value='';valInp.value='';stockRefreshFields(name);});
 });
+function stockHasUnsavedFields(){
+  var item=_sdOriginal;
+  if([['status','sdStatus'],['targetPrice','sdTarget'],['quantity','sdQty'],['avgCost','sdAvgCost']].some(function(f){return document.getElementById(f[1]).value.trim()!==String(item[f[0]]==null?'':item[f[0]]);}))return true;
+  return (item.customFields||[]).some(function(f,i){var inp=document.querySelector('#sdCustomFields .cfVal[data-idx="'+i+'"]');return inp&&inp.value.trim()!==String(f.value||'');});
+}
 document.getElementById('sdThesisAddBtn').addEventListener('click', function(){
-  if(!_sdCurName) return;
-  var inp = document.getElementById('sdThesisInput');
-  var v = inp.value.trim();
-  if(!v) return;
-  appendThesisLog(_sdCurName, v, false);
-  inp.value = '';
-  setTimeout(function(){ openStockDetail(_sdCurName); }, 300);
+  if(!_sdCurName)return;
+  var name=_sdCurName, inp=document.getElementById('sdThesisInput'), value=inp.value.trim();
+  if(!value)return;
+  stockSaveAction(this,function(){return appendThesisLog(name,value,false);},function(){if(inp.value.trim()===value)inp.value='';refreshStockDetail(name);});
 });
 
 /* ══════════════════════════════════════════════════════════
@@ -4216,7 +4304,7 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.30.0 준비됨 — 기록·확인·복기');
+console.log('[기록보관실] v7.31.0 준비됨 — 종목별 누적 기록');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
