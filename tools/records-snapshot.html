@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>투자 기록 · 배포 전 백업과 대조</title>
+<style>body{font:16px/1.7 system-ui;max-width:900px;margin:40px auto;padding:20px;color:#17243b;background:#f3f6fa}button,input{font:inherit;padding:9px;margin:5px}pre{white-space:pre-wrap;background:white;border:1px solid #d6dfe9;padding:20px}small{display:block}</style>
+<h1>투자 기록 · 백업과 대조</h1>
+<p>기존 Firebase 서버에서 기록·종목 정보·할 일·확인·복기 이력을 읽습니다. 데이터를 수정하거나 복원하지 않습니다. 백업에는 개인 자료와 사진 접근 주소가 들어 있으므로 공개 저장소에 올리지 마세요.</p>
+<button id="login">본인 Google 로그인</button><span id="auth">로그인 확인 중</span>
+<p><button id="snapshot" disabled>서버 자료·사진 백업 내려받기</button></p>
+<p>백업 파일을 선택하면 현재 서버와 원본 문서를 대조합니다.<br><input id="compare" type="file" accept="application/json" disabled></p>
+<pre id="status" role="status">대기 중</pre>
+<small>기록보관실의 5개 컬렉션만 대상으로 합니다. 다른 프로그램이나 Firebase 프로젝트 전체 백업은 아닙니다. 자료를 읽는 동안 여러 기기에서 변경하면 단일 시점의 백업이 아닐 수 있으므로 대조 후 사용하세요.</small>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script type="module" src="../js/records-snapshot.mjs"></script>
+</html>
