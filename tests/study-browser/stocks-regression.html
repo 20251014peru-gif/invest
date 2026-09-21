@@ -32,11 +32,12 @@
  d.querySelector('[data-stocktab="정보만 있는 종목"]').click();check(d.querySelector('.stockSummary').textContent.includes('관심'),'연결 기록 없어도 기존 정보 표시');
  d.querySelector('#stockAddRecord').click();check(w.pickedStocks[0]==='정보만 있는 종목','새 기록에 종목 자동 연결');w.closeModal();
  w.navigateStock('검증 종목 A');d.querySelector('[data-stockopen]').click();
- w.__mockFail='offline';d.querySelector('#sdThesisInput').value='실패해도 입력 보존';d.querySelector('#sdThesisAddBtn').click();await until(()=>!w._stockSaving);
- check(d.querySelector('#sdThesisInput').value==='실패해도 입력 보존','저장 실패 입력 보존');
+ d.querySelector('#sdCfLabel').value='메모';d.querySelector('#sdCfValue').value='실패해도 입력 보존';d.querySelector('#sdCfAddBtn').click();
+ w.__mockFail='offline';d.querySelector('#sdSaveFields').click();await until(()=>!w._stockSaving);
+ check(d.querySelector('#sdCustomFields .cfVal').value==='실패해도 입력 보존','저장 실패 입력 보존');
  check(d.querySelector('#stockSaveStatus').textContent.includes('저장되지 않았습니다'),'실패 표시');
- w.__mockFail='';d.querySelector('#sdThesisAddBtn').click();await until(()=>!w._stockSaving);
- check(d.querySelector('#sdThesisInput').value==='','성공 후 입력 비움');
+ w.__mockFail='';d.querySelector('#sdSaveFields').click();await until(()=>!w._stockSaving);
+ check(!d.querySelector('#stockDetailModal').classList.contains('on'),'성공 후 공통 입력 닫힘');
  check(w.stockSummary('검증 종목 A').total===4,'새 이력 즉시 반영');
  await Promise.all([w.appendThesisLog('검증 종목 A','연속 A'),w.appendThesisLog('검증 종목 A','연속 B')]);
  check(w.stockSummary('검증 종목 A').history===5,'연속 저장 이력 손실 없음');
@@ -46,7 +47,7 @@
  d.querySelector('#sdSaveFields').click();await until(()=>!w._stockSaving);
  check(w.stockItemOf('검증 종목 B').quantity==='99'&&d.querySelector('#sdQty').value==='3','같은 필드 충돌 거절, 서버와 입력 보존');
  check(JSON.stringify(w.__mockDump().records)===JSON.stringify(seed.records),'일반 기록 원문 보존');
- d.querySelector('#sdClose').click();w.__mockReset(seed);w.stockOnlyContent=true;w.curView='table';w.navigateStock('');
+ w.confirm=()=>true;d.querySelector('#sdClose').click();w.__mockReset(seed);w.stockOnlyContent=true;w.curView='table';w.navigateStock('');
  document.getElementById('result').textContent=results.length+'개 통과 · 운영 데이터 접속 없음';document.getElementById('result').className='ok';
 })().catch(e=>{document.getElementById('result').textContent='실패: '+e.message;document.getElementById('result').className='bad';});
 </script></html>

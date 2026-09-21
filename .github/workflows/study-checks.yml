@@ -1,9 +1,9 @@
 name: Study notes checks
 on:
   pull_request:
-    paths: ['records.html', 'journal.html', 'js/study/**', 'js/records-reading.*', 'js/records-stocks.*', 'tests/records-stocks.test.cjs', 'js/followups*', 'tests/followups*', 'tests/records-reading.test.cjs', 'js/research-tools.mjs', 'js/research-dashboard-core.mjs', 'tests/study-*.mjs', 'tests/study-browser/**', 'tools/study-editor/**', '.github/workflows/study-checks.yml']
+    paths: ['records.html', 'journal.html', 'js/study/**', 'js/records-reading.*', 'js/records-stocks.*', 'js/records-workspace.*', 'js/records-stock-workflow.js', 'tests/records-workflow*', 'tests/records-stocks.test.cjs', 'js/followups*', 'tests/followups*', 'tests/records-reading.test.cjs', 'js/research-tools.mjs', 'js/research-dashboard-core.mjs', 'tests/study-*.mjs', 'tests/study-browser/**', 'tools/study-editor/**', '.github/workflows/study-checks.yml']
   push:
-    paths: ['records.html', 'journal.html', 'js/study/**', 'js/records-reading.*', 'js/records-stocks.*', 'tests/records-stocks.test.cjs', 'js/followups*', 'tests/followups*', 'tests/records-reading.test.cjs', 'js/research-tools.mjs', 'js/research-dashboard-core.mjs', 'tests/study-*.mjs', 'tests/study-browser/**', 'tools/study-editor/**', '.github/workflows/study-checks.yml']
+    paths: ['records.html', 'journal.html', 'js/study/**', 'js/records-reading.*', 'js/records-stocks.*', 'js/records-workspace.*', 'js/records-stock-workflow.js', 'tests/records-workflow*', 'tests/records-stocks.test.cjs', 'js/followups*', 'tests/followups*', 'tests/records-reading.test.cjs', 'js/research-tools.mjs', 'js/research-dashboard-core.mjs', 'tests/study-*.mjs', 'tests/study-browser/**', 'tools/study-editor/**', '.github/workflows/study-checks.yml']
 permissions:
   contents: read
 jobs:
@@ -16,6 +16,7 @@ jobs:
           node-version: '22'
       - run: node --test tests/study-*.test.mjs tests/research*.mjs tests/records-reading.test.cjs tests/records-stocks.test.cjs tests/followups.test.mjs
       - run: for f in js/study/*.mjs js/study/vendor/*.mjs; do node --check "$f"; done
+      - run: node --check js/records-workspace.js && node --check js/records-stock-workflow.js && node --check js/followups-app.mjs
       - name: records.html inline script parses
         run: node -e "const s=require('fs').readFileSync('records.html','utf8');const m=[...s.matchAll(/<script>([\s\S]*?)<\/script>/g)];if(!m.length)throw Error('no inline script');for(const x of m)new Function(x[1]);console.log('inline scripts',m.length)"
       - name: vendored editor bundle matches pinned build

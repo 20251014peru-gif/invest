@@ -9,7 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="js/study/study.css?v=7.27.2">
-<link rel="stylesheet" href="js/records-stocks.css?v=7.31.0">
+<link rel="stylesheet" href="js/records-stocks.css?v=7.32.0">
+<link rel="stylesheet" href="js/records-workspace.css?v=7.32.0">
 <style>
 /* ══════════════════════════════════════════════════════════
    🗂 투자 기록보관실  v7.27.2-0917-1400
@@ -600,12 +601,12 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
-  <span class="ver">v7.31.1 · 서희타워</span>
+  <span class="ver">v7.32.0 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
   <button class="navbtn gold" id="authBtn" type="button">🔐 본인 Google 로그인</button>
-  <button class="navbtn" id="btnStockMgr">🏷 종목 관리</button>
+  <button class="navbtn" id="btnStockMgr">🏷 종목 모아보기</button>
   <button class="navbtn" id="btnRecRestore" title="기록 파일(⬇ 내보내기로 받은 .json)을 새 기록으로 복원">♻ 기록 복원</button>
   <button class="navbtn" id="btnSysCheck">⚙ 시스템 점검 <span id="sysBadge" style="display:none;background:var(--warn);color:#fff;border-radius:999px;padding:0 6px;font-size:10.5px;margin-left:2px">0</span></button>
 </div>
@@ -645,6 +646,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
   </div>
   <div id="filterPop" style="display:none;position:absolute;z-index:200;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 28px rgba(60,50,20,.15);padding:9px;min-width:190px;max-height:340px;overflow:auto"></div>
 
+  <div id="recordEditorHost" hidden aria-label="기록 입력 공간"></div>
   <div id="content"></div>
 
   </div>
@@ -850,7 +852,8 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
       <!-- v7.5: 이 창의 중심을 "정해진 4칸 채우기"에서 "종목마다 원하는 정보를 쌓는 곳"으로 —
            추가 정보를 맨 위 · 항상 보이게, 상태/목표가/보유수량/매수단가는 아래로 접어둠 -->
       <div class="frow">
-        <label>🗂 핵심 정보 — 이름 붙여 자유롭게 추가하세요 (예: PER, 섹터, 손절가…)</label>
+        <label>판단 기준 — 필요한 항목만 추가하세요</label>
+        <p class="stockHint">추가·수정·삭제한 내용은 아래 ‘저장’을 눌렀을 때 함께 반영됩니다.</p>
         <div id="sdCustomFields"></div>
         <div class="cfPresets" id="sdCfPresets"></div>
         <div class="cfAddRow">
@@ -861,7 +864,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
       </div>
 
       <!-- v7.5: 전부 채우는 게 아닌 항목이라 기본은 접어둠(details 기본 동작 그대로 사용) -->
-      <details class="sdTradeInfo" id="sdTradeInfo">
+      <details class="sdTradeInfo" id="sdTradeInfo" open>
         <summary>📊 매매 정보 (상태 · 목표가 · 보유수량 · 매수단가)</summary>
         <div class="frow2">
           <div class="frow sdField"><label>상태</label>
@@ -876,19 +879,16 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
       </details>
       <button type="button" class="saveBtn" id="sdSaveFields" style="margin-top:12px">💾 저장</button>
 
-      <div class="frow" style="margin-top:16px">
-        <label>📝 투자논지 이력 — 날짜별로 쌓여요(지우거나 덮어쓰지 않음)</label>
+      <details class="frow" style="margin-top:16px">
+        <summary>기존 투자논지·정보 변경 이력</summary>
         <div id="sdThesisLog"></div>
-        <div class="stockAdd">
-          <input type="text" id="sdThesisInput" placeholder="오늘 생각을 적어주세요…">
-          <button type="button" class="go" id="sdThesisAddBtn">추가</button>
-        </div>
-      </div>
+        <p class="stockHint">새 생각과 투자논지는 종목 화면의 ‘기록 남기기’에서 사진·근거와 함께 남기세요.</p>
+      </details>
 
-      <div class="frow" style="margin-top:16px">
-        <label>📌 관련 기록</label>
+      <details class="frow" style="margin-top:16px">
+        <summary>관련 기록</summary>
         <div id="sdRelatedRecords"></div>
-      </div>
+      </details>
     </div>
   </div>
 </div>
@@ -1015,7 +1015,9 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 </div>
 <div id="recordLoadError" role="alert" hidden style="position:fixed;bottom:16px;left:16px;right:16px;z-index:90;background:#fff4e2;border:1px solid #c28e34;border-radius:10px;padding:14px;color:#754d13"></div>
 <div class="toast" id="toast"></div>
-<script src="js/records-stocks.js?v=7.31.0"></script>
+<script src="js/records-stocks.js?v=7.32.0"></script>
+<script src="js/records-workspace.js?v=7.32.0"></script>
+<script src="js/records-stock-workflow.js?v=7.32.0"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -1112,6 +1114,7 @@ function makeDraggable(modalEl){
   if(!hd) return;
   var dragging=false, sx=0, sy=0, ox=0, oy=0;
   function start(x,y){
+    if(modalEl.closest('#recordEditorHost'))return;
     var r = modalEl.getBoundingClientRect();
     dragging=true; sx=x; sy=y; ox=r.left; oy=r.top;
     modalEl.classList.add('dragged');
@@ -1483,10 +1486,10 @@ function draftsApi(){
 var FU = null, _fuReady = null;
 function followupsStart(){
   if(!db || !uid) return Promise.resolve();
-  if(!_fuReady) _fuReady=import('./js/followups-app.mjs?v=7.30.0.1').then(function(m){
-    FU=m.init({db:db,storage:storage,records:function(){return records;},studyNeedsReview:studyNeedsReview,toast:toast,openRecord:goRecord,
+  if(!_fuReady) _fuReady=import('./js/followups-app.mjs?v=7.32.0').then(function(m){
+    FU=m.init({db:db,storage:storage,records:function(){return records;},studyNeedsReview:studyNeedsReview,toast:toast,openRecord:goRecord,workspace:RecordWorkspace,account:function(){return uid;},
       count:function(n){document.getElementById('cntLabel').textContent=n+'건';},
-      changed:function(){renderKtabs();renderTodos();if(laterMode)renderLaterMode();if(PAGE_OPEN&&document.getElementById('pageModal').classList.contains('on'))FU.decoratePage(document.getElementById('pgBody'),PAGE_OPEN);}}); return FU;
+      changed:function(){renderKtabs();renderTodos();if(laterMode)renderLaterMode();else if(stockMode||curView==='cal')render();if(PAGE_OPEN&&document.getElementById('pageModal').classList.contains('on'))FU.decoratePage(document.getElementById('pgBody'),PAGE_OPEN);}}); return FU;
   });
   return _fuReady.then(function(api){return api.start();}).catch(function(e){logBug('확인·복기 연결: '+e.message);});
 }
@@ -1546,6 +1549,7 @@ function allStockNames(){
   var set = {};
   stockMaster.forEach(function(s){ var n=stockName(s); if(n) set[n]=1; });
   records.forEach(function(r){ (r.stocks||[]).forEach(function(s){ set[s]=1; }); });
+  if(FU)FU.items.forEach(function(x){(x.stocks||[]).forEach(function(n){if(n)set[n]=1;});});
   return Object.keys(set).sort(function(a,b){ return a.localeCompare(b,'ko'); });
 }
 function stockCount(name){
@@ -2240,7 +2244,7 @@ function render(){
   document.getElementById('btnAdd').textContent = curKind==='study' ? '＋ 새 공부노트' : '＋ 기록 추가';
   var host = document.getElementById('content');
   if(curKind==='study'){ renderStudyTab(host, arr); return; }
-  if(!arr.length){
+  if(!arr.length&&curView!=='cal'){
     host.innerHTML = '<div class="emptyState"><div class="ei">🗂</div>아직 기록이 없어요. <b>＋ 기록 추가</b>로 시작해보세요</div>';
     return;
   }
@@ -2258,10 +2262,10 @@ function render(){
    특정 종목이 골라져 있으면(레벨2) 그 종목의 기록들을 "기존 레코드 렌더 함수 그대로" curView 방식으로.
    레벨2는 새 함수가 하나도 없다 — records를 그 종목으로만 filter해서 cardHTML/listHTML/...에 그대로 넘긴다 */
 var stockOnlyContent=true, stockListScroll=0;
-function stockSummary(name){ return RecordStocks.summary(name,stockItemOf(name),records); }
+function stockSummary(name){ return RecordStocks.summary(name,stockItemOf(name),records,FU?FU.items:[]); }
 function stockEntries(name){ return RecordStocks.entries(name,stockItemOf(name),records); }
-function stockDirectory(){ return RecordStocks.directory(allStockNames(),stockItemOf,records,curQ,stockOnlyContent); }
-function stockCountText(name){ var s=stockSummary(name); return s.total ? s.total+'건' : (s.fields.length?'정보 '+s.fields.length+'개':'내용 없음'); }
+function stockDirectory(){ return RecordStocks.directory(allStockNames(),stockItemOf,records,curQ,stockOnlyContent,FU?FU.items:[]); }
+function stockCountText(name){ var s=stockSummary(name); return s.total ? s.total+'건' : (s.fields.length?'정보 '+s.fields.length+'개':s.followups.length?'확인 '+s.followups.length+'건':'내용 없음'); }
 function navigateStock(name){
   if(!curStockTab && name)stockListScroll=window.scrollY;
   curStockTab=name;
@@ -2287,13 +2291,9 @@ function renderStockMode(){
     var summary=stockSummary(name), recs = summary.entries;
     document.getElementById('cntLabel').textContent = stockCountText(name);
     document.getElementById('topStat').textContent = records.length+'건 기록됨';
-    var head = nav+'<div class="stockFocusHd"><b style="font-size:15px">🏷 '+esc(name)+'</b>'
-      + '<span><button type="button" class="infoBtn" data-stockopen="'+esc(name)+'">📋 정보 보기/입력</button> '
-      + '<button type="button" class="infoBtn" id="stockAddRecord">＋ 이 종목에 기록</button></span></div>'
-      + '<div class="stockTotals">연결 기록 '+summary.linked+'건 · 투자논지/정보 변경 '+summary.history+'건 · 최신 날짜순'+(curQ?' · 종목 선택 후에는 전체 이력을 표시합니다':'')+'</div>'
-      + (summary.fields.length?'<div class="stockSummary">'+summary.fields.map(function(f){return '<div><b>'+esc(f.label)+'</b>'+esc(f.value)+'</div>';}).join('')+'</div>':'');
-    if(!recs.length){
-      host.innerHTML = head + '<div class="emptyMini">'+(summary.fields.length?'저장된 정보는 위에 표시됩니다.':'아직 저장된 내용이 없습니다.')+' ‘이 종목에 기록’이나 ‘정보 보기/입력’에서 새 내용을 남기면 이곳에 쌓입니다.</div>';
+    var head = nav+stockFocusHTML(name,summary);
+    if(!recs.length && curView!=='cal'){
+      host.innerHTML = head + '<div class="emptyMini">아직 기록이 없습니다. ‘기록 남기기’에서 생각과 근거를 남겨 보세요.</div>';
       bindContentClicks();
       return;
     }
@@ -2313,6 +2313,7 @@ function renderStockMode(){
   document.getElementById('cntLabel').textContent = names.length+'개 종목';
   document.getElementById('topStat').textContent = records.length+'건 기록됨';
   var options=nav+'<div class="stockOptions"><label><input type="checkbox" id="stockOnlyContent"'+(stockOnlyContent?' checked':'')+'> 내용 있는 종목만</label><span>'+names.length+' / '+allStockNames().length+'개 · 내용 있는 종목 우선 · 최신 날짜순</span></div>';
+  options+='<details class="stockDetails"><summary>종목 등록·빈 항목 정리</summary><div class="stockRegister"><input id="stockRegisterInput" aria-label="새 종목명" placeholder="종목명"><button type="button" class="infoBtn" id="stockRegisterBtn">등록하고 열기</button></div>'+stockEmptyHTML()+'</details>';
   if(!names.length){
     host.innerHTML = options+'<div class="emptyMini">표시할 종목이 없습니다. 검색어를 지우거나 ‘내용 있는 종목만’을 해제해 보세요.</div>';
     bindContentClicks();
@@ -2699,19 +2700,10 @@ function calHTML(arr){
   var days=new Date(y,m,0).getDate();
   var byDay={};
   arr.forEach(function(r){ var d=String(r.date||''); if(d.slice(0,7)===calYM){ var dd=+d.slice(8,10); (byDay[dd]=byDay[dd]||[]).push(r); } });
-  /* v6: 체크 캘린더(checks[].date)도 같이 표시 — 필터된 arr 기준
-     v7.28: 공부노트 재검토일(reviewAt)도 같은 🔔 자리에 합쳐서 보여준다(이전엔 달력이 checks[]만 읽어 reviewAt은 전혀 안 보였음) */
   var chkByDay={};
-  arr.forEach(function(r){ (r.checks||[]).forEach(function(c){
-    var d=String(c.date||''); if(d.slice(0,7)===calYM){ var dd=+d.slice(8,10); (chkByDay[dd]=chkByDay[dd]||[]).push({r:r,c:c}); }
-  }); });
-  arr.forEach(function(r){
-    if(!isStudyRec(r) || !r.reviewAt) return;
-    var d=String(r.reviewAt); if(d.slice(0,7)!==calYM) return;
-    var dd=+d.slice(8,10); (chkByDay[dd]=chkByDay[dd]||[]).push({r:r, c:{what:'재검토: '+(r.title||''), action:''}, isReview:true});
-  });
+  calendarFollowups(arr).forEach(function(x){var d=String(x.dueAt||'');if(d.slice(0,7)===calYM){var dd=+d.slice(8,10);(chkByDay[dd]=chkByDay[dd]||[]).push(x);}});
   var t = todayStr();
-  var h = '<div class="cal"><div class="calhd"><div class="nav"><button id="calPrev">‹</button></div><b>'+y+'년 '+m+'월</b><div class="nav"><button id="calNext">›</button></div></div>'
+  var h = calendarConnectionHTML()+'<div class="cal"><div class="calhd"><div class="nav"><button id="calPrev">‹</button></div><b>'+y+'년 '+m+'월</b><div class="nav"><button id="calNext">›</button></div></div>'
     + '<div class="calgrid">';
   ['일','월','화','수','목','금','토'].forEach(function(d){ h+='<div class="dow">'+d+'</div>'; });
   for(var i=0;i<start;i++) h+='<div class="cell dim"></div>';
@@ -2729,7 +2721,7 @@ function calHTML(arr){
         }).join('')
       + (list.length>3 ? '<span style="font-size:10px;color:var(--sub2)">+'+(list.length-3)+'건 더</span>' : '')
       + chks.slice(0,2).map(function(x){
-          return '<span class="chkEvt" data-daypop="'+dateStr+'">🔔 '+esc(x.c.what||x.r.title||'')+'</span>';
+          return '<span class="chkEvt" data-daypop="'+dateStr+'">🔔 '+esc(x.question||'')+'</span>';
         }).join('')
       + (chks.length>2 ? '<span class="calChk" data-daypop="'+dateStr+'">+'+(chks.length-2)+'건 더</span>' : '')
       + '</div>';
@@ -2738,12 +2730,9 @@ function calHTML(arr){
 }
 /* v6.1: 달력 🔔 클릭 → 전체기록 대신 그날 요약(기록+확인할 것)만 가볍게 보여주는 팝업 */
 function openDayPopup(dateStr){
-  var arr = filtered();
-  var dayRecords = arr.filter(function(r){ return r.date===dateStr; });
-  var dayChecks = [];
-  arr.forEach(function(r){ (r.checks||[]).forEach(function(c){ if(c.date===dateStr) dayChecks.push({r:r, c:c}); }); });
-  /* v7.28: 달력 셀과 똑같이 공부노트 재검토일도 같이 보여준다 */
-  arr.forEach(function(r){ if(isStudyRec(r) && r.reviewAt===dateStr) dayChecks.push({r:r, c:{what:'재검토: '+(r.title||''), action:''}}); });
+  var arr=stockMode&&curStockTab?stockEntries(curStockTab):filtered();
+  var dayRecords=arr.filter(function(r){return r.date===dateStr;});
+  var dayChecks=calendarFollowups(arr).filter(function(x){return x.dueAt===dateStr;});
   var p = dateStr.split('-');
   var wd = ['일','월','화','수','목','금','토'][new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).getUTCDay()];
   document.getElementById('dayModalTitle').textContent = (+p[1])+'월 '+(+p[2])+'일 ('+wd+')';
@@ -2757,17 +2746,11 @@ function openDayPopup(dateStr){
           + '</div>';
       }).join('') : '<div class="emptyMini">이날 기록은 없어요</div>')
     + '</div><div class="dayPopSec"><h5>🔔 확인할 것</h5>'
-    + (dayChecks.length ? dayChecks.map(function(x){
-        var k = KINDS[x.r.kind] || KINDS.memo;
-        return '<div class="checkItem" data-open="'+esc(x.r.id)+'">'
-          + '<span class="dot" style="background:'+k.c+'"></span>'
-          + '<span class="tt">'+esc(x.c.what||x.r.title||'')+(x.c.action?(' <span style="color:var(--sub2)">— '+esc(x.c.action)+'</span>'):'')+'</span>'
-          + '<span class="kk">'+k.i+' '+esc(x.r.title||'')+'</span>'
-          + '</div>';
-      }).join('') : '<div class="emptyMini">확인할 예정은 없어요</div>')
+    + calendarConnectionHTML()+(dayChecks.length?dayChecks.map(stockTaskHTML).join(''):'<div class="emptyMini">확인할 예정은 없어요</div>')
     + '</div>';
   var body = document.getElementById('dayModalBody');
   body.innerHTML = html;
+  body.querySelectorAll('[data-open-fu]').forEach(function(b){b.onclick=function(){document.getElementById('dayModal').classList.remove('on');openFollowup(b.dataset.openFu);};});
   body.querySelectorAll('[data-open]').forEach(function(el){
     el.addEventListener('click', function(){
       document.getElementById('dayModal').classList.remove('on');
@@ -2866,6 +2849,7 @@ function galHTML(arr){
 }
 
 function bindContentClicks(){
+  bindStockWorkflow();
   var quick=document.getElementById('stockQuickSelect');
   if(quick)quick.addEventListener('change',function(){navigateStock(quick.value);});
   var only=document.getElementById('stockOnlyContent');
@@ -2948,7 +2932,7 @@ function renderKindPick(activeKind){
     return '<button type="button" data-k="'+k+'" class="'+(activeKind===k?'on':'')+'">'+meta.i+' '+meta.n+'</button>';
   }).join('') + ((EDIT || IN_WORKSPACE) ? '' : '<button type="button" data-studynew="1" title="서식 편집기로 공부노트 쓰기">📚 공부노트 →</button>');
   var sn = host.querySelector('[data-studynew]');
-  if(sn) sn.addEventListener('click', function(){ closeModal(); studyDo(function(api){ return api.newNote(); }); });
+  if(sn) sn.addEventListener('click', function(){ if(!closeModal())return; studyDo(function(api){ return api.newNote(); }); });
   host.querySelectorAll('button[data-k]').forEach(function(b){
     b.addEventListener('click', function(){
       host.querySelectorAll('button[data-k]').forEach(function(x){ x.classList.remove('on'); });
@@ -2987,12 +2971,12 @@ function checkRowHTML(c){
 }
 function renderChecksBox(checks){
   var host=document.getElementById('checksBox');
-  document.getElementById('checkAddBtn').style.display=(EDIT && FU && FU.ready)?'none':'';
-  if(EDIT && FU && FU.ready){host.innerHTML='<p style="font-size:12px">확인 항목은 ‘확인·복기’에서 관리합니다. 기존 질문은 그대로 보존됩니다.</p>';return;}
+  document.getElementById('checkAddBtn').style.display=EDIT?'none':'';
+  if(EDIT){host.innerHTML='<p style="font-size:12px">확인 항목은 ‘확인·복기’에서 관리합니다. 기존 질문은 그대로 보존됩니다.</p>';return;}
   host.innerHTML = (checks||[]).map(checkRowHTML).join('');
 }
 function collectChecks(){
-  if(EDIT && FU && FU.ready){var r=records.find(function(x){return x.id===EDIT;});return r&&r.checks?r.checks:[];}
+  if(EDIT){var r=_recordOriginal;return r&&r.checks?r.checks:[];}
   var out = [];
   document.querySelectorAll('#checksBox .checkRow').forEach(function(row){
     var date = row.querySelector('.cd').value;
@@ -3444,8 +3428,10 @@ function defaultAddKind(){
   return 'memo';
 }
 function openAdd(){
+  if(!RecordWorkspace.prepare('recModal'))return;
   if(curKind==='study' && !stockMode && !IN_WORKSPACE){ studyDo(function(api){ return api.newNote(); }); return; }
   EDIT = null; pickedStocks = stockMode && curStockTab ? [curStockTab] : []; pickedAttachments = [];
+  _recordOriginal=null;_recordNewId=db?db.collection('records').doc().id:null;_recordSaving=false;
   document.getElementById('mTitle').textContent = '＋ 기록 추가';
   document.getElementById('mDel').style.display = 'none';
   _curEditingAction = '';
@@ -3472,16 +3458,23 @@ function openAdd(){
   resetAttDraftBanner();
   resetModalPos(document.querySelector('#recModal .modal'));
   document.getElementById('recModal').classList.add('on');
-  setTimeout(function(){ document.getElementById('fTitle').focus(); }, 60);
+  setTimeout(function(){
+    var modal=document.getElementById('recModal'),focused=document.activeElement;
+    if(!modal.classList.contains('on')||(focused&&focused.closest('#recModal')&&!focused.closest('.mhd')))return;
+    document.getElementById('fTitle').focus();
+  }, 60);
   attCheckDraftOnOpen('new');
+  _recordBaseline=recordFormSignature();
 }
 function openEdit(id){
+  if(!RecordWorkspace.prepare('recModal'))return;
   var r = records.find(function(x){ return x.id===id; });
   if(!r) return;
   /* v7.27: 공부노트는 서식 문서가 기준본 — 구형 textarea 편집창으로 body만 덮어쓰면 두 본문이 어긋나므로 항상 전용 편집기로 연다
      (통합분석실 iframe 의 openEdit 호출도 여기로 온다) */
   if(isStudyRec(r)){ studyDo(function(api){ return api.openEditor(id); }); return; }
   EDIT = id; pickedStocks = (r.stocks||[]).slice();
+  _recordOriginal=JSON.parse(JSON.stringify(r));_recordNewId=null;_recordSaving=false;
   document.getElementById('mTitle').textContent = '기록 수정';
   document.getElementById('mDel').style.display = '';
   _curEditingAction = r.action||'';
@@ -3513,13 +3506,14 @@ function openEdit(id){
   document.getElementById('recModal').scrollTop = 0;
   document.querySelector('#recModal .modal').scrollTop = 0;
   attCheckDraftOnOpen(id);
+  _recordBaseline=recordFormSignature();
 }
 function resetAttDraftBanner(){
   var banner = document.getElementById('attDraftBanner');
   if(banner){ banner.style.display='none'; banner.innerHTML=''; }
   attSetDraftStatus('');
 }
-function closeModal(){ document.getElementById('recModal').classList.remove('on'); }
+function closeModal(force){if(force!==true&&!recordCanLeave())return false;document.getElementById('recModal').classList.remove('on');return true;}
 document.getElementById('mClose').addEventListener('click', closeModal);
 document.getElementById('btnAdd').addEventListener('click', function(){if(laterMode)openFollowup();else openAdd();});
 
@@ -3555,6 +3549,7 @@ document.querySelectorAll('#starRow span').forEach(function(s){
 });
 
 document.getElementById('mSave').addEventListener('click', function(){
+  if(_recordSaving)return;
   if(!db){ toast('연결 중입니다 — 잠시 뒤 다시 눌러 주세요'); return; }
   var _ed = EDIT ? records.find(function(x){ return x.id===EDIT; }) : null;
   if(_ed && isStudyRec(_ed)){ toast('공부노트는 공부노트 편집창에서 수정해 주세요 — 서식이 손상되지 않도록 저장을 막았어요'); return; }
@@ -3609,17 +3604,7 @@ document.getElementById('mSave').addEventListener('click', function(){
       data.scenariosSetAt = (existing && existing.scenariosSetAt) ? existing.scenariosSetAt : (kstNow().toISOString().slice(0,19)+'+09:00');
     }
   }
-  pickedStocks.forEach(function(s){ addStockToMaster(s); });
-  if(EDIT){
-    db.collection('records').doc(EDIT).update(data)
-      .then(function(){ attClearDraftAfterSave(); toast('수정했습니다'); closeModal(); })
-      .catch(function(e){ logBug('수정 실패: '+e.message); toast('저장 실패 — 콘솔을 확인해 주세요'); });
-  } else {
-    data.createdAt = Date.now();
-    db.collection('records').add(data)
-      .then(function(){ attClearDraftAfterSave(); toast('기록했습니다'); closeModal(); })
-      .catch(function(e){ logBug('추가 실패: '+e.message); toast('저장 실패 — 콘솔을 확인해 주세요'); });
-  }
+  saveRecordForm(data);
 });
 document.getElementById('mDel').addEventListener('click', function(){
   if(!EDIT) return;
@@ -4052,8 +4037,6 @@ document.getElementById('pgEdit').addEventListener('click', function(){
   if(!PAGE_OPEN) return;
   var _r = records.find(function(x){ return x.id===PAGE_OPEN; });
   if(_r && isStudyRec(_r)){ openEdit(PAGE_OPEN); return; } // 공부노트: 읽기 화면은 두고 위에 편집창을 연다(저장 뒤 읽기 화면 자동 갱신)
-  document.getElementById('pageModal').classList.remove('on');
-  setRecordHash('');
   openEdit(PAGE_OPEN);
 });
 document.getElementById('pgDel').addEventListener('click', function(){
@@ -4094,9 +4077,10 @@ function fallbackCopy(text){
    종목 관리 모달
    ══════════════════════════════════════════════════════════ */
 document.getElementById('btnStockMgr').addEventListener('click', function(){
-  renderStockMgr();
-  resetModalPos(document.querySelector('#stockModal .modal'));
-  document.getElementById('stockModal').classList.add('on');
+  if(!RecordWorkspace.prepare())return;
+  document.querySelectorAll('#recordEditorHost .on').forEach(function(el){el.classList.remove('on');});
+  document.getElementById('pageModal').classList.remove('on');PAGE_OPEN=null;setRecordHash('');
+  stockMode=true;laterMode=false;curStockTab='';curQ='';renderKtabs();render();
 });
 document.getElementById('smClose').addEventListener('click', function(){
   document.getElementById('stockModal').classList.remove('on');
@@ -4138,11 +4122,11 @@ document.getElementById('stockMgrAddBtn').addEventListener('click', function(){
 /* ══════════════════════════════════════════════════════════
    v7.1: 종목 상세(정보 누적) — 목표가·보유수량·매수단가·상태 + 투자논지 이력 + 관련 기록
    ══════════════════════════════════════════════════════════ */
-var _sdCurName = null, _sdOriginal = {}, _stockSaving=false;
+var _sdCurName = null, _sdOriginal = {}, _sdFields=[], _stockSaving=false;
 function stockSaveAction(button,work,done){
   if(_stockSaving)return Promise.resolve(false);
   _stockSaving=true; button.disabled=true;
-  var controls=Array.from(document.querySelectorAll('#stockDetailModal input,#stockDetailModal select,#stockDetailModal button'));
+  var controls=Array.from(document.querySelectorAll('#stockDetailModal input,#stockDetailModal textarea,#stockDetailModal select,#stockDetailModal button'));
   var disabled=controls.map(function(el){return el===button?false:el.disabled;});
   controls.forEach(function(el){el.disabled=true;});
   var status=document.getElementById('stockSaveStatus'); status.textContent='서버에 저장 중…';
@@ -4154,12 +4138,15 @@ function stockSaveAction(button,work,done){
   }).finally(function(){_stockSaving=false;button.disabled=false;controls.forEach(function(el,i){el.disabled=disabled[i];});});
 }
 function openStockDetail(name){
+  if(!RecordWorkspace.prepare('stockDetailModal'))return;
   if(_stockSaving){toast('현재 저장을 마친 뒤 열어주세요');return;}
   _sdCurName = name;
   document.getElementById('sdName').textContent = '🏷 '+name;
   document.getElementById('sdCount').textContent = stockCountText(name)+' · 연결 기록과 투자논지를 종목 화면에서 함께 볼 수 있어요';
   var item = stockItemOf(name) || {};
   _sdOriginal=JSON.parse(JSON.stringify(typeof item==='object'?item:{}));
+  _sdFields=JSON.parse(JSON.stringify(item.customFields||[]));
+  document.getElementById('sdCfLabel').value='';document.getElementById('sdCfValue').value='';
   document.getElementById('stockSaveStatus').textContent='';
   document.getElementById('sdStatus').value = item.status || '';
   document.getElementById('sdTarget').value = item.targetPrice != null ? item.targetPrice : '';
@@ -4175,34 +4162,14 @@ function openStockDetail(name){
 }
 /* v7.4: 목표가·보유수량·매수단가처럼 미리 정해둔 항목 말고, 종목마다 원하는 항목을 이름 붙여
    자유롭게 추가하는 "추가 정보". 값 수정은 💾 저장 버튼으로 한번에(자동이력 diff 포함),
-   추가/삭제는 그 자리에서 바로(각각 mutateStockItem 한 번씩 — 경합 걱정 없음) */
+   v7.32: 추가/삭제도 폼에서 임시 편집한 뒤 한 트랜잭션으로 저장한다. */
+function collectStockFields(){
+  return _sdFields.map(function(f,i){var input=document.querySelector('#sdCustomFields .cfVal[data-idx="'+i+'"]');var value=input?input.value.trim():String(f.value==null?'':f.value);return Object.assign({},f,{value:f.value!=null&&value===String(f.value)?f.value:value});});
+}
 function renderCustomFields(fields){
-  var host = document.getElementById('sdCustomFields');
-  if(!fields || !fields.length){ host.innerHTML = '<div class="emptyMini">아직 추가한 항목이 없어요</div>'; return; }
-  host.innerHTML = fields.map(function(f, i){
-    return '<div class="cfRow"><label>'+esc(f.label)+'</label>'
-      + '<input type="text" class="cfVal" data-idx="'+i+'" value="'+esc(f.value||'')+'">'
-      + '<button type="button" class="cfDel" data-idx="'+i+'" title="삭제">✕</button></div>';
-  }).join('');
-  host.querySelectorAll('.cfDel').forEach(function(b){
-    b.addEventListener('click', function(){
-      if(!_sdCurName) return;
-      if(stockHasUnsavedFields()){toast('수정 중인 항목을 먼저 저장해 주세요');return;}
-      var idx = +b.getAttribute('data-idx');
-      var name=_sdCurName, expected=fields[idx], at=Date.now();
-      stockSaveAction(b,function(){return mutateStockItem(name, function(base){
-        var list = (base.customFields||[]).slice();
-        if(JSON.stringify(list[idx])!==JSON.stringify(expected))throw new Error('다른 기기에서 항목을 변경했습니다. 다시 열어 확인해 주세요.');
-        var removed = list.splice(idx,1)[0];
-        base.customFields = list;
-        if(removed){
-          var log = (base.thesisLog||[]).slice();
-          log.push({date: RecordStocks.kstDate(at), at:at, text: '항목 삭제: '+removed.label+(removed.value?('('+removed.value+')'):''), auto:true});
-          base.thesisLog = log;
-        }
-      });},function(){stockRefreshFields(name);});
-    });
-  });
+  var host=document.getElementById('sdCustomFields');
+  host.innerHTML=fields.length?fields.map(function(f,i){return '<div class="cfRow"><label for="stockField'+i+'">'+esc(f.label)+'</label><textarea id="stockField'+i+'" class="cfVal" data-idx="'+i+'">'+esc(f.value==null?'':f.value)+'</textarea><button type="button" class="cfDel" data-idx="'+i+'" aria-label="'+esc(f.label)+' 삭제">✕</button></div>';}).join(''):'<div class="emptyMini">아직 추가한 항목이 없어요</div>';
+  host.querySelectorAll('.cfDel').forEach(function(b){b.onclick=function(){_sdFields=collectStockFields();_sdFields.splice(+b.dataset.idx,1);renderCustomFields(_sdFields);renderCfPresets(_sdFields);};});
 }
 /* v7.5: 항목명 타이핑 없이 자주 쓰는 이름을 칩으로 눌러서 채우기 — 이미 추가한 이름은 빼서
    같은 항목이 중복으로 쌓이지 않게. 종목마다 필요한 게 다르므로 강제로 채우지 않음(눌러야만 생김)
@@ -4246,13 +4213,14 @@ function renderRelatedRecords(name){
   }).join('') + (recs.length>20 ? '<div class="emptyMini">+'+(recs.length-20)+'건 더 있어요(종목칩으로 필터해서 보세요)</div>' : '');
   host.querySelectorAll('[data-open]').forEach(function(el){
     el.addEventListener('click', function(){
+      if(!stockCanLeave())return;
       document.getElementById('stockDetailModal').classList.remove('on');
       openPage(el.getAttribute('data-open'));
     });
   });
 }
 document.getElementById('sdClose').addEventListener('click', function(){
-  document.getElementById('stockDetailModal').classList.remove('on');
+  if(stockCanLeave())document.getElementById('stockDetailModal').classList.remove('on');
 });
 function refreshStockDetail(name){
   if(_sdCurName!==name)return;
@@ -4272,53 +4240,41 @@ function stockRefreshFields(name){
   var item=stockItemOf(name)||{};
   _sdOriginal=JSON.parse(JSON.stringify(item));
   [['status','sdStatus'],['targetPrice','sdTarget'],['quantity','sdQty'],['avgCost','sdAvgCost']].forEach(function(f){document.getElementById(f[1]).value=item[f[0]]==null?'':item[f[0]];});
-  renderCustomFields(item.customFields||[]);renderCfPresets(item.customFields||[]);
+  _sdFields=JSON.parse(JSON.stringify(item.customFields||[]));
+  renderCustomFields(_sdFields);renderCfPresets(_sdFields);
 }
 document.getElementById('sdSaveFields').addEventListener('click', function(){
   if(!_sdCurName)return;
+  if(document.getElementById('sdCfLabel').value.trim()||document.getElementById('sdCfValue').value.trim()){toast('입력한 새 항목을 먼저 추가한 뒤 저장해 주세요');return;}
   var name=_sdCurName, item=_sdOriginal, edits={}, changes=[], at=Date.now();
   [['targetPrice','sdTarget','목표가'],['quantity','sdQty','보유수량'],['avgCost','sdAvgCost','매수단가'],['status','sdStatus','상태']].forEach(function(f){
     var value=document.getElementById(f[1]).value.trim(), old=item[f[0]]==null?'':String(item[f[0]]);
     if(value!==old){edits[f[0]]=value;changes.push(f[2]+' '+(old||'-')+' → '+(value||'-'));}
   });
-  var changedCf=false;
-  var newCf=(item.customFields||[]).map(function(f,i){
-    var inp=document.querySelector('#sdCustomFields .cfVal[data-idx="'+i+'"]');
-    var value=inp?inp.value.trim():String(f.value||'');
-    if(value!==String(f.value||'')){changedCf=true;changes.push(f.label+' '+(f.value||'-')+' → '+(value||'-'));}
-    return Object.assign({},f,{value:value});
-  });
-  if(changedCf)edits.customFields=newCf;
+  var newCf=collectStockFields();
+  if(JSON.stringify(newCf)!==JSON.stringify(item.customFields||[])){
+    edits.customFields=newCf;
+    (item.customFields||[]).forEach(function(f){var next=newCf.find(function(x){return x.label===f.label;});if(!next)changes.push('항목 삭제: '+f.label+' = '+(f.value||'-'));else if(next.value!==f.value)changes.push(f.label+' '+(f.value||'-')+' → '+(next.value||'-'));});
+    newCf.forEach(function(f){if(!(item.customFields||[]).some(function(x){return x.label===f.label;}))changes.push('항목 추가: '+f.label+' = '+(f.value||'-'));});
+  }
   if(!changes.length){toast('변경한 내용이 없습니다');return;}
   stockSaveAction(this,function(){return mutateStockItem(name,function(base){
     RecordStocks.mergeFields(base,item,edits);stockAutoLog(base,changes.join(' · '),at);
-  });},function(){stockRefreshFields(name);});
+  });},function(){stockRefreshFields(name);document.getElementById('stockDetailModal').classList.remove('on');});
 });
-document.getElementById('sdCfAddBtn').addEventListener('click', function(){
+document.getElementById('sdCfAddBtn').addEventListener('click',function(){
   if(!_sdCurName)return;
-  var name=_sdCurName, labelInp=document.getElementById('sdCfLabel'), valInp=document.getElementById('sdCfValue');
-  var label=labelInp.value.trim(), value=valInp.value.trim(), at=Date.now();
+  var labelInp=document.getElementById('sdCfLabel'),valueInp=document.getElementById('sdCfValue'),label=labelInp.value.trim();
   if(!label){toast('항목 이름을 먼저 적어주세요');return;}
-  // Preserve outstanding value edits by asking for their normal save first.
-  if(stockHasUnsavedFields()){toast('수정 중인 항목을 먼저 저장해 주세요');return;}
-  stockSaveAction(this,function(){return mutateStockItem(name,function(base){
-    var list=(base.customFields||[]).slice();
-    if(list.some(function(f){return f.label===label;}))throw new Error('같은 이름의 항목이 있습니다. 기존 항목을 수정해 주세요.');
-    list.push({label:label,value:value});base.customFields=list;
-    stockAutoLog(base,'항목 추가: '+label+(value?' = '+value:''),at);
-  });},function(){labelInp.value='';valInp.value='';stockRefreshFields(name);});
+  _sdFields=collectStockFields();
+  if(_sdFields.some(function(f){return f.label===label;})){toast('같은 항목이 있습니다. 기존 내용을 수정해 주세요');return;}
+  _sdFields.push({label:label,value:valueInp.value.trim()});labelInp.value='';valueInp.value='';renderCustomFields(_sdFields);renderCfPresets(_sdFields);
 });
 function stockHasUnsavedFields(){
   var item=_sdOriginal;
   if([['status','sdStatus'],['targetPrice','sdTarget'],['quantity','sdQty'],['avgCost','sdAvgCost']].some(function(f){return document.getElementById(f[1]).value.trim()!==String(item[f[0]]==null?'':item[f[0]]);}))return true;
-  return (item.customFields||[]).some(function(f,i){var inp=document.querySelector('#sdCustomFields .cfVal[data-idx="'+i+'"]');return inp&&inp.value.trim()!==String(f.value||'');});
+  return !!document.getElementById('sdCfLabel').value.trim()||!!document.getElementById('sdCfValue').value.trim()||JSON.stringify(collectStockFields())!==JSON.stringify(item.customFields||[]);
 }
-document.getElementById('sdThesisAddBtn').addEventListener('click', function(){
-  if(!_sdCurName)return;
-  var name=_sdCurName, inp=document.getElementById('sdThesisInput'), value=inp.value.trim();
-  if(!value)return;
-  stockSaveAction(this,function(){return appendThesisLog(name,value,false);},function(){if(inp.value.trim()===value)inp.value='';refreshStockDetail(name);});
-});
 
 /* ══════════════════════════════════════════════════════════
    전역 오류 — 조용히 삼키지 않는다
@@ -4333,7 +4289,11 @@ makeDraggable(document.querySelector('#tmplModal .modal'));
 makeDraggable(document.querySelector('#dayModal .modal'));
 makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
-console.log('[기록보관실] v7.31.1 준비됨 — 본인 로그인·종목별 누적 기록');
+RecordWorkspace.register('recModal',recordCanLeave);
+RecordWorkspace.register('stockDetailModal',stockCanLeave);
+window.addEventListener('records-editor-closed',function(){if(PAGE_OPEN&&document.getElementById('pageModal').classList.contains('on'))openPage(PAGE_OPEN,{fromRoute:true});});
+window.addEventListener('beforeunload',function(e){if((_recordSaving||_stockSaving)||(RecordWorkspace.active==='recModal'&&recordIsDirty())||(RecordWorkspace.active==='stockDetailModal'&&stockHasUnsavedFields())){e.preventDefault();e.returnValue='';}});
+console.log('[기록보관실] v7.32.0 준비됨 — 종목별 기록·확인 통합');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════

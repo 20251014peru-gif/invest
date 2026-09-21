@@ -1,0 +1,28 @@
+#recordEditorHost[hidden]{display:none!important}
+body.rw-active{overflow:auto!important}
+body.rw-active #content,body.rw-active #toolbar,body.rw-active #pageModal,body.rw-active #stockModal,body.rw-active #stockLogModal,body.rw-active #dayModal,body.rw-active .widgetEdge,body.rw-active .recSide{display:none!important}
+#recordEditorHost{max-width:980px;margin:0 auto 32px;scroll-margin-top:16px}
+#recordEditorHost .rw-panel{position:static;inset:auto;background:none;padding:0;z-index:auto;min-height:0}
+#recordEditorHost .rw-panel.on{display:block}
+#recordEditorHost .modal{position:static!important;transform:none!important;left:auto!important;top:auto!important;width:100%;max-width:none!important;max-height:none!important;height:auto;overflow:visible;box-shadow:none;border:1px solid var(--line);border-radius:14px}
+#recordEditorHost #followupModal{padding:0;overflow:visible}
+#recordEditorHost .mhd{cursor:default;position:sticky;top:0;z-index:15;background:var(--paper,#fff);color:var(--txt,#2f2f2c);border-radius:14px 14px 0 0;gap:12px}
+#recordEditorHost .mhd .x{color:var(--sub);min-width:36px;min-height:36px}
+#recordEditorHost .mbody{max-height:none;overflow:visible}
+#recordEditorHost .mfoot{position:sticky;bottom:0;background:var(--paper,#fff);border-top:1px solid var(--line);z-index:14;flex-wrap:wrap}
+#recordEditorHost .cfVal{min-width:0;flex:1;min-height:72px;resize:vertical;font:inherit;line-height:1.6;border:1px solid var(--line);border-radius:8px;padding:8px}
+.stockOverview,.stockChecks,.stockDetails{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:12px 0}
+.stockOverview .stockSummary{border:0;padding:0;margin:0 0 12px;background:none}
+.stockReason{margin:0;white-space:pre-wrap;line-height:1.7;overflow-wrap:anywhere}.stockReason b{display:block;font-size:12px;color:var(--sub);margin-bottom:4px}
+.stockDetails summary,.stockChecks summary{cursor:pointer;min-height:30px;font-size:13px;font-weight:700}.stockDetails .stockSummary{border:0;padding:12px 0 0;margin:0}
+.stockSectionHd{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 10px}.stockSectionHd h3{font-size:15px;margin:0}
+.stockTask{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:12px 0;cursor:pointer;color:var(--txt);font:inherit}
+.stockTask>span:first-child{flex:1;min-width:0}.stockTask b{display:block;font-size:13px;overflow-wrap:anywhere}.stockTask small{display:block;font-size:12px;color:var(--sub);margin-top:4px;overflow-wrap:anywhere}.stockTask .taskDue{font-size:12px;white-space:nowrap;color:var(--sub)}.stockTask .taskDue.overdue{color:var(--warn)}
+.stockHint{font-size:12px;color:var(--sub);line-height:1.65;margin:8px 0}.stockFeedTitle{font-size:15px;margin:22px 0 10px}.stockRegister{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.stockRegister input{padding:10px;border:1px solid var(--line);border-radius:8px;max-width:100%;min-width:0}
+.stockChecks .infoBtn,.stockRegister .infoBtn,.stockPrintActions .infoBtn{padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--gold-lt,#faf4dd);color:var(--txt,#2f2f2c);cursor:pointer;font:inherit;font-size:12px}
+.stockPrintView{display:none}body.stock-printing .stockPrintView{display:block;max-width:900px;margin:auto;padding:24px;background:white}body.stock-printing .wrap,body.stock-printing .topbar{display:none!important}
+.stockPrintView h1{font-size:24px}.stockPrintView section{margin:24px 0}.stockPrintView article{border-bottom:1px solid #ccc;padding:14px 0}.stockPrintView p,.stockPrintView dd{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65}.stockPrintView dt{font-weight:bold}.stockPrintView a{overflow-wrap:anywhere}.stockPrintActions{display:flex;gap:10px}.stockPrintView img{max-width:100%;max-height:600px;object-fit:contain}
+@media(max-width:650px){#toolbar #ktabs{display:flex;flex-wrap:nowrap;overflow-x:auto;width:100%;max-width:100%;padding-bottom:5px}#toolbar .ktab{flex:0 0 auto;white-space:nowrap}#toolbar .viewicons{display:flex;flex-wrap:nowrap;max-width:100%;overflow-x:auto}#toolbar .vicon{flex:0 0 auto}.topbar .ver{display:none}.topbar h1{font-size:18px}#recordEditorHost .mbody{padding:14px}#recordEditorHost .cfRow{flex-wrap:wrap}#recordEditorHost .cfRow label{width:100%}#recordEditorHost .frow2{display:block}#recordEditorHost .mfoot button{min-height:42px}.stockOverview,.stockChecks,.stockDetails{padding:14px}.stockTask{align-items:flex-start}.stockFocusHd .infoBtn{min-height:42px}.stockRegister input{flex:1}}
+@media print{body.stock-printing>*{display:none!important}body.stock-printing>#stockPrintView{display:block!important;padding:0;max-width:none}.stockPrintActions{display:none!important}.stockPrintView h2,.stockPrintView h3{break-after:avoid}.stockPrintView img{break-inside:avoid}.stockPrintView a{color:inherit}.stockPrintView{font-size:11pt;color:#111}@page{margin:16mm}}
+
+#toolbar .vicon[hidden]{display:none}

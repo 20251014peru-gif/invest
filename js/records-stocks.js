@@ -30,19 +30,42 @@
     });
     return related.concat(history).sort(newest);
   }
-  function summary(name,item,records){
-    var all=entries(name,item,records), info=fields(item), own=logs(item);
-    return {name:name,entries:all,total:all.length,linked:all.length-own.length,history:own.length,fields:info,
-      hasContent:!!(all.length||info.length),last:all.length?date(all[0]):'',
-      preview:all.length?text(all[0].oneLiner||all[0].body||all[0].title):info.map(function(f){return f.label+': '+f.value;}).join(' · ')};
+  function followupsFor(name,items,records){
+    var ids=new Set(records.filter(function(r){return (r.stocks||[]).includes(name);}).map(function(r){return r.id;}));
+    return (items||[]).filter(function(x){return (x.stocks||[]).includes(name)||(x.sourceIds||[]).some(function(id){return ids.has(id);});});
   }
-  function directory(names,itemOf,records,query,onlyContent){
+  function pending(items){
+    return (items||[]).filter(function(x){return x.state==='open'||x.state==='working';}).slice().sort(function(a,b){return (a.dueAt||'9999').localeCompare(b.dueAt||'9999')||text(a.question).localeCompare(text(b.question),'ko');});
+  }
+  function schedules(items,records,scope){
+    scope=scope||{};
+    var ids=new Set(records.map(function(r){return r.id;})), seen=new Set();
+    var list=scope.stock?followupsFor(scope.stock,items,scope.allRecords||records):items;
+    return pending(list).filter(function(x){
+      if(!x.dueAt||seen.has(x.id))return false;
+      if(!scope.stock&&!scope.all&&!(x.sourceIds||[]).some(function(id){return ids.has(id);}))return false;
+      seen.add(x.id);return true;
+    });
+  }
+  function overview(item){
+    var all=fields(item), core=all.filter(function(f){return ['상태','보유수량','매수단가'].includes(f.label);});
+    var reason=all.find(function(f){return ['관심 이유','매수사유','핵심가정'].includes(f.label);});
+    return {core:core,reason:reason||null,details:all.filter(function(f){return !core.includes(f)&&f!==reason;})};
+  }
+  function summary(name,item,records,followups){
+    var all=entries(name,item,records), info=fields(item), own=logs(item);
+    var linkedFollowups=followupsFor(name,followups,records);
+    return {name:name,entries:all,total:all.length,linked:all.length-own.length,history:own.length,fields:info,
+      followups:linkedFollowups,pending:pending(linkedFollowups),hasContent:!!(all.length||info.length||linkedFollowups.length),last:all.length?date(all[0]):'',
+      preview:all.length?text(all[0].oneLiner||all[0].body||all[0].title):info.length?info.map(function(f){return f.label+': '+f.value;}).join(' · '):linkedFollowups.map(function(x){return x.question;}).join(' · ')};
+  }
+  function directory(names,itemOf,records,query,onlyContent,followups){
     var q=text(query).toLocaleLowerCase();
-    return names.map(function(n){return summary(n,itemOf(n),records);}).filter(function(s){
+    return names.map(function(n){return summary(n,itemOf(n),records,followups);}).filter(function(s){
       if(onlyContent&&!s.hasContent)return false;
       return !q||[s.name,s.fields.map(function(f){return f.label+' '+f.value;}).join(' '),s.entries.map(function(r){
         return [r.title,r.oneLiner,r.body,r.userJudgment,r.aiInterpretation,(r.topics||[]).join(' ')].join(' ');
-      }).join(' ')].join(' ').toLocaleLowerCase().includes(q);
+      }).join(' '),s.followups.map(function(x){return [x.question,x.result,x.expectation].join(' ');}).join(' ')].join(' ').toLocaleLowerCase().includes(q);
     }).sort(function(a,b){return Number(b.hasContent)-Number(a.hasContent)||newest(a.entries[0]||{},b.entries[0]||{})||a.name.localeCompare(b.name,'ko');});
   }
   function mergeFields(base,original,edits){
@@ -52,7 +75,7 @@
       base[k]=edits[k];
     });
   }
-  var api={millis:millis,kstDate:kstDate,newest:newest,fields:fields,logs:logs,entries:entries,summary:summary,directory:directory,mergeFields:mergeFields};
+  var api={millis:millis,kstDate:kstDate,newest:newest,fields:fields,logs:logs,entries:entries,summary:summary,directory:directory,mergeFields:mergeFields,followupsFor:followupsFor,pending:pending,schedules:schedules,overview:overview};
   if(typeof module==='object'&&module.exports)module.exports=api;
   else root.RecordStocks=api;
 })(typeof window!=='undefined'?window:globalThis);
