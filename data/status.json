@@ -1,7 +1,7 @@
 {
   "schema": "status/1",
   "_설명": "워크플로가 쓰는 파일. jobs[] 한 줄 = 작업 하나. status: ok | fail | stale | stopped. due 가 지나면 앱이 '늦음' 경고. 시각은 KST(+09:00) ISO.",
-  "updated": "2026-09-22T08:55:14+09:00",
+  "updated": "2026-09-22T10:36:17+09:00",
   "jobs": [
     {
       "id": "hub",
@@ -14,17 +14,6 @@
       "link": ""
     },
     {
-      "id": "score",
-      "name": "오픈북 채점",
-      "status": "ok",
-      "ran": "2026-09-21T17:01:01+09:00",
-      "due": "2026-09-23T05:01:01+09:00",
-      "cause": "",
-      "fix": "",
-      "link": "predict.html",
-      "note": "새로 채점 0건 · 대기 0건"
-    },
-    {
       "id": "board",
       "name": "토론실 근거",
       "status": "ok",
@@ -34,17 +23,6 @@
       "fix": "",
       "link": "cygnus.html#board",
       "note": "훑음 34종목 · 새 글 0 · 근거글 +0(누적 136) · 적중 7"
-    },
-    {
-      "id": "dart",
-      "name": "공시 수집",
-      "status": "ok",
-      "ran": "2026-09-22T07:49:32+09:00",
-      "due": "2026-09-23T13:49:32+09:00",
-      "cause": "",
-      "fix": "",
-      "link": "cygnus.html#sectors",
-      "note": "58건(7일) · 신규 Event 0 · 중대성갱신 0 · push 0"
     },
     {
       "id": "macro",
@@ -78,6 +56,28 @@
       "fix": "manual.html 보고서 탭에서 입력",
       "link": "manual.html#reports",
       "note": "오늘 0건 · 14일 내 5건 · 미입력 2건"
+    },
+    {
+      "id": "score",
+      "name": "오픈북 채점",
+      "status": "ok",
+      "ran": "2026-09-22T09:54:51+09:00",
+      "due": "2026-09-23T21:54:51+09:00",
+      "cause": "",
+      "fix": "",
+      "link": "predict.html",
+      "note": "새로 채점 0건 · 대기 0건"
+    },
+    {
+      "id": "dart",
+      "name": "공시 수집",
+      "status": "ok",
+      "ran": "2026-09-22T10:36:17+09:00",
+      "due": "2026-09-23T16:36:17+09:00",
+      "cause": "",
+      "fix": "",
+      "link": "cygnus.html#sectors",
+      "note": "57건(7일) · 신규 Event 0 · 중대성갱신 0 · push 0"
     }
   ]
 }
