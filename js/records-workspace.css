@@ -1,7 +1,7 @@
 #recordEditorHost[hidden]{display:none!important}
 body.rw-active{overflow:auto!important}
 body.rw-active #content,body.rw-active #toolbar,body.rw-active #pageModal,body.rw-active #stockModal,body.rw-active #stockLogModal,body.rw-active #dayModal,body.rw-active .widgetEdge,body.rw-active .recSide{display:none!important}
-#recordEditorHost{max-width:1600px;margin:0 auto 32px;scroll-margin-top:16px}
+#recordEditorHost{max-width:1280px;margin:0 auto 32px;scroll-margin-top:16px}
 #recordEditorHost .rw-panel{position:static;inset:auto;background:none;padding:0;z-index:auto;min-height:0}
 #recordEditorHost .rw-panel.on{display:block}
 #recordEditorHost .modal{position:static!important;transform:none!important;left:auto!important;top:auto!important;width:100%;max-width:none!important;max-height:none!important;height:auto;overflow:visible;box-shadow:none;border:1px solid var(--line);border-radius:14px}
@@ -26,13 +26,24 @@ body.rw-active #content,body.rw-active #toolbar,body.rw-active #pageModal,body.r
 @media print{body.stock-printing>*{display:none!important}body.stock-printing>#stockPrintView{display:block!important;padding:0;max-width:none}.stockPrintActions{display:none!important}.stockPrintView h2,.stockPrintView h3{break-after:avoid}.stockPrintView img{break-inside:avoid}.stockPrintView a{color:inherit}.stockPrintView{font-size:11pt;color:#111}@page{margin:16mm}}
 
 #toolbar .vicon[hidden]{display:none}
+.rw-nav{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.rw-nav button{padding:10px 20px;border:1px solid var(--line);background:white;border-radius:8px;font:inherit;font-size:13px;cursor:pointer;color:var(--txt)}
+.rw-nav button[aria-current=page]{background:var(--gold-lt);border-color:var(--gold);color:var(--txt);font-weight:700;opacity:1;cursor:default}
+.rw-nav button[hidden]{display:none}
+#recordDestination{padding:8px 12px;background:#f5f0dc;border-radius:6px;margin:0 0 12px;overflow-wrap:anywhere}
+#authPanel[hidden]{display:none}
+#authPanel{display:flex;gap:10px;align-items:center;max-width:1280px;margin:12px auto;padding:14px 18px;border:1px solid var(--line);background:#fff9e8;border-radius:10px;box-sizing:border-box}
+#authPanel>div{flex:1;min-width:0;overflow-wrap:anywhere}#authPanel b{font-size:13px}#authPanel p{font-size:12px;line-height:1.6;margin:5px 0 0}
+#authPanel button{padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;font:inherit;font-size:12px;cursor:pointer;white-space:nowrap}
+@media(max-width:700px){#authPanel{margin:10px;flex-wrap:wrap}#authPanel>div{flex-basis:100%}}
 
-/* Shared, numbered writing surface. DOM order is also the keyboard/mobile reading order. */
+/* Shared compact writing surface. DOM order is also the keyboard/mobile reading order. */
+.rcard.stock{border-left-color:var(--k-memo)}.rcard.stock .kind{color:var(--k-memo)}.k.stock{background:var(--k-memo)}
 #recordEditorHost .mbody{padding:20px;background:#fcfbf7}
 .rw-intro{margin:0 0 16px;color:var(--sub,#6c675c);font-size:13px;line-height:1.65}
-.rw-grid{display:grid;grid-template-columns:minmax(240px,.9fr) minmax(300px,1.25fr) minmax(270px,1fr);gap:16px;align-items:start}
+.rw-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:16px;align-items:start}
 .rw-step{min-width:0;border:1px solid var(--line,#e6dfce);border-radius:12px;background:#fff;padding:18px}
-.rw-step-head{display:flex;align-items:flex-start;gap:10px;border-bottom:1px solid var(--line,#e6dfce);padding-bottom:14px;margin-bottom:18px}
+.rw-step-head{display:flex;align-items:flex-start;gap:10px;border-bottom:1px solid var(--line,#e6dfce);padding-bottom:9px;margin-bottom:12px}
 .rw-step-head>span{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:9px;background:#f5e9b4;color:#79621a;font-size:12px;font-weight:800}
 .rw-step-head h3{margin:0;font-size:16px;line-height:1.5;color:var(--txt,#2f2f2c)}
 .rw-step-head p{margin:3px 0 0;font-size:12px;color:var(--sub,#6c675c);line-height:1.5}
@@ -43,20 +54,21 @@ body.rw-active #content,body.rw-active #toolbar,body.rw-active #pageModal,body.r
 #recordEditorHost textarea{line-height:1.65}
 #recordEditorHost .frow2{gap:10px}
 #recordEditorHost .frow2>.frow{min-width:0}
-#recordEditorHost #fBody{min-height:220px!important}
+#recordEditorHost #fBody{min-height:150px!important}
 #recordEditorHost #fUserJudge{min-height:115px!important}
 #recordEditorHost #fDate{max-width:none!important}
 #recordEditorHost #kindSwitchBtn[hidden]{display:none}
-#recordEditorHost #kindPick{display:flex!important;gap:5px;flex-wrap:wrap;margin-bottom:16px!important}
+#recordEditorHost #kindPick{gap:5px;flex-wrap:wrap;margin-bottom:16px!important}
 #recordEditorHost .kindSwitchRow{margin-bottom:8px}
 #recordEditorHost #kindPick button{padding:7px 9px;font-size:12px;min-height:34px}
 #recordEditorHost .stockAdd{gap:6px}
 #recordEditorHost .stockAdd input{width:0;min-width:0;flex:1}
-#recordEditorHost .attDrop{padding:12px;font-size:12px}
+#recordEditorHost .attDrop{padding:8px;font-size:12px}
 #recordEditorHost .attHint{font-size:11px}
 #recordEditorHost .attGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
 #recordEditorHost #moreFields{margin-top:16px}
-#recordEditorHost #moreFields .moreFieldsBody{display:grid;grid-template-columns:1fr 2fr;gap:20px;padding:16px}
+#recordEditorHost #moreFields .moreFieldsBody{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px}
+#recordEditorHost #scenarioBox{grid-column:1 / -1}
 #recordEditorHost #moreFields:not([open]) .moreFieldsBody{display:none}
 #recordEditorHost .mfoot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 20px;box-shadow:0 -4px 14px #40330d08}
 #recordEditorHost .mfoot button{min-height:42px;padding:10px 18px;border-radius:8px;font:inherit;font-size:13px;cursor:pointer}
@@ -82,7 +94,8 @@ body.rw-active #content,body.rw-active #toolbar,body.rw-active #pageModal,body.r
 #recordEditorHost .fu-status{display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:6px;background:#f5efdc}
 #recordEditorHost .fu-field{margin:0 0 16px;font-size:12px;gap:6px;line-height:1.6}
 #recordEditorHost .fu-field input,#recordEditorHost .fu-field select,#recordEditorHost .fu-field textarea{font-size:13px;padding:10px;border-radius:8px}
-#recordEditorHost #fuResult{min-height:180px}
+#recordEditorHost #fuResult{min-height:120px}
+#recordEditorHost #fuQuestion{min-height:105px}
 #recordEditorHost .fu-evidence{padding:0;border:0}
 #recordEditorHost .fu-upload{display:block;background:#faf7ed;border:1px dashed var(--line);padding:12px;border-radius:8px;font-size:12px}
 #recordEditorHost .fu-upload input{display:block;margin-top:8px;width:100%;font-size:12px}
@@ -126,7 +139,7 @@ body.stock-printing{background:white}
 .stockPrintView figure{margin:10px 0;break-inside:avoid}
 .stockPrintView img{max-height:240px;max-width:100%;object-fit:contain}
 .stockPrintView figcaption{font-size:10px;color:#555;overflow-wrap:anywhere}
-@media(max-width:1150px){.rw-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rw-grid>.rw-step:last-child{grid-column:1 / -1}.rw-grid-stock>.rw-step:last-child{grid-column:auto}.stockDashboard{grid-template-columns:1fr 1fr}.stockDashboard>.stockChecks{grid-column:1 / -1}.stockDashboard .stockTask{flex-direction:row;justify-content:space-between}}
+@media(max-width:1150px){.stockDashboard{grid-template-columns:1fr 1fr}.stockDashboard>.stockChecks{grid-column:1 / -1}.stockDashboard .stockTask{flex-direction:row;justify-content:space-between}}
 @media screen and (max-width:700px){#recordEditorHost .mbody{padding:12px}.rw-grid,#recordEditorHost .rw-grid-stock,.stockDashboard{grid-template-columns:minmax(0,1fr)}.rw-step{padding:14px}.rw-grid>.rw-step:last-child,.stockDashboard>.stockChecks{grid-column:auto}#recordEditorHost #moreFields .moreFieldsBody,.rw-history-grid{grid-template-columns:1fr}#recordEditorHost .mfoot{padding:10px;gap:6px}#recordEditorHost .mfoot button{padding:10px 12px}#recordEditorHost #sdCustomFields{grid-template-columns:1fr}#recordEditorHost .cfAddRow{grid-template-columns:1fr auto}#recordEditorHost .cfAddRow #sdCfLabel{grid-column:1 / -1}#recordEditorHost .frow2{display:flex}#recordEditorHost .fu-two{grid-template-columns:1fr 1fr}body.stock-printing .stockPrintView{padding:14px}.stockPrintColumns{column-count:1}.stockPrintView .stockPrintSummary{grid-template-columns:1fr 1fr}.stockPrintActions{position:static}.stockPrintActions [data-print-now]{margin-left:0}}
 @media print{
   @page{size:A4 landscape;margin:12mm}

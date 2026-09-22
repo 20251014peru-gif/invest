@@ -32,7 +32,7 @@ const output=path.resolve(process.env.TEST_OUTPUT_DIR||'test-results/records-wor
     await p.evaluate(()=>{curView='cal';calYM='2026-09';render();});
     assert.equal(await p.locator('[data-daypop="2026-09-22"]').count(),0);assert.equal(await p.locator('[data-daypop="2026-09-25"]').count(),1);
     await p.locator('[data-daypop="2026-09-25"]').click();await p.locator('#dayModal [data-open-fu]').click();await p.waitForSelector('#followupModal.on');
-    await p.locator('#fuResult').fill('공식 실적 발표에서 16%를 확인');await p.locator('#followupModal [data-fu="complete"]').click();await p.waitForSelector('body:not(.rw-active)');
+    await p.locator('#fuResultPanel>summary').click();await p.locator('#fuResult').fill('공식 실적 발표에서 16%를 확인');await p.locator('#followupModal [data-fu="complete"]').click();await p.waitForSelector('body:not(.rw-active)');
     assert.equal(await p.locator('[data-daypop="2026-09-25"]').count(),0);assert.equal(await p.evaluate(()=>FU.pending.length),0);
     assert.equal(await p.evaluate(()=>JSON.stringify(__mockDump().records)),original);
     await p.locator('#stockAddFollowup').click();await p.waitForSelector('#fuStocks');assert.equal(await p.locator('#fuStocks').inputValue(),'가상전자');

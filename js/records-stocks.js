@@ -25,7 +25,7 @@
     var related=records.filter(function(r){return (r.stocks||[]).indexOf(name)>=0;});
     var history=logs(item).map(function(x){
       return {id:'stock-log:'+encodeURIComponent(name)+':'+x._stockIndex,_stockLog:true,_stockIndex:x._stockIndex,
-        kind:'memo',title:x.auto?'정보 변경':'투자논지',channel:'종목에 직접 남긴 이력',date:date(x),createdAt:millis(x.at||x.createdAt),
+        kind:'stock',title:x.auto?'정보 변경':'투자논지',channel:'종목에 직접 남긴 이력',date:date(x),createdAt:millis(x.at||x.createdAt),
         body:x.text,oneLiner:x.text,stocks:[name],topics:[]};
     });
     return related.concat(history).sort(newest);

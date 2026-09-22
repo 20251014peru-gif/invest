@@ -9,8 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="js/study/study.css?v=7.27.2">
-<link rel="stylesheet" href="js/records-stocks.css?v=7.33.0">
-<link rel="stylesheet" href="js/records-workspace.css?v=7.33.0">
+<link rel="stylesheet" href="js/records-stocks.css?v=7.34.0">
+<link rel="stylesheet" href="js/records-workspace.css?v=7.34.0">
 <style>
 /* ══════════════════════════════════════════════════════════
    🗂 투자 기록보관실  v7.27.2-0917-1400
@@ -601,7 +601,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
-  <span class="ver">v7.33.0 · 서희타워</span>
+  <span class="ver">v7.34.0 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -1015,9 +1015,9 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 </div>
 <div id="recordLoadError" role="alert" hidden style="position:fixed;bottom:16px;left:16px;right:16px;z-index:90;background:#fff4e2;border:1px solid #c28e34;border-radius:10px;padding:14px;color:#754d13"></div>
 <div class="toast" id="toast"></div>
-<script src="js/records-stocks.js?v=7.33.0"></script>
-<script src="js/records-workspace.js?v=7.33.0"></script>
-<script src="js/records-stock-workflow.js?v=7.33.0"></script>
+<script src="js/records-stocks.js?v=7.34.0"></script>
+<script src="js/records-workspace.js?v=7.34.0"></script>
+<script src="js/records-stock-workflow.js?v=7.34.0"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -1051,17 +1051,41 @@ function isGoogleUser(u){
 function renderAuth(u){
   var b=document.getElementById('authBtn'); if(!b)return;
   ['btnStockMgr','btnRecRestore','btnAdd'].forEach(function(id){var el=document.getElementById(id);if(el)el.disabled=!isGoogleUser(u);});
-  if(isGoogleUser(u)){ b.textContent='✓ 본인 로그인'; b.classList.remove('gold'); b.title=u.email||''; }
+  if(isGoogleUser(u)){ b.textContent='✓ Google 계정'; b.classList.remove('gold'); b.title='현재 계정 확인: '+(u.email||''); }
   else { b.textContent='🔐 본인 Google 로그인'; b.classList.add('gold'); b.title='기록을 불러오려면 본인 Google 계정으로 로그인하세요'; }
+  var who=document.getElementById('authAccount');if(who)who.textContent=isGoogleUser(u)?'현재 로그인: '+(u.email||u.displayName||'Google 계정'):'Google 로그인이 필요합니다.';
+}
+function authPanel(){
+  var panel=document.getElementById('authPanel');if(panel)return panel;
+  panel=document.createElement('section');panel.id='authPanel';panel.hidden=true;panel.setAttribute('aria-label','로그인 계정');
+  panel.innerHTML='<div><b id="authAccount"></b><p id="authStatus" role="status"></p></div><button type="button" id="authChoose">Google 계정 선택</button><button type="button" id="authCheck">연결 확인</button><button type="button" id="authClose" aria-label="계정 안내 닫기">✕</button>';
+  document.querySelector('.topbar').after(panel);
+  document.getElementById('authChoose').onclick=loginOwner;
+  document.getElementById('authClose').onclick=function(){panel.hidden=true;document.getElementById('authBtn').setAttribute('aria-expanded','false');};
+  document.getElementById('authCheck').onclick=checkAccountConnection;renderAuth(authUser);return panel;
+}
+function showAccount(message){var panel=authPanel();panel.hidden=false;renderAuth(authUser);document.getElementById('authBtn').setAttribute('aria-expanded','true');if(message)document.getElementById('authStatus').textContent=message;}
+function authErrorText(e){return ({'auth/popup-blocked':'Google 로그인 창이 차단됐습니다. 이 사이트의 팝업을 허용한 뒤 다시 선택해 주세요.','auth/popup-closed-by-user':'로그인 창이 닫혔습니다. 계정 선택을 완료하려면 다시 눌러 주세요.','auth/cancelled-popup-request':'다른 로그인 창이 열려 있습니다. 열린 창에서 계정을 선택해 주세요.','auth/unauthorized-domain':'현재 주소가 로그인 허용 주소에 등록되어 있지 않습니다. 공식 사용 주소에서 다시 열어 주세요.','auth/network-request-failed':'로그인 서버에 연결하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 눌러 주세요.','auth/web-storage-unsupported':'브라우저가 로그인 저장소를 차단하고 있습니다. 일반 Chrome 또는 Edge 창에서 다시 열어 주세요.'})[e&&e.code]||'Google 로그인 실패: '+(e&&e.message||'다시 시도해 주세요.');}
+async function checkAccountConnection(){
+  showAccount('서버 연결 확인 중…');
+  if(!isGoogleUser(authUser)||!db){showAccount('먼저 본인 Google 계정을 선택해 주세요.');return;}
+  var btn=document.getElementById('authCheck');btn.disabled=true;
+  try{await db.collection('records_meta').doc('stocks').get({source:'server'});showAccount('로그인됨 · 기록 서버에 접근할 수 있습니다.');}
+  catch(e){showAccount(e.code==='permission-denied'?'현재 Google 계정은 기록을 볼 권한이 없습니다. 기록을 사용하던 본인 계정을 선택해 주세요.':'서버 연결 실패: '+(e.message||e.code));}
+  finally{btn.disabled=false;}
 }
 function loginOwner(){
-  var b=document.getElementById('authBtn'); b.disabled=true;
-  var auth=firebase.auth(), provider=new firebase.auth.GoogleAuthProvider();
+  if(RecordWorkspace.active){showAccount('작성 중인 내용을 저장하거나 입력창을 닫은 뒤 계정을 선택해 주세요.');return Promise.resolve();}
+  var b=document.getElementById('authBtn'),panel=authPanel(),choose=document.getElementById('authChoose');if(choose.disabled)return Promise.resolve();
+  var before=authUser&&authUser.uid;b.disabled=true;choose.disabled=true;showAccount('Google 로그인 창에서 계정을 선택해 주세요.');
+  var auth,provider,task;
+  try{auth=firebase.auth();provider=new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({prompt:'select_account'});
-  var begin=isGoogleUser(auth.currentUser)?Promise.resolve():auth.signOut();
-  return begin.then(function(){return auth.signInWithPopup(provider);}).catch(function(e){
-    if(e && e.code!=='auth/popup-closed-by-user'){logBug('Google 로그인 실패: '+e.message);toast('Google 로그인 실패 — 다시 눌러주세요');}
-  }).finally(function(){b.disabled=false;});
+  // Start the popup in the button event; keep the current session if selection is cancelled.
+  task=auth.signInWithPopup(provider);}catch(e){task=Promise.reject(e);}
+  return task.then(function(result){if(before&&result.user.uid!==before){location.reload();return;}return checkAccountConnection();}).catch(function(e){
+    logBug('Google 로그인: '+(e.code||e.message));showAccount(authErrorText(e));
+  }).finally(function(){b.disabled=false;choose.disabled=false;});
 }
 try{
   firebase.initializeApp(firebaseConfig);
@@ -1077,7 +1101,9 @@ try{
     else if(!uid){ render(); }
   });
 }catch(e){ logBug('firebase 초기화 실패: '+e.message); }
-document.getElementById('authBtn').addEventListener('click',function(){ if(!isGoogleUser(authUser))loginOwner(); });
+document.getElementById('authBtn').setAttribute('aria-controls','authPanel');
+document.getElementById('authBtn').setAttribute('aria-expanded','false');
+document.getElementById('authBtn').addEventListener('click',function(){if(isGoogleUser(authUser))showAccount('Google 로그인은 완료되어 있습니다. 계정 선택 또는 연결 확인을 사용할 수 있습니다.');else loginOwner();});
 
 /* ── KST 시간 (worklog 관행: new Date() 직접 쓰지 않는다) ── */
 function kstNow(){
@@ -1149,6 +1175,7 @@ function makeDraggable(modalEl){
    종류(kind) 정의 — 여기에 한 줄만 추가하면 탭이 하나 늘어난다
    ══════════════════════════════════════════════════════════ */
 const KINDS = {
+  stock:   {i:'🏷', n:'종목 기록', c:'var(--k-memo)', chLabel:'출처(선택)'},
   youtube: {i:'📺', n:'유튜브', c:'var(--k-youtube)', chLabel:'채널'},
   news:    {i:'📰', n:'뉴스',   c:'var(--k-news)',    chLabel:'출처'},
   idea:    {i:'💡', n:'아이디어', c:'var(--k-idea)',  chLabel:'출처(선택)'},
@@ -1156,12 +1183,20 @@ const KINDS = {
   memo:    {i:'📝', n:'메모',   c:'var(--k-memo)',    chLabel:'출처(선택)'},
   study:   {i:'📚', n:'공부노트', c:'var(--k-study)',  chLabel:'출처(선택)'}  // v7.27: 전용 서식 편집기(js/study) — 구형 편집창에서는 열지 않음
 };
-const KIND_ORDER = ['youtube','news','idea','chart','memo'];
+const KIND_ORDER = ['stock','youtube','news','idea','chart','memo'];
 
 /* ── 종류별 모달 필드 커스터마이즈 — 탭마다 성격이 달라서 라벨·항목을 따로 잡는다 ──
    v7.28: bodyLbl/bodyPh 는 "1차 화면"(작성창 맨 위) 문구로, oneLiner 는 idea 만 1차(이유·배경)이고
    나머지는 "추가 속성" 안의 선택 필드(핵심 1줄)로 내려간다 — KIND_PRIMARY 가 배치를 결정. */
 const KIND_FIELDS = {
+  stock: {
+    oneLinerLbl:'핵심 판단 (선택)', oneLinerPh:'이 종목에 대한 현재 생각을 한 줄로',
+    showChannel:true, chBoxLbl:'출처(선택)',
+    showLink:true, linkLbl:'🔗 참고 링크',
+    showAction:false, actionLbl:'다음 행동', actionPh:'',
+    starLbl:'⭐ 중요도', bodyLbl:'남길 내용',
+    bodyPh:'관심 이유, 새로 확인한 사실, 생각의 변화를 적어 주세요'
+  },
   youtube: {
     oneLinerLbl:'⚡ 핵심 1줄 (선택)', oneLinerPh:'30초 판단 — 이 기록의 결론을 한 줄로',
     showChannel:true, chBoxLbl:'📺 채널',
@@ -1306,8 +1341,14 @@ function applyKindFields(kind){
   var km = KINDS[kind] || KINDS.memo;
   var kn = document.getElementById('kindNowLabel');
   if(kn) kn.textContent = km.i + ' ' + km.n;
+  updateRecordDestination();
 }
-/* 접힌 상세 영역에 남은 AI 해석·시나리오만 집계하고, 기존 내용이 있으면 펼친다. */
+function updateRecordDestination(){
+  var kind=curPickedKind(),meta=KINDS[kind]||KINDS.memo,where=document.getElementById('recordDestination');
+  if(where)where.textContent='저장 분류: '+meta.n+(pickedStocks.length?' · 연결 종목: '+pickedStocks.join(', '):'')+(kind==='stock'?' · 종목에서 확인할 수 있습니다.':'');
+  var save=document.getElementById('mSave');if(save&&!_recordSaving)save.textContent=meta.n+' 저장';
+}
+/* 추가 정보는 기본으로 접되 저장된 내용이 있다는 표시를 남긴다. */
 function updateMoreFieldsBadge(r){
   var badge = document.getElementById('moreFieldsBadge');
   var more = document.getElementById('moreFields');
@@ -1316,8 +1357,10 @@ function updateMoreFieldsBadge(r){
   var n = 0;
   if(r.aiInterpretation) n++;
   if(r.scenarios && scenarioHasContent(r.scenarios)) n++;
+  ['oneLiner','userJudgment','channel','verifyState','action','star'].forEach(function(k){if(r[k])n++;});
+  if((r.topics||[]).length)n++;
   badge.textContent = n ? ('저장된 내용 '+n+'개') : '';
-  more.open = n>0;
+  more.open = false;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1460,7 +1503,7 @@ function draftsApi(){
 var FU = null, _fuReady = null;
 function followupsStart(){
   if(!db || !uid) return Promise.resolve();
-  if(!_fuReady) _fuReady=import('./js/followups-app.mjs?v=7.33.0').then(function(m){
+  if(!_fuReady) _fuReady=import('./js/followups-app.mjs?v=7.34.0').then(function(m){
     FU=m.init({db:db,storage:storage,records:function(){return records;},studyNeedsReview:studyNeedsReview,toast:toast,openRecord:goRecord,workspace:RecordWorkspace,account:function(){return uid;},
       count:function(n){document.getElementById('cntLabel').textContent=n+'건';},
       changed:function(){renderKtabs();renderTodos();if(laterMode)renderLaterMode();else if(stockMode||curView==='cal')render();if(PAGE_OPEN&&document.getElementById('pageModal').classList.contains('on'))FU.decoratePage(document.getElementById('pgBody'),PAGE_OPEN);}}); return FU;
@@ -3401,15 +3444,16 @@ function defaultAddKind(){
   if(KINDS[curKind] && curKind!=='study') return curKind;
   return 'memo';
 }
-function openAdd(){
+function openAdd(options){
   if(!RecordWorkspace.prepare('recModal'))return;
-  if(curKind==='study' && !stockMode && !IN_WORKSPACE){ studyDo(function(api){ return api.newNote(); }); return; }
-  EDIT = null; pickedStocks = stockMode && curStockTab ? [curStockTab] : []; pickedAttachments = [];
+  if(curKind==='study' && !stockMode && !IN_WORKSPACE && !(options&&options.stock)){ studyDo(function(api){ return api.newNote(); }); return; }
+  var forStock=options&&typeof options.stock==='string'?options.stock:(stockMode?curStockTab:'');
+  EDIT = null; pickedStocks = forStock ? [forStock] : []; pickedAttachments = [];
   _recordOriginal=null;_recordNewId=db?db.collection('records').doc().id:null;_recordSaving=false;
-  document.getElementById('mTitle').textContent = '＋ 기록 추가';
+  document.getElementById('mTitle').textContent = forStock ? forStock+' · 기록 남기기' : '＋ 기록 추가';
   document.getElementById('mDel').style.display = 'none';
   _curEditingAction = '';
-  var startKind = stockMode ? 'memo' : defaultAddKind();
+  var startKind = forStock ? 'stock' : defaultAddKind();
   renderKindPick(startKind);
   applyKindFields(startKind);
   document.getElementById('kindPick').style.display = 'none';
@@ -3495,6 +3539,7 @@ function renderStockTags(){
   document.getElementById('stockTagsBox').innerHTML = pickedStocks.map(function(s){
     return '<span class="stockTag">'+esc(s)+'<button type="button" data-rm="'+esc(s)+'">✕</button></span>';
   }).join('');
+  RecordWorkspace.setContext(pickedStocks[0]||'');updateRecordDestination();
   document.getElementById('stockTagsBox').querySelectorAll('[data-rm]').forEach(function(b){
     b.addEventListener('click', function(){
       pickedStocks = pickedStocks.filter(function(s){ return s!==b.getAttribute('data-rm'); });
@@ -3532,6 +3577,7 @@ document.getElementById('mSave').addEventListener('click', function(){
   var body = document.getElementById('fBody').value;
   var link = document.getElementById('fLink').value.trim();
   var kind = curPickedKind();
+  if(kind==='stock'&&!pickedStocks.length){toast('종목 기록에 연결할 종목을 입력하고 추가해 주세요.');document.getElementById('stockInput').focus();return;}
   /* v7.28: 최소 저장 조건 — 제목/본문/링크/사진 중 하나만 있어도 저장(완전히 빈 기록만 차단).
      제목이 비었으면 저장 시 1회만 자동 채움(본문 첫 줄 → 사진만 있으면 "사진 기록·날짜" → 링크 도메인 → 종류명),
      사용자가 이미 적은 제목은 절대 덮지 않는다. */
@@ -4113,6 +4159,7 @@ function stockSaveAction(button,work,done){
 }
 function openStockDetail(name){
   if(!RecordWorkspace.prepare('stockDetailModal'))return;
+  RecordWorkspace.setContext(name);
   if(_stockSaving){toast('현재 저장을 마친 뒤 열어주세요');return;}
   _sdCurName = name;
   document.getElementById('sdName').textContent = '🏷 '+name;
@@ -4265,9 +4312,15 @@ makeDraggable(document.querySelector('#stockDetailModal .modal'));
 
 RecordWorkspace.register('recModal',recordCanLeave);
 RecordWorkspace.register('stockDetailModal',stockCanLeave);
+window.addEventListener('records-editor-navigate',function(e){
+  var d=e.detail;
+  if(d.target==='recModal')openAdd({stock:d.stock});
+  else if(d.target==='followupModal')openFollowup(null,{stocks:d.stock?[d.stock]:[]});
+  else if(d.target==='stockDetailModal'&&d.stock)openStockDetail(d.stock);
+});
 window.addEventListener('records-editor-closed',function(){if(PAGE_OPEN&&document.getElementById('pageModal').classList.contains('on'))openPage(PAGE_OPEN,{fromRoute:true});});
 window.addEventListener('beforeunload',function(e){if((_recordSaving||_stockSaving)||(RecordWorkspace.active==='recModal'&&recordIsDirty())||(RecordWorkspace.active==='stockDetailModal'&&stockHasUnsavedFields())){e.preventDefault();e.returnValue='';}});
-console.log('[기록보관실] v7.33.0 준비됨 — 3열 입력·종목 요약·다단 출력');
+console.log('[기록보관실] v7.34.0 준비됨 — 간단 입력·종목 기록 분류·계정 안내');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
