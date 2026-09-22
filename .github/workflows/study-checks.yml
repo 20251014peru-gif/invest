@@ -1,9 +1,9 @@
 name: Study notes checks
 on:
   pull_request:
-    paths: ['records.html', 'journal.html', 'js/study/**', 'js/records-reading.*', 'js/records-stocks.*', 'js/records-workspace.*', 'js/records-stock-workflow.js', 'tests/records-workflow*', 'tests/records-stocks.test.cjs', 'js/followups*', 'tests/followups*', 'tests/records-reading.test.cjs', 'js/research-tools.mjs', 'js/research-dashboard-core.mjs', 'tests/study-*.mjs', 'tests/study-browser/**', 'tools/study-editor/**', '.github/workflows/study-checks.yml']
+    paths: ['records.html', 'journal.html', 'js/study/**', 'js/records-reading.*', 'js/records-stocks.*', 'js/records-workspace.*', 'js/records-stock-workflow.js', 'tests/records-workflow*', 'tests/records-layout*', 'tests/records-stocks.test.cjs', 'js/followups*', 'tests/followups*', 'tests/records-reading.test.cjs', 'js/research-tools.mjs', 'js/research-dashboard-core.mjs', 'tests/study-*.mjs', 'tests/study-browser/**', 'tools/study-editor/**', '.github/workflows/study-checks.yml']
   push:
-    paths: ['records.html', 'journal.html', 'js/study/**', 'js/records-reading.*', 'js/records-stocks.*', 'js/records-workspace.*', 'js/records-stock-workflow.js', 'tests/records-workflow*', 'tests/records-stocks.test.cjs', 'js/followups*', 'tests/followups*', 'tests/records-reading.test.cjs', 'js/research-tools.mjs', 'js/research-dashboard-core.mjs', 'tests/study-*.mjs', 'tests/study-browser/**', 'tools/study-editor/**', '.github/workflows/study-checks.yml']
+    paths: ['records.html', 'journal.html', 'js/study/**', 'js/records-reading.*', 'js/records-stocks.*', 'js/records-workspace.*', 'js/records-stock-workflow.js', 'tests/records-workflow*', 'tests/records-layout*', 'tests/records-stocks.test.cjs', 'js/followups*', 'tests/followups*', 'tests/records-reading.test.cjs', 'js/research-tools.mjs', 'js/research-dashboard-core.mjs', 'tests/study-*.mjs', 'tests/study-browser/**', 'tools/study-editor/**', '.github/workflows/study-checks.yml']
 permissions:
   contents: read
 jobs:

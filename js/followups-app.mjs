@@ -1,10 +1,11 @@
-import * as C from './followups-core.mjs?v=7.32.0';
-import {makeFollowupStore} from './followups-store.mjs?v=7.32.0';
+import * as C from './followups-core.mjs?v=7.33.0';
+import {makeFollowupStore} from './followups-store.mjs?v=7.33.0';
 const uid=()=>crypto.randomUUID();
 const errorText=e=>({CONFLICT:'다른 기기에서 변경됐습니다. 입력은 그대로 두고, 새로 열어 최신 내용과 비교해 주세요.',RESULT_REQUIRED:'확인 결과를 한 줄 적어 주세요.',QUESTION_REQUIRED:'확인할 질문을 적어 주세요.',PAUSE_REASON_REQUIRED:'보류 이유를 결과 칸에 적어 주세요.',BAD_URL:'근거 링크는 http 또는 https 주소로 넣어 주세요.',TOO_LARGE:'내용이 너무 큽니다. 후속 확인으로 나눠 주세요.',IMAGE_SIZE:'사진은 한 장당 8MB까지 가능합니다.',IMAGE_TYPE:'PNG·JPG·GIF·WebP 사진을 선택해 주세요.'}[e.message]||'저장소 연결을 확인하고 다시 시도해 주세요. ('+(e.code||e.message)+')');
 const button=(text,action,cls='')=>'<button type="button" class="fu-button '+cls+'" data-fu="'+action+'">'+text+'</button>';
 const options=(map,value)=>Object.entries(map).map(([k,v])=>'<option value="'+C.esc(k)+'"'+(value===k?' selected':'')+'>'+C.esc(v)+'</option>').join('');
 const field=(label,id,value,type='text')=>'<label class="fu-field">'+label+(type==='textarea'?'<textarea id="'+id+'" rows="3">'+C.esc(value)+'</textarea>':'<input id="'+id+'" type="'+type+'" value="'+C.esc(value)+'">')+'</label>';
+const step=(n,title,hint)=>'<section class="rw-step"><div class="rw-step-head"><span>'+n+'</span><div><h3>'+title+'</h3><p>'+hint+'</p></div></div>';
 const stamp=t=>t?new Date(t).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',hour12:false}):'';
 function download(data,name){const u=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),30000);}
 async function dataURL(blob){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(blob);});}
@@ -73,16 +74,21 @@ export function init(bridge){
       }catch{}
       const r=active;
       $('fuBody').innerHTML='<div class="fu-status">'+C.STATES[r.state]+(r.legacyCompleted?' · 기존 완료 · 결과 미기록':'')+'</div>'+(savedDraft?'<div class="fu-draft">'+(legacyDraftKey?'이전 버전의 임시 입력입니다. 관련 종목과 내용을 확인한 뒤 복원하세요. ':'이 기기에 저장 전 내용이 있습니다. ')+button('입력 복원','draft')+button('임시 내용 버리기','discard')+'</div>':'')
+        +'<p class="rw-intro">새 질문은 ①부터 작성해 저장하세요. 확인한 뒤 같은 화면의 ② 결과와 ③ 판단을 채워 완료합니다.</p><div class="rw-grid">'
+        +step('01','무엇을 확인하나요?','질문 · 종목 · 예정일')
         +field('확인할 질문','fuQuestion',r.question)+field('관련 종목 (여러 개는 쉼표로 구분)','fuStocks',(r.stocks||[]).join(', '))+ '<div class="fu-two">'+field('다음 확인 예정일','fuDue',r.dueAt,'date')+field('자료 기준일 (선택)','fuBasis',r.basisDate,'date')+'</div>'
-        +'<details '+(r.expectation?'open':'')+'><summary>당시 예상·조건</summary>'+field('무엇을 예상했는가','fuExpected',r.expectation,'textarea')+'</details>'
+        +field('당시 예상·조건 (선택)','fuExpected',r.expectation,'textarea')+'</section>'
+        +step('02','확인한 결과와 근거','확인 후 작성 · 사진과 링크 첨부')
         +field('확인 결과 · 보류라면 이유','fuResult',r.result,'textarea')
-        +'<div class="fu-evidence"><label class="fu-upload">📷 사진 추가<input id="fuFiles" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden></label><div id="fuAssets"></div>'+field('근거 링크 (한 줄에 하나)','fuLinks',(r.links||[]).map(l=>l.url).join('\n'),'textarea')+'</div>'
+        +'<div class="fu-evidence"><label class="fu-upload">📷 사진 추가<input id="fuFiles" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple></label><div id="fuAssets"></div>'+field('근거 링크 (한 줄에 하나)','fuLinks',(r.links||[]).map(l=>l.url).join('\n'),'textarea')+'</div>'
+        +'<details><summary>관련 자료 · 앞선 확인</summary><div id="fuSources"></div>'+button('관련 자료 선택','sources')+(r.parentFollowupId?button('앞선 확인 기록','parent'):'')+items.filter(x=>x.parentFollowupId===r.id).map(x=>'<button class="fu-button" data-open-fu="'+C.esc(x.id)+'">'+C.esc(x.question)+'</button>').join('')+'</details></section>'
+        +step('03','판단과 다음 행동','예상 비교 · 판단 변화 · 복기')
         +'<div class="fu-two"><label class="fu-field">판단 변화<select id="fuJudgment">'+options(C.JUDGMENTS,r.judgment||'pending')+'</select></label><label class="fu-field">예상과 비교<select id="fuComparison">'+options(C.COMPARISONS,r.comparison||'')+'</select></label></div>'
-        +'<details '+(r.changeReason||r.nextAction||r.observedChange||r.lesson?'open':'')+'><summary>변화 이유 · 다음 행동 · 사후 복기</summary>'+field('판단을 바꾼 이유','fuReason',r.changeReason,'textarea')+field('다음에 할 일','fuNext',r.nextAction,'textarea')+field('이후 실제로 관찰한 변화','fuObserved',r.observedChange,'textarea')+field('배운 점','fuLesson',r.lesson,'textarea')+'</details>'
-        +'<details><summary>관련 자료 · 후속 확인</summary><div id="fuSources"></div>'+button('관련 자료 선택','sources')+(r.parentFollowupId?button('앞선 확인 기록','parent'):'')+items.filter(x=>x.parentFollowupId===r.id).map(x=>'<button class="fu-button" data-open-fu="'+C.esc(x.id)+'">'+C.esc(x.question)+'</button>').join('')+'</details>'
+        +field('판단을 바꾼 이유 (선택)','fuReason',r.changeReason,'textarea')+field('다음에 할 일 (선택)','fuNext',r.nextAction,'textarea')
+        +'<details '+(r.observedChange||r.lesson?'open':'')+'><summary>나중에 돌아보기 · 배운 점</summary>'+field('이후 실제로 관찰한 변화','fuObserved',r.observedChange,'textarea')+field('배운 점','fuLesson',r.lesson,'textarea')+'</details></section></div>'
         +'<div class="fu-actions">'+button('확인 이력 보기','history')+(r.revision?button('후속 질문 만들기','followup'):'')+(['done','paused'].includes(r.state)?button(r.state==='paused'?'확인 재개':'다시 열기','reopen'):'')+'</div><div id="fuHistory"></div><p class="fu-error" id="fuError" role="status"></p>';
       overlay.classList.add('on');overlay.scrollTop=0;overlay.querySelector('.modal').scrollTop=0;drawAssets();drawSources();
-      $('fuJudgment').onchange=function(){if(this.value==='change'||this.value==='withdraw')$('fuReason').closest('details').open=true;};
+      $('fuJudgment').onchange=function(){if(this.value==='change'||this.value==='withdraw')$('fuReason').focus();};
       $('fuFiles').onchange=async e=>{setBusy(true);$('fuError').textContent='사진을 보관하는 중입니다…';try{for(const f of e.target.files)assets.push(await store.upload(f));dirty=true;op=null;drawAssets();draft();$('fuError').textContent='사진 보관됨 · 결과를 저장해 주세요';}catch(err){$('fuError').textContent=errorText(err);}finally{e.target.value='';setBusy(false);}};
       overlay.querySelectorAll('[data-open-fu]').forEach(b=>b.onclick=()=>open(b.dataset.openFu));
       overlay.querySelectorAll('[data-fu]').forEach(b=>b.onclick=()=>editorAction(b.dataset.fu,savedDraft));

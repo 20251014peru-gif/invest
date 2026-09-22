@@ -12,7 +12,7 @@ const output=path.resolve(process.env.TEST_OUTPUT_DIR||'test-results/records-wor
     const original=await p.evaluate(()=>JSON.stringify(__mockDump().records));
     await p.locator('#btnStockMgr').click();await p.locator('#content [data-stocktab="가상전자"]').first().click();
     assert.match(await p.locator('.stockOverview').textContent(),/수익성 회복/);
-    assert.equal(await p.locator('#content details.stockDetails').getAttribute('open'),null);
+    assert.ok(await p.locator('#content .stockDetails').isVisible());
     assert.equal(await p.locator('#content .stockTask').count(),1);
     await p.screenshot({path:path.join(output,'desktop.png'),fullPage:true});
     await p.locator('#content [data-stockopen]').click();await p.waitForSelector('body.rw-active');
