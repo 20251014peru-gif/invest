@@ -1,7 +1,7 @@
 #recordEditorHost[hidden]{display:none!important}
 body.rw-active{overflow:auto!important}
 body.rw-active #content,body.rw-active #toolbar,body.rw-active #pageModal,body.rw-active #stockModal,body.rw-active #stockLogModal,body.rw-active #dayModal,body.rw-active .widgetEdge,body.rw-active .recSide{display:none!important}
-#recordEditorHost{max-width:980px;margin:0 auto 32px;scroll-margin-top:16px}
+#recordEditorHost{max-width:1600px;margin:0 auto 32px;scroll-margin-top:16px}
 #recordEditorHost .rw-panel{position:static;inset:auto;background:none;padding:0;z-index:auto;min-height:0}
 #recordEditorHost .rw-panel.on{display:block}
 #recordEditorHost .modal{position:static!important;transform:none!important;left:auto!important;top:auto!important;width:100%;max-width:none!important;max-height:none!important;height:auto;overflow:visible;box-shadow:none;border:1px solid var(--line);border-radius:14px}
@@ -26,3 +26,118 @@ body.rw-active #content,body.rw-active #toolbar,body.rw-active #pageModal,body.r
 @media print{body.stock-printing>*{display:none!important}body.stock-printing>#stockPrintView{display:block!important;padding:0;max-width:none}.stockPrintActions{display:none!important}.stockPrintView h2,.stockPrintView h3{break-after:avoid}.stockPrintView img{break-inside:avoid}.stockPrintView a{color:inherit}.stockPrintView{font-size:11pt;color:#111}@page{margin:16mm}}
 
 #toolbar .vicon[hidden]{display:none}
+
+/* Shared, numbered writing surface. DOM order is also the keyboard/mobile reading order. */
+#recordEditorHost .mbody{padding:20px;background:#fcfbf7}
+.rw-intro{margin:0 0 16px;color:var(--sub,#6c675c);font-size:13px;line-height:1.65}
+.rw-grid{display:grid;grid-template-columns:minmax(240px,.9fr) minmax(300px,1.25fr) minmax(270px,1fr);gap:16px;align-items:start}
+.rw-step{min-width:0;border:1px solid var(--line,#e6dfce);border-radius:12px;background:#fff;padding:18px}
+.rw-step-head{display:flex;align-items:flex-start;gap:10px;border-bottom:1px solid var(--line,#e6dfce);padding-bottom:14px;margin-bottom:18px}
+.rw-step-head>span{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:9px;background:#f5e9b4;color:#79621a;font-size:12px;font-weight:800}
+.rw-step-head h3{margin:0;font-size:16px;line-height:1.5;color:var(--txt,#2f2f2c)}
+.rw-step-head p{margin:3px 0 0;font-size:12px;color:var(--sub,#6c675c);line-height:1.5}
+#recordEditorHost .frow{margin:0 0 16px;min-width:0}
+#recordEditorHost .frow:last-child{margin-bottom:0}
+#recordEditorHost .frow>label{display:block;font-size:12px;line-height:1.6;margin-bottom:6px}
+#recordEditorHost input,#recordEditorHost textarea,#recordEditorHost select{max-width:100%;box-sizing:border-box;font-family:inherit}
+#recordEditorHost textarea{line-height:1.65}
+#recordEditorHost .frow2{gap:10px}
+#recordEditorHost .frow2>.frow{min-width:0}
+#recordEditorHost #fBody{min-height:220px!important}
+#recordEditorHost #fUserJudge{min-height:115px!important}
+#recordEditorHost #fDate{max-width:none!important}
+#recordEditorHost #kindSwitchBtn[hidden]{display:none}
+#recordEditorHost #kindPick{display:flex!important;gap:5px;flex-wrap:wrap;margin-bottom:16px!important}
+#recordEditorHost .kindSwitchRow{margin-bottom:8px}
+#recordEditorHost #kindPick button{padding:7px 9px;font-size:12px;min-height:34px}
+#recordEditorHost .stockAdd{gap:6px}
+#recordEditorHost .stockAdd input{width:0;min-width:0;flex:1}
+#recordEditorHost .attDrop{padding:12px;font-size:12px}
+#recordEditorHost .attHint{font-size:11px}
+#recordEditorHost .attGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+#recordEditorHost #moreFields{margin-top:16px}
+#recordEditorHost #moreFields .moreFieldsBody{display:grid;grid-template-columns:1fr 2fr;gap:20px;padding:16px}
+#recordEditorHost #moreFields:not([open]) .moreFieldsBody{display:none}
+#recordEditorHost .mfoot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 20px;box-shadow:0 -4px 14px #40330d08}
+#recordEditorHost .mfoot button{min-height:42px;padding:10px 18px;border-radius:8px;font:inherit;font-size:13px;cursor:pointer}
+#recordEditorHost .mfoot #mSave{flex:0 0 auto;min-width:140px}
+#recordEditorHost .rw-cancel{background:#fff;color:var(--sub);border:1px solid var(--line);margin-right:auto}
+#recordEditorHost #mDel{order:-1;background:none;color:var(--warn);border:1px solid var(--line)}
+#recordEditorHost .rw-grid-stock{grid-template-columns:minmax(260px,1fr) minmax(0,2fr)}
+#recordEditorHost #sdTradeInfo{border:0;padding:0;margin:0}
+#recordEditorHost #sdTradeInfo>summary[hidden]{display:none}
+#recordEditorHost #sdCustomFields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:16px}
+#recordEditorHost .cfRow{display:grid;grid-template-columns:1fr auto;gap:6px;padding:0;border:0;align-items:start}
+#recordEditorHost .cfRow label{max-width:none;grid-column:1;line-height:1.5}
+#recordEditorHost .cfRow .cfVal{grid-column:1 / -1;grid-row:2;width:100%;min-height:86px}
+#recordEditorHost .cfRow .cfDel{grid-column:2;grid-row:1}
+#recordEditorHost .cfAddRow{display:grid;grid-template-columns:minmax(90px,1fr) minmax(100px,2fr) auto;gap:8px}
+#recordEditorHost .cfAddRow input{width:100%;min-width:0}
+#recordEditorHost #sdSaveFields{background:var(--gold,#c5a12a);border:0;color:#fff;font-weight:700}
+#recordEditorHost .stockSaveStatus{flex-basis:100%;margin:0}
+#recordEditorHost .stockSaveStatus:empty{display:none}
+.rw-history{margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.rw-history>summary{cursor:pointer;font-weight:700;font-size:13px}
+.rw-history-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+#recordEditorHost .fu-status{display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:6px;background:#f5efdc}
+#recordEditorHost .fu-field{margin:0 0 16px;font-size:12px;gap:6px;line-height:1.6}
+#recordEditorHost .fu-field input,#recordEditorHost .fu-field select,#recordEditorHost .fu-field textarea{font-size:13px;padding:10px;border-radius:8px}
+#recordEditorHost #fuResult{min-height:180px}
+#recordEditorHost .fu-evidence{padding:0;border:0}
+#recordEditorHost .fu-upload{display:block;background:#faf7ed;border:1px dashed var(--line);padding:12px;border-radius:8px;font-size:12px}
+#recordEditorHost .fu-upload input{display:block;margin-top:8px;width:100%;font-size:12px}
+#recordEditorHost #fuAssets{grid-template-columns:repeat(2,minmax(0,1fr))}
+#recordEditorHost .fu-foot>[data-fu=close]{margin-right:auto}
+#recordEditorHost .rw-step details{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+#recordEditorHost .rw-step details summary{font-size:12px;font-weight:700;cursor:pointer;line-height:1.7;margin-bottom:10px}
+#recordEditorHost :is(button,input,textarea,select,summary):focus-visible{outline:3px solid #bb933c;outline-offset:3px}
+.stockDashboard{display:grid;grid-template-columns:1fr 1fr 1.15fr;gap:14px;align-items:start;margin:16px 0 22px}
+.stockDashboard>section{margin:0;min-width:0;padding:18px;height:100%;box-sizing:border-box}
+.stockDashboard .stockSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;background:none;border:0;padding:0;margin:0 0 16px}
+.stockDashboard .stockSummary>div{min-width:0;overflow-wrap:anywhere;white-space:pre-wrap;line-height:1.65;font-size:13px}
+.stockDashboard .stockSummary b{display:block;font-size:11px;color:var(--sub);margin-bottom:4px}
+.stockDashboard .stockDetails .stockSummary{grid-template-columns:1fr;margin:0}
+.stockDashboard .stockReason{border-top:1px solid var(--line);padding-top:12px;font-size:13px}
+.stockDashboard .stockCompleted{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.stockDashboard .stockTask{align-items:flex-start;flex-direction:column;gap:5px;padding:10px 0}
+.stockDashboard .stockSectionHd{margin-bottom:14px}
+.stockDashboard .stockHint{margin-bottom:0}
+
+/* Preview and paper use the same multi-column document flow. Long entries can continue on the next page. */
+body.stock-printing .stockPrintView{max-width:1300px;padding:28px 36px;--print-cols:2}
+body.stock-printing{background:white}
+.stockPrintActions{position:sticky;top:0;background:#f9f6ea;padding:12px;align-items:center;flex-wrap:wrap;border:1px solid #ddd4bb;border-radius:10px;font-size:12px;margin-bottom:28px;z-index:2}
+.stockPrintActions select{padding:8px;border:1px solid #ccc;border-radius:6px;background:#fff;font:inherit}
+.stockPrintActions [data-print-now]{margin-left:auto;background:#625332;color:white}
+.stockPrintView h1{margin:0 0 6px;font-size:25px}
+.stockPrintView .printDate,.stockPrintView .printMeta{font-size:11px;color:#656565}
+.stockPrintView h2{font-size:16px;border-bottom:2px solid #777;padding-bottom:7px;margin:16px 0 12px}
+.stockPrintView h3{font-size:14px;margin:0 0 6px;overflow-wrap:anywhere;line-height:1.5}
+.stockPrintView section{margin:18px 0}
+.stockPrintView .stockPrintSummary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 20px;margin:0}
+.stockPrintSummary>div{display:grid;grid-template-columns:minmax(65px,.32fr) minmax(0,1fr);gap:8px;align-items:baseline;border-bottom:1px solid #ddd;padding:6px 0;break-inside:avoid}
+.stockPrintView dt{font-size:11px;color:#555}
+.stockPrintView dd{margin:0;font-size:13px}
+.stockPrintColumns{column-count:var(--print-cols,2);column-gap:24px;column-rule:1px solid #dedede}
+.stockPrintColumns>h2:first-child{margin-top:0}
+.stockPrintView article{padding:10px 0 12px;margin:0 0 10px;border-bottom:1px solid #ccc;break-inside:avoid-column}
+.stockPrintView p{font-size:13px;margin:6px 0;line-height:1.6;orphans:3;widows:3}
+.stockPrintView figure{margin:10px 0;break-inside:avoid}
+.stockPrintView img{max-height:240px;max-width:100%;object-fit:contain}
+.stockPrintView figcaption{font-size:10px;color:#555;overflow-wrap:anywhere}
+@media(max-width:1150px){.rw-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rw-grid>.rw-step:last-child{grid-column:1 / -1}.rw-grid-stock>.rw-step:last-child{grid-column:auto}.stockDashboard{grid-template-columns:1fr 1fr}.stockDashboard>.stockChecks{grid-column:1 / -1}.stockDashboard .stockTask{flex-direction:row;justify-content:space-between}}
+@media screen and (max-width:700px){#recordEditorHost .mbody{padding:12px}.rw-grid,#recordEditorHost .rw-grid-stock,.stockDashboard{grid-template-columns:minmax(0,1fr)}.rw-step{padding:14px}.rw-grid>.rw-step:last-child,.stockDashboard>.stockChecks{grid-column:auto}#recordEditorHost #moreFields .moreFieldsBody,.rw-history-grid{grid-template-columns:1fr}#recordEditorHost .mfoot{padding:10px;gap:6px}#recordEditorHost .mfoot button{padding:10px 12px}#recordEditorHost #sdCustomFields{grid-template-columns:1fr}#recordEditorHost .cfAddRow{grid-template-columns:1fr auto}#recordEditorHost .cfAddRow #sdCfLabel{grid-column:1 / -1}#recordEditorHost .frow2{display:flex}#recordEditorHost .fu-two{grid-template-columns:1fr 1fr}body.stock-printing .stockPrintView{padding:14px}.stockPrintColumns{column-count:1}.stockPrintView .stockPrintSummary{grid-template-columns:1fr 1fr}.stockPrintActions{position:static}.stockPrintActions [data-print-now]{margin-left:0}}
+@media print{
+  @page{size:A4 landscape;margin:12mm}
+  body.stock-printing>#stockPrintView{padding:0;max-width:none;font-size:10pt}
+  .stockPrintActions{display:none!important}
+  .stockPrintView h1{font-size:18pt}.stockPrintView h2{font-size:12pt;break-after:avoid}
+  .stockPrintView h3{font-size:10.5pt;break-after:avoid}
+  .stockPrintView p,.stockPrintView dd{font-size:9.5pt;line-height:1.5}
+  .stockPrintView p{margin:4px 0}.stockPrintView h2{margin:12px 0 8px}
+  .stockPrintView .stockPrintSummary{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .stockPrintColumns{column-count:var(--print-cols,2);column-gap:7mm}
+  .stockPrintView article{break-inside:avoid-column;padding:5px 0 7px;margin:0 0 6px}.stockPrintView article.printLong{break-inside:auto}
+  .stockPrintView img{max-height:50mm}.stockPrintView figure{break-inside:avoid}
+  .stockPrintView .printDate,.stockPrintView .printMeta,.stockPrintView dt{font-size:8pt}
+}

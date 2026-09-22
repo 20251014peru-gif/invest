@@ -1,4 +1,4 @@
-import * as C from './followups-core.mjs?v=7.32.0';
+import * as C from './followups-core.mjs?v=7.33.0';
 export function makeFollowupStore(db,storage){
   const col=db.collection('record_followups'),reviews=db.collection('record_followup_reviews');
   const rows=s=>s.docs.map(d=>({...d.data(),id:d.id}));

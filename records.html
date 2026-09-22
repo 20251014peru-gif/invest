@@ -9,8 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="js/study/study.css?v=7.27.2">
-<link rel="stylesheet" href="js/records-stocks.css?v=7.32.0">
-<link rel="stylesheet" href="js/records-workspace.css?v=7.32.0">
+<link rel="stylesheet" href="js/records-stocks.css?v=7.33.0">
+<link rel="stylesheet" href="js/records-workspace.css?v=7.33.0">
 <style>
 /* ══════════════════════════════════════════════════════════
    🗂 투자 기록보관실  v7.27.2-0917-1400
@@ -601,7 +601,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1>🗂 투자 기록보관실</h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
-  <span class="ver">v7.32.0 · 서희타워</span>
+  <span class="ver">v7.33.0 · 서희타워</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -1015,9 +1015,9 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 </div>
 <div id="recordLoadError" role="alert" hidden style="position:fixed;bottom:16px;left:16px;right:16px;z-index:90;background:#fff4e2;border:1px solid #c28e34;border-radius:10px;padding:14px;color:#754d13"></div>
 <div class="toast" id="toast"></div>
-<script src="js/records-stocks.js?v=7.32.0"></script>
-<script src="js/records-workspace.js?v=7.32.0"></script>
-<script src="js/records-stock-workflow.js?v=7.32.0"></script>
+<script src="js/records-stocks.js?v=7.33.0"></script>
+<script src="js/records-workspace.js?v=7.33.0"></script>
+<script src="js/records-stock-workflow.js?v=7.33.0"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -1208,36 +1208,18 @@ const KIND_FIELDS = {
     bodyPh:'자유롭게 적어주세요 — 사진만 남겨도 괜찮아요'
   }
 };
-/* v7.28: 종류별 1차 화면 배치 — photoFirst 는 사진 섹션을 본문보다 위에,
-   showLinkPrimary/showReasonPrimary 는 링크·이유배경 행을 1차 화면에 남길지(아니면 "추가 속성"으로) 결정.
-   본문/사진은 모든 종류에서 항상 1차 화면(스펙: 사진 버튼은 어떤 작성창에서도 항상 접근 가능). */
+/* 기록 종류가 바뀌어도 분류·본문·판단의 위치는 고정한다.
+   차트만 사진을 본문 앞에 놓으며 같은 DOM을 옮겨 입력과 리스너를 보존한다. */
 const KIND_PRIMARY = {
-  youtube: {photoFirst:false, showLinkPrimary:true,  showReasonPrimary:false},
-  news:    {photoFirst:false, showLinkPrimary:true,  showReasonPrimary:false},
-  idea:    {photoFirst:false, showLinkPrimary:false, showReasonPrimary:true},
-  chart:   {photoFirst:true,  showLinkPrimary:false, showReasonPrimary:false},
-  memo:    {photoFirst:false, showLinkPrimary:false, showReasonPrimary:false}
+  youtube: {photoFirst:false}, news: {photoFirst:false}, idea: {photoFirst:false},
+  chart: {photoFirst:true}, memo: {photoFirst:false}
 };
-/* 1차 화면 안에서 rowTitle/rowAttach/rowBody/rowOneLiner/rowLink 를 종류에 맞는 순서로 재배치하고,
-   1차가 아닌 행은 "추가 속성"(#moreFields) 맨 앞으로 옮긴다 — 필드 자체(및 리스너)는 그대로 두고
-   DOM 위치만 옮기므로 값 read/write 코드는 손대지 않는다. */
 function layoutKindPrimary(kind){
   var cfg = KIND_PRIMARY[kind] || KIND_PRIMARY.memo;
   var zone = document.getElementById('primaryZone');
-  var more = document.querySelector('#moreFields .moreFieldsBody');
-  var rowTitle = document.getElementById('rowTitle');
   var rowAttach = document.getElementById('rowAttach');
   var rowBody = document.getElementById('rowBody');
-  var rowOneLiner = document.getElementById('rowOneLiner');
-  var rowLink = document.getElementById('rowLink');
-  var order = [rowTitle];
-  if(cfg.photoFirst) order.push(rowAttach);
-  order.push(rowBody);
-  if(!cfg.photoFirst) order.push(rowAttach);
-  if(cfg.showReasonPrimary){ order.push(rowOneLiner); rowOneLiner.style.display=''; }
-  else { more.insertBefore(rowOneLiner, more.firstChild); }
-  if(cfg.showLinkPrimary){ order.push(rowLink); }
-  else { more.insertBefore(rowLink, more.firstChild); }
+  var order = cfg.photoFirst ? [rowAttach,rowBody] : [rowBody,rowAttach];
   order.forEach(function(el){ zone.appendChild(el); });
 }
 
@@ -1308,9 +1290,9 @@ function applyKindFields(kind){
   var f = KIND_FIELDS[kind] || KIND_FIELDS.memo;
   document.getElementById('lblOneLiner').textContent = f.oneLinerLbl;
   document.getElementById('fOneLiner').placeholder = f.oneLinerPh;
-  document.getElementById('rowChannel').style.display = f.showChannel ? '' : 'none';
+  document.getElementById('rowChannel').style.display = '';
   document.getElementById('lblChannel').textContent = f.chBoxLbl;
-  document.getElementById('rowLink').style.display = f.showLink ? '' : 'none';
+  document.getElementById('rowLink').style.display = '';
   document.getElementById('lblLink').textContent = f.linkLbl;
   document.getElementById('rowAction').style.display = f.showAction ? '' : 'none';
   document.getElementById('lblAction').textContent = f.actionLbl;
@@ -1325,25 +1307,17 @@ function applyKindFields(kind){
   var kn = document.getElementById('kindNowLabel');
   if(kn) kn.textContent = km.i + ' ' + km.n;
 }
-/* v7.28: "기존 추가 정보 N개" 뱃지 — 추가 속성 패널을 열어보지 않아도 값이 있다는 걸 알려준다.
-   패널은 항상 같은 DOM(값 유지)이라 이 카운트는 표시용일 뿐, 저장 시 값 손실과는 무관하다. */
+/* 접힌 상세 영역에 남은 AI 해석·시나리오만 집계하고, 기존 내용이 있으면 펼친다. */
 function updateMoreFieldsBadge(r){
   var badge = document.getElementById('moreFieldsBadge');
   var more = document.getElementById('moreFields');
   if(!badge || !more) return;
   if(!r){ badge.textContent=''; more.open=false; return; }
   var n = 0;
-  if(r.channel) n++;
-  if((r.stocks||[]).length) n++;
-  if((r.topics||[]).length) n++;
-  if(r.action) n++;
-  if(r.star) n++;
-  if(r.verifyState) n++;
   if(r.aiInterpretation) n++;
-  if(r.userJudgment) n++;
   if(r.scenarios && scenarioHasContent(r.scenarios)) n++;
-  if((r.checks||[]).length) n++;
-  badge.textContent = n ? ('기존 추가 정보 '+n+'개') : '';
+  badge.textContent = n ? ('저장된 내용 '+n+'개') : '';
+  more.open = n>0;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1486,7 +1460,7 @@ function draftsApi(){
 var FU = null, _fuReady = null;
 function followupsStart(){
   if(!db || !uid) return Promise.resolve();
-  if(!_fuReady) _fuReady=import('./js/followups-app.mjs?v=7.32.0').then(function(m){
+  if(!_fuReady) _fuReady=import('./js/followups-app.mjs?v=7.33.0').then(function(m){
     FU=m.init({db:db,storage:storage,records:function(){return records;},studyNeedsReview:studyNeedsReview,toast:toast,openRecord:goRecord,workspace:RecordWorkspace,account:function(){return uid;},
       count:function(n){document.getElementById('cntLabel').textContent=n+'건';},
       changed:function(){renderKtabs();renderTodos();if(laterMode)renderLaterMode();else if(stockMode||curView==='cal')render();if(PAGE_OPEN&&document.getElementById('pageModal').classList.contains('on'))FU.decoratePage(document.getElementById('pgBody'),PAGE_OPEN);}}); return FU;
@@ -4293,7 +4267,7 @@ RecordWorkspace.register('recModal',recordCanLeave);
 RecordWorkspace.register('stockDetailModal',stockCanLeave);
 window.addEventListener('records-editor-closed',function(){if(PAGE_OPEN&&document.getElementById('pageModal').classList.contains('on'))openPage(PAGE_OPEN,{fromRoute:true});});
 window.addEventListener('beforeunload',function(e){if((_recordSaving||_stockSaving)||(RecordWorkspace.active==='recModal'&&recordIsDirty())||(RecordWorkspace.active==='stockDetailModal'&&stockHasUnsavedFields())){e.preventDefault();e.returnValue='';}});
-console.log('[기록보관실] v7.32.0 준비됨 — 종목별 기록·확인 통합');
+console.log('[기록보관실] v7.33.0 준비됨 — 3열 입력·종목 요약·다단 출력');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
