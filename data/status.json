@@ -1,7 +1,7 @@
 {
   "schema": "status/1",
   "_설명": "워크플로가 쓰는 파일. jobs[] 한 줄 = 작업 하나. status: ok | fail | stale | stopped. due 가 지나면 앱이 '늦음' 경고. 시각은 KST(+09:00) ISO.",
-  "updated": "2026-09-23T09:08:16+09:00",
+  "updated": "2026-09-23T09:42:49+09:00",
   "jobs": [
     {
       "id": "hub",
@@ -12,17 +12,6 @@
       "cause": "",
       "fix": "",
       "link": ""
-    },
-    {
-      "id": "score",
-      "name": "오픈북 채점",
-      "status": "ok",
-      "ran": "2026-09-22T16:46:21+09:00",
-      "due": "2026-09-24T04:46:21+09:00",
-      "cause": "",
-      "fix": "",
-      "link": "predict.html",
-      "note": "새로 채점 0건 · 대기 0건"
     },
     {
       "id": "board",
@@ -78,6 +67,17 @@
       "fix": "manual.html 보고서 탭에서 입력",
       "link": "manual.html#reports",
       "note": "오늘 0건 · 14일 내 5건 · 미입력 2건"
+    },
+    {
+      "id": "score",
+      "name": "오픈북 채점",
+      "status": "ok",
+      "ran": "2026-09-23T09:42:49+09:00",
+      "due": "2026-09-24T21:42:49+09:00",
+      "cause": "",
+      "fix": "",
+      "link": "predict.html",
+      "note": "새로 채점 0건 · 대기 0건"
     }
   ]
 }
