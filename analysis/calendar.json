@@ -1,9 +1,21 @@
 {
   "schema": "calendar/1",
   "version": "v 20260907-2300",
-  "computed_at": "2026-09-24T22:23:45+09:00",
-  "today": "2026-09-24",
-  "due_today": [],
+  "computed_at": "2026-09-25T03:19:55+09:00",
+  "today": "2026-09-25",
+  "due_today": [
+    {
+      "id": "krx_flow",
+      "name": "KRX 외국인·기관 주간 순매수",
+      "tier": "month",
+      "date": "2026-09-25",
+      "time": "18:00",
+      "period": "2026-W39",
+      "url": "https://data.krx.co.kr/",
+      "auto": false,
+      "note": "매주 금요일 장 마감 후. 자동 수집 실험 전까지 수동 · optional=미입력 경고 안 함"
+    }
+  ],
   "upcoming": [
     {
       "id": "krx_flow",
@@ -59,6 +71,17 @@
       "url": "https://www.bls.gov/news.release/empsit.toc.htm",
       "auto": true,
       "note": "매월 첫 금요일 21:30 KST(여름엔 21:30, 겨울 22:30)"
+    },
+    {
+      "id": "krx_flow",
+      "name": "KRX 외국인·기관 주간 순매수",
+      "tier": "month",
+      "date": "2026-10-09",
+      "time": "18:00",
+      "period": "2026-W41",
+      "url": "https://data.krx.co.kr/",
+      "auto": false,
+      "note": "매주 금요일 장 마감 후. 자동 수집 실험 전까지 수동 · optional=미입력 경고 안 함"
     }
   ],
   "missing": [
@@ -72,7 +95,7 @@
       "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
       "auto": false,
       "note": "분기 FOMC 둘째 날 새벽 3시 KST(추정, 일정표 확인)",
-      "days_late": 6
+      "days_late": 7
     },
     {
       "id": "kr_export_20",
@@ -84,7 +107,7 @@
       "url": "https://www.customs.go.kr/kcs/na/ntt/selectNttList.do?mi=2891&bbsId=1362",
       "auto": false,
       "note": "매월 21일 아침(주말이면 다음 영업일)",
-      "days_late": 3
+      "days_late": 4
     }
   ],
   "latest": {
