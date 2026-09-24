@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-09-25",
-  "generated_at": "2026-09-25T03:21:36+09:00",
+  "generated_at": "2026-09-25T07:08:17+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · 유가 WTI 94.89 $(+1.4%) · SOX 반도체 12,427 pt(-0.9%)"
+      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · VIX 15.67 pt(-1.9%) · 유가 WTI 94.76 $(+1.3%)"
     },
     {
       "k": "오늘 발표",
@@ -18,7 +18,7 @@
     },
     {
       "k": "산업·종목",
-      "t": "DART 57건(수주·공급계약 6) · 토론실 근거글 +0(적중 7) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
+      "t": "DART 60건(수주·공급계약 6) · 토론실 근거글 +0(적중 7) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
     },
     {
       "k": "미입력",
@@ -50,8 +50,8 @@
     {
       "key": "us10y",
       "label": "미 10년물",
-      "value": "4.96%",
-      "sub": "부담 · 2026-09-22",
+      "value": "5.11%",
+      "sub": "부담 · 2026-09-23",
       "tone": "green"
     }
   ],
@@ -85,32 +85,46 @@
       "group": "kr"
     },
     {
+      "id": "vix",
+      "name": "VIX",
+      "value": 15.67,
+      "unit": "pt",
+      "prev": 15.97,
+      "delta": -0.3,
+      "delta_text": "-1.9%",
+      "judge": "안정",
+      "as_of": "2026-09-25",
+      "cycle": "D",
+      "score": 1.8785222291797163,
+      "group": "us"
+    },
+    {
       "id": "wti",
       "name": "유가 WTI",
-      "value": 94.89,
+      "value": 94.76,
       "unit": "$",
       "prev": 93.56,
-      "delta": 1.33,
-      "delta_text": "+1.4%",
+      "delta": 1.2,
+      "delta_text": "+1.3%",
       "judge": "",
       "as_of": "2026-09-25",
       "cycle": "D",
-      "score": 1.4215476699444187,
+      "score": 1.2825994014536157,
       "group": "world"
     },
     {
-      "id": "sox",
-      "name": "SOX 반도체",
-      "value": 12426.562,
-      "unit": "pt",
-      "prev": 12534.274,
-      "delta": -107.712,
-      "delta_text": "-0.9%",
-      "judge": "중립",
+      "id": "bdry",
+      "name": "해운 BDRY",
+      "value": 15.77,
+      "unit": "$",
+      "prev": 15.96,
+      "delta": -0.19,
+      "delta_text": "-1.2%",
+      "judge": "",
       "as_of": "2026-09-25",
       "cycle": "D",
-      "score": 0.859339759127649,
-      "group": "us"
+      "score": 1.1904761904761985,
+      "group": "world"
     },
     {
       "id": "m2",
@@ -127,20 +141,6 @@
       "group": "us"
     },
     {
-      "id": "gold",
-      "name": "금",
-      "value": 4297.9,
-      "unit": "$/oz",
-      "prev": 4314.7,
-      "delta": -16.8,
-      "delta_text": "-0.4%",
-      "judge": "",
-      "as_of": "2026-09-25",
-      "cycle": "D",
-      "score": 0.3893665840035271,
-      "group": "world"
-    },
-    {
       "id": "kr_lead",
       "name": "선행지수순환변동치",
       "value": 104.2,
@@ -155,18 +155,18 @@
       "group": "kr"
     },
     {
-      "id": "kr_cpi_yoy",
-      "name": "한국 CPI 전년비",
-      "value": 3.09,
-      "unit": "%",
-      "prev": 2.79,
-      "delta": 0.3,
-      "delta_text": "+0.30%p",
-      "judge": "부담",
-      "as_of": "2026-08",
-      "cycle": "M",
-      "score": 0.2999999999999998,
-      "group": "kr"
+      "id": "sox",
+      "name": "SOX 반도체",
+      "value": 12492.536,
+      "unit": "pt",
+      "prev": 12534.274,
+      "delta": -41.738,
+      "delta_text": "-0.3%",
+      "judge": "중립",
+      "as_of": "2026-09-25",
+      "cycle": "D",
+      "score": 0.3329909654121122,
+      "group": "us"
     }
   ],
   "releases": {
@@ -300,32 +300,46 @@
           "group": "kr"
         },
         {
+          "id": "vix",
+          "name": "VIX",
+          "value": 15.67,
+          "unit": "pt",
+          "prev": 15.97,
+          "delta": -0.3,
+          "delta_text": "-1.9%",
+          "judge": "안정",
+          "as_of": "2026-09-25",
+          "cycle": "D",
+          "score": 1.8785222291797163,
+          "group": "us"
+        },
+        {
           "id": "wti",
           "name": "유가 WTI",
-          "value": 94.89,
+          "value": 94.76,
           "unit": "$",
           "prev": 93.56,
-          "delta": 1.33,
-          "delta_text": "+1.4%",
+          "delta": 1.2,
+          "delta_text": "+1.3%",
           "judge": "",
           "as_of": "2026-09-25",
           "cycle": "D",
-          "score": 1.4215476699444187,
+          "score": 1.2825994014536157,
           "group": "world"
         },
         {
-          "id": "sox",
-          "name": "SOX 반도체",
-          "value": 12426.562,
-          "unit": "pt",
-          "prev": 12534.274,
-          "delta": -107.712,
-          "delta_text": "-0.9%",
-          "judge": "중립",
+          "id": "bdry",
+          "name": "해운 BDRY",
+          "value": 15.77,
+          "unit": "$",
+          "prev": 15.96,
+          "delta": -0.19,
+          "delta_text": "-1.2%",
+          "judge": "",
           "as_of": "2026-09-25",
           "cycle": "D",
-          "score": 0.859339759127649,
-          "group": "us"
+          "score": 1.1904761904761985,
+          "group": "world"
         },
         {
           "id": "m2",
@@ -342,20 +356,6 @@
           "group": "us"
         },
         {
-          "id": "gold",
-          "name": "금",
-          "value": 4297.9,
-          "unit": "$/oz",
-          "prev": 4314.7,
-          "delta": -16.8,
-          "delta_text": "-0.4%",
-          "judge": "",
-          "as_of": "2026-09-25",
-          "cycle": "D",
-          "score": 0.3893665840035271,
-          "group": "world"
-        },
-        {
           "id": "kr_lead",
           "name": "선행지수순환변동치",
           "value": 104.2,
@@ -370,18 +370,18 @@
           "group": "kr"
         },
         {
-          "id": "kr_cpi_yoy",
-          "name": "한국 CPI 전년비",
-          "value": 3.09,
-          "unit": "%",
-          "prev": 2.79,
-          "delta": 0.3,
-          "delta_text": "+0.30%p",
-          "judge": "부담",
-          "as_of": "2026-08",
-          "cycle": "M",
-          "score": 0.2999999999999998,
-          "group": "kr"
+          "id": "sox",
+          "name": "SOX 반도체",
+          "value": 12492.536,
+          "unit": "pt",
+          "prev": 12534.274,
+          "delta": -41.738,
+          "delta_text": "-0.3%",
+          "judge": "중립",
+          "as_of": "2026-09-25",
+          "cycle": "D",
+          "score": 0.3329909654121122,
+          "group": "us"
         }
       ]
     },
@@ -395,7 +395,7 @@
     },
     {
       "id": "2026-09-25/auto/macro",
-      "time": "03:19",
+      "time": "07:06",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 36/36 수집",
