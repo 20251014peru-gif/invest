@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "youtube-summary-personal",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-09-14",
+  "assets": {"directory": "./public", "binding": "ASSETS", "run_worker_first": true},
+  "durable_objects": {"bindings": [{"name": "JOBS", "class_name": "SummaryJobs"}]},
+  "migrations": [{"tag": "v1", "new_sqlite_classes": ["SummaryJobs"]}],
+  "vars": {"LIVE_AI": "0", "MONTHLY_LIMIT_USD": "0"},
+  "observability": {"enabled": false}
+}
