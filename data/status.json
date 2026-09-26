@@ -1,7 +1,7 @@
 {
   "schema": "status/1",
   "_설명": "워크플로가 쓰는 파일. jobs[] 한 줄 = 작업 하나. status: ok | fail | stale | stopped. due 가 지나면 앱이 '늦음' 경고. 시각은 KST(+09:00) ISO.",
-  "updated": "2026-09-27T03:25:27+09:00",
+  "updated": "2026-09-27T04:23:01+09:00",
   "jobs": [
     {
       "id": "hub",
@@ -36,17 +36,6 @@
       "note": "훑음 34종목 · 새 글 0 · 근거글 +0(누적 136) · 적중 7"
     },
     {
-      "id": "dart",
-      "name": "공시 수집",
-      "status": "ok",
-      "ran": "2026-09-27T01:19:52+09:00",
-      "due": "2026-09-28T07:19:52+09:00",
-      "cause": "",
-      "fix": "",
-      "link": "cygnus.html#sectors",
-      "note": "28건(7일) · 신규 Event 0 · 중대성갱신 0 · push 0"
-    },
-    {
       "id": "macro",
       "name": "매크로 수집",
       "status": "ok",
@@ -78,6 +67,17 @@
       "fix": "manual.html 보고서 탭에서 입력",
       "link": "manual.html#reports",
       "note": "오늘 0건 · 14일 내 5건 · 미입력 2건"
+    },
+    {
+      "id": "dart",
+      "name": "공시 수집",
+      "status": "ok",
+      "ran": "2026-09-27T04:23:01+09:00",
+      "due": "2026-09-28T10:23:01+09:00",
+      "cause": "",
+      "fix": "",
+      "link": "cygnus.html#sectors",
+      "note": "28건(7일) · 신규 Event 0 · 중대성갱신 0 · push 0"
     }
   ]
 }
