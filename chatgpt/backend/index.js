@@ -1,3 +1,4 @@
+import {handleRecordsAI} from './records-ai.js';
 import {onRequest} from 'firebase-functions/v2/https';
 import {defineSecret,defineString} from 'firebase-functions/params';
 import {initializeApp} from 'firebase-admin/app';import {getAuth} from 'firebase-admin/auth';import {getFirestore} from 'firebase-admin/firestore';import {createHash} from 'node:crypto';
@@ -7,6 +8,9 @@ initializeApp();const key=defineSecret('OPENAI_API_KEY'),owner=defineSecret('MAC
 export const macroAi=onRequest({region:'asia-northeast3',cors:['https://20251014peru-gif.github.io'],secrets:[key,owner],timeoutSeconds:110,maxInstances:1,concurrency:1},async(req,res)=>{
  res.set('Cache-Control','no-store');if(req.method!=='POST'){res.status(405).json({error:'POST만 지원합니다'});return;}
  let uid;try{const token=(req.headers.authorization||'').match(/^Bearer (.+)$/)?.[1];if(!token)throw Error();const user=await getAuth().verifyIdToken(token,true);if(user.uid!==owner.value()||user.email_verified!==true||user.firebase?.sign_in_provider!=='google.com')throw Error();uid=user.uid;}catch{res.status(401).json({error:'본인 Google 로그인 확인이 필요합니다'});return;}
+ if(['records-costs','records-history','records-analyze'].includes(req.body?.action)){
+  try{if(JSON.stringify(req.body).length>20000)throw Error('요청이 너무 큽니다.');res.json(await handleRecordsAI({db:getFirestore(),uid,input:req.body,key:key.value()}));}catch(e){res.status(502).json({error:'종합분석 서버 처리 실패. 결과·비용 기록을 새로 확인하세요. 자동 재시도하지 않았습니다.'});}return;
+ }
  let data;try{if(JSON.stringify(req.body).length>120000)throw Error();data=normalizeRequest(req.body);}catch{res.status(400).json({error:'질문 또는 근거 자료 형식을 확인하세요'});return;}
  const db=getFirestore(),root=db.collection('chatgpt_macro_private').doc(uid),m=model.value();const cacheId=createHash('sha256').update(JSON.stringify({data,model:m,prompt:PROMPT_VERSION})).digest('hex');const cache=root.collection('aiCache').doc(cacheId);
  try{if(data.kind==='news'){const c=await cache.get();if(c.exists){res.json({...c.data(),cached:true});return;}}
