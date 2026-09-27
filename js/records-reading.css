@@ -61,3 +61,22 @@ body:has(#pageModal.on){overflow:hidden}
 .yt-section+.yt-section{margin-top:14px}.yt-section-label{display:block;font-size:13px;color:#716e61;margin-bottom:4px}
 .yt-section p{margin:0;white-space:pre-wrap}.yt-empty{font-size:14px;color:#716e61}
 @media(max-width:700px){.yt-list thead,.yt-list colgroup{display:none}.yt-list,.yt-list tbody,.yt-list tr,.yt-list td{display:block;width:100%}.yt-list tr{border-bottom:2px solid var(--line)}.yt-list td{padding:12px 16px;border-bottom:0}.yt-list td+td{border-left:0}.yt-list td:first-child{background:#faf4df}.yt-list td:not(:first-child)::before{content:attr(data-label);display:block;font-weight:700;margin-bottom:6px}}
+/* v7.36.0: wide document reader; source sections remain intact, in source order. */
+#pageModal{padding:12px;background:#34332966}
+#pageModal .pageModalBox{width:100%;max-width:none!important;height:calc(100dvh - 24px);max-height:calc(100dvh - 24px);border-radius:10px}
+#pageModal .mhd{position:sticky;top:0;z-index:5;background:#faf8f1;color:#514a39;border-radius:10px 10px 0 0;border-bottom:1px solid var(--line);cursor:default;padding:12px 24px}
+#pageModal .mhd .x{color:#514a39;font-size:16px;border:1px solid var(--line);border-radius:7px;padding:6px 12px;background:#fff}
+#pageModal .mbody{padding:26px 36px 12px}
+#pageModal .pg-body{background:none;border:0;border-radius:0;padding:0}
+#pageModal .pg-readable,#pageModal .pg-outline-item .pg-readable,#pageModal .pg-source-section .pg-text-line{font-size:16px;line-height:1.8}
+#pageModal .pg-outline-item h4,#pageModal .pg-source-section h4{font-size:16px}
+#pageModal .pg-document-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 36px;align-items:start}
+.pg-document-section{min-width:0;overflow-wrap:anywhere}
+.pg-document-section>p,.pg-document-section>h4{white-space:pre-wrap}
+.pg-document-section>.pg-text-heading:first-child{margin-top:0}
+.pg-document-wide{grid-column:1/-1}
+.pg-document-intro{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;align-items:start}
+.pg-document-intro>h4{grid-column:1/-1}.pg-document-intro>p{margin:0}
+@media(max-width:1050px){.pg-document-intro{grid-template-columns:1fr}}
+@media(max-width:1050px){#pageModal .pg-document-grid{grid-template-columns:1fr;gap:20px}}
+@media(max-width:600px){#pageModal{padding:0}#pageModal .pageModalBox{height:100dvh;max-height:100dvh;border-radius:0}#pageModal .mhd{padding:10px 16px;border-radius:0}#pageModal .mbody{padding:18px 16px}#pageModal .pg-source-overview,#pageModal .pg-outline{grid-template-columns:1fr}}

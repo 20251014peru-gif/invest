@@ -84,6 +84,29 @@
     var shell=document.createElement('div');shell.innerHTML=tabsHTML('','','');page.appendChild(shell);
     [content,relations,later].forEach(function(part,i){if(part.childNodes.length)shell.querySelector('[data-readpanel="'+i+'"]').replaceChildren(part);});
   }
+  function documentColumns(host){
+    var readable=host.querySelector('[data-readview="full"] > .pg-readable');
+    if(!readable||readable.classList.contains('pg-document-grid'))return;
+    // Only explicit source headings form columns; unstructured prose stays one column.
+    if(Array.from(readable.children).filter(function(n){return n.matches('h4.pg-text-heading');}).length<2)return;
+    var nodes=Array.from(readable.childNodes),section=null;
+    readable.classList.add('pg-document-grid');
+    nodes.forEach(function(node){
+      if(node.nodeType===1&&node.matches('.pg-source-overview')){
+        if(section)section.classList.add('pg-document-wide','pg-document-intro');
+        readable.appendChild(node);node.classList.add('pg-document-wide');section=null;return;
+      }
+      if(node.nodeType===1&&node.matches('h4.pg-text-heading'))section=null;
+      if(!section){
+        if(node.nodeType===3&&!node.textContent.trim()){readable.appendChild(node);return;}
+        section=document.createElement('section');section.className='pg-document-section';readable.appendChild(section);
+      }
+      section.appendChild(node);
+    });
+    readable.querySelectorAll(':scope > .pg-document-section').forEach(function(s){
+      if(!s.querySelector('h4.pg-text-heading'))s.classList.add('pg-document-wide');
+    });
+  }
   function prepare(host){
     var meta=host.querySelector('.pg-meta'),title=host.querySelector('h2');
     if(meta){
@@ -101,6 +124,7 @@
       var panel=document.createElement('section');panel.id='pg-panel-full';panel.dataset.readpanel='full';panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby','pg-tab-full');panel.hidden=true;full.hidden=false;panel.appendChild(full);nav.after(panel);
       host.querySelector('.pg-readswitch').remove();
     }
+    documentColumns(host);
   }
   function bind(host){
     var tabs=Array.from(host.querySelectorAll('[data-readtab]'));
@@ -156,6 +180,6 @@
       return '<tr><td data-label="제목"><button type="button" class="yt-title" data-open="'+esc(r.id)+'">'+esc(r.title||'제목 없는 기록')+'</button><div class="yt-meta">'+esc(r.date||'')+(r.channel?' · '+esc(r.channel):'')+'</div>'+(stars?'<div class="yt-stars" aria-label="중요도 '+stars+'점">'+'★'.repeat(stars)+'</div>':'')+'</td>'+cell(c.core,'핵심내용')+cell(c.evidence,'근거')+cell(c.change,'변화')+'</tr>';
     }).join('')+'</tbody></table></div>';
   }
-  var api={youtubeColumns:youtubeColumns,youtubeTableHTML:youtubeTableHTML,outline:outline,formattedHTML:formattedHTML,bodyHTML:bodyHTML,tabsHTML:tabsHTML,studyTabs:studyTabs,prepare:prepare,bind:bind,resetTop:resetTop,drawer:drawer};
+  var api={documentColumns:documentColumns,youtubeColumns:youtubeColumns,youtubeTableHTML:youtubeTableHTML,outline:outline,formattedHTML:formattedHTML,bodyHTML:bodyHTML,tabsHTML:tabsHTML,studyTabs:studyTabs,prepare:prepare,bind:bind,resetTop:resetTop,drawer:drawer};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.RecordReading=api;
 })(typeof window!=='undefined'?window:globalThis);
