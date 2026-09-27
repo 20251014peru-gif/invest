@@ -64,7 +64,7 @@
     host=host||document.getElementById('recordEditorHost');
     var el=document.getElementById(id);if(!el||!host)return;
     if(!nav){nav=document.createElement('nav');nav.className='rw-nav';nav.setAttribute('aria-label','작성할 내용');
-      [['recModal','기록'],['followupModal','확인할 일'],['stockDetailModal','종목 정보']].forEach(function(pair){var b=document.createElement('button');b.type='button';b.dataset.editor=pair[0];b.textContent=pair[1];b.onclick=function(){root.dispatchEvent(new CustomEvent('records-editor-navigate',{detail:{target:pair[0],stock:context}}));};nav.appendChild(b);});host.prepend(nav);}
+      [['stockDetailModal','종목 정보']].forEach(function(pair){var b=document.createElement('button');b.type='button';b.dataset.editor=pair[0];b.textContent=pair[1];b.onclick=function(){root.dispatchEvent(new CustomEvent('records-editor-navigate',{detail:{target:pair[0],stock:context}}));};nav.appendChild(b);});host.prepend(nav);}
     arrange(el);
     el.classList.add('rw-panel');el.removeAttribute('aria-modal');el.setAttribute('role','region');
     host.appendChild(el);panels.set(id,{el:el,canLeave:canLeave});
@@ -75,7 +75,7 @@
     if(current&&current.canLeave&&!current.canLeave())return false;
     generation++;return true;
   }
-  function updateNav(){if(nav)nav.querySelectorAll('button').forEach(function(b){b.disabled=!!active&&active.el.id===b.dataset.editor;b.setAttribute('aria-current',b.disabled?'page':'false');b.hidden=b.dataset.editor==='stockDetailModal'&&!context;});}
+  function updateNav(){if(!nav)return;nav.querySelectorAll('button').forEach(function(b){b.disabled=!!active&&active.el.id===b.dataset.editor;b.setAttribute('aria-current',b.disabled?'page':'false');b.hidden=b.dataset.editor==='stockDetailModal'&&!context;});nav.style.display=Array.from(nav.querySelectorAll('button')).some(function(b){return !b.hidden;})?'':'none';}
   function setContext(name){context=name||'';updateNav();}
   root.RecordWorkspace={register:register,prepare:prepare,setContext:setContext,get generation(){return generation;},get active(){return active&&active.el.id;}};
 })(window);

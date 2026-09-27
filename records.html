@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="js/records-workspace.css?v=7.34.0">
 <style>
 /* ══════════════════════════════════════════════════════════
-   🗂 투자 기록보관실  v7.38.0
+   🗂 투자 기록보관실  v7.38.1
    2026-09-28 03:55:44 KST — 전체 흐름 본문도 PC 2열, 900px 이하 1열. 원문 보존.
    2026-09-27 13:50:45 KST — 한눈에 보기·원문 PC 2열 통일, 유튜브 목록 행 여백 압축.
    2026-09-27 13:23:10 KST — 넓은 문서형 읽기 창과 소제목 단위 원문 2열. 원문·순서 보존.
@@ -605,15 +605,15 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy-900);color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.on{opacity:1}
 </style>
-<link rel="stylesheet" href="js/records-reading.css?v=7.38.0">
+<link rel="stylesheet" href="js/records-reading.css?v=7.38.1">
 <link rel="stylesheet" href="js/followups.css?v=7.30.0">
-<script src="js/records-reading.js?v=7.38.0"></script>
+<script src="js/records-reading.js?v=7.38.1"></script>
 </head>
 <body>
 
 <div class="topbar">
   <h1><a class="recordsHome" href="records.html" aria-label="투자 기록보관실 전체 기록으로 이동">🗂 투자 기록보관실</a></h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
-  <span class="ver">v7.38.0 · 2026-09-28 03:18:14 KST · 주제별 2열 읽기 정돈</span>
+  <span class="ver">v7.38.1 · 2026-09-28 04:11:43 KST · 수정 화면 전환 버튼 정리</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -1028,7 +1028,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 <div id="recordLoadError" role="alert" hidden style="position:fixed;bottom:16px;left:16px;right:16px;z-index:90;background:#fff4e2;border:1px solid #c28e34;border-radius:10px;padding:14px;color:#754d13"></div>
 <div class="toast" id="toast"></div>
 <script src="js/records-stocks.js?v=7.34.0"></script>
-<script src="js/records-workspace.js?v=7.34.0"></script>
+<script src="js/records-workspace.js?v=7.38.1"></script>
 <script src="js/records-stock-workflow.js?v=7.34.0"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -4334,7 +4334,7 @@ window.addEventListener('records-editor-navigate',function(e){
 });
 window.addEventListener('records-editor-closed',function(){if(PAGE_OPEN&&document.getElementById('pageModal').classList.contains('on'))openPage(PAGE_OPEN,{fromRoute:true});});
 window.addEventListener('beforeunload',function(e){if((_recordSaving||_stockSaving)||(RecordWorkspace.active==='recModal'&&recordIsDirty())||(RecordWorkspace.active==='stockDetailModal'&&stockHasUnsavedFields())){e.preventDefault();e.returnValue='';}});
-console.log('[기록보관실] v7.38.0 준비됨 — 주제별 2열 읽기 정돈');
+console.log('[기록보관실] v7.38.1 준비됨 — 수정 화면 전환 버튼 정리');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════

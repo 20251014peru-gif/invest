@@ -24,10 +24,11 @@ const base=process.env.TEST_BASE_URL||'http://localhost:8923';
     const before=await p.evaluate(()=>__mockAuthStats.popups);await p.locator('#authChoose').click();
     assert.match(await p.locator('#authStatus').textContent(),/작성 중인 내용/);assert.equal(await p.evaluate(()=>__mockAuthStats.popups),before);
     assert.equal(await p.locator('#fBody').inputValue(),'작성 중인 글을 보존한다.');
-    // Cancelling the shared navigation must keep the same form and values.
-    p.once('dialog',d=>d.dismiss());await p.locator('[data-editor="followupModal"]').click();
+    // Removed shortcuts stay absent; other entry points retain the dirty guard.
+    assert.equal(await p.locator('[data-editor="recModal"],[data-editor="followupModal"]').count(),0);
+    p.once('dialog',d=>d.dismiss());await p.evaluate(()=>openFollowup(null,{}));
     assert.ok(await p.locator('#recModal').isVisible());assert.equal(await p.locator('#fBody').inputValue(),'작성 중인 글을 보존한다.');
-    await p.locator('#fBody').fill('');await p.locator('[data-editor="followupModal"]').click();await p.locator('#fuQuestion').waitFor({state:'visible'});
+    await p.locator('#fBody').fill('');await p.evaluate(()=>openFollowup(null,{}));await p.locator('#fuQuestion').waitFor({state:'visible'});
     assert.equal(await p.locator('#recordEditorHost .rw-panel.on').count(),1);
     await p.locator('#followupModal [data-fu="close"]').first().click();
     await p.evaluate(()=>firebase.auth().signOut());await p.locator('#authBtn').click();
