@@ -29,6 +29,9 @@ jobs:
         run: |
           npm install -g firebase-tools@latest
           npm --prefix chatgpt/backend install --no-audit --no-fund
+      - name: Set non-secret existing model parameter
+        working-directory: chatgpt/backend
+        run: node -e "require('fs').writeFileSync('.env.my-system-25497', 'MACRO_AI_MODEL=gpt-5-mini\n')"
       - name: Deploy existing private AI function
         working-directory: chatgpt/backend
         run: firebase deploy --only functions:macro-private-ai:macroAi --project my-system-25497 --non-interactive
