@@ -116,3 +116,15 @@ body:has(#pageModal.on){overflow:hidden}
 #pageModal .pg-document-columns .pg-flow{column-span:none}
 #pageModal .pg-document-columns .pg-flow-text{column-count:auto}
 @media(max-width:900px){#pageModal [data-readview="full"]>.pg-document-columns{column-count:1;column-rule:none}}
+
+/* v7.37.3: related paragraphs in short, row-major pairs under each source heading. */
+#pageModal [data-readview="full"]>.pg-readable.pg-topic-document{display:block;column-count:auto}
+#pageModal .pg-topic-section{margin:0 0 16px}
+#pageModal .pg-topic-section>h4{margin:0 0 8px;font-size:16px;white-space:pre-wrap}
+#pageModal .pg-topic-pairs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 28px;align-items:start}
+#pageModal .pg-topic-cell{min-width:0;overflow-wrap:anywhere}
+#pageModal .pg-topic-cell:only-of-type{grid-column:1/-1}
+#pageModal .pg-topic-cell>p,#pageModal .pg-topic-cell>.pg-flow{margin:0;white-space:pre-wrap}
+#pageModal .pg-topic-cell .pg-flow-text{column-count:auto}
+#pageModal .pg-topic-pairs>.is-blank{display:none}
+@media(max-width:900px){#pageModal .pg-topic-pairs{grid-template-columns:1fr}}
