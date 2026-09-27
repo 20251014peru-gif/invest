@@ -142,3 +142,23 @@ body:has(#pageModal.on){overflow:hidden}
 #pageModal .pg-source-detail>.pg-topic-document{column-count:auto;display:block}
 #pageModal .pg-source-detail .pg-topic-pairs{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media(max-width:900px){#pageModal .pg-source-detail .pg-topic-pairs{grid-template-columns:1fr}}
+
+/* v7.38.0: cohesive reading cards, paired spacing, and attached source annotations. */
+#pageModal .pg-topic-section{margin-bottom:20px}
+#pageModal .pg-topic-section>h4{padding:10px 14px;border-left:3px solid #b59844;border-bottom:1px solid #e7dfcc;background:#f7f3e8;border-radius:0 8px 8px 0;line-height:1.5;margin-bottom:10px}
+#pageModal .pg-topic-pairs{gap:10px 16px;align-items:stretch}
+#pageModal .pg-topic-cell{padding:12px 16px;border:1px solid #ebe6db;border-radius:9px;background:#fffefa;line-height:1.7}
+#pageModal .pg-topic-cell>p{margin:0 0 7px}
+#pageModal .pg-topic-cell>p:last-child{margin-bottom:0}
+#pageModal .pg-topic-cell>p:has(+.pg-inline-status){display:inline}
+#pageModal .pg-topic-cell>.pg-inline-status{display:inline;margin-left:6px;font-size:13px;white-space:normal}
+#pageModal .pg-topic-cell.pg-takeaway{background:#f7f1df;border-color:#e3d5aa}
+#pageModal .pg-takeaway-label{font-weight:700;color:#78602a;font-size:13px;margin-bottom:5px}
+#pageModal .pg-source-detail{border-bottom:0;padding-top:14px}
+#pageModal .pg-summary-pairs>.pg-labelled{border:1px solid #e9dfc5;border-radius:9px;padding:12px 16px}
+@media(max-width:900px){#pageModal .pg-topic-cell{padding:10px 12px}#pageModal .pg-topic-pairs{gap:8px}}
+
+#pageModal .pg-topic-cell>.is-blank{display:none}
+
+#pageModal .pg-topic-cell:has(>.pg-inline-status)>p:not(.is-blank){display:inline}
+#pageModal .pg-topic-cell.pg-takeaway:last-child:nth-child(odd of .pg-topic-cell){grid-column:1/-1}
