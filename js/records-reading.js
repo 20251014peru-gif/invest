@@ -143,6 +143,32 @@
       if(node.nodeType!==1||!node.textContent.trim()||node.matches('.pg-source-marker')){body.appendChild(node);return;}
       pieces(node).forEach(function(part){var cell=document.createElement('div');cell.className='pg-topic-cell';cell.appendChild(part);body.appendChild(cell);});
     });
+    // Attach source status marks to their sentence and keep conclusion labels with their text.
+    readable.querySelectorAll(':scope > .pg-topic-section > .pg-topic-pairs').forEach(function(group){
+      function merge(left,right){
+        while(left.nextSibling&&left.nextSibling!==right)left.appendChild(left.nextSibling);
+        while(right.firstChild)left.appendChild(right.firstChild);
+        right.remove();return left;
+      }
+      var cells=Array.from(group.children).filter(function(n){return n.classList.contains('pg-topic-cell');});
+      cells.forEach(function(cell){
+        if(cell.parentNode!==group)return;
+        var text=cell.textContent.trim();
+        if(/^[🟢🟡🔴🔵🟠🟣⚪⚫🟩🟨🟥✅⚠️]+$/u.test(text)){
+          var prev=cell.previousElementSibling;while(prev&&!prev.textContent.trim())prev=prev.previousElementSibling;
+          if(prev&&prev.classList.contains('pg-topic-cell')){
+            Array.from(cell.children).forEach(function(n){n.classList.add('pg-inline-status');});merge(prev,cell);
+          }
+        }
+      });
+      Array.from(group.children).forEach(function(cell){
+        if(!cell.classList.contains('pg-topic-cell'))return;
+        if(/^(한마디로|한줄 요약|요약|결론)\s*[:：]$/.test(cell.textContent.trim())){
+          var next=cell.nextElementSibling;while(next&&!next.textContent.trim())next=next.nextElementSibling;
+          if(next&&next.classList.contains('pg-topic-cell')){cell.classList.add('pg-takeaway');cell.firstElementChild.classList.add('pg-takeaway-label');merge(cell,next);}
+        }
+      });
+    });
   }
   function prepare(host){
     var meta=host.querySelector('.pg-meta'),title=host.querySelector('h2');
