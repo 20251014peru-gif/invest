@@ -13,7 +13,11 @@
 <link rel="stylesheet" href="js/records-workspace.css?v=7.34.0">
 <style>
 /* ══════════════════════════════════════════════════════════
-   🗂 투자 기록보관실  v7.27.2-0917-1400
+   🗂 투자 기록보관실  v7.34.1
+   2026-09-27 12:43:59 KST — 제목을 records.html 링크로 변경. 종류·검색·상세 주소를 초기화한 전체 기록으로 이동.
+   원인: 기존 h1에는 이동 동작이 없었음. 기존 beforeunload 경고와 저장 로직 유지.
+   검증: 링크 목적지·초기 전체 상태·인라인 스크립트 구문 확인. 복구: 이 변경 커밋의 records.html만 되돌림.
+   교훈: 첫 화면 복귀에는 기본 링크를 사용하고 기존 입력 이탈 보호를 우회하지 않음.
    업무일지(worklog)와 한눈에 구분되도록 네이비×골드 테마로 짰다.
    업무일지의 8뷰 엔진(카드·표·보드·달력)을 새 창고(records)에
    맞게 다시 짠 것 — worklog_entries 와는 완전히 분리된 컬렉션.
@@ -120,6 +124,9 @@ a{color:inherit}
 /* ── 헤더 ── */
 .topbar{background:linear-gradient(90deg,#fffaf0,#f5e8bf);color:#3c3527;padding:11px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid #e5d7af}
 .topbar h1{font-family:'Gowun Batang',serif;font-size:21px;font-weight:700;letter-spacing:.3px;display:flex;align-items:center;gap:8px}
+.topbar .recordsHome{color:inherit;text-decoration:none;border-radius:4px}
+.topbar .recordsHome:hover{text-decoration:underline;text-underline-offset:4px}
+.topbar .recordsHome:focus-visible{outline:2px solid #8b6b23;outline-offset:5px}
 .topbar .ver{font-size:11px;color:#9a8a5c;font-weight:600}
 .topbar .sp{flex:1}
 .topbar .search{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.65);border:1px solid #e0d3a6;border-radius:10px;padding:7px 14px;font-size:13px;color:#6b6049;min-width:240px}
@@ -600,8 +607,8 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 <body>
 
 <div class="topbar">
-  <h1>🗂 투자 기록보관실</h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
-  <span class="ver">v7.34.0 · 서희타워</span>
+  <h1><a class="recordsHome" href="records.html" aria-label="투자 기록보관실 전체 기록으로 이동">🗂 투자 기록보관실</a></h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
+  <span class="ver">v7.34.1 · 2026-09-27 12:43:59 KST · 제목 클릭 → 전체 기록</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -4320,7 +4327,7 @@ window.addEventListener('records-editor-navigate',function(e){
 });
 window.addEventListener('records-editor-closed',function(){if(PAGE_OPEN&&document.getElementById('pageModal').classList.contains('on'))openPage(PAGE_OPEN,{fromRoute:true});});
 window.addEventListener('beforeunload',function(e){if((_recordSaving||_stockSaving)||(RecordWorkspace.active==='recModal'&&recordIsDirty())||(RecordWorkspace.active==='stockDetailModal'&&stockHasUnsavedFields())){e.preventDefault();e.returnValue='';}});
-console.log('[기록보관실] v7.34.0 준비됨 — 간단 입력·종목 기록 분류·계정 안내');
+console.log('[기록보관실] v7.34.1 준비됨 — 제목 클릭으로 전체 기록 이동');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
