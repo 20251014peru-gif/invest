@@ -140,6 +140,22 @@
     show(false);
     return {open:function(){pinned=true;show(true);},close:hide};
   }
-  var api={outline:outline,formattedHTML:formattedHTML,bodyHTML:bodyHTML,tabsHTML:tabsHTML,studyTabs:studyTabs,prepare:prepare,bind:bind,resetTop:resetTop,drawer:drawer};
+  // Read-only projections of labelled source sections; never infer facts or changes.
+  function youtubeColumns(record){
+    var items=outline(record.body).filter(function(x){return x.number<=8;});
+    function pick(pattern){return items.filter(function(x){return pattern.test(x.title)&&x.text.trim();}).map(function(x){return {label:x.title,text:x.text.trim()};});}
+    var core=pick(/30초\s*판단|핵심\s*(?:내용|정리|요약)|신호\s*요약/);
+    if(!core.length&&record.oneLiner)core=[{label:'핵심 한 줄',text:String(record.oneLiner)}];
+    if(!core.length&&!items.length&&record.body)core=[{label:'본문 발췌',text:String(record.body).trim().split(/\n\s*\n/)[0]}];
+    return {core:core,evidence:pick(/근거|선행\s*지표/),change:pick(/직전.*대비|이전.*대비|달라진|변화/)};
+  }
+  function youtubeTableHTML(records){
+    function cell(items,label){return '<td data-label="'+label+'">'+(items.length?items.map(function(x){return '<div class="yt-section"><span class="yt-section-label">'+esc(x.label)+'</span><p>'+esc(x.text)+'</p></div>';}).join(''):'<span class="yt-empty">구분된 '+label+' 없음</span>')+'</td>';}
+    return '<div class="yt-list-wrap"><table class="yt-list"><colgroup><col style="width:23%"><col style="width:32%"><col style="width:24%"><col style="width:21%"></colgroup><thead><tr><th scope="col">제목 · 출처</th><th scope="col">핵심내용</th><th scope="col">근거 <small>요약에 제시된 내용</small></th><th scope="col">변화</th></tr></thead><tbody>'+records.map(function(r){
+      var c=youtubeColumns(r),stars=Math.max(0,Math.min(5,Number(r.star)||0));
+      return '<tr><td data-label="제목"><button type="button" class="yt-title" data-open="'+esc(r.id)+'">'+esc(r.title||'제목 없는 기록')+'</button><div class="yt-meta">'+esc(r.date||'')+(r.channel?' · '+esc(r.channel):'')+'</div>'+(stars?'<div class="yt-stars" aria-label="중요도 '+stars+'점">'+'★'.repeat(stars)+'</div>':'')+'</td>'+cell(c.core,'핵심내용')+cell(c.evidence,'근거')+cell(c.change,'변화')+'</tr>';
+    }).join('')+'</tbody></table></div>';
+  }
+  var api={youtubeColumns:youtubeColumns,youtubeTableHTML:youtubeTableHTML,outline:outline,formattedHTML:formattedHTML,bodyHTML:bodyHTML,tabsHTML:tabsHTML,studyTabs:studyTabs,prepare:prepare,bind:bind,resetTop:resetTop,drawer:drawer};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.RecordReading=api;
 })(typeof window!=='undefined'?window:globalThis);
