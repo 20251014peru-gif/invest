@@ -86,7 +86,9 @@
     [content,relations,later].forEach(function(part,i){if(part.childNodes.length)shell.querySelector('[data-readpanel="'+i+'"]').replaceChildren(part);});
   }
   function documentColumns(host){
-    var readable=host.querySelector('[data-readview="full"] > .pg-readable');
+    layoutDocument(host.querySelector('[data-readview="full"] > .pg-readable'));
+  }
+  function layoutDocument(readable){
     if(!readable||readable.classList.contains('pg-topic-document'))return;
     // Keep source order and group columns under their own source heading.
     var nodes=Array.from(readable.childNodes);
@@ -122,7 +124,16 @@
         summary.appendChild(node);body=null;return;
       }
       summary=null;
-      if(node.nodeType===1&&node.matches('.pg-source-overview')){readable.appendChild(node);body=null;return;}
+      if(node.nodeType===1&&node.matches('.pg-source-overview')){
+        // The last outline card can contain the complete detailed source, not just a summary.
+        node.querySelectorAll(':scope > .pg-source-section').forEach(function(card){
+          if(card.textContent.length<=480&&!card.querySelector('.pg-text-heading'))return;
+          var content=document.createElement('div');content.className='pg-readable';
+          while(card.firstChild)content.appendChild(card.firstChild);
+          card.appendChild(content);card.classList.add('pg-source-detail');layoutDocument(content);
+        });
+        readable.appendChild(node);body=null;return;
+      }
       if(node.nodeType===1&&node.matches('h4')){start(node);return;}
       if(node.nodeType===1&&node.matches('.pg-labelled,.pg-subtopic')){
         var label=node.querySelector(':scope > strong');

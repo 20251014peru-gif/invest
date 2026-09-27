@@ -16,4 +16,13 @@ const cards=await p.locator('.pg-summary-pairs').first().locator(':scope > .pg-l
 assert.equal(cards.length,4);assert(!cards[3].text.includes('목차'));
 const toc=await p.locator('.pg-source-section').evaluateAll(es=>es.map(e=>({x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y})));
 if(width>900){assert.equal(cards[0].y,cards[1].y);assert.equal(cards[2].y,cards[3].y);assert(cards[1].x>cards[0].x);assert.equal(toc[0].y,toc[1].y);assert(toc[1].x>toc[0].x);}else{assert(cards[1].y>cards[0].y);assert(toc[1].y>toc[0].y);}}
+const nested='■ 30초 판단 ▸\n핵심 1줄 | 핵심\n전체 흐름 | 흐름\n볼 가치 | 중요\n액션 | 관망\n'+Array.from({length:9},(_,i)=>String(i+1).padStart(2,'0')+'\n'+(i===8?'달님 시사점':'목차 '+(i+1))+'\n'+(i===8?'긴 시사점 원문을 그대로 보존합니다. '.repeat(120):'짧은 설명')).join('\n')+'\n■ 추가 근거 ▸\n'+'후속 근거를 빠뜨리지 않습니다. '.repeat(100);
+await p.evaluate(t=>{host.innerHTML='<div data-readview="full">'+RecordReading.formattedHTML(t)+'</div>';RecordReading.documentColumns(host);RecordReading.documentColumns(host);},nested);
+for(const width of [1440,1024,390]){await p.setViewportSize({width,height:1000});assert.equal(await p.locator('[data-readview="full"]').textContent(),nested);
+const positions=await p.locator('.pg-summary-pairs').first().locator(':scope > .pg-labelled').evaluateAll(es=>es.map(e=>({x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y})));
+const toc=await p.locator('.pg-source-section').evaluateAll(es=>es.map(e=>({x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y})));
+const detail=await p.locator('.pg-source-detail .pg-topic-pairs').first().locator(':scope > .pg-topic-cell').evaluateAll(es=>es.map(e=>({x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y,h:e.getBoundingClientRect().height})));
+assert(detail.length>2);assert.equal(await p.locator('.pg-source-detail .pg-topic-section').count(),2);
+if(width>900){assert.equal(positions[0].y,positions[1].y);assert(positions[1].x>positions[0].x);assert.equal(toc[0].y,toc[1].y);assert(toc[1].x>toc[0].x);assert.equal(detail[0].y,detail[1].y);assert(detail[1].x>detail[0].x);assert(detail[2].y>=detail[0].y+detail[0].h-1);}else{assert(detail[1].y>detail[0].y);}
+assert(await p.locator('[data-readview="full"]').evaluate(e=>e.scrollWidth<=e.clientWidth+1));}
 await p.setViewportSize({width:1440,height:1000});await p.screenshot({path:'test-results/records-topic-pairs.png',fullPage:true});console.log('PASS: exact original, related heading groups, bounded chunks, row-major pairs, mobile order, no overflow, idempotence');}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
