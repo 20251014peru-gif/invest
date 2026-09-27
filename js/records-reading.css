@@ -80,3 +80,25 @@ body:has(#pageModal.on){overflow:hidden}
 @media(max-width:1050px){.pg-document-intro{grid-template-columns:1fr}}
 @media(max-width:1050px){#pageModal .pg-document-grid{grid-template-columns:1fr;gap:20px}}
 @media(max-width:600px){#pageModal{padding:0}#pageModal .pageModalBox{height:100dvh;max-height:100dvh;border-radius:0}#pageModal .mhd{padding:10px 16px;border-radius:0}#pageModal .mbody{padding:18px 16px}#pageModal .pg-source-overview,#pageModal .pg-outline{grid-template-columns:1fr}}
+/* v7.37.0: compact list and two-column reading in both tabs. */
+.yt-list th{padding:9px 14px}.yt-list th small{display:inline;margin-left:6px}
+.yt-list td{padding:10px 14px;line-height:1.5}.yt-title{line-height:1.5}
+.yt-meta{margin-top:5px}.yt-stars{display:inline-block;margin:0 0 0 6px;white-space:nowrap}
+.yt-section+.yt-section{margin-top:6px}.yt-section-label{display:inline;margin:0 6px 0 0}
+.yt-section p{display:inline}.yt-section-label::after{content:' ·'}
+#pageModal .mbody{padding-top:18px}
+#pageModal .pg-readtabs{margin:10px 0;padding-bottom:8px}
+#pageModal .pg-readable,#pageModal .pg-outline-item .pg-readable,#pageModal .pg-source-section .pg-text-line{line-height:1.6}
+#pageModal .pg-outline-item{padding:7px 0}
+#pageModal .pg-implications{margin-top:16px}
+#pageModal .pg-implications>h3{padding-bottom:7px;margin-bottom:8px}
+#pageModal .pg-text-line{margin-bottom:5px}
+#pageModal .pg-text-line.is-blank{min-height:2px;margin:0}
+#pageModal .pg-implications>.pg-readable{column-count:2;column-gap:32px}
+#pageModal .pg-implications>.pg-readable>p{break-inside:avoid-column}
+#pageModal [data-readview="full"]>.pg-readable:not(.pg-document-grid){column-count:2;column-gap:32px}
+#pageModal [data-readview="full"]>.pg-readable:not(.pg-document-grid)>p{break-inside:avoid-column}
+#pageModal .pg-document-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 28px}
+#pageModal .pg-document-intro{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 24px}
+#pageModal .pg-source-overview{column-span:all}
+@media(max-width:900px){#pageModal .pg-document-grid,#pageModal .pg-document-intro,#pageModal .pg-source-overview,#pageModal .pg-outline{grid-template-columns:1fr}#pageModal .pg-implications>.pg-readable,#pageModal [data-readview="full"]>.pg-readable:not(.pg-document-grid){column-count:1}}
