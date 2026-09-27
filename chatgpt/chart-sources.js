@@ -4,7 +4,7 @@ import {esc,hashRoute} from './core.js';
 // with spot prices, or changes with index levels. See docs/CHART-AUDIT.md.
 const yahoo={usdkrw:'KRW=X',sp500:'^GSPC',nasdaq:'^IXIC',sox:'^SOX',vix:'^VIX',dxy:'DX-Y.NYB',hsi:'^HSI',wti:'CL=F',copper:'HG=F',gold:'GC=F',bdry:'BDRY'};
 const fred={us10y:['DGS10','lin'],us2y:['DGS2','lin'],fedfunds:['FEDFUNDS','lin'],cpi_yoy:['CPIAUCSL','pc1'],core_pce_yoy:['PCEPILFE','pc1'],m2:['M2SL','lin'],fed_bs:['WALCL','lin'],payems_chg:['PAYEMS','chg'],unrate:['UNRATE','lin'],ahe_yoy:['CES0500000003','pc1'],spread_10_2:['T10Y2Y','lin']};
-const ecos={bok_rate:'K051',kr3y:'K056',kr_aa3:'K057',kr_cpi_yoy:'K401',kr_lead:'K254',kr_export_yoy:'K358'};
+const ecos={bok_rate:'K051',kr3y:'K056',kr_aa3:'K057',kr_cpi_yoy:'K401',kr_lead:'K254',kr_export_yoy:'K358',kr_deposit:'K107'};
 // Generated using FRED's Custom Graph Link with automatic updates through latest.
 // Plain graph ?id=...&units=pc1 silently reverted to levels in browser verification.
 const transformed={cpi_yoy:'1Yh9Z',core_pce_yoy:'1Yha5',payems_chg:'1Yhab',ahe_yoy:'1Yhaw'};

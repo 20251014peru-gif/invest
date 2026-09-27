@@ -135,3 +135,9 @@
 
 ## BUILD-023 · Anthropic 요금 기준
 기록 종합분석만 Claude Sonnet 5로 전환. 기존 ANTHROPIC_API_KEY Secret 바인딩, Messages API 및 공식 입력/출력/캐시 단가 적용. OpenAI 과거 집계는 별도 보존. 제공사별 액션 구분으로 배포 전환 중 다른 제공사 유료 호출 차단. 11개 서버 검사 및 격리 화면 검사 통과. 화면 시험 초기 비동기 비용 조회 대기 누락을 수정했다. 실제 유료 분석/청구 조회는 미검증. 전체 매크로의 기존 지표 개수 검사 2건 불일치는 v022와 동일.
+
+## BUILD-024 · kr_deposit(투자자예탁금) 차트 링크 등록
+v022부터 기존 문제로 남겨뒀던 지표 개수 검사 불일치 2건(chart-sources.test.mjs, observatory.test.mjs)의 원인을 확인했다: data/indicators.json에 kr_deposit이 추가되며 실제 지표가 35→36개가 됐는데 chart-sources.js에 kr_deposit 차트 링크가 없었고, 두 테스트의 기대값은 35로 고정돼 있었다.
+ECOS 테마별 통계(100대지표) 화면에서 '투자자예탁금' 항목을 실제로 열어 코드 K107을 확인했다(자료: 금융투자협회, 월간·말잔 기준, 2026-08 값 99.7조원으로 facts/kr_key.json과 일치). 새 분기 추가 없이 기존 ecos 매핑에 kr_deposit:'K107'만 추가해 기존 ECOS 지표들과 같은 차트 화면·안내 문구를 그대로 재사용했다.
+테스트는 지표 수 35→36, chart kind 개수 33→34로 수정하고 kr_deposit 전용 URL 검사(K107로 끝나는지) 1건을 추가했다. tests/research*.mjs + tests/macro-detail.test.cjs + chatgpt/tests/*.test.mjs 전체 86개 자동 검사 통과.
+release.json v024 갱신. build.mjs는 실행해봤으나 chatgpt/index.html이 BUILD-020부터 ../research-dashboard.html로 리다이렉트만 하고 build.mjs가 만드는 chatgpt/assets/{hash} 번들·build-manifest.json을 아무 데서도 참조하지 않는 것을 이번에 확인했다(신규 버그 아님, 기존 상태). 그래서 build.mjs 산출물은 되돌리고 코드·테스트·문서만 반영했다. 실제 화면에서 kr_deposit 카드 클릭 → 팝업 링크 열기는 이번 빌드에서 재검증하지 않았고, 이 세션에는 이 저장소의 push 권한이 없어 원격 main 반영은 별도로 필요하다.
