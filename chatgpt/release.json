@@ -1,9 +1,16 @@
 {
-  "version": "v023-20260928-045703-KST",
-  "builtAt": "2026-09-27T19:57:03.704Z",
-  "summary": "기록 종합분석 Anthropic 전환·제공사별 비용 분리",
-  "status": "격리 검사 통과 · 청구 대조 미연결",
+  "version": "v024-20260928-083808-KST",
+  "builtAt": "2026-09-27T23:38:08.286Z",
+  "summary": "kr_deposit(투자자예탁금) 차트 링크 등록·지표 개수 검사 수정",
+  "status": "자동 86개 통과 · ECOS 실제 화면 확인 대기",
   "changes": [
+    {
+      "id": "BUILD-024",
+      "title": "kr_deposit(투자자예탁금) 차트 링크 등록·지표 개수 검사 수정",
+      "problem": "data/indicators.json에 kr_deposit이 추가되며 실제 지표가 35→36개가 됐는데 chart-sources.js에 차트 링크가 없고 chart-sources.test.mjs·observatory.test.mjs의 지표 수 검사가 35로 고정돼 Research workspace checks가 계속 실패(v022부터 기존 문제로 기록됨)",
+      "solution": "ECOS 100대지표 화면에서 '투자자예탁금' 항목을 직접 확인해 코드 K107을 확보, ecos 매핑에 kr_deposit:'K107' 추가(기존 ecos 분기 재사용, 새 분기 추가 안 함). 두 테스트 파일의 지표 수 기대값을 35→36, chart kind 개수 33→34로 수정하고 kr_deposit 전용 URL 검사 1건 추가",
+      "limitations": "K107 링크는 ECOS 화면에서 직접 클릭해 확인했으나(월간, 말잔 기준, 자료: 금융투자협회, 2026-08 값 99.7조원 일치), 실제 kr_deposit 카드 클릭 후 팝업 링크가 여는지는 브라우저 재검증하지 않음. chatgpt/index.html은 BUILD-020부터 research-dashboard.html로 리다이렉트만 하며 build.mjs 자산 번들을 참조하지 않는 것을 이번에 확인해 build.mjs 실행분은 되돌림. 이 저장소에는 push 권한이 없어 원격 main 반영은 별도로 필요"
+    },
     {
       "id": "BUILD-023",
       "title": "기록 종합분석 Anthropic 전환·제공사별 비용 분리",

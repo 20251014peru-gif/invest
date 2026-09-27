@@ -5,9 +5,10 @@ import {mergeIndicators} from '../core.js';
 import {chartSource,chartTitle,chartPanel} from '../chart-sources.js';
 const read=p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url),'utf8'));
 const items=mergeIndicators(read('../../data/indicators.json'),read('../../facts/macro.json'));
-test('모든 35개 지표에 명시적인 차트 경로 또는 정확한 제한 안내가 있다',()=>{
-  assert.equal(items.length,35);for(const r of items){const c=chartSource(r.id);assert.ok(c,r.id);assert.equal(new URL(c.url).protocol,'https:');assert.ok(c.note);}
-  assert.equal(items.filter(r=>chartSource(r.id).kind==='chart').length,33);
+test('모든 36개 지표에 명시적인 차트 경로 또는 정확한 제한 안내가 있다',()=>{
+  // v024: kr_deposit(투자자예탁금) 추가로 35→36. ECOS 100대지표 K107.
+  assert.equal(items.length,36);for(const r of items){const c=chartSource(r.id);assert.ok(c,r.id);assert.equal(new URL(c.url).protocol,'https:');assert.ok(c.note);}
+  assert.equal(items.filter(r=>chartSource(r.id).kind==='chart').length,34);
   assert.equal(chartSource('unknown'),null);
 });
 test('미국 물가·임금은 전년비, 고용은 증감으로 연결한다',()=>{
@@ -22,6 +23,7 @@ test('달러지수·선물·ETF를 다른 원지표로 바꾸지 않는다',()=>
 });
 test('ECOS 홈 대신 개별 그래프를 열고 예외를 숨기지 않는다',()=>{
   assert.ok(chartSource('kr_lead').url.endsWith('/K254'));
+  assert.ok(chartSource('kr_deposit').url.endsWith('/K107'));
   assert.equal(chartSource('credit_spread').kind,'components');assert.equal(chartSource('credit_spread').extra.length,1);
   assert.equal(chartSource('kr_bbb3').kind,'selection');
   assert.match(chartPanel({id:'kr_bbb3'}),/010320000/);
