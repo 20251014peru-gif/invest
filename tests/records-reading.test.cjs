@@ -2,6 +2,14 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const R=require('../js/records-reading.js');
 
+test('full flow gets its own columns without rewriting text',()=>{
+  const text='전체 흐름 | 긴 설명 <확인>과 다음 문장을 그대로 보존합니다.';
+  const html=R.formattedHTML(text);
+  assert.match(html,/class="pg-flow-text"/);
+  assert.equal(html.replace(/<[^>]+>/g,'').replace(/&lt;/g,'<').replace(/&gt;/g,'>'),text);
+  assert.ok(!R.formattedHTML('핵심 1줄 | 요약').includes('pg-flow-text'));
+});
+
 test('YouTube columns use explicit headings and preserve source records',()=>{
   const r={id:'x',title:'<img src=x onerror=alert(1)>',oneLiner:'짧은 결론',body:'01\n⚡ 30초 판단\n상세한 핵심 설명\n02\n직전 영상 대비\n기존 의견 유지\n03\n신호 요약 — 배경\n추가 맥락\n04\n선행 지표 현황\n지표 수치 없음',star:5};
   const before=JSON.stringify(r),c=R.youtubeColumns(r);
