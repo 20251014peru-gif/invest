@@ -89,14 +89,9 @@
     var readable=host.querySelector('[data-readview="full"] > .pg-readable');
     if(!readable||readable.classList.contains('pg-topic-document'))return;
     // Keep source order and group columns under their own source heading.
-    var nodes=[];
-    function flatten(node){
-      if(node.nodeType===1&&node.matches('.pg-source-overview,.pg-source-section'))Array.from(node.childNodes).forEach(flatten);
-      else nodes.push(node);
-    }
-    Array.from(readable.childNodes).forEach(flatten);
+    var nodes=Array.from(readable.childNodes);
     readable.replaceChildren();readable.classList.add('pg-topic-document');
-    var section,body;
+    var section,body,summary;
     function start(heading){
       section=document.createElement('section');section.className='pg-topic-section';
       if(heading)section.appendChild(heading);
@@ -121,6 +116,13 @@
       return cuts.slice(0,-1).map(function(n,i){var range=document.createRange(),from=point(n),to=point(cuts[i+1]),copy=node.cloneNode(false);range.setStart(from[0],from[1]);range.setEnd(to[0],to[1]);copy.appendChild(range.cloneContents());return copy;});
     }
     nodes.forEach(function(node){
+      if(summary&&node.nodeType===3&&!node.textContent.trim()){summary.appendChild(node);return;}
+      if(node.nodeType===1&&node.matches('.pg-labelled')&&node.textContent.length<=480){
+        if(!summary){summary=document.createElement('div');summary.className='pg-summary-pairs';readable.appendChild(summary);}
+        summary.appendChild(node);body=null;return;
+      }
+      summary=null;
+      if(node.nodeType===1&&node.matches('.pg-source-overview')){readable.appendChild(node);body=null;return;}
       if(node.nodeType===1&&node.matches('h4')){start(node);return;}
       if(node.nodeType===1&&node.matches('.pg-labelled,.pg-subtopic')){
         var label=node.querySelector(':scope > strong');

@@ -9,4 +9,11 @@ for(const cells of rows){for(let i=0;i<cells.length;i++){assert(cells[i].text<=4
 assert(await p.locator('.pg-topic-document').evaluate(e=>e.scrollWidth<=e.clientWidth+1));}
 if(text.startsWith('##')){const topics=await p.locator('.pg-topic-section').allTextContents();assert.equal(topics.length,2);assert(!topics[0].includes('둘째'));assert(!topics[1].includes('첫 구간'));}
 }
+const top='■ 30초 판단 ▸\n항목 | 내용\n핵심 1줄 | 핵심 설명을 그대로 보존합니다.\n전체 흐름 | 전체 흐름 설명을 그대로 보존합니다.\n볼 가치 | 별점과 이유\n액션 | 관망\n핵심 목차\n전체 펼치기\n01\n30초 판단\n판단 설명\n02\n직전 영상 대비\n변화 설명\n핵심 1줄 | 상세 시작\n■ 근거 ▸\n'+'상세 근거를 문장 단위로 보존합니다. '.repeat(100);
+await p.setContent('<style>:root{--line:#e8e2d4;--text:#34362f}#pageModal{background:white!important;font-family:Arial}</style><style>'+css+'</style><div id="pageModal"><div id="host"></div></div>');await p.addScriptTag({content:js});await p.evaluate(t=>{host.innerHTML='<div data-readview="full">'+RecordReading.formattedHTML(t)+'</div>';RecordReading.documentColumns(host);},top);
+for(const width of [1440,1024,390]){await p.setViewportSize({width,height:1000});assert.equal(await p.locator('.pg-topic-document').textContent(),top);
+const cards=await p.locator('.pg-summary-pairs').first().locator(':scope > .pg-labelled').evaluateAll(es=>es.map(e=>({x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y,text:e.textContent})));
+assert.equal(cards.length,4);assert(!cards[3].text.includes('목차'));
+const toc=await p.locator('.pg-source-section').evaluateAll(es=>es.map(e=>({x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y})));
+if(width>900){assert.equal(cards[0].y,cards[1].y);assert.equal(cards[2].y,cards[3].y);assert(cards[1].x>cards[0].x);assert.equal(toc[0].y,toc[1].y);assert(toc[1].x>toc[0].x);}else{assert(cards[1].y>cards[0].y);assert(toc[1].y>toc[0].y);}}
 await p.setViewportSize({width:1440,height:1000});await p.screenshot({path:'test-results/records-topic-pairs.png',fullPage:true});console.log('PASS: exact original, related heading groups, bounded chunks, row-major pairs, mobile order, no overflow, idempotence');}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

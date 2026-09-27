@@ -128,3 +128,11 @@ body:has(#pageModal.on){overflow:hidden}
 #pageModal .pg-topic-cell .pg-flow-text{column-count:auto}
 #pageModal .pg-topic-pairs>.is-blank{display:none}
 @media(max-width:900px){#pageModal .pg-topic-pairs{grid-template-columns:1fr}}
+
+/* v7.37.4: retain paired summary cards and the original numbered overview. */
+#pageModal .pg-summary-pairs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;margin:8px 0 14px;align-items:start}
+#pageModal .pg-summary-pairs>.pg-labelled{margin:0;grid-column:auto;white-space:pre-wrap}
+#pageModal .pg-summary-pairs>.pg-labelled>strong{display:block;margin-bottom:5px}
+#pageModal .pg-summary-pairs .pg-flow-text{column-count:auto}
+#pageModal .pg-topic-document>.pg-source-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:10px 0 16px}
+@media(max-width:900px){#pageModal .pg-summary-pairs,#pageModal .pg-topic-document>.pg-source-overview{grid-template-columns:1fr}}
