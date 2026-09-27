@@ -107,3 +107,12 @@ body:has(#pageModal.on){overflow:hidden}
 #pageModal .pg-flow>strong{display:block;margin-bottom:6px;white-space:pre-wrap}
 #pageModal .pg-flow-text{column-count:2;column-gap:28px;white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:900px){#pageModal .pg-flow-text{column-count:1}}
+
+/* v7.37.2: the entire original flows in two columns, including long single paragraphs. */
+#pageModal [data-readview="full"]>.pg-document-columns{display:block;column-count:2;column-gap:32px;column-rule:1px solid var(--line);column-fill:balance}
+#pageModal [data-readview="full"]>.pg-readable.pg-document-columns>p{break-inside:auto}
+#pageModal .pg-document-columns .pg-source-overview,#pageModal .pg-document-columns .pg-source-section{display:contents}
+#pageModal .pg-document-columns h4{break-after:avoid-column}
+#pageModal .pg-document-columns .pg-flow{column-span:none}
+#pageModal .pg-document-columns .pg-flow-text{column-count:auto}
+@media(max-width:900px){#pageModal [data-readview="full"]>.pg-document-columns{column-count:1;column-rule:none}}

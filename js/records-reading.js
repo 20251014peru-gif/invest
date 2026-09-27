@@ -87,26 +87,8 @@
   }
   function documentColumns(host){
     var readable=host.querySelector('[data-readview="full"] > .pg-readable');
-    if(!readable||readable.classList.contains('pg-document-grid'))return;
-    // Only explicit source headings form columns; unstructured prose stays one column.
-    if(Array.from(readable.children).filter(function(n){return n.matches('h4.pg-text-heading');}).length<2)return;
-    var nodes=Array.from(readable.childNodes),section=null;
-    readable.classList.add('pg-document-grid');
-    nodes.forEach(function(node){
-      if(node.nodeType===1&&node.matches('.pg-source-overview')){
-        if(section)section.classList.add('pg-document-wide','pg-document-intro');
-        readable.appendChild(node);node.classList.add('pg-document-wide');section=null;return;
-      }
-      if(node.nodeType===1&&node.matches('h4.pg-text-heading'))section=null;
-      if(!section){
-        if(node.nodeType===3&&!node.textContent.trim()){readable.appendChild(node);return;}
-        section=document.createElement('section');section.className='pg-document-section';readable.appendChild(section);
-      }
-      section.appendChild(node);
-    });
-    readable.querySelectorAll(':scope > .pg-document-section').forEach(function(s){
-      if(!s.querySelector('h4.pg-text-heading'))s.classList.add('pg-document-wide');
-    });
+    // Flow the complete original through columns, independent of heading detection.
+    if(readable)readable.classList.add('pg-document-columns');
   }
   function prepare(host){
     var meta=host.querySelector('.pg-meta'),title=host.querySelector('h2');
