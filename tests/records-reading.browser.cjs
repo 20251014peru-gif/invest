@@ -19,7 +19,7 @@ await p.locator('tr[data-open="a"]').click();assert.equal(await p.locator('#page
 const cards=await p.locator('.pg-outline-item').evaluateAll(es=>es.map(e=>({x:e.offsetLeft,y:e.offsetTop})));assert.equal(cards[0].y,cards[1].y);assert.ok(cards[1].x>cards[0].x);
 assert.equal(await p.locator('[data-outline]').count(),0);
 await p.locator('[data-readtab="full"]').click();assert.equal(await p.locator('[data-readview="full"]').textContent(),body);
-await p.locator('[data-readtab="1"]').click();assert.ok(await p.locator('#relAddBtn').isVisible());assert.ok(await p.locator('#pgBody [data-goto="b"]').isVisible());
+await p.locator('[data-readtab="1"]').click();assert.ok(await p.locator('[data-run]').isVisible());await p.locator('#pg-panel-1 > details > summary').click();assert.ok(await p.locator('#relAddBtn').isHidden());assert.ok(await p.locator('#pgBody [data-goto="b"]').isVisible());
 await p.locator('[data-readtab="2"]').click();assert.match(await p.locator('#pg-panel-2').textContent(),/확인할 자료/);
 await p.locator('#pgCloseBottom').click();await p.evaluate(()=>openPage('b'));assert.equal(await p.locator('#pageModal .modal').evaluate(e=>e.scrollTop),0);assert.ok(await p.locator('#pg-panel-0').isVisible());
 assert.ok(await p.locator('#pgEdit').isHidden());await p.evaluate(()=>openEdit('b'));assert.ok(await p.locator('#recModal').isHidden());assert.ok(await p.locator('#pageModal').isVisible());
