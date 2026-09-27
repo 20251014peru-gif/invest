@@ -6,6 +6,8 @@
 
 AI 비용 기본은 Anthropic 전환 이후의 종합분석 계산액. records_anthropic_totals/day/month에 별도 집계하고 이전 OpenAI records_totals 및 요청 원장은 손대지 않는다. 비용 팝업에 이전 OpenAI 금액은 합산 제외로 표시한다. 분석 이력은 둘 다 유지. 새 분석 action을 구분해 구형 화면/신형 서버가 다른 제공사로 몰래 유료 호출하지 않는다. 청구용 관리자 API 미연결은 그대로 표시. 기존 다른 Anthropic 프로그램이나 계정 전체 청구액은 합산 범위가 아니다. 원본 기록 불변. 복구 기준 a5d35f6.
 
+운영 확인: 2026-09-28 05:00 KST, Actions 36346294762 macroAi 배포 성공. ANTHROPIC_API_KEY 기존 Secret 바인딩 완료. 운영 v7.39.1 및 Claude Sonnet 5 UI 확인, 무인증 비용 요청 401. 서버 11개 및 격리 브라우저 시험 통과. 실제 소유자 유료 호출/청구 대조는 미검증.
+
 
 ## 2026-09-28 v7.39.0 AI 종합분석과 비용
 
