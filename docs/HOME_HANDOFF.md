@@ -1,5 +1,12 @@
 # 집 컴퓨터에서 이어서 개발하기
 
+## 2026-09-28 v7.39.1 Anthropic 기준 전환
+
+사용자 요청으로 기록 종합분석의 실제 제공사를 Anthropic Claude Sonnet 5로 전환한다. 기존 macroAi에 이미 있는 ANTHROPIC_API_KEY Secret을 바인딩하며 일반 매크로 OpenAI 경로는 유지한다. Messages API 구조화 출력, standard_only/global 호출. 공식 요금표 https://platform.claude.com/docs/en/about-claude/pricing 2026-09-28 확인: 입력/출력/캐시읽기/5분쓰기/1시간쓰기 MTok당 $2/$10/$0.20/$2.50/$4. 사용량의 입력과 캐시는 Anthropic 방식으로 별도 합산. 캐시쓰기 세부 사용량이 없으면 미확인 처리한다.
+
+AI 비용 기본은 Anthropic 전환 이후의 종합분석 계산액. records_anthropic_totals/day/month에 별도 집계하고 이전 OpenAI records_totals 및 요청 원장은 손대지 않는다. 비용 팝업에 이전 OpenAI 금액은 합산 제외로 표시한다. 분석 이력은 둘 다 유지. 새 분석 action을 구분해 구형 화면/신형 서버가 다른 제공사로 몰래 유료 호출하지 않는다. 청구용 관리자 API 미연결은 그대로 표시. 기존 다른 Anthropic 프로그램이나 계정 전체 청구액은 합산 범위가 아니다. 원본 기록 불변. 복구 기준 a5d35f6.
+
+
 ## 2026-09-28 v7.39.0 AI 종합분석과 비용
 
 일반 기록의 연결 탭을 AI 종합분석으로 전환. 기존 관계는 접힌 영역에 보존한다. 2~8개 기록의 서버 본문을 GPT-5 mini에 보내 자료 내 인용/재해석/충돌/불확실성을 구분한다. 원문 독립 사실 검증이나 웹 검색은 아니다. 원문 수정 없음.
