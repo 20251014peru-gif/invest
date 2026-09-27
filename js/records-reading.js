@@ -31,6 +31,7 @@
     var lines=String(text||'').split('\n');
     function lineHTML(line){
       var trimmed=line.trim(), label=line.match(/^(\s*(?:핵심\s*(?:1줄|한\s*줄)|전체 흐름|볼 가치|액션|전제|근거|반대 근거|리스크|확인할 것|결론|투자 시사점|달님(?:의)? 시사점)\s*[|｜:：])([\s\S]*)$/);
+      if(label&&/^\s*전체\s*흐름/.test(label[1]))return '<div class="pg-labelled pg-flow"><strong>'+esc(label[1])+'</strong><div class="pg-flow-text">'+esc(label[2])+'</div></div>';
       if(label)return '<p class="pg-labelled"><strong>'+esc(label[1])+'</strong>'+esc(label[2])+'</p>';
       var sub=line.match(/^(\s*\*\*[^*]{1,100}\*\*)([\s\S]*)$/);
       if(sub)return '<p class="pg-subtopic"><strong>'+esc(sub[1]).replace(/\*\*/g,'<span class="pg-source-marker">**</span>')+'</strong>'+esc(sub[2])+'</p>';

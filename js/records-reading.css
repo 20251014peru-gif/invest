@@ -102,3 +102,8 @@ body:has(#pageModal.on){overflow:hidden}
 #pageModal .pg-document-intro{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 24px}
 #pageModal .pg-source-overview{column-span:all}
 @media(max-width:900px){#pageModal .pg-document-grid,#pageModal .pg-document-intro,#pageModal .pg-source-overview,#pageModal .pg-outline{grid-template-columns:1fr}#pageModal .pg-implications>.pg-readable,#pageModal [data-readview="full"]>.pg-readable:not(.pg-document-grid){column-count:1}}
+/* v7.37.1: full-flow prose occupies full width, then flows through two text columns. */
+#pageModal .pg-flow{grid-column:1/-1;column-span:all;white-space:normal}
+#pageModal .pg-flow>strong{display:block;margin-bottom:6px;white-space:pre-wrap}
+#pageModal .pg-flow-text{column-count:2;column-gap:28px;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:900px){#pageModal .pg-flow-text{column-count:1}}
