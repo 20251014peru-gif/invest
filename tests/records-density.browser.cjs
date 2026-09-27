@@ -17,7 +17,7 @@ assert.equal(await p.locator('.pg-outline').evaluate(e=>getComputedStyle(e).grid
 assert.equal(await p.locator('.pg-implications>.pg-readable').first().evaluate(e=>getComputedStyle(e).columnCount),'2');
 await p.locator('[data-readtab="full"]').click();assert.equal(await p.locator('[data-readview="full"]').textContent(),body);
 for(const width of [1440,1024,390]){await p.setViewportSize({width,height:1000});const n=width>900?2:1;
-assert.equal(await p.locator('.pg-document-columns').evaluate(e=>getComputedStyle(e).columnCount),String(n));
+assert.equal(await p.locator('.pg-topic-pairs').first().evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length),n);
 assert.equal(await p.locator('.pg-implications>.pg-readable').first().evaluate(e=>getComputedStyle(e).columnCount),String(n));
 assert(await p.locator('#pageModal .modal').evaluate(e=>e.scrollWidth<=e.clientWidth+1));}
 assert.equal(await p.locator('[data-readview="full"]').textContent(),body);
