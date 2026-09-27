@@ -1,9 +1,16 @@
 {
-  "version": "v022-20260928-044251-KST",
-  "builtAt": "2026-09-27T19:42:51.799Z",
-  "summary": "기록보관실 종합분석 서버·사용량 비용 기록",
-  "status": "격리 검사 통과 · 실제 청구 대조 미연결",
+  "version": "v023-20260928-045703-KST",
+  "builtAt": "2026-09-27T19:57:03.704Z",
+  "summary": "기록 종합분석 Anthropic 전환·제공사별 비용 분리",
+  "status": "격리 검사 통과 · 청구 대조 미연결",
   "changes": [
+    {
+      "id": "BUILD-023",
+      "title": "기록 종합분석 Anthropic 전환·제공사별 비용 분리",
+      "problem": "사용자 Anthropic 요금 기준 요청",
+      "solution": "실제 Anthropic Messages 호출과 별도 사용량 집계, 기존 OpenAI 비용 보존",
+      "limitations": "확정 청구액 미연결; 실제 개인 계정 유료 호출 미검증"
+    },
     {
       "id": "BUILD-022",
       "title": "기록보관실 종합분석 서버·사용량 비용 기록",
