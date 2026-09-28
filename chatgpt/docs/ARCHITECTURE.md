@@ -17,11 +17,11 @@
 - 지표 관계는 양쪽 지표 ID, 관계 종류, 근거 주소, 작성 내용을 저장.
 
 ## 기능 격리
-core.js(숫자·시각·정규화), catalog.js(정의·조건부 해석), chart.js(차트), storage.js(개인 기록), app.js(화면 흐름).
+core.js(숫자·시각·정규화), catalog.js(정의·조건부 해석), chart.js(차트), storage.js(개인 기록).
 뉴스 또는 저장소가 실패해도 지표는 유지. 미수집 값은 0으로 대체하지 않음. 실패한 입력은 지우지 않음. 동시 수정 충돌은 덮어쓰지 않고 재확인을 요청.
 
-## 배포
-기존 프로그램과 별도 chatgpt 경로. 기존 수집기를 재사용하며 기존 앱 코드는 변경하지 않는다. build.mjs가 버전별 자산을 만들어 이전 캐시와 섞이지 않게 한다. release.json은 화면 버전의 원본. GitHub 커밋을 복원해도 개인 기록은 별도 저장소에 유지.
+## 배포 (2026-09-28 정정)
+v020 통합 이후 chatgpt/index.html은 ../research-dashboard.html로 리다이렉트만 하는 껍데기다. 실제 화면은 ../js/research-tools.mjs·research-dashboard.mjs가 이 폴더의 core.js·catalog.js·chart.js·storage.js·lens.js·ai.js·notebook.js·observatory.js·chart-sources.js·live-chart.js·news-*.js·answer-view.js를 번들 없이 원본 그대로 import해서 쓴다. GitHub Pages가 별도 빌드 없이 main 브랜치 파일을 그대로 서빙하므로 push되면 바로 반영된다. 예전에 있던 독립 SPA 진입점(app.js)과 그 전용 번들 파이프라인(build.mjs·build-manifest.json·assets/·release.json)은 아무 데서도 안 읽혀서 삭제했다. GitHub 커밋을 복원해도 개인 기록은 별도 저장소(Firestore)에 유지.
 
 ## 다음 확장
 충분한 실제 시계열 → 시점별 경기 국면·과거 사례 비교 → 산업·종목 → 공시·수급·EPS 시나리오. 관측 당시 자료와 나중에 수정된 자료를 분리해야 사후정보로 과거 판단을 꾸미지 않는다. 역사 반복은 검증할 가설이며 결과를 미리 확정하지 않는다.
