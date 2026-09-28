@@ -141,3 +141,10 @@ v022부터 기존 문제로 남겨뒀던 지표 개수 검사 불일치 2건(cha
 ECOS 테마별 통계(100대지표) 화면에서 '투자자예탁금' 항목을 실제로 열어 코드 K107을 확인했다(자료: 금융투자협회, 월간·말잔 기준, 2026-08 값 99.7조원으로 facts/kr_key.json과 일치). 새 분기 추가 없이 기존 ecos 매핑에 kr_deposit:'K107'만 추가해 기존 ECOS 지표들과 같은 차트 화면·안내 문구를 그대로 재사용했다.
 테스트는 지표 수 35→36, chart kind 개수 33→34로 수정하고 kr_deposit 전용 URL 검사(K107로 끝나는지) 1건을 추가했다. tests/research*.mjs + tests/macro-detail.test.cjs + chatgpt/tests/*.test.mjs 전체 86개 자동 검사 통과.
 release.json v024 갱신. build.mjs는 실행해봤으나 chatgpt/index.html이 BUILD-020부터 ../research-dashboard.html로 리다이렉트만 하고 build.mjs가 만드는 chatgpt/assets/{hash} 번들·build-manifest.json을 아무 데서도 참조하지 않는 것을 이번에 확인했다(신규 버그 아님, 기존 상태). 그래서 build.mjs 산출물은 되돌리고 코드·테스트·문서만 반영했다. 실제 화면에서 kr_deposit 카드 클릭 → 팝업 링크 열기는 이번 빌드에서 재검증하지 않았고, 이 세션에는 이 저장소의 push 권한이 없어 원격 main 반영은 별도로 필요하다.
+
+
+## BUILD-025 · 안 쓰는 독립 SPA 파이프라인 삭제
+달님 확인 요청으로 chatgpt/index.html 리다이렉트 껍데기가 아무것도 안 부르는 옛 독립 SPA 진입점(app.js)과 그 전용 자산 파이프라인(build.mjs, build-manifest.json, chatgpt/assets/, release.json)을 grep으로 재확인한 뒤 삭제했다. release.json은 app.js·build.mjs 두 곳 외 아무 데서도 안 읽혔다(연구 대시보드 화면의 버전 표시는 루트 release.json이 따로 있고 별개다). 같이 안 쓰이던 icon.svg·styles.css도 함께 지웠다.
+chatgpt/index.html·config.json과 core.js·catalog.js·chart.js·storage.js·lens.js·ai.js·notebook.js·observatory.js·chart-sources.js·live-chart.js·news-*.js·answer-view.js·server.mjs는 js/research-tools.mjs·research-dashboard.mjs가 실제로 import·fetch하는 걸 확인해 그대로 남겼다.
+package.json의 check 스크립트에서 삭제된 app.js 참조를 제거했다. chatgpt/AGENTS.md·docs/ARCHITECTURE.md의 "각 배포는 release.json 갱신·build.mjs 실행" 지침은 사실과 달라져 다음 작업자가 헷갈릴 수 있어 함께 정정했다.
+tests/research*.mjs + tests/macro-detail.test.cjs + chatgpt/tests/*.test.mjs 전체 86개 재실행 통과(삭제 전과 동일). 실제 GitHub Pages 화면에서 삭제 후에도 정상 로드되는지는 push 후 재검증 필요 — 이 세션은 push 권한이 없다.
