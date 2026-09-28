@@ -311,7 +311,7 @@ def run():
         try:
             r = urllib.request.urlopen(urllib.request.Request("https://ntfy.sh/" + TOPIC, data=body.encode("utf-8"),
                 headers={"Title": h(f"[토론실] 오늘 근거글 {len(digest)}건(미검증·상 {n_strong})"), "Priority": "3",
-                         "Click": "https://20251014peru-gif.github.io/invest/cygnus.html#board"}), timeout=10)
+                         "Click": "https://20251014peru-gif.github.io/invest/regime-lite-v1.html"}), timeout=10)
             print(f"ntfy OK (HTTP {r.status}) · 다이제스트 {len(digest)}건(상 {n_strong}) · 토픽 끝4자리=…{TOPIC[-4:]}")
         except Exception as e:
             print(f"ntfy 실패: {type(e).__name__}: {e}")

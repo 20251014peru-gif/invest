@@ -5,7 +5,7 @@
   var NAV = [
     { id: 'journal', n: '★', name: '투자일지', file: 'journal.html', what: '하루 한 장 — 결론·시장 상태·시간순 기록', look: '매일 여기서 시작. 아래 화면들은 참고 서랍' },
     { id: 'hub',     n: '①', name: '허브',     file: 'index.html',   what: '오늘 상태 7칸 — 실패한 작업·확인 필요부터 본다', look: '확인 필요·실패한 작업 칸이 비어 있으면 정상. 시장 상태 한 줄로 오늘 레짐을 잡고 ②로' },
-    { id: 'market',  n: '②', name: '시장',     file: 'cygnus.html',  what: '레짐 판정 + 지표(한국·미국·국제) + 고른 12개', look: '레짐 한 줄 → 확인/추정 태그 → 값 없음 카드는 수동 입력으로' },
+    { id: 'market',  n: '②', name: '시장',     file: 'regime-lite-v1.html',  what: '국면 대시보드 — 배경·주간·당일 지표 + 전략카드 + 종목분석', look: '종합 판정 한 줄 → 지표 카드 → 국면이 우호적이면 아래 종목분석으로' },
         { id: 'manual',  n: '③', name: '수동 입력', file: 'manual.html',  what: '자동 출처 없는 값(ISM PMI 등) 채우기', look: '출처 열기 → 값 입력 → JSON 복사 → GitHub 에서 붙여넣기 → 지금 실행' }
   ];
   var CSS = '#nav-strip{background:#fff;border-bottom:1px solid #e3e6ee;padding:8px 16px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}' +
