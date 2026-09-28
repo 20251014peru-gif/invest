@@ -114,7 +114,13 @@
   </section>
 
   <section>
-    <div class="sec-head"><h2>종목 분석 · 붙여넣기</h2><span class="sec-sub">국면이 우호적일 때 여기서 종목을 좁힙니다 — 선행EPS · 가격/밸류 위치 · 재무요약 · 캡쳐분석</span></div>
+    <div class="sec-head"><h2>종목 분석 · 붙여넣기</h2><span class="sec-sub">국면이 우호적일 때 여기서 종목을 좁힙니다 — 토론실 근거글 · 선행EPS · 가격/밸류 위치 · 재무요약 · 캡쳐분석</span></div>
+
+    <div class="stock-card">
+      <b>💬 토론실 근거글</b>
+      <span class="meta" id="boardTag">불러오는 중…</span>
+      <div id="boardBox" class="meta">불러오는 중…</div>
+    </div>
 
     <div class="stock-card">
       <b>종목 바로가기</b>
@@ -147,7 +153,7 @@
 
   <footer>
     facts/macro.json · facts/macro_history.json · data/strategies.json 실데이터를 그대로 불러옵니다. 국면 판단 13개 지표(배경4·주간5·당일4, 2개는 미수집) + 전략카드 5개.<br>
-    종목 분석은 data/sectors.json(바로가기) · raw/financials.json(캡쳐분석)을 함께 씁니다. 선행EPS·스냅샷 붙여넣기 결과는 이 브라우저에만 저장됩니다.
+    종목 분석은 facts/board.json(토론실 근거글) · data/sectors.json(바로가기) · raw/financials.json(캡쳐분석)을 함께 씁니다. 선행EPS·스냅샷 붙여넣기 결과는 이 브라우저에만 저장됩니다.
   </footer>
 
 </div>
@@ -220,6 +226,41 @@ function riskBannerHTML(r){
 }
 
 // ==== 종목 분석 (cygnus.html 이식, 2026-09-28) ====
+
+// ---- 💬 토론실 근거글(facts/board.json) ----
+function boardRowHTML(i){
+  const v = (i.verify && i.verify.status) || '미검증';
+  const scls = i.strength==='상' ? 'bear' : i.strength==='하' ? 'bull' : 'neutral';
+  const vcls = v==='적중' ? 'bull' : v==='빗나감' ? 'bear' : 'neutral';
+  return '<tr><td><span class="badge ' + scls + '" title="' + esc(i.why||'') + '">' + esc(i.strength||'중') + '</span></td>'
+    + '<td><b>' + esc(i.company||'') + '</b><br><span class="meta">' + esc(i.sector||'') + '</span></td>'
+    + '<td>' + esc(i.topic || i.title || '') + '</td>'
+    + '<td class="meta">' + esc(i.when||'') + '</td>'
+    + '<td><span class="badge ' + vcls + '"' + ((i.verify&&i.verify.note)?(' title="'+esc(i.verify.note)+'"'):'') + '>' + esc(v) + '</span></td>'
+    + '<td><a href="' + esc(i.url||'#') + '" target="_blank" rel="noopener">원글 ↗</a></td></tr>';
+}
+async function loadBoard(){
+  const tagEl = document.getElementById('boardTag'), boxEl = document.getElementById('boardBox');
+  try{
+    const r = await fetch('facts/board.json?t=' + Date.now(), {cache:'no-store'});
+    const d = await r.json();
+    const items = d.items || [];
+    const nHit = (typeof d.hit === 'number') ? d.hit : items.filter(i => (i.verify && i.verify.status) === '적중').length;
+    const ac = d.ai_cost || {};
+    const costTxt = ac.total_usd != null ? (' · AI비용 누적 $' + ac.total_usd.toFixed(4)) : '';
+    tagEl.textContent = d.updated ? ('갱신 ' + String(d.updated).slice(0,16).replace('T',' ') + ' · ' + items.length + '건' + (nHit ? ' · 적중 ' + nHit : '') + costTxt) : '자동 필터 (첫 실행 대기)';
+    if (!items.length){
+      boxEl.innerHTML = '아직 없음 — GitHub Actions 「Board Signals」가 돌면 관심 종목 토론실에서 근거 있는 주장만 뽑아 여기 뜹니다.<br><span class="meta">토론실 글은 검증 안 된 주장입니다. 근거 후보를 모아줄 뿐, 사실 확인·판단은 직접 해야 합니다.</span>';
+      return;
+    }
+    boxEl.innerHTML = '<table class="stock-tbl"><tr><th>강도</th><th>회사</th><th>요약</th><th>시점</th><th>검증</th><th>원글</th></tr>'
+      + items.slice(0,40).map(boardRowHTML).join('') + '</table>'
+      + '<p class="meta" style="margin-top:6px">⚠ 검증 안 된 주장 후보입니다. AI가 "근거를 대려는 글인지"만 걸렀을 뿐, 맞다는 뜻이 아닙니다.</p>';
+  }catch(e){
+    boxEl.textContent = '토론실 근거글을 못 불러왔어요.';
+    tagEl.textContent = '';
+  }
+}
 
 // ---- 업종별 바로가기 칩 ----
 function chipRowHTML(sec){
@@ -397,6 +438,7 @@ function initStockSection(){
   document.getElementById('snapBtn').onclick = () => { const t = document.getElementById('snapPaste').value; if (!t.trim()) return; renderSnap(parseSnap(t)); };
   document.getElementById('snapClearBtn').onclick = () => { document.getElementById('snapPaste').value=''; document.getElementById('snapOut').innerHTML=''; };
   renderEps();
+  loadBoard();
   loadEpsLinks();
   loadCap();
 }
