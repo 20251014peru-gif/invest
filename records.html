@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="js/records-workspace.css?v=7.34.0">
 <style>
 /* ══════════════════════════════════════════════════════════
-   🗂 투자 기록보관실  v7.40.0
+   🗂 투자 기록보관실  v7.41.0
    2026-09-28 03:55:44 KST — 전체 흐름 본문도 PC 2열, 900px 이하 1열. 원문 보존.
    2026-09-27 13:50:45 KST — 한눈에 보기·원문 PC 2열 통일, 유튜브 목록 행 여백 압축.
    2026-09-27 13:23:10 KST — 넓은 문서형 읽기 창과 소제목 단위 원문 2열. 원문·순서 보존.
@@ -607,6 +607,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 </style>
 <link rel="stylesheet" href="js/records-reading.css?v=7.39.1">
 <link rel="stylesheet" href="js/followups.css?v=7.30.0">
+<link rel="stylesheet" href="js/records-calendar.css?v=7.41.0">
 <script src="js/records-reading.js?v=7.39.1"></script>
 <link rel="stylesheet" href="js/records-ai.css?v=7.39.1">
 <script src="js/records-ai.js?v=7.39.1"></script>
@@ -615,7 +616,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1><a class="recordsHome" href="records.html" aria-label="투자 기록보관실 전체 기록으로 이동">🗂 투자 기록보관실</a></h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
-  <span class="ver">v7.40.0 · 2026-09-28 12:52:56 KST · 캘린더 확인·복기 공통 화면</span>
+  <span class="ver">v7.41.0 · 2026-09-28 14:15 KST · 기록 보관과 전용 캘린더 역할 정리</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -628,6 +629,10 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 <div class="wrap">
 <div class="recLayout" id="recLayout">
   <div class="recMain">
+  <nav class="archiveRoles" aria-label="투자 기록과 일정">
+    <div><b>기록·근거·복기를 쌓는 곳</b><small>원문을 보관하고, 지난 판단과 실제 결과를 함께 돌아보세요.</small></div>
+    <a href="/dalnim-calendar/" target="_blank" rel="noopener"><b>☾ 달님 캘린더 ↗</b><small>일정 · 알림 · 검증 작업</small></a>
+  </nav>
 
   <!-- v7.2: kind탭·보기아이콘·개수·버튼·종목/상태칩을 한 줄(넓으면 1줄, 좁으면 자동 다음줄)로 통합
        v7.29: 기록 열람 중심 배치 — 이 툴바·기록 목록이 헤더 바로 아래에서 시작(오늘 할 일 등은 오른쪽으로) */-->
@@ -640,9 +645,9 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
       <button type="button" class="vicon" data-v="table" title="표 — 비교">≣</button>
       <button type="button" class="vicon" data-v="board" title="보드 — 종목별">▥</button>
       <button type="button" class="vicon" data-v="ch" title="채널 — 출처 비교">📡</button>
-      <button type="button" class="vicon" data-v="cal" title="달력 — 날짜">📅</button>
       <button type="button" class="vicon" data-v="time" title="타임라인 — 변화 흐름">⏱</button>
       <button type="button" class="vicon" data-v="gal" title="갤러리 — 이미지">🖼</button>
+      <button type="button" class="vicon archiveDateView" data-v="cal" title="기록 날짜 보기 — 보관한 기록을 날짜별로" aria-label="기록 날짜 보기">📅 기록 날짜</button>
     </div>
     <span class="cnt" id="cntLabel"></span>
     <button class="mgrbtn" id="btnClearFlt">✕ 필터해제</button>
@@ -1031,7 +1036,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 <div class="toast" id="toast"></div>
 <script src="js/records-stocks.js?v=7.34.0"></script>
 <script src="js/records-workspace.js?v=7.39.1"></script>
-<script src="js/records-stock-workflow.js?v=7.34.0"></script>
+<script src="js/records-stock-workflow.js?v=7.41.0"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -1421,6 +1426,7 @@ var REL_REV_LBL={references:'이 자료를 참고한 기록',supports:'이 기�
 var todayExpanded=false, TODAY_SHOW=5; // v7.19 오늘 할 일 통합 목록
 var curStar='', curChannel='', curDateRange=''; // v7.20~24 별표·출처·날짜 필터(기존 데이터만)
 var calYM = todayStr().slice(0,7);
+var calShowChecks = false; // Archive starts with record history; upcoming work lives in Dalnim.
 var EDIT = null; // 지금 수정 중인 기록 id (null이면 새로 추가)
 var pickedStocks = []; // 모달 안에서 고르는 중인 종목들
 /* v7.28: 다중 사진 첨부 — 항목별 {id,path,url,name,size,type,caption,order,addedAt,status:'uploading'|'stored'|'error',note,file}
@@ -1517,7 +1523,7 @@ function draftsApi(){
 var FU = null, _fuReady = null;
 function followupsStart(){
   if(!db || !uid) return Promise.resolve();
-  if(!_fuReady) _fuReady=import('./js/followups-app.mjs?v=7.40.0').then(function(m){
+  if(!_fuReady) _fuReady=import('./js/followups-app.mjs?v=7.41.0').then(function(m){
     FU=m.init({db:db,storage:storage,records:function(){return records;},studyNeedsReview:studyNeedsReview,toast:toast,openRecord:goRecord,workspace:RecordWorkspace,account:function(){return uid;},
       count:function(n){document.getElementById('cntLabel').textContent=n+'건';},
       changed:function(){renderKtabs();renderTodos();if(laterMode)renderLaterMode();else if(stockMode||curView==='cal')render();if(PAGE_OPEN&&document.getElementById('pageModal').classList.contains('on'))FU.decoratePage(document.getElementById('pgBody'),PAGE_OPEN);}}); return FU;
@@ -2005,7 +2011,7 @@ setInterval(checkDayRollover, 60000);
    "종목 목록"에 적용할지 고를 뿐이라, 두 UI(탭 줄/아이콘 줄)가 서로 다른 상태를 각자 책임져서
    v7.9의 버그(한 값이 두 UI에 걸쳐 있어 한쪽 갱신을 빠뜨리면 하이라이트가 어긋나던 것) 자체가 구조적으로 없어짐 */
 var KTAB_ORDER = ['youtube','news','__stock__','study','idea','chart','memo','__later__']; // v7.27: 공부노트 탭, v7.28: 나중에 탭
-function laterCount(){ return FU&&FU.ready?FU.pending.length:'…'; }
+function laterCount(){ return FU&&FU.ready?FU.items.length:'…'; }
 
 function renderKtabs(){
   var total = records.length;
@@ -2017,7 +2023,7 @@ function renderKtabs(){
       return;
     }
     if(k==='__later__'){
-      html += '<span class="ktab'+(laterMode?' on':'')+'" data-latertabbtn="1">🔎 확인·복기<span class="n">'+laterCount()+'</span></span>';
+      html += '<span class="ktab'+(laterMode?' on':'')+'" data-latertabbtn="1">🔎 검증 기록·복기<span class="n">'+laterCount()+'</span></span>';
       return;
     }
     var meta = KINDS[k];
@@ -2679,7 +2685,7 @@ function stockCalHTML(names){
     if(last && last.slice(0,7)===calYM){ var dd=+last.slice(8,10); (byDay[dd]=byDay[dd]||[]).push(n); }
   });
   var t = todayStr();
-  var h = '<div class="cal"><div class="calhd"><div class="nav"><button id="calPrev">‹</button></div><b>'+y+'년 '+m+'월</b><div class="nav"><button id="calNext">›</button></div></div>'
+  var h = archiveDateIntroHTML(true)+'<div class="cal"><div class="calhd"><div class="nav"><button id="calPrev">‹</button></div><b>'+y+'년 '+m+'월</b><div class="nav"><button id="calNext">›</button></div></div>'
     + '<div class="calgrid">';
   ['일','월','화','수','목','금','토'].forEach(function(d){ h+='<div class="dow">'+d+'</div>'; });
   for(var i=0;i<start;i++) h+='<div class="cell dim"></div>';
@@ -2733,9 +2739,9 @@ function calHTML(arr){
   var byDay={};
   arr.forEach(function(r){ var d=String(r.date||''); if(d.slice(0,7)===calYM){ var dd=+d.slice(8,10); (byDay[dd]=byDay[dd]||[]).push(r); } });
   var chkByDay={};
-  calendarFollowups(arr).forEach(function(x){var d=String(x.dueAt||'');if(d.slice(0,7)===calYM){var dd=+d.slice(8,10);(chkByDay[dd]=chkByDay[dd]||[]).push(x);}});
+  (calShowChecks?calendarFollowups(arr):[]).forEach(function(x){var d=String(x.dueAt||'');if(d.slice(0,7)===calYM){var dd=+d.slice(8,10);(chkByDay[dd]=chkByDay[dd]||[]).push(x);}});
   var t = todayStr();
-  var h = calendarConnectionHTML()+'<div class="cal"><div class="calhd"><div class="nav"><button id="calPrev">‹</button></div><b>'+y+'년 '+m+'월</b><div class="nav"><button id="calNext">›</button></div></div>'
+  var h = archiveDateIntroHTML(false)+(calShowChecks?calendarConnectionHTML():'')+'<div class="cal"><div class="calhd"><div class="nav"><button id="calPrev">‹</button></div><b>'+y+'년 '+m+'월</b><div class="nav"><button id="calNext">›</button></div></div>'
     + '<div class="calgrid">';
   ['일','월','화','수','목','금','토'].forEach(function(d){ h+='<div class="dow">'+d+'</div>'; });
   for(var i=0;i<start;i++) h+='<div class="cell dim"></div>';
@@ -2942,6 +2948,8 @@ function bindContentClicks(){
       openStockDetail(el.getAttribute('data-stockopen'));
     });
   });
+  var showChecks = document.getElementById('calShowChecks');
+  if(showChecks) showChecks.onchange=function(){calShowChecks=this.checked;render();};
   var pv = document.getElementById('calPrev'), nx = document.getElementById('calNext');
   if(pv) pv.addEventListener('click', function(){ shiftMonth(-1); });
   if(nx) nx.addEventListener('click', function(){ shiftMonth(1); });
@@ -4309,7 +4317,7 @@ window.addEventListener('records-editor-navigate',function(e){
 window.addEventListener('records-editor-closed',function(){if(PAGE_OPEN&&document.getElementById('pageModal').classList.contains('on'))openPage(PAGE_OPEN,{fromRoute:true});});
 window.addEventListener('beforeunload',function(e){if((_recordSaving||_stockSaving)||(RecordWorkspace.active==='recModal'&&recordIsDirty())||(RecordWorkspace.active==='stockDetailModal'&&stockHasUnsavedFields())){e.preventDefault();e.returnValue='';}});
 RecordAI.initCosts();
-console.log('[기록보관실] v7.40.0 준비됨 — Anthropic 종합분석·비용');
+console.log('[기록보관실] v7.41.0 준비됨 — Anthropic 종합분석·비용');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
