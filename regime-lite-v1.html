@@ -93,7 +93,7 @@
   </section>
 
   <footer>
-    facts/macro.json · facts/macro_history.json · data/strategies.json 실데이터를 그대로 불러옵니다. 국면 판단 13개 지표(배경4·주간5·당일4, 2개는 미수집) + 전략카드 5개. 세부 축·개별 신호는 <a href="axes.html" style="color:var(--quiet)">axes.html</a>에서 볼 수 있습니다.
+    facts/macro.json · facts/macro_history.json · data/strategies.json 실데이터를 그대로 불러옵니다. 국면 판단 13개 지표(배경4·주간5·당일4, 2개는 미수집) + 전략카드 5개.
   </footer>
 
 </div>
@@ -282,7 +282,7 @@ async function load(){
       const activeStrats = (strat.strategies || []).filter(s => s.status === 'active');
       document.getElementById('strategies').innerHTML = activeStrats.map(strategyCardHTML).join('');
     } else {
-      document.getElementById('riskBanner').textContent = 'data/strategies.json 로드 실패 — axes.html에서 확인하세요.';
+      document.getElementById('riskBanner').textContent = 'data/strategies.json 로드 실패 — 잠시 후 새로고침해 보세요.';
     }
 
     // ---- 종합 판정 ----
