@@ -1,0 +1,15 @@
+/* Archive browsing and the dedicated calendar share existing record IDs. */
+.archiveRoles{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 16px;padding:14px 18px;border:1px solid #eadfea;border-radius:14px;background:linear-gradient(110deg,#fffaf6,#fbf1f7 60%,#f3f1fb)}
+.archiveRoles b,.archiveRoles small{display:block}.archiveRoles b{font-size:14px;color:#5f526c}.archiveRoles small{margin-top:4px;font-size:12px;color:#857c8d}
+.archiveRoles a,.archiveCalendarLink{color:#6151a0;text-decoration:none;font-size:13px;font-weight:700}
+.archiveRoles a{padding:9px 16px;background:#fff;border:1px solid #e2d8ef;border-radius:10px;flex-shrink:0}
+.archiveRoles a:hover,.archiveTaskLink:hover{background:#f4ecfb}.archiveRoles a:focus-visible,.archiveCalendarLink:focus-visible,.archiveTaskLink:focus-visible{outline:3px solid #b39bd8;outline-offset:3px}
+.archiveDateIntro,.archiveReviewIntro{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 18px;background:#fff;border:1px solid var(--line);border-radius:12px;margin:14px 0}
+.archiveDateIntro h2,.archiveReviewIntro h2{font-size:16px;margin:0 0 5px}.archiveDateIntro p,.archiveReviewIntro p{font-size:12px;line-height:1.6;color:var(--sub);margin:0}
+.archiveDateOptions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.archiveDateOptions label{font-size:12px;color:var(--sub);cursor:pointer;display:flex;align-items:center;gap:5px}
+.archiveTaskLink{display:inline-block;align-self:flex-end;text-decoration:none;color:#68509b;background:#f7f1fb;border:1px solid #e7dcee;border-radius:8px;padding:7px 10px;font-size:12px;white-space:nowrap}
+.archiveTaskRow{border-bottom:1px solid var(--line);padding-bottom:8px}.archiveTaskRow .stockTask{border-bottom:0}.archiveTaskRow .archiveTaskLink{margin-bottom:3px}
+.vicon.archiveDateView{width:auto;padding-inline:9px;font-size:12px;white-space:nowrap}
+body.rw-active .archiveRoles{display:none}
+@media(max-width:700px){.archiveRoles{align-items:stretch;flex-direction:column;padding:12px;gap:10px}.archiveRoles a{padding:10px 12px}.archiveDateIntro,.archiveReviewIntro{padding:12px}.fu-row-status{flex-wrap:wrap;align-items:center}.fu-row-status .archiveTaskLink{margin-left:auto}}
+@media print{.archiveRoles,.archiveCalendarLink,.archiveTaskLink,.archiveDateOptions{display:none!important}}
