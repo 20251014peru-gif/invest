@@ -108,6 +108,15 @@
   </section>
 
   <section>
+    <div class="sec-head"><h2>📚 보고서 함</h2><span class="sec-sub">분기 큰 틀 4 + 월간 · 판정은 직접 · 기록은 수동</span></div>
+    <div class="stock-card" id="repBox" hidden>
+      <span class="meta" id="repTag"></span>
+      <span class="meta">보고서마다 최근 기록(기준기간·위/그대로/아래·메모)과 다음 발표일. 기록은 <a href="manual.html#reports">수동 입력 › 보고서 기록</a>. 발표일은 규칙 기반 추정.</span>
+      <div class="grid" id="repCards" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))"></div>
+    </div>
+  </section>
+
+  <section>
     <div class="sec-head"><h2>전략 카드 · 실제 매매 규칙</h2><span class="sec-sub">국면이 우호적일 때 이 5개 중에서 종목을 고릅니다</span></div>
     <div class="risk-banner" id="riskBanner">공통 리스크 규칙 불러오는 중…</div>
     <div class="strat-grid" id="strategies"></div>
@@ -153,7 +162,8 @@
 
   <footer>
     facts/macro.json · facts/macro_history.json · data/strategies.json 실데이터를 그대로 불러옵니다. 국면 판단 13개 지표(배경4·주간5·당일4, 2개는 미수집) + 전략카드 5개.<br>
-    종목 분석은 facts/board.json(토론실 근거글) · data/sectors.json(바로가기) · raw/financials.json(캡쳐분석)을 함께 씁니다. 선행EPS·스냅샷 붙여넣기 결과는 이 브라우저에만 저장됩니다.
+    종목 분석은 facts/board.json(토론실 근거글) · data/sectors.json(바로가기) · raw/financials.json(캡쳐분석)을 함께 씁니다. 선행EPS·스냅샷 붙여넣기 결과는 이 브라우저에만 저장됩니다.<br>
+    보고서 함은 data/reports.json · raw/report_log.json · analysis/calendar.json을 씁니다.
   </footer>
 
 </div>
@@ -223,6 +233,46 @@ function riskBannerHTML(r){
   return '<b>공통 리스크 규칙</b> — 종목당 손실 ' + esc(r.per_trade_loss_pct) + '% · '
     + esc(r.positions) + '종목 분산 · ATR×' + esc(r.atr_multiple) + ' · 계좌 고점대비 -' + esc(r.account_drawdown_stop_pct) + '% 서킷브레이커 · '
     + '최소 ' + esc(r.min_shares) + '주 · ' + esc(r.execution);
+}
+
+// ---- 📚 보고서 함(data/reports.json + raw/report_log.json + analysis/calendar.json) ----
+async function loadReports(){
+  const box = document.getElementById('repBox'), el = document.getElementById('repCards'), tagEl = document.getElementById('repTag');
+  try{
+    const [repsRes, logRes, calRes] = await Promise.all([
+      fetch('data/reports.json?t=' + Date.now(), {cache:'no-store'}),
+      fetch('raw/report_log.json?t=' + Date.now(), {cache:'no-store'}).catch(() => null),
+      fetch('analysis/calendar.json?t=' + Date.now(), {cache:'no-store'}).catch(() => null)
+    ]);
+    const repsData = await repsRes.json();
+    const reps = repsData.items || [];
+    let log = [];
+    if (logRes && logRes.ok){ try{ log = (await logRes.json()).items || []; }catch(e){} }
+    let cal = null;
+    if (calRes && calRes.ok){ try{ cal = await calRes.json(); }catch(e){} }
+    if (!reps.length) return;
+    const latest = {};
+    log.forEach(e => { latest[e.id] = e; });
+    const nextOf = id => { const u = ((cal && cal.upcoming) || []).find(x => x.id === id); return u ? u.date.slice(5) + (u.time ? ' ' + u.time : '') : ''; };
+    const missOf = id => ((cal && cal.missing) || []).find(x => x.id === id);
+    const vc = {'위':'#C24672','그대로':'#8C8078','아래':'#5C6F94'};
+    const order = {quarter:0, month:1, auto:2}, rtiers = {quarter:'분기', month:'월간', auto:'자동'};
+    el.innerHTML = reps.slice().sort((a,b) => (order[a.tier]||0) - (order[b.tier]||0)).map(x => {
+      const l = latest[x.id], m = missOf(x.id), nx = nextOf(x.id);
+      const hist = log.filter(e => e.id === x.id).slice(-4).map(e => '<span style="color:' + (vc[e.verdict] || 'var(--text)') + '">' + esc(e.period) + ' ' + esc(e.verdict||'') + '</span>').join(' → ');
+      return '<div class="card"' + (m ? ' style="border-color:#EAD9A8;background:var(--manual-bg)"' : '') + '>'
+        + '<div style="display:flex;justify-content:space-between;gap:6px;align-items:center"><span><span class="strat-chip">' + esc(rtiers[x.tier]||x.tier) + '</span> <b>' + esc(x.name) + '</b></span><span class="meta">' + esc(x.axis||'') + '</span></div>'
+        + (x.auto ? '<div class="meta" style="margin-top:6px">자동 수집 → 위 지표 카드(' + esc((x.auto||[]).join(', ')) + ')</div>'
+          : (l ? '<div style="font-size:18px;font-weight:700;margin:6px 0 2px;color:' + (vc[l.verdict]||'var(--text)') + '">' + esc(l.verdict||'') + ' <span class="meta" style="font-weight:400">' + esc(l.period) + ' · 읽음 ' + esc(l.date||'') + '</span></div><div style="font-size:13px">' + esc(l.memo||'') + '</div>'
+            + (l.fields && Object.keys(l.fields).length ? '<div class="meta" style="margin-top:3px">' + esc(Object.keys(l.fields).map(k => k + ' ' + l.fields[k]).join(' · ')) + '</div>' : '')
+            : '<div class="meta" style="margin-top:6px">기록 없음</div>'))
+        + (hist ? '<div style="font-size:12px;margin-top:6px">' + hist + '</div>' : '')
+        + '<div class="meta" style="margin-top:8px">' + (m ? '<a href="manual.html#rep:' + esc(x.id) + '" style="color:#7A5C12;font-weight:700">📝 ' + esc(m.period) + ' 미입력 ' + m.days_late + '일 → 기록</a> · ' : '') + (nx ? '다음 발표 ' + esc(nx) : '') + (x.url ? ' · <a href="' + esc(x.url) + '" target="_blank" rel="noopener">출처 ↗</a>' : '') + '</div>'
+        + '</div>';
+    }).join('');
+    tagEl.textContent = log.length + '건 기록' + (cal ? ' · 달력 ' + String(cal.today||'') : '');
+    box.hidden = false;
+  }catch(e){ /* 자료 없으면 조용히 숨김 유지 */ }
 }
 
 // ==== 종목 분석 (cygnus.html 이식, 2026-09-28) ====
@@ -593,6 +643,7 @@ async function load(){
   }
 }
 load();
+loadReports();
 initStockSection();
 </script>
 </body>
