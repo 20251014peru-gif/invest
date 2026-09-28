@@ -52,9 +52,9 @@
     {
       "id": "axes-view",
       "name": "축·전략 보기",
-      "file": "axes.html",
+      "file": "_old/axes.html",
       "axis": "내용",
-      "status": "active",
+      "status": "stopped",
       "since": "2026-09-04",
       "reads": [
         "analysis/regime.json",
@@ -64,7 +64,8 @@
         "facts/macro.json",
         "facts/macro_history.json"
       ],
-      "writes": []
+      "writes": [],
+      "note": "regime-lite-v1.html(레짐라이트)로 대체(2026-09-28). 레짐 요약·전략카드 5개는 레짐라이트에 이미 있고, 8축×6단계 상세는 안 옮기기로 함. 참고용으로 _old/에 보존"
     },
     {
       "id": "telegram-bot",
@@ -219,9 +220,9 @@
     {
       "id": "cygnus",
       "name": "CYGNUS 시장 상태(정적)",
-      "file": "cygnus.html",
+      "file": "_old/cygnus.html",
       "axis": "판단",
-      "status": "active",
+      "status": "stopped",
       "since": "2026-09-04",
       "reads": [
         "analysis/calendar.json",
@@ -239,7 +240,8 @@
       ],
       "writes": [
         "raw/supply.json(복사·붙여넣기)"
-      ]
+      ],
+      "note": "regime-lite-v1.html(레짐라이트)로 대체(2026-09-28). 레짐요약·지표는 레짐라이트에 이미 있었고, 종목분석·캡쳐분석·토론실 근거글(facts/board.json)을 이식. 산업 사슬·영웅문 수급 붙여넣기는 뺌(수급은 추후 외부 API 예정). DART 공시 검토는 events.html 사용. 참고용으로 _old/에 보존"
     },
     {
       "id": "dart",

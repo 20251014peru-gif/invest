@@ -251,7 +251,7 @@ def run(fetch_map=None, manual=None):
     status = "ok" if not errors else ("fail" if ok == 0 else "ok")
     job = {"id": "macro", "name": "매크로 수집", "status": status, "ran": kst_iso(), "due": kst_iso(kst_now() + dt.timedelta(hours=30)),
            "cause": ("; ".join(errors)[:300] if errors else ""), "fix": ("출처 주소·심볼(data/indicators.json) 확인. 전부 실패면 FRED/Yahoo 접속 문제" if errors else ""),
-           "link": "cygnus.html", "note": f"{ok}/{len(out)} 지표"}
+           "link": "regime-lite-v1.html", "note": f"{ok}/{len(out)} 지표"}
     st["jobs"] = [j for j in st.get("jobs", []) if j.get("id") != "macro"] + [job]; st["updated"] = kst_iso()
     save(P("data", "status.json"), st)
     print(f"매크로 {ok}/{len(out)} 지표 수집" + (f" · 실패 {len(errors)}: " + "; ".join(errors) if errors else ""))

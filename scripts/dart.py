@@ -41,7 +41,7 @@ def run():
     if not KEY:
         stj = load(P("data", "status.json"), {"schema": "status/1", "jobs": []})
         stj["jobs"] = [j for j in stj.get("jobs", []) if j.get("id") != "dart"] + [{"id": "dart", "name": "공시 수집",
-            "status": "stopped", "ran": kst_iso(), "due": "", "cause": "DART_API_KEY 미설정", "fix": "GitHub Secret 에 DART_API_KEY 등록하면 자동 수집", "link": "cygnus.html#sectors"}]
+            "status": "stopped", "ran": kst_iso(), "due": "", "cause": "DART_API_KEY 미설정", "fix": "GitHub Secret 에 DART_API_KEY 등록하면 자동 수집", "link": "events.html"}]
         stj["updated"] = kst_iso(); save(P("data", "status.json"), stj)
         print("DART_API_KEY 없음 — 공시 수집 건너뜀(정상 종료, 알림 없음)")
         return 0
@@ -91,7 +91,7 @@ def run():
 
     stj = load(P("data", "status.json"), {"schema": "status/1", "jobs": []})
     job = {"id": "dart", "name": "공시 수집", "status": "ok", "ran": kst_iso(),
-           "due": kst_iso(kst_now() + dt.timedelta(hours=30)), "cause": "", "fix": "", "link": "cygnus.html#sectors",
+           "due": kst_iso(kst_now() + dt.timedelta(hours=30)), "cause": "", "fix": "", "link": "events.html",
            "note": f"{len(items)}건({DAYS}일) · 신규 Event {len(er.get('new_events',[]))} · 중대성갱신 {len(er.get('material_updates',[]))} · push {notify.get('count',0)}"}
     stj["jobs"] = [j for j in stj.get("jobs", []) if j.get("id") != "dart"] + [job]
     stj["updated"] = kst_iso(); save(P("data", "status.json"), stj)
@@ -101,7 +101,7 @@ def run():
 def fail(msg):
     stj = load(P("data", "status.json"), {"schema": "status/1", "jobs": []})
     stj["jobs"] = [j for j in stj.get("jobs", []) if j.get("id") != "dart"] + [{"id": "dart", "name": "공시 수집",
-        "status": "fail", "ran": kst_iso(), "due": "", "cause": msg[:300], "fix": "DART_API_KEY Secret 확인 · Event Engine · Actions 로그", "link": "cygnus.html#sectors"}]
+        "status": "fail", "ran": kst_iso(), "due": "", "cause": msg[:300], "fix": "DART_API_KEY Secret 확인 · Event Engine · Actions 로그", "link": "events.html"}]
     stj["updated"] = kst_iso(); save(P("data", "status.json"), stj)
 
 if __name__ == "__main__":
