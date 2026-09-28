@@ -99,7 +99,7 @@
       today.forEach(function(x){ lines.push('📅 <b>오늘 '+esc(x.time||'')+' '+esc(x.name)+'</b>'+(x.auto?' <small>(자동 수집)</small>':' → <a href="manual.html#rep:'+esc(x.id)+'">기록</a>')); });
       miss.forEach(function(x){ lines.push('📝 <b>'+esc(x.name)+' '+esc(x.period)+'</b> 미입력 '+x.days_late+'일 → <a href="manual.html#rep:'+esc(x.id)+'">보고서 기록</a>'); });
       need.forEach(function(x){ lines.push('📝 <b>'+esc(x.name)+'</b> 값 없음 → <a href="manual.html#'+esc(x.id)+'">수동 입력</a>'); });
-      fail.forEach(function(x){ lines.push('⚠ <b>'+esc(x.name)+'</b> 수집 실패 <small>'+esc(String(x.error).slice(0,50))+'</small> → <a href="cygnus.html">지표</a>'); });
+      fail.forEach(function(x){ lines.push('⚠ <b>'+esc(x.name)+'</b> 수집 실패 <small>'+esc(String(x.error).slice(0,50))+'</small> → <a href="regime-lite-v1.html">지표</a>'); });
       if(up.length) lines.push('<span style="color:var(--sub)">다가오는 발표: '+up.map(function(x){return esc(x.date.slice(5))+' '+esc(x.name)}).join(' · ')+'</span>');
       if(!lines.length) return;
       el.classList.remove('empty');
