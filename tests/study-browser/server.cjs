@@ -4,6 +4,7 @@
 const http = require('node:http'), fs = require('node:fs'), path = require('node:path');
 const ROOT = path.resolve(__dirname, '../..');
 const MF = process.env.MARKFLOW_DIR || path.resolve(ROOT, '../site');
+const CAL = path.resolve(process.env.CALENDAR_SOURCE || path.join(ROOT, '../calendar-shared/dalnim-calendar'));
 const PORT = Number(process.argv[2] || 8123), EXT_PORT = PORT + 1;
 const TYPES = {'.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.md': 'text/markdown; charset=utf-8'};
 const files = new Map();
@@ -20,10 +21,11 @@ http.createServer((req, res) => {
   if (u.pathname.startsWith('/__test/files/')) { const f = files.get(u.pathname.split('/').pop()); return f ? send(res, 200, f.body, f.type, {'access-control-allow-origin': '*'}) : send(res, 404, 'no'); }
   if (u.pathname === '/__test/uploads') return send(res, 200, JSON.stringify([...files].map(([k, v]) => ({id: k, path: v.path, size: v.body.length, type: v.type}))), 'application/json');
   let file;
-  if (u.pathname.startsWith('/__test/markflow')) file = path.join(MF, u.pathname.replace('/__test/', ''));
+  if (u.pathname.startsWith('/dalnim-calendar/')) file = path.join(CAL, decodeURIComponent(u.pathname.slice('/dalnim-calendar/'.length)));
+  else if (u.pathname.startsWith('/__test/markflow')) file = path.join(MF, u.pathname.replace('/__test/', ''));
   else if (u.pathname === '/__test/firebase-mock.js') file = path.join(__dirname, 'firebase-mock.js');
   else file = path.join(ROOT, decodeURIComponent(u.pathname === '/' ? '/records.html' : u.pathname));
-  if (!file.startsWith(ROOT) && !file.startsWith(MF)) return send(res, 403, 'no');
+  if (!file.startsWith(ROOT) && !file.startsWith(MF) && !file.startsWith(CAL+path.sep)) return send(res, 403, 'no');
   fs.readFile(file, (err, buf) => {
     if (err) return send(res, 404, 'not found');
     const ext = path.extname(file);
