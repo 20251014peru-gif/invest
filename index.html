@@ -78,13 +78,13 @@
     fetch('analysis/regime.json?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(r){
       var el=grid.querySelector('[data-id=market]'); if(!el) return; el.classList.remove('empty');
       var t=function(c){return '<span style="font-size:11px;padding:0 6px;border-radius:6px;background:'+(c==='확인'?'#dcfce7':c==='추정'?'#fef3c7':'#fee2e2')+'">'+c+'</span>'};
-      el.querySelector('.body').innerHTML='<b>'+esc(r.one_line)+'</b><br><small>성장 '+t(r.growth.confidence)+' 물가 '+t(r.inflation.confidence)+' 유동성 '+t(r.liquidity.confidence)+' · 판정 '+String(r.computed_at||'').slice(5,16).replace('T',' ')+' · 값 수집 '+String(r.macro_collected_at||'').slice(5,16).replace('T',' ')+'</small><br><a href="axes.html">근거·바뀌는 조건 →</a>';
+      el.querySelector('.body').innerHTML='<b>'+esc(r.one_line)+'</b><br><small>성장 '+t(r.growth.confidence)+' 물가 '+t(r.inflation.confidence)+' 유동성 '+t(r.liquidity.confidence)+' · 판정 '+String(r.computed_at||'').slice(5,16).replace('T',' ')+' · 값 수집 '+String(r.macro_collected_at||'').slice(5,16).replace('T',' ')+'</small><br><a href="regime-lite-v1.html">국면 대시보드 →</a>';
     }).catch(function(){
       fetch('data/axes.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
         var rg=d.regime||{}, el=grid.querySelector('[data-id=market]'); if(!el) return;
         var known=[rg.growth,rg.inflation,rg.liquidity].some(function(v){return v&&v!=='미확인'});
         el.classList.remove('empty');
-        el.querySelector('.body').innerHTML=(known?'성장 '+rg.growth+' · 물가 '+rg.inflation+' · 유동성 '+rg.liquidity+' · '+(rg.quadrant||'')+'<br>':'현재값 미확인 · ')+'<a href="axes.html">축 8개 · 전략 카드 5개 보기 →</a>';
+        el.querySelector('.body').innerHTML=(known?'성장 '+rg.growth+' · 물가 '+rg.inflation+' · 유동성 '+rg.liquidity+' · '+(rg.quadrant||'')+'<br>':'현재값 미확인 · ')+'<a href="regime-lite-v1.html">국면 대시보드 보기 →</a>';
       }).catch(function(){});
     });
   }
