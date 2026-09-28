@@ -2,6 +2,7 @@ import {makeSharedFollowup} from './followup-shared.mjs?v=7.40.0';
 import * as C from './followups-core.mjs?v=7.34.0';
 import {makeFollowupStore} from './followups-store.mjs?v=7.34.0';
 const uid=()=>crypto.randomUUID();
+const archiveFollowupLinkHTML=x=>'<a class="archiveTaskLink" href="/dalnim-calendar/?investment='+encodeURIComponent('investment-followup:'+x.id)+'" target="_blank" rel="noopener">'+(x.state==='done'?'달님에서 열기 ↗':'달님에서 확인 ↗')+'</a>';
 const errorText=e=>({CONFLICT:'다른 기기에서 변경됐습니다. 입력은 그대로 두고, 새로 열어 최신 내용과 비교해 주세요.',RESULT_REQUIRED:'확인 결과를 한 줄 적어 주세요.',QUESTION_REQUIRED:'확인할 질문을 적어 주세요.',PAUSE_REASON_REQUIRED:'보류 이유를 결과 칸에 적어 주세요.',BAD_URL:'근거 링크는 http 또는 https 주소로 넣어 주세요.',TOO_LARGE:'내용이 너무 큽니다. 후속 확인으로 나눠 주세요.',IMAGE_SIZE:'사진은 한 장당 8MB까지 가능합니다.',IMAGE_TYPE:'PNG·JPG·GIF·WebP 사진을 선택해 주세요.'}[e.message]||'저장소 연결을 확인하고 다시 시도해 주세요. ('+(e.code||e.message)+')');
 const button=(text,action,cls='')=>'<button type="button" class="fu-button '+cls+'" data-fu="'+action+'">'+text+'</button>';
 const options=(map,value)=>Object.entries(map).map(([k,v])=>'<option value="'+C.esc(k)+'"'+(value===k?' selected':'')+'>'+C.esc(v)+'</option>').join('');
@@ -13,7 +14,7 @@ async function dataURL(blob){return new Promise((ok,no)=>{const r=new FileReader
 export function init(bridge){
   const store=makeFollowupStore(bridge.db,bridge.storage);
   const shared=makeSharedFollowup(bridge);
-  let items=[],ready=false,loading=null,failure='',state='undone',comparison='',judgment='',page=1,selection=new Set(),sig='',unsubscribe=null;
+  let items=[],ready=false,loading=null,failure='',state='done',comparison='',judgment='',page=1,selection=new Set(),sig='',unsubscribe=null;
   let active=null,dirty=false,busy=false,assets=[],op=null,editingSources=[],parentId='',draftKey='',opening=0,legacyDraftKey='',restoredLegacy=false;
   const overlay=document.createElement('div');overlay.id='followupModal';overlay.className='ovwrap';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','확인·복기');
   overlay.innerHTML='<div class="modal fu-modal"><div class="mhd"><b>🔎 확인·복기</b><button class="x" data-fu="close" aria-label="닫기">✕</button></div><div class="mbody" id="fuBody"></div><div class="mfoot fu-foot">'+button('닫기','close')+button('저장','save')+button('보류','pause')+button('저장하고 완료','complete','primary')+'</div></div>';
@@ -37,14 +38,14 @@ export function init(bridge){
   }
   function cardRow(x,withSelect=true){
     const completed=x.state==='done',label=completed?(x.completedAt?stamp(x.completedAt)+' 완료':'기존 완료'):x.dueAt?(x.dueAt+' · '+C.group(x,C.day(Date.now()))):C.group(x,C.day(Date.now()));
-    return '<div class="fu-row">'+(withSelect?'<input type="checkbox" data-select="'+C.esc(x.id)+'" aria-label="정리에 포함"'+(selection.has(x.id)?' checked':'')+'>':'')+'<button class="fu-open" type="button" data-open-fu="'+C.esc(x.id)+'"><b>'+C.esc(x.question)+'</b><span>'+C.esc(completed?(x.result||'기존 완료 · 결과 미기록'):(x.result||x.expectation||'확인 결과를 남겨 주세요'))+'</span></button><div class="fu-row-status"><strong>'+C.STATES[x.state]+'</strong><small>'+C.esc(label)+'</small>'+(completed?'<small>판단: '+C.esc(C.JUDGMENTS[x.judgment]||'아직 판단 안 함')+'</small>':'')+'</div></div>';
+    return '<div class="fu-row">'+(withSelect?'<input type="checkbox" data-select="'+C.esc(x.id)+'" aria-label="정리에 포함"'+(selection.has(x.id)?' checked':'')+'>':'')+'<button class="fu-open" type="button" data-open-fu="'+C.esc(x.id)+'"><b>'+C.esc(x.question)+'</b><span>'+C.esc(completed?(x.result||'기존 완료 · 결과 미기록'):(x.result||x.expectation||'확인 결과를 남겨 주세요'))+'</span></button><div class="fu-row-status"><strong>'+C.STATES[x.state]+'</strong><small>'+C.esc(label)+'</small>'+(completed?'<small>판단: '+C.esc(C.JUDGMENTS[x.judgment]||'아직 판단 안 함')+'</small>':'')+archiveFollowupLinkHTML(x)+'</div></div>';
   }
   function render(host,q=''){
     if(!ready||failure){host.innerHTML='<div class="fu-loading">'+C.esc(failure||'전체 기간 완료 기록을 확인하는 중입니다…')+(failure?button('다시 연결','refresh'):'')+'</div>';bindList(host);return;}
     const filtered=C.filterItems(items,{state,q,comparison,judgment}),shown=filtered.slice(0,page*50);
-    host.innerHTML='<div class="fu-listbar"><div>'+[['undone','미완료'],['done','완료·복기'],['paused','보류'],['all','전체']].map(([k,n])=>'<button class="fu-button '+(state===k?'selected':'')+'" data-state="'+k+'">'+n+'</button>').join('')+'</div><span>'+filtered.length+'건</span>'+button('＋ 확인할 질문','new','primary')+button('새로고침','refresh')+'<details class="fu-filter"><summary>필터·백업</summary><label>예상 비교 <select data-filter="comparison">'+options(C.COMPARISONS,comparison)+'</select></label><label>판단 변화 <select data-filter="judgment">'+options({'':'전체',...C.JUDGMENTS},judgment)+'</select></label>'+button('전체 확인 기록 백업','export')+button('확인 기록 복원','restore')+'</details></div>'
+    host.innerHTML='<section class="archiveReviewIntro"><div><h2>검증 기록 · 복기</h2><p>지난 결과와 근거를 비교하고 다음 판단의 기준을 남기세요. 확인할 일정과 알림은 달님에서 모아 봅니다.</p></div><a class="archiveCalendarLink" href="/dalnim-calendar/" target="_blank" rel="noopener">달님에서 일정·검증 보기 ↗</a></section><div class="fu-listbar"><div>'+[['done','완료·복기'],['undone','미완료'],['paused','보류'],['all','전체']].map(([k,n])=>'<button class="fu-button '+(state===k?'selected':'')+'" data-state="'+k+'">'+n+'</button>').join('')+'</div><span>'+filtered.length+'건</span>'+button('＋ 확인할 질문','new','primary')+button('새로고침','refresh')+'<details class="fu-filter"><summary>필터·백업</summary><label>예상 비교 <select data-filter="comparison">'+options(C.COMPARISONS,comparison)+'</select></label><label>판단 변화 <select data-filter="judgment">'+options({'':'전체',...C.JUDGMENTS},judgment)+'</select></label>'+button('전체 확인 기록 백업','export')+button('확인 기록 복원','restore')+'</details></div>'
       +(selection.size?'<div class="fu-selection">'+selection.size+'개 선택 '+button('공부노트로 모아 정리','synthesize')+'</div>':'')
-      +'<div class="fu-list">'+(shown.length?shown.map(x=>cardRow(x)).join(''):'<p class="fu-muted">해당하는 확인 기록이 없습니다.</p>')+'</div>'+(shown.length<filtered.length?button('50개 더 보기','more'):'');
+      +'<div class="fu-list">'+(shown.length?shown.map(x=>cardRow(x)).join(''):'<p class="fu-muted">'+(state==='done'&&!items.some(x=>x.state==='done')?'아직 완료한 검증 기록이 없습니다. 미완료 탭에서 확인할 질문을 보고 달님으로 이어갈 수 있습니다.':'해당하는 확인 기록이 없습니다.')+'</p>')+'</div>'+(shown.length<filtered.length?button('50개 더 보기','more'):'');
     bridge.count?.(filtered.length);bindList(host);
   }
   function bindList(host){

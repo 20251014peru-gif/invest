@@ -1,8 +1,16 @@
 /* UI projections use existing records, stock metadata and canonical followups. No new database. */
+function archiveFollowupLinkHTML(x){
+  return '<a class="archiveTaskLink" href="/dalnim-calendar/?investment='+encodeURIComponent('investment-followup:'+x.id)+'" target="_blank" rel="noopener">'+(x.state==='done'?'달님에서 열기 ↗':'달님에서 확인 ↗')+'</a>';
+}
+function archiveDateIntroHTML(stocks){
+  return '<section class="archiveDateIntro"><div><h2>기록 날짜 보기</h2><p>'+(stocks?'종목별 마지막 기록 날짜를 돌아봅니다.':'보관한 기록을 날짜별로 돌아봅니다.')+' 일정·알림과 검증 작업은 달님에서 이어가세요.</p></div><div class="archiveDateOptions">'
+    +(!stocks?'<label><input type="checkbox" id="calShowChecks"'+(calShowChecks?' checked':'')+'>예정된 확인도 함께 보기</label>':'')
+    +'<a class="archiveCalendarLink" href="/dalnim-calendar/" target="_blank" rel="noopener">달님 캘린더 열기 ↗</a></div></section>';
+}
 function stockTaskHTML(x){
   var state={open:'미확인',working:'확인 중',done:'완료',paused:'보류'}[x.state]||x.state;
   var due=x.state==='done'?(x.completedAt?RecordStocks.kstDate(x.completedAt)+' 완료':'기존 완료'):x.dueAt||'날짜 미정';
-  return '<button type="button" class="stockTask" data-open-fu="'+esc(x.id)+'"><span><b>'+esc(x.question)+'</b><small>'+esc(x.state==='done'?(x.result||'기존 완료 · 결과 미기록'):(x.expectation||state))+'</small></span><span class="taskDue'+(x.state!=='done'&&x.dueAt&&x.dueAt<todayStr()?' overdue':'')+'">'+esc(due)+'</span></button>';
+  return '<div class="archiveTaskRow"><button type="button" class="stockTask" data-open-fu="'+esc(x.id)+'"><span><b>'+esc(x.question)+'</b><small>'+esc(x.state==='done'?(x.result||'기존 완료 · 결과 미기록'):(x.expectation||state))+'</small></span><span class="taskDue'+(x.state!=='done'&&x.dueAt&&x.dueAt<todayStr()?' overdue':'')+'">'+esc(due)+'</span></button>'+archiveFollowupLinkHTML(x)+'</div>';
 }
 function stockFocusHTML(name,summary){
   var info=RecordStocks.overview(stockItemOf(name)), done=summary.followups.filter(function(x){return x.state==='done';}).sort(function(a,b){return (b.completedAt||b.updatedAt||0)-(a.completedAt||a.updatedAt||0);});
