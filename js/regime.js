@@ -1,4 +1,5 @@
-// v 20260907-2100  regime.js — 레짐 요약 카드(공통). analysis/regime.json(regime/1) 을 읽어 el 에 그린다. axes.html·cygnus.html 이 같이 씀.
+// v 20260907-2100  regime.js — 레짐 요약 카드(공통). analysis/regime.json(regime/1) 을 읽어 el 에 그린다.
+// 2026-09-28 확인: 지금 쓰는 곳은 _old/axes.html·_old/cygnus.html(보존용)뿐. 운영 화면 regime-lite-v1.html은 이 공용 컴포넌트 대신 자체 코드로 레짐 요약을 그린다.
 // 사용: <script src="js/regime.js"></script> 뒤에 window.Regime.render(document.getElementById('regime'), {compact:false})
 // 원칙: 판정 옆에 반드시 신뢰(확인/추정/판단 불가) · 근거 지표 값 · 바뀌는 조건. 값 없는 신호는 '값 없음' 으로 그대로 보인다(조용히 숨기지 않음).
 (function () {
