@@ -1,3 +1,4 @@
+import {makeSharedFollowup} from './followup-shared.mjs?v=7.40.0';
 import * as C from './followups-core.mjs?v=7.34.0';
 import {makeFollowupStore} from './followups-store.mjs?v=7.34.0';
 const uid=()=>crypto.randomUUID();
@@ -11,6 +12,7 @@ function download(data,name){const u=URL.createObjectURL(new Blob([JSON.stringif
 async function dataURL(blob){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(blob);});}
 export function init(bridge){
   const store=makeFollowupStore(bridge.db,bridge.storage);
+  const shared=makeSharedFollowup(bridge);
   let items=[],ready=false,loading=null,failure='',state='undone',comparison='',judgment='',page=1,selection=new Set(),sig='',unsubscribe=null;
   let active=null,dirty=false,busy=false,assets=[],op=null,editingSources=[],parentId='',draftKey='',opening=0,legacyDraftKey='',restoredLegacy=false;
   const overlay=document.createElement('div');overlay.id='followupModal';overlay.className='ovwrap';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','확인·복기');
@@ -58,7 +60,9 @@ export function init(bridge){
   function sourceSnapshots(ids){return ids.map(id=>{const r=bridge.records().find(x=>x.id===id);return {id,title:r?.title||'원본 없음',kind:r?.kind||'',url:r?.link||''};});}
   function collect(){return {stocks:[...new Set($('fuStocks').value.split(',').map(s=>s.trim()).filter(Boolean))],question:$('fuQuestion').value.trim(),dueAt:$('fuDue').value,expectation:$('fuExpected').value,result:$('fuResult').value.trim(),judgment:$('fuJudgment').value,comparison:$('fuComparison').value,changeReason:$('fuReason').value,nextAction:$('fuNext').value,observedChange:$('fuObserved').value,lesson:$('fuLesson').value,basisDate:$('fuBasis').value,links:$('fuLinks').value.split('\n').map(s=>s.trim()).filter(Boolean).map(url=>({url})),assets,sourceIds:editingSources,sourceSnapshots:editingSources.map(id=>sourceSnapshots([id])[0].title!=='원본 없음'?sourceSnapshots([id])[0]:(active?.sourceSnapshots||[]).find(x=>x.id===id)||sourceSnapshots([id])[0]),parentFollowupId:parentId,followUpType:active?.followUpType||'lookup'};}
   function draft(){if(!$('fuQuestion')||!active)return;try{localStorage.setItem('fu_draft_'+draftKey,JSON.stringify({revision:active.revision||0,patch:collect()}));}catch{$('fuError').textContent='이 기기에 임시 보관하지 못했습니다. 창을 닫기 전에 저장해 주세요.';}}
-  async function open(id,prefill={}){
+  async function open(id,prefill={},legacy=false){
+    if(legacy&&!shared.close())return;
+    if(id&&!legacy){if(!canLeave())return;overlay.classList.remove('on');return shared.open(id,()=>open(id,{},true));}
     if(bridge.workspace?!bridge.workspace.prepare('followupModal'):!canLeave())return;
     const ticket=++opening,workspaceGeneration=bridge.workspace?.generation;
     try{
@@ -103,14 +107,14 @@ export function init(bridge){
     if(busy)return false;const patch=collect();patch.state=stateNext||active.state;op=op||uid();setBusy(true);$('fuError').textContent='서버 저장 중…';
     try{const item=await store.save(active.id,patch,active.revision||0,op);clearDraft();active=item;dirty=false;items=items.filter(x=>x.id!==item.id).concat(item);changed();bridge.toast('확인 기록을 저장했습니다');return true;}catch(e){if(['RESULT_REQUIRED','PAUSE_REASON_REQUIRED'].includes(e.message)){$('fuResultPanel').open=true;setTimeout(()=>$('fuResult').focus(),0);}$('fuError').textContent=errorText(e);draft();return false;}finally{setBusy(false);}
   }
-  function canLeave(){if(busy){bridge.toast('저장·사진 업로드가 끝난 뒤 이동해 주세요');return false;}return !overlay.classList.contains('on')||!dirty||confirm('저장 전 내용은 이 기기에 남습니다. 이동할까요?');}
-  function close(){if(!canLeave())return false;overlay.classList.remove('on');return true;}
+  function canLeave(){if(!shared.canLeave())return false;if(busy){bridge.toast('저장·사진 업로드가 끝난 뒤 이동해 주세요');return false;}return !overlay.classList.contains('on')||!dirty||confirm('저장 전 내용은 이 기기에 남습니다. 이동할까요?');}
+  function close(){if(!canLeave()||!shared.close(true))return false;overlay.classList.remove('on');return true;}
   async function editorAction(action,savedDraft){
     if(busy)return;
     if(action==='close')return close();
     if(action==='save'||action==='complete'||action==='pause'||action==='reopen'){
       const next={complete:'done',pause:'paused',reopen:'working'}[action]|| (active.state==='open'?'working':active.state);
-      if(await save(next))overlay.classList.remove('on');return;
+      if(await save(next)){overlay.classList.remove('on');await shared.open(active.id,()=>open(active.id,{},true));}return;
     }
     if(action==='history'){try{const list=await store.history(active.id);$('fuHistory').innerHTML=list.length?list.map(h=>'<article class="fu-history"><b>'+C.esc(stamp(h.recordedAt))+' · '+C.esc({migrated:'기존 기록 보존',created:'생성',completed:'완료',reopened:'재개',updated:'수정'}[h.event]||'확인')+'</b><p>당시 예상: '+C.esc(h.expectation||'미기록')+'</p><p>결과: '+C.esc(h.result||(h.legacyCompleted?'기존 완료 · 결과 미기록':'미기록'))+'</p><p>판단: '+C.esc(C.JUDGMENTS[h.judgment]||'아직 판단 안 함')+' '+C.esc(h.changeReason||'')+'</p><p>관찰: '+C.esc(h.observedChange||'미기록')+'</p><p>배운 점: '+C.esc(h.lesson||'미기록')+'</p>'+(h.links||[]).filter(l=>C.safeURL(l.url)).map(l=>'<a target="_blank" rel="noopener" href="'+C.esc(C.safeURL(l.url))+'">'+C.esc(l.url)+'</a>').join('<br>')+(h.assets||[]).filter(a=>C.safeURL(a.url)).map(a=>'<a target="_blank" rel="noopener" href="'+C.esc(C.safeURL(a.url))+'"> · 사진 근거</a>').join('')+'</article>').join(''):'<p>저장된 이력이 없습니다.</p>';}catch(e){$('fuError').textContent=errorText(e);}return;}
     if(action==='followup'){if(dirty&&!await save())return;return open(null,{stocks:(active.stocks||[]).slice(),sourceIds:editingSources,sourceSnapshots:sourceSnapshots(editingSources),parentFollowupId:active.id,expectation:'앞선 확인 결과: '+(active.result||'결과 미기록')});}

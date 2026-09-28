@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="js/records-workspace.css?v=7.34.0">
 <style>
 /* ══════════════════════════════════════════════════════════
-   🗂 투자 기록보관실  v7.39.1
+   🗂 투자 기록보관실  v7.40.0
    2026-09-28 03:55:44 KST — 전체 흐름 본문도 PC 2열, 900px 이하 1열. 원문 보존.
    2026-09-27 13:50:45 KST — 한눈에 보기·원문 PC 2열 통일, 유튜브 목록 행 여백 압축.
    2026-09-27 13:23:10 KST — 넓은 문서형 읽기 창과 소제목 단위 원문 2열. 원문·순서 보존.
@@ -615,7 +615,7 @@ table.rt .re2{color:var(--warn);font-weight:700;font-size:12px}
 
 <div class="topbar">
   <h1><a class="recordsHome" href="records.html" aria-label="투자 기록보관실 전체 기록으로 이동">🗂 투자 기록보관실</a></h1><a class="navbtn" href="research.html" target="_top">📊 통합 분석실</a>
-  <span class="ver">v7.39.1 · 2026-09-28 04:57:03 KST · Anthropic 종합분석·비용</span>
+  <span class="ver">v7.40.0 · 2026-09-28 12:52:56 KST · 캘린더 확인·복기 공통 화면</span>
   <span class="sp"></span>
   <div class="search"><span>🔍</span><input type="text" id="searchBar" placeholder="종목·제목·메모에서 찾기…"></div>
   <span class="stat" id="topStat"></span>
@@ -1517,7 +1517,7 @@ function draftsApi(){
 var FU = null, _fuReady = null;
 function followupsStart(){
   if(!db || !uid) return Promise.resolve();
-  if(!_fuReady) _fuReady=import('./js/followups-app.mjs?v=7.34.0').then(function(m){
+  if(!_fuReady) _fuReady=import('./js/followups-app.mjs?v=7.40.0').then(function(m){
     FU=m.init({db:db,storage:storage,records:function(){return records;},studyNeedsReview:studyNeedsReview,toast:toast,openRecord:goRecord,workspace:RecordWorkspace,account:function(){return uid;},
       count:function(n){document.getElementById('cntLabel').textContent=n+'건';},
       changed:function(){renderKtabs();renderTodos();if(laterMode)renderLaterMode();else if(stockMode||curView==='cal')render();if(PAGE_OPEN&&document.getElementById('pageModal').classList.contains('on'))FU.decoratePage(document.getElementById('pgBody'),PAGE_OPEN);}}); return FU;
@@ -3878,6 +3878,8 @@ function setRecordHash(id){
 }
 function routeFromHash(){
   if(IN_WORKSPACE) return;
+  var fu=location.hash.match(/^#followup=(.+)$/);
+  if(fu){try{openFollowup(decodeURIComponent(fu[1]));}catch(e){toast('확인 기록 주소를 확인해 주세요.');}return;}
   var m = location.hash.match(/^#record=(.+)$/);
   var modal = document.getElementById('pageModal');
   if(!m){ if(modal.classList.contains('on')){ modal.classList.remove('on'); PAGE_OPEN=null; } return; }
@@ -4307,7 +4309,7 @@ window.addEventListener('records-editor-navigate',function(e){
 window.addEventListener('records-editor-closed',function(){if(PAGE_OPEN&&document.getElementById('pageModal').classList.contains('on'))openPage(PAGE_OPEN,{fromRoute:true});});
 window.addEventListener('beforeunload',function(e){if((_recordSaving||_stockSaving)||(RecordWorkspace.active==='recModal'&&recordIsDirty())||(RecordWorkspace.active==='stockDetailModal'&&stockHasUnsavedFields())){e.preventDefault();e.returnValue='';}});
 RecordAI.initCosts();
-console.log('[기록보관실] v7.39.1 준비됨 — Anthropic 종합분석·비용');
+console.log('[기록보관실] v7.40.0 준비됨 — Anthropic 종합분석·비용');
 render(); renderKtabs(); renderTodos(); renderDue(); renderStockPicker(); renderStockDatalist(); renderVerifyPicker();
 
 /* ══════════════════════════════════════════════════════════
