@@ -54,7 +54,7 @@
 (function(){
   var VER='v 20260907-2300'; document.getElementById('ver').textContent=VER;
   var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
-  var CELLS=[['market','c1'],['kr-us','c2'],['sector','c3'],['signals','c4'],['failed','c5'],['review','c6'],['alerts','c7']];
+  var CELLS=[['market','c1'],['kr-us','c2'],['signals','c4'],['failed','c5'],['review','c6'],['alerts','c7']];
   var LS='hub_ui'; var ui={}; try{ui=JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){}
   function save(){ try{localStorage.setItem(LS,JSON.stringify(ui))}catch(e){} }
   var feats={}, grid=document.getElementById('grid');
@@ -99,7 +99,7 @@
       today.forEach(function(x){ lines.push('📅 <b>오늘 '+esc(x.time||'')+' '+esc(x.name)+'</b>'+(x.auto?' <small>(자동 수집)</small>':' → <a href="manual.html#rep:'+esc(x.id)+'">기록</a>')); });
       miss.forEach(function(x){ lines.push('📝 <b>'+esc(x.name)+' '+esc(x.period)+'</b> 미입력 '+x.days_late+'일 → <a href="manual.html#rep:'+esc(x.id)+'">보고서 기록</a>'); });
       need.forEach(function(x){ lines.push('📝 <b>'+esc(x.name)+'</b> 값 없음 → <a href="manual.html#'+esc(x.id)+'">수동 입력</a>'); });
-      fail.forEach(function(x){ lines.push('⚠ <b>'+esc(x.name)+'</b> 수집 실패 <small>'+esc(String(x.error).slice(0,50))+'</small> → <a href="cygnus.html">지표</a>'); });
+      fail.forEach(function(x){ lines.push('⚠ <b>'+esc(x.name)+'</b> 수집 실패 <small>'+esc(String(x.error).slice(0,50))+'</small> → <a href="regime-lite-v1.html">지표</a>'); });
       if(up.length) lines.push('<span style="color:var(--sub)">다가오는 발표: '+up.map(function(x){return esc(x.date.slice(5))+' '+esc(x.name)}).join(' · ')+'</span>');
       if(!lines.length) return;
       el.classList.remove('empty');
@@ -114,15 +114,7 @@
       var parts=want.map(function(id){var r=by[id]; if(!r||r.value==null) return null; return r.name+' '+(r.change_pct!=null?(r.change_pct>0?'▲':r.change_pct<0?'▼':'')+Math.abs(r.change_pct).toFixed(1)+'%':r.value)+(r.judge?' <b>'+r.judge+'</b>':'')}).filter(Boolean);
       if(!parts.length) return;
       el.classList.remove('empty');
-      el.querySelector('.body').innerHTML=parts.join(' · ')+'<br><a href="cygnus.html">전체 지표 →</a> <small>수집 '+window.Status.kstStr(d.collected_at)+'</small>';
-    }).catch(function(){});
-  }
-  // 산업·테마 칸: data/sectors.json 국면 요약(값 있을 때만)
-  function fillSectors(){
-    fetch('data/sectors.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
-      var el=grid.querySelector('[data-id=sector]'), rows=(d.sectors||[]).filter(function(x){return x.status==='active'}); if(!el||!rows.length) return;
-      el.classList.remove('empty');
-      el.querySelector('.body').innerHTML=rows.map(function(x){return '<b>'+x.name+'</b> — '+x.phase+' <small>('+(x.as_of||'')+', '+(x.companies||[]).length+'개사)</small>'}).join('<br>')+'<br><a href="cygnus.html#sectors">산업 사슬 →</a>';
+      el.querySelector('.body').innerHTML=parts.join(' · ')+'<br><a href="regime-lite-v1.html">전체 지표 →</a> <small>수집 '+window.Status.kstStr(d.collected_at)+'</small>';
     }).catch(function(){});
   }
   function showTip(t){ var d=document.getElementById('tip'); d.textContent=t; d.style.display='block'; clearTimeout(d._t); d._t=setTimeout(function(){d.style.display='none'},4000); }
@@ -133,8 +125,8 @@
   modeBtn.onclick=function(){ ui.notion=!ui.notion; save(); applyMode(); };
 
   // features.json 한 곳에서 제목·툴팁을 읽는다(원칙 17)
-  fetch('data/features.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){ feats=d.features||{}; render(); applyMode(); fillMarket(); fillMarkets(); fillSectors(); fillReview(); })
-    .catch(function(e){ console.error('features.json 읽기 실패: '+e.message); render(); applyMode(); fillMarket(); fillMarkets(); fillSectors(); fillReview(); });
+  fetch('data/features.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){ feats=d.features||{}; render(); applyMode(); fillMarket(); fillMarkets(); fillReview(); })
+    .catch(function(e){ console.error('features.json 읽기 실패: '+e.message); render(); applyMode(); fillMarket(); fillMarkets(); fillReview(); });
 
   // 자가 점검(원칙 21): 파일 4개 읽힘 + 경고 띠 + 🐞 [복사] 가 실제로 뜨는지
   document.getElementById('checkBtn').onclick=function(){

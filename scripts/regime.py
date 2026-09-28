@@ -155,7 +155,7 @@ def run():
     # status: 세 칸 다 판단 불가면 fail(조용한 실패 금지), 아니면 ok
     st = load(P("data", "status.json"), {"schema": "status/1", "jobs": []})
     job = {"id": "regime", "name": "레짐 판정", "status": "ok" if ok_n else "fail", "ran": kst_iso(), "due": (dt.datetime.now(KST) + dt.timedelta(hours=30)).replace(microsecond=0).isoformat(),
-           "cause": "" if ok_n else "성장·물가·유동성 셋 다 판단 불가 — facts/macro.json 에 값이 없음", "fix": "" if ok_n else "매크로 수집(macro.yml) 먼저 확인", "link": "axes.html", "note": out["one_line"][:120]}
+           "cause": "" if ok_n else "성장·물가·유동성 셋 다 판단 불가 — facts/macro.json 에 값이 없음", "fix": "" if ok_n else "매크로 수집(macro.yml) 먼저 확인", "link": "regime-lite-v1.html", "note": out["one_line"][:120]}
     st["jobs"] = [j for j in st.get("jobs", []) if j.get("id") != "regime"] + [job]; st["updated"] = kst_iso()
     save(P("data", "status.json"), st)
     print(out["one_line"]); return out
