@@ -56,6 +56,27 @@
   .strat-card .strat-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
   .strat-chip{font-size:10.5px;background:var(--neutral-bg);color:var(--neutral-tx);padding:2px 7px;border-radius:999px;white-space:nowrap}
   .strat-card .strat-invalid{font-size:11px;color:#B04A4A;line-height:1.5}
+
+  .stock-card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px}
+  .stock-card > b{font-size:14px}
+  .stock-card textarea{width:100%;min-height:70px;font:13px/1.5 inherit;padding:10px;border:1px solid var(--card-border);border-radius:8px;background:var(--manual-bg);color:var(--text);resize:vertical;box-sizing:border-box}
+  .stock-btn{min-height:38px;padding:0 14px;border-radius:8px;border:1px solid var(--card-border);background:var(--card);font:inherit;font-size:13px;cursor:pointer;color:var(--text)}
+  .stock-btn.pri{background:var(--bull-bg);border-color:#F4CCDA;color:var(--bull-tx);font-weight:700}
+  .chip-grp{margin-bottom:2px}
+  .chip-grp .chip-lbl{font-size:11px;color:var(--faint);margin-bottom:4px}
+  .chip-grp .chip-row{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid var(--card-border);background:var(--card);color:var(--text);font-size:12px;text-decoration:none}
+  .chip:active{background:var(--manual-bg)}
+  .stock-tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}
+  .stock-tbl th{background:var(--manual-bg);text-align:left;padding:6px 8px;font-weight:700;color:var(--quiet)}
+  .stock-tbl td{padding:6px 8px;border-top:1px solid var(--card-border);vertical-align:top}
+  .sig-box{border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:8px}
+  .sig-box.bull{background:var(--bull-bg);border:1px solid #F4CCDA}
+  .sig-box.bear{background:var(--bear-bg);border:1px solid #D7DEEC}
+  .sig-box.neutral{background:var(--neutral-bg);border:1px solid #EAD9A8}
+  .cap-card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+  .cap-card .cap-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+  .cap-del{border:1px solid var(--card-border);background:var(--card);border-radius:8px;padding:2px 8px;font-size:11px;cursor:pointer;color:var(--quiet)}
 </style>
 </head>
 <body>
@@ -92,8 +113,41 @@
     <div class="strat-grid" id="strategies"></div>
   </section>
 
+  <section>
+    <div class="sec-head"><h2>종목 분석 · 붙여넣기</h2><span class="sec-sub">국면이 우호적일 때 여기서 종목을 좁힙니다 — 선행EPS · 가격/밸류 위치 · 재무요약 · 캡쳐분석</span></div>
+
+    <div class="stock-card">
+      <b>종목 바로가기</b>
+      <span class="meta">업종별로 묶은 네이버금융 바로가기 — 클릭하면 바로 이동</span>
+      <div id="epsLinks">불러오는 중…</div>
+    </div>
+
+    <div class="stock-card">
+      <b>① 선행EPS 붙여넣기</b>
+      <span class="meta">한 줄씩 「종목명 올해EPS 내년EPS」(컨센서스 문구 그대로도 인식) → 상향/하향 방향 판정</span>
+      <textarea id="epsPaste" placeholder="예) 삼성전자  4,800  5,200"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="stock-btn pri" id="epsBtn" type="button">읽어내기</button></div>
+      <div id="epsOut"></div>
+    </div>
+
+    <div class="stock-card">
+      <b>② 종목 스냅샷 붙여넣기</b>
+      <span class="meta">네이버 「투자정보」·「기업실적분석」 페이지를 통째로 복사해 붙여넣기 — 현재가·52주·PER·PBR 자동 인식</span>
+      <textarea id="snapPaste" placeholder="네이버 종목 페이지 내용을 통째로 붙여넣으세요"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="stock-btn pri" id="snapBtn" type="button">분석</button><button class="stock-btn" id="snapClearBtn" type="button">지우기</button></div>
+      <div id="snapOut"></div>
+    </div>
+
+    <div class="stock-card">
+      <b>📸 캡쳐 분석 결과</b>
+      <span class="meta">네이버 종목 화면을 캡쳐해서 채팅에 보내면 쌓이는 결과(raw/financials.json)</span>
+      <div id="capBox" class="meta">불러오는 중…</div>
+    </div>
+  </section>
+
   <footer>
-    facts/macro.json · facts/macro_history.json · data/strategies.json 실데이터를 그대로 불러옵니다. 국면 판단 13개 지표(배경4·주간5·당일4, 2개는 미수집) + 전략카드 5개.
+    facts/macro.json · facts/macro_history.json · data/strategies.json 실데이터를 그대로 불러옵니다. 국면 판단 13개 지표(배경4·주간5·당일4, 2개는 미수집) + 전략카드 5개.<br>
+    종목 분석은 data/sectors.json(바로가기) · raw/financials.json(캡쳐분석)을 함께 씁니다. 선행EPS·스냅샷 붙여넣기 결과는 이 브라우저에만 저장됩니다.
   </footer>
 
 </div>
@@ -162,6 +216,188 @@ function riskBannerHTML(r){
   return '<b>공통 리스크 규칙</b> — 종목당 손실 ' + esc(r.per_trade_loss_pct) + '% · '
     + esc(r.positions) + '종목 분산 · ATR×' + esc(r.atr_multiple) + ' · 계좌 고점대비 -' + esc(r.account_drawdown_stop_pct) + '% 서킷브레이커 · '
     + '최소 ' + esc(r.min_shares) + '주 · ' + esc(r.execution);
+}
+
+// ==== 종목 분석 (cygnus.html 이식, 2026-09-28) ====
+
+// ---- 업종별 바로가기 칩 ----
+function chipRowHTML(sec){
+  const comps = (sec.companies || []).filter(c => c.code);
+  if (!comps.length) return '';
+  const chips = comps.map(c => '<a class="chip" target="_blank" rel="noopener" href="https://finance.naver.com/item/main.naver?code=' + encodeURIComponent(c.code) + '">' + esc(c.name) + ' ↗</a>').join('');
+  return '<div class="chip-grp"><div class="chip-lbl">' + esc(sec.name) + '</div><div class="chip-row">' + chips + '</div></div>';
+}
+async function loadEpsLinks(){
+  const el = document.getElementById('epsLinks');
+  try{
+    const r = await fetch('data/sectors.json?t=' + Date.now(), {cache:'no-store'});
+    const d = await r.json();
+    const rows = (d.sectors || []).map(chipRowHTML).filter(Boolean).join('');
+    el.innerHTML = rows || '<span class="meta">등록된 종목이 없습니다</span>';
+  }catch(e){
+    el.innerHTML = '<span class="meta">종목 목록을 못 불러왔어요(' + esc(e.message) + '). 네이버금융에서 직접 검색하세요.</span>';
+  }
+}
+
+// ---- ① 선행EPS 붙여넣기 ----
+const EPS_KEY = 'cygnus_eps'; // cygnus.html과 같은 키(같은 브라우저면 기존 값 그대로 보임)
+function loadEps(){ try{ const v = localStorage.getItem(EPS_KEY); return v ? JSON.parse(v) : null; }catch(e){ return null; } }
+function saveEps(v){ try{ localStorage.setItem(EPS_KEY, JSON.stringify(v)); }catch(e){} }
+function parseEps(t){
+  const out = { schema:'eps/1', as_of: new Date().toISOString().slice(0,10), source:'컨센서스 붙여넣기', items:[], up:0, down:0, verdict:'혼조/유지' };
+  t.split(/\r?\n/).forEach(line => {
+    const s = line.trim(); if (!s) return;
+    const sc = s.replace(/\d+\s*개월\s*전?/g,'개월전').replace(/\d+\s*M\s*전?/gi,'M전');
+    const nums = (sc.replace(/,/g,'').match(/[-+]?\d+(?:\.\d+)?/g) || []).map(parseFloat);
+    const upw = /상향|증가|개선|\+|올림|상승/.test(s), dnw = /하향|감소|악화|내림|하락|-(?=\s|$)/.test(s);
+    const nm = (s.match(/^[^\d]+/) || [''])[0].replace(/추정|EPS|컨센서스|투자정보/g,'').trim();
+    if (!nm && !nums.length) return;
+    const n = nums.length;
+    let eps = n ? nums[n-1] : null, prev = n>1 ? nums[n-2] : null, chg = null, dir = '유지', mono = '';
+    if (prev != null && eps != null && prev !== 0){ chg = (eps-prev)/Math.abs(prev)*100; dir = chg>1?'상향':chg<-1?'하향':'유지'; }
+    if (n >= 3){ const a=nums[n-3], b=nums[n-2], c=nums[n-1]; if (c>b && b>a){dir='상향';mono='3년 연속↑';} else if (c<b && b<a){dir='하향';mono='3년 연속↓';} }
+    if (upw) dir = '상향'; if (dnw) dir = '하향';
+    if (dir==='상향') out.up++; else if (dir==='하향') out.down++;
+    out.items.push({ name: nm || '(이름없음)', eps, prev, eps3: nums.slice(-3), trend: mono, chg_pct: chg==null?null:Math.round(chg*10)/10, dir });
+  });
+  out.verdict = out.up>out.down ? '상향(우호)' : out.down>out.up ? '하향(부담)' : '혼조/유지';
+  return out;
+}
+function epsForName(nm){
+  const st = loadEps(); if (!st || !st.items || !st.items.length) return null;
+  if (st.items.length === 1) return st.items[0];
+  for (const it of st.items){ if (it.name && nm && (nm.indexOf(it.name)>=0 || it.name.indexOf(nm)>=0)) return it; }
+  return null;
+}
+function renderEps(){
+  const eps = loadEps(); const box = document.getElementById('epsOut'); if (!box) return;
+  if (!eps){ box.innerHTML = ''; return; }
+  const vcls = eps.verdict.indexOf('상향')>=0 ? 'bull' : eps.verdict.indexOf('하향')>=0 ? 'bear' : 'neutral';
+  box.innerHTML = '<div class="sig-box ' + vcls + '"><b>결론: ' + esc(eps.verdict) + '</b> <span class="meta">상향 ' + eps.up + ' · 하향 ' + eps.down + ' · 기준 ' + esc(eps.as_of) + '</span></div>'
+    + '<table class="stock-tbl"><tr><th>종목</th><th>EPS(작→내년E)</th><th>선행(내년E)</th><th>변화</th><th>방향</th></tr>'
+    + eps.items.map(r => '<tr><td>' + esc(r.name) + '</td><td>' + ((r.eps3&&r.eps3.length) ? r.eps3.map(v=>fmt(v,0)).join(' → ') : '-') + (r.trend?' <span class="meta">'+r.trend+'</span>':'') + '</td><td>' + (r.eps==null?'-':fmt(r.eps,0)) + '</td><td>' + (r.chg_pct==null?'-':(r.chg_pct>0?'▲':r.chg_pct<0?'▼':'')+Math.abs(r.chg_pct)+'%') + '</td><td><span class="badge ' + (r.dir==='상향'?'bull':r.dir==='하향'?'bear':'neutral') + '">' + esc(r.dir) + '</span></td></tr>').join('')
+    + '</table>';
+}
+
+// ---- ② 종목 스냅샷(가격·재무) 붙여넣기 ----
+function afterLabel(flat, label){ const m = flat.match(new RegExp(label + '[^0-9\\-]{0,6}(-?[0-9][0-9,\\.]*)')); return m ? parseFloat(m[1].replace(/,/g,'')) : null; }
+function afterAny(flat, labels){ for (const l of labels){ const v = afterLabel(flat, l); if (v != null) return v; } return null; }
+function parseSnap(t){
+  const flat = t.replace(/\r/g,' ').replace(/\n/g,' ');
+  const nm = (t.match(/([가-힣A-Za-z][가-힣A-Za-z0-9&.]{1,20})/) || ['',''])[1];
+  return {
+    name: nm,
+    price: afterLabel(flat, '현재가'),
+    hi: afterAny(flat, ['52주\\s*최고','52주최고','52주 최고']),
+    lo: afterAny(flat, ['52주\\s*최저','52주최저','52주 최저']),
+    sectorPer: afterAny(flat, ['동일업종\\s*PER','업종\\s*PER']),
+    per: afterLabel(flat, '(?<!업종\\s)PER'),
+    pbr: afterLabel(flat, 'PBR')
+  };
+}
+function band3(pct){ return pct>=66.7 ? ['상','bear'] : pct<=33.3 ? ['하','bull'] : ['중','neutral']; }
+function renderSnap(x){
+  const box = document.getElementById('snapOut'); if (!box) return;
+  const ei = epsForName(x.name);
+  let fundPos = null; const epsDir = ei ? ei.dir : null;
+  let top = '<p style="margin:0 0 8px"><b>' + esc(x.name || '종목') + '</b>' + (x.price!=null?' · 현재가 <b>'+fmt(x.price,0)+'</b>':'') + '</p>';
+  const rows = [];
+
+  if (ei && ei.eps != null && x.price != null && (x.sectorPer != null || x.per != null)){
+    const basePer = x.sectorPer != null ? x.sectorPer : x.per, baseNm = x.sectorPer != null ? '업종PER' : '현재PER';
+    const fair = ei.eps * basePer;
+    const up = (fair - x.price) / x.price * 100;
+    fundPos = up > 20 ? ['싼 자리','bull'] : up < -20 ? ['비싼 자리','bear'] : ['보통','neutral'];
+    rows.push('<tr><td><b>적정주가 위치</b><br><span class="meta">내년EPS×PER</span></td>'
+      + '<td>적정 = 내년EPS ' + fmt(ei.eps,0) + ' × ' + baseNm + ' ' + basePer + ' = <b>' + fmt(Math.round(fair),0) + '원</b><br>'
+      + '상승여력 = <b>' + (up>0?'+':'') + up.toFixed(0) + '%</b></td>'
+      + '<td><span class="badge ' + fundPos[1] + '">' + fundPos[0] + '</span></td></tr>');
+    const buyL = Math.round(fair*0.85), stopL = Math.round(x.price*0.95);
+    rows.push('<tr><td><b>매수·손절 참고선</b></td><td>매수선 ' + fmt(buyL,0) + '원(안전마진15%) · 손절선(현재가 -5%) ' + fmt(stopL,0) + '원</td><td class="meta">규칙</td></tr>');
+  } else {
+    rows.push('<tr><td><b>적정주가 위치</b></td><td class="meta">' + (ei ? '현재가/PER를 못 읽었어요' : '위 「① 선행EPS」에 이 종목 EPS를 먼저 넣어야 계산됩니다') + '</td><td>-</td></tr>');
+  }
+
+  if (x.price != null && x.hi != null && x.lo != null && x.hi > x.lo){
+    const pct = (x.price - x.lo) / (x.hi - x.lo) * 100, b = band3(pct);
+    rows.push('<tr><td><b>가격 위치</b><br><span class="meta">52주 밴드</span></td><td>' + pct.toFixed(1) + '% (52주 ' + fmt(x.lo,0) + '~' + fmt(x.hi,0) + ')</td><td><span class="badge ' + b[1] + '">' + b[0] + '</span></td></tr>');
+  } else rows.push('<tr><td><b>가격 위치</b></td><td class="meta">현재가/52주 값을 못 읽었어요</td><td>-</td></tr>');
+
+  if (x.per != null && x.sectorPer != null && x.sectorPer !== 0){
+    const r = x.per / x.sectorPer, lab = r<0.8 ? ['저평가','bull'] : r>1.2 ? ['고평가','bear'] : ['적정','neutral'];
+    rows.push('<tr><td><b>밸류 위치</b><br><span class="meta">업종 대비 PER</span></td><td>PER ' + x.per + ' ÷ 업종 ' + x.sectorPer + ' = ' + r.toFixed(2) + '배' + (x.pbr!=null?' · PBR '+x.pbr:'') + '</td><td><span class="badge ' + lab[1] + '">' + lab[0] + '</span></td></tr>');
+  } else rows.push('<tr><td><b>밸류 위치</b></td><td class="meta">PER/업종PER을 못 읽었어요</td><td>-</td></tr>');
+
+  let sig;
+  if (fundPos && epsDir){
+    const cheap = fundPos[0]==='싼 자리', pricey = fundPos[0]==='비싼 자리', upd = epsDir==='상향', dnd = epsDir==='하향';
+    let em, txt, cls;
+    if (cheap && upd){ em='🟢'; txt='쌀 때 실적 오르는 자리'; cls='bull'; }
+    else if (pricey && dnd){ em='🔴'; txt='비쌀 때 실적 꺾이는 자리'; cls='bear'; }
+    else if (cheap && dnd){ em='🟡'; txt='싸지만 실적 꺾임 — 함정 주의'; cls='neutral'; }
+    else if (pricey && upd){ em='🟡'; txt='실적 좋지만 이미 비쌈'; cls='neutral'; }
+    else { em='🟡'; txt='중립 — 가격·실적 뚜렷하지 않음'; cls='neutral'; }
+    sig = '<div class="sig-box ' + cls + '"><b>' + em + ' ' + esc(txt) + '</b><div class="meta">근거: 적정주가 위치 ' + esc(fundPos[0]) + ' + 실적 방향 ' + esc(epsDir) + '</div></div>';
+  } else {
+    sig = '<div class="meta" style="margin-bottom:8px">종합 신호는 적정주가 위치와 실적 방향(위 ① 선행EPS) 둘 다 있어야 나옵니다.</div>';
+  }
+
+  box.innerHTML = top + sig + '<table class="stock-tbl"><tr><th>항목</th><th>계산</th><th>판정</th></tr>' + rows.join('') + '</table>'
+    + '<p class="meta" style="margin-top:6px">※ 신호는 참고입니다. 최종 판단은 직접 기록으로 남기세요.</p>';
+}
+
+// ---- 📸 캡쳐 분석 결과(raw/financials.json) ----
+const CAP_HIDE_KEY = 'cap_hidden'; // cygnus.html과 같은 키
+function capHidden(){ try{ return JSON.parse(localStorage.getItem(CAP_HIDE_KEY) || '{}'); }catch(e){ return {}; } }
+function capCardHTML(it){
+  const fin = it.fin || {}, val = it.val || {};
+  const key = esc((it.name||'') + '|' + (it.captured||it.as_of||''));
+  const frow = (label, v, extra) => (v==null||v==='') ? '' : '<tr><td>'+label+'</td><td><b>'+v+'</b></td><td class="meta">'+(extra||'')+'</td></tr>';
+  const pctv = v => v==null ? null : (v>0?'▲':v<0?'▼':'') + Math.abs(v) + '%';
+  let h = '<div class="cap-card"><div class="cap-head"><b>' + esc(it.name||'') + (it.code?' <span class="meta">'+esc(it.code)+'</span>':'') + '</b>'
+    + '<span><span class="meta">캡쳐 기준 ' + esc(it.captured||it.as_of||'') + '</span> <button class="cap-del" type="button" data-capkey="' + key + '">🗑 지우기</button></span></div>';
+  if (it.signal) h += '<div class="sig-box ' + (String(it.signal).indexOf('🟢')>=0?'bull':String(it.signal).indexOf('🔴')>=0?'bear':'neutral') + '"><b>' + esc(it.signal) + '</b></div>';
+  if (it.diag) h += '<div class="sig-box neutral"><b>⚠️ ' + esc(it.diag) + '</b></div>';
+  const rows = [
+    frow('성장 · 매출 YoY', pctv(fin.rev_yoy)),
+    frow('영업이익률', fin.op_margin!=null?fin.op_margin+'%':null, fin.op_margin_prev!=null?'전기 '+fin.op_margin_prev+'%':''),
+    frow('순이익률', fin.net_margin!=null?fin.net_margin+'%':null),
+    frow('ROE', fin.roe!=null?fin.roe+'%':null, fin.roe_prev!=null?'전기 '+fin.roe_prev+'%':''),
+    frow('부채비율', fin.debt_ratio!=null?fin.debt_ratio+'%':null),
+    frow('현재가', val.price!=null?fmt(val.price,0):null, (val.w52lo!=null&&val.w52hi!=null)?'52주 '+fmt(val.w52lo,0)+'~'+fmt(val.w52hi,0):''),
+    frow('PER / PBR', (val.per!=null?val.per+'배':'-') + ' / ' + (val.pbr!=null?val.pbr+'배':'-')),
+    frow('EPS 올해→내년', (val.eps_this!=null?fmt(val.eps_this,0):'-') + ' → ' + (val.eps_next!=null?fmt(val.eps_next,0):'-')),
+    frow('배당수익률', val.div_yield!=null?val.div_yield+'%':null)
+  ].filter(Boolean).join('');
+  h += '<table class="stock-tbl"><tr><th>구분</th><th>값</th><th>참고</th></tr>' + rows + '</table>';
+  if (it.note) h += '<p class="meta" style="margin-top:6px">📝 ' + esc(it.note) + '</p>';
+  h += '</div>';
+  return h;
+}
+let CAP_ALL = [];
+function renderCap(){
+  const box = document.getElementById('capBox'); if (!box) return;
+  const hid = capHidden();
+  const vis = CAP_ALL.filter(it => !hid[(it.name||'')+'|'+(it.captured||it.as_of||'')]);
+  if (!vis.length){ box.innerHTML = '아직 표시할 캡쳐 분석이 없어요. 네이버 종목 화면을 캡쳐해서 채팅에 보내주세요.'; return; }
+  box.innerHTML = vis.slice().reverse().map(capCardHTML).join('');
+}
+async function loadCap(){
+  try{ const r = await fetch('raw/financials.json?t=' + Date.now(), {cache:'no-store'}); const d = await r.json(); CAP_ALL = d.items || []; renderCap(); }
+  catch(e){ document.getElementById('capBox').textContent = '아직 표시할 캡쳐 분석이 없어요. 네이버 종목 화면을 캡쳐해서 채팅에 보내주세요.'; }
+}
+document.addEventListener('click', e => {
+  const del = e.target.closest && e.target.closest('.cap-del');
+  if (del){ const k = del.getAttribute('data-capkey'); const hid = capHidden(); hid[k]=1; try{ localStorage.setItem(CAP_HIDE_KEY, JSON.stringify(hid)); }catch(err){} renderCap(); }
+});
+
+function initStockSection(){
+  document.getElementById('epsBtn').onclick = () => { const t = document.getElementById('epsPaste').value; if (!t.trim()) return; saveEps(parseEps(t)); renderEps(); };
+  document.getElementById('snapBtn').onclick = () => { const t = document.getElementById('snapPaste').value; if (!t.trim()) return; renderSnap(parseSnap(t)); };
+  document.getElementById('snapClearBtn').onclick = () => { document.getElementById('snapPaste').value=''; document.getElementById('snapOut').innerHTML=''; };
+  renderEps();
+  loadEpsLinks();
+  loadCap();
 }
 
 async function load(){
@@ -314,6 +550,7 @@ async function load(){
   }
 }
 load();
+initStockSection();
 </script>
 </body>
 </html>
