@@ -27,8 +27,16 @@
   .verdict .headline b{font-size:20px}
   .verdict .tally{font-size:13px;font-weight:600;color:var(--faint)}
   .verdict p{margin:0;font-size:13.5px;color:var(--quiet);line-height:1.5}
-  section{display:flex;flex-direction:column;gap:12px}
-  .sec-head{display:flex;align-items:baseline;gap:10px}
+  details.fold{background:var(--card);border:1px solid var(--card-border);border-radius:14px}
+  details.fold > summary{cursor:pointer;list-style:none;padding:16px 18px;border-radius:14px}
+  details.fold > summary::-webkit-details-marker{display:none}
+  details.fold > summary::after{content:'열기 ▸';margin-left:auto;font-size:12px;font-weight:700;color:var(--faint);white-space:nowrap}
+  details.fold[open] > summary::after{content:'접기 ▴'}
+  details.fold > summary:hover{background:var(--manual-bg)}
+  details.fold[open] > summary{border-bottom:1px solid var(--card-border);border-radius:14px 14px 0 0}
+  .fold-badge{font-size:11px;font-weight:700;color:var(--bull-tx);background:var(--bull-bg);padding:2px 9px;border-radius:999px;white-space:nowrap}
+  .fold-body{display:flex;flex-direction:column;gap:12px;padding:18px}
+  .sec-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
   h2{margin:0;font-size:16px;font-weight:700}
   .sec-sub{font-size:12px;color:var(--faint)}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
@@ -116,8 +124,9 @@
     <p id="verdictNote"></p>
   </div>
 
-  <section>
-    <div class="sec-head"><h2>시장 환경 점검</h2><span class="sec-sub">왼쪽 배경(월 1~2회) → 가운데 주간(주 1회) → 오른쪽 당일(개장 전) 순서로 확인. 각 지표는 이전 값 → 현재 값을 같이 보여줍니다</span></div>
+  <details class="fold">
+    <summary class="sec-head"><h2>시장 환경 점검</h2><span class="sec-sub">왼쪽 배경(월 1~2회) → 가운데 주간(주 1회) → 오른쪽 당일(개장 전) 순서로 확인. 각 지표는 이전 값 → 현재 값을 같이 보여줍니다</span><span class="fold-badge" id="tierBadge" hidden></span></summary>
+    <div class="fold-body">
     <div class="horizons">
       <div class="horizon">
         <div class="horizon-head"><h3>배경 · 2~3개월 방향</h3><span class="horizon-sub">월 1~2회 확인 · 큰 그림 설정</span></div>
@@ -132,25 +141,31 @@
         <div class="grid" id="tier3"></div>
       </div>
     </div>
-  </section>
+    </div>
+  </details>
 
-  <section>
-    <div class="sec-head"><h2>📚 보고서 함</h2><span class="sec-sub">분기 큰 틀 4 + 월간 · 판정은 직접 · 기록은 수동</span></div>
+  <details class="fold">
+    <summary class="sec-head"><h2>📚 보고서 함</h2><span class="sec-sub">분기 큰 틀 4 + 월간 · 판정은 직접 · 기록은 수동</span><span class="fold-badge" id="repBadge" hidden></span></summary>
+    <div class="fold-body">
     <div class="stock-card" id="repBox" hidden>
       <span class="meta" id="repTag"></span>
       <span class="meta">보고서마다 최근 기록(기준기간·위/그대로/아래·메모)과 다음 발표일. 기록은 <a href="manual.html">보고서 입력</a>에서. 발표일은 규칙 기반 추정.</span>
       <div class="grid" id="repCards" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))"></div>
     </div>
-  </section>
+    </div>
+  </details>
 
-  <section>
-    <div class="sec-head"><h2>전략 카드 · 실제 매매 규칙</h2><span class="sec-sub">국면이 우호적일 때 이 5개 중에서 종목을 고릅니다</span></div>
+  <details class="fold">
+    <summary class="sec-head"><h2>전략 카드 · 실제 매매 규칙</h2><span class="sec-sub">국면이 우호적일 때 이 5개 중에서 종목을 고릅니다</span><span class="fold-badge" id="stratBadge" hidden></span></summary>
+    <div class="fold-body">
     <div class="risk-banner" id="riskBanner">공통 리스크 규칙 불러오는 중…</div>
     <div class="strat-grid" id="strategies"></div>
-  </section>
+    </div>
+  </details>
 
-  <section>
-    <div class="sec-head"><h2>종목 분석</h2><span class="sec-sub">왼쪽 후보 찾기 → 가운데 뜯어보기 → 오른쪽 쌓인 분석 순서로 진행. 국면이 우호적일 때만 여기서 종목을 좁힙니다</span></div>
+  <details class="fold">
+    <summary class="sec-head"><h2>종목 분석</h2><span class="sec-sub">왼쪽 후보 찾기 → 가운데 뜯어보기 → 오른쪽 쌓인 분석 순서로 진행. 국면이 우호적일 때만 여기서 종목을 좁힙니다</span></summary>
+    <div class="fold-body">
     <div class="cols3">
 
       <div class="col">
@@ -195,7 +210,8 @@
       </div>
 
     </div>
-  </section>
+    </div>
+  </details>
 
   <footer>
     facts/macro.json · facts/macro_history.json · data/strategies.json 실데이터를 그대로 불러옵니다. 국면 판단 13개 지표(배경4·주간5·당일4, 2개는 미수집) + 전략카드 5개.<br>
@@ -326,6 +342,9 @@ async function loadReports(){
     }).join('');
     tagEl.textContent = log.length + '건 기록' + (cal ? ' · 달력 ' + String(cal.today||'') : '');
     box.hidden = false;
+    const missN = ((cal && cal.missing) || []).length;
+    const badge = document.getElementById('repBadge');
+    if (badge){ badge.textContent = reps.length + '개 보고서' + (missN ? ' · 미입력 ' + missN : ''); badge.hidden = false; }
   }catch(e){ /* 자료 없으면 조용히 숨김 유지 */ }
 }
 
@@ -664,6 +683,8 @@ async function load(){
       document.getElementById('riskBanner').innerHTML = riskBannerHTML(strat.risk_rules);
       const activeStrats = (strat.strategies || []).filter(s => s.status === 'active');
       document.getElementById('strategies').innerHTML = activeStrats.map(strategyCardHTML).join('');
+      const stratBadge = document.getElementById('stratBadge');
+      if (stratBadge){ stratBadge.textContent = activeStrats.length + '개 활성'; stratBadge.hidden = false; }
     } else {
       document.getElementById('riskBanner').textContent = 'data/strategies.json 로드 실패 — 잠시 후 새로고침해 보세요.';
     }
@@ -688,6 +709,8 @@ async function load(){
     }
     document.getElementById('verdictHead').textContent = '종합 판정 · ' + head;
     document.getElementById('verdictTally').textContent = '우호 ' + bull + ' · 중립 ' + neutral + ' · 비우호 ' + bear;
+    const tierBadge = document.getElementById('tierBadge');
+    if (tierBadge){ tierBadge.textContent = '우호 ' + bull + ' · 중립 ' + neutral + ' · 비우호 ' + bear; tierBadge.hidden = false; }
     document.getElementById('verdictNote').textContent = note;
 
   } catch(e){
