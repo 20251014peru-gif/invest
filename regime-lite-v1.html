@@ -8,9 +8,9 @@
   :root{
     --bg:#FBF7F1; --card:#FFFFFF; --card-border:#F0E4D8;
     --text:#3D3630; --quiet:#8C8078; --faint:#A79B8E;
-    --bull-bg:#FCE3ED; --bull-tx:#C24672;
-    --neutral-bg:#F5EBD0; --neutral-tx:#7A5C12;
-    --bear-bg:#EAEEF6; --bear-tx:#5C6F94;
+    --bull-bg:#FBEEDA; --bull-tx:#8A5A26; --bull-border:#F0DCB8;
+    --neutral-bg:#F3EDE4; --neutral-tx:#7A6F62; --neutral-border:#E8DFD2;
+    --bear-bg:#EAEEF6; --bear-tx:#5C6F94; --bear-border:#D7DEEC;
     --manual-border:#E3D3C4; --manual-bg:#FFFDF8;
   }
   *{box-sizing:border-box}
@@ -21,7 +21,7 @@
   header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
   h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-0.01em}
   .meta{font-size:13px;color:var(--quiet)}
-  .verdict{background:var(--bull-bg);border:1px solid #F4CCDA;border-radius:12px;padding:22px 26px;
+  .verdict{background:var(--bull-bg);border:1px solid var(--bull-border);border-radius:12px;padding:22px 26px;
     display:flex;flex-direction:column;gap:6px}
   .verdict .headline{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
   .verdict .headline b{font-size:20px}
@@ -58,7 +58,7 @@
   .card.manual{background:var(--manual-bg);border:1px dashed var(--manual-border)}
   .card.manual .val{color:var(--faint);font-size:18px}
   footer{border-top:1px solid #EFE3D6;padding-top:16px;font-size:12px;color:var(--faint);line-height:1.6}
-  .err{background:#FCE3ED;border:1px solid #F4CCDA;border-radius:10px;padding:16px;font-size:13px;color:#8A3A55}
+  .err{background:#FDEAEA;border:1px solid #F3C6C6;border-radius:10px;padding:16px;font-size:13px;color:#9B3B3B}
 
   .risk-banner{background:#F5EBD0;border:1px solid #EAD9A8;border-radius:10px;padding:14px 18px;font-size:12.5px;color:#6B5518;line-height:1.6}
   .risk-banner b{color:#3D3630}
@@ -76,7 +76,7 @@
   .stock-card > b{font-size:14px}
   .stock-card textarea{width:100%;min-height:70px;font:13px/1.5 inherit;padding:10px;border:1px solid var(--card-border);border-radius:8px;background:var(--manual-bg);color:var(--text);resize:vertical;box-sizing:border-box}
   .stock-btn{min-height:38px;padding:0 14px;border-radius:8px;border:1px solid var(--card-border);background:var(--card);font:inherit;font-size:13px;cursor:pointer;color:var(--text)}
-  .stock-btn.pri{background:var(--bull-bg);border-color:#F4CCDA;color:var(--bull-tx);font-weight:700}
+  .stock-btn.pri{background:var(--bull-bg);border-color:var(--bull-border);color:var(--bull-tx);font-weight:700}
   .chip-grp{margin-bottom:2px}
   .chip-grp .chip-lbl{font-size:11px;color:var(--faint);margin-bottom:4px}
   .chip-grp .chip-row{display:flex;flex-wrap:wrap;gap:6px}
@@ -86,9 +86,9 @@
   .stock-tbl th{background:var(--manual-bg);text-align:left;padding:6px 8px;font-weight:700;color:var(--quiet)}
   .stock-tbl td{padding:6px 8px;border-top:1px solid var(--card-border);vertical-align:top}
   .sig-box{border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:8px}
-  .sig-box.bull{background:var(--bull-bg);border:1px solid #F4CCDA}
-  .sig-box.bear{background:var(--bear-bg);border:1px solid #D7DEEC}
-  .sig-box.neutral{background:var(--neutral-bg);border:1px solid #EAD9A8}
+  .sig-box.bull{background:var(--bull-bg);border:1px solid var(--bull-border)}
+  .sig-box.bear{background:var(--bear-bg);border:1px solid var(--bear-border)}
+  .sig-box.neutral{background:var(--neutral-bg);border:1px solid var(--neutral-border)}
   #boardBox{max-height:420px;overflow:auto}
   .cap-card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:14px 16px;margin-bottom:10px}
   .cap-card .cap-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
@@ -309,7 +309,7 @@ async function loadReports(){
     log.forEach(e => { latest[e.id] = e; });
     const nextOf = id => { const u = ((cal && cal.upcoming) || []).find(x => x.id === id); return u ? u.date.slice(5) + (u.time ? ' ' + u.time : '') : ''; };
     const missOf = id => ((cal && cal.missing) || []).find(x => x.id === id);
-    const vc = {'위':'#C24672','그대로':'#8C8078','아래':'#5C6F94'};
+    const vc = {'위':'#8A5A26','그대로':'#8C8078','아래':'#5C6F94'};
     const order = {quarter:0, month:1, auto:2}, rtiers = {quarter:'분기', month:'월간', auto:'자동'};
     el.innerHTML = reps.slice().sort((a,b) => (order[a.tier]||0) - (order[b.tier]||0)).map(x => {
       const l = latest[x.id], m = missOf(x.id), nx = nextOf(x.id);
