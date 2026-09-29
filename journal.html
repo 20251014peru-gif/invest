@@ -55,11 +55,9 @@
   input,select,textarea{width:100%;min-height:44px;font:inherit;font-size:15px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}textarea{min-height:80px}
   .seg{display:flex;gap:6px}.seg button{flex:1;min-height:44px;border-radius:10px;border:1px solid var(--line);background:#fff;font:inherit;font-size:15px;cursor:pointer}.seg button.on{background:var(--ink);color:#fff;font-weight:700}
   .muted{color:var(--sub);font-size:12.5px}
-  #drawer{position:fixed;inset:0;background:rgba(31,36,48,.35);z-index:30;display:none;align-items:flex-start;justify-content:center;padding:40px 12px}#drawer.on{display:flex}
-  .modal{background:#fff;border-radius:16px;padding:16px;max-width:560px;width:100%;max-height:85vh;overflow:auto}.modal a{display:block;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;text-decoration:none;color:inherit}.modal a small{display:block;color:var(--sub);font-size:12px}
   .st{position:fixed;right:14px;bottom:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:12px;color:var(--sub);z-index:6}
   @media (max-width:900px){.app{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line);padding:14px 16px}main{padding:14px 16px 80px}.front{grid-template-columns:1fr;gap:14px}.head{font-size:24px}.tl{grid-template-columns:56px minmax(0,1fr);gap:0 10px}.top .d{font-size:22px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  @media print{aside,.add,.form,.btn,.st,#drawer{display:none!important}.app{display:block}main{padding:0}body{font-size:12px;background:#fff}.head{font-size:26px}.e{break-inside:avoid}}
+  @media print{aside,.add,.form,.btn,.st,#nav-strip{display:none!important}.app{display:block}main{padding:0}body{font-size:12px;background:#fff}.head{font-size:26px}.e{break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -75,7 +73,6 @@
   <div class="sec"><div class="lb">종목 상태</div><div id="stocks" class="muted">기록 없음</div></div>
   <div class="sec"><div class="lb">다음 발표</div><div id="next" class="muted" style="font-size:13px;line-height:1.7">—</div></div>
   <div style="flex-grow:1"></div>
-  <div class="sec"><a class="btn" href="#" id="drawerBtn">참고 서랍</a><a class="btn" href="index.html">옛 허브(참고)</a></div>
 </aside>
 <main>
   <div class="top">
@@ -113,16 +110,11 @@
   </div></div>
 </main>
 </div>
-<div id="drawer" onclick="if(event.target===this)this.classList.remove('on')"><div class="modal">
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b style="font-size:16px;flex:1">참고 서랍 — 매일 안 보는 것</b><button class="btn" type="button" onclick="document.getElementById('drawer').classList.remove('on')">닫기</button></div>
-  <a href="regime-lite-v1.html">국면 대시보드 · 전략 카드 · 종목분석(캡쳐)<small>배경·주간·당일 3단 + 실제 매매 규칙 + 종목 붙여넣기 분석</small></a>
-  <a href="manual.html">수동 입력 도구<small>지표 값 · 보고서 기록(GitHub 경로)</small></a>
-  <a href="index.html">옛 허브 7칸<small>실패한 작업·확인 필요·자가 점검</small></a>
-</div></div>
 <div class="st" id="status">준비 중…</div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/status.js" data-app="journal" data-version="v 20260910-0938"></script>
+<script src="js/nav.js" data-page="journal"></script>
 <script>
 var firebaseConfig = {
   apiKey: "AIzaSyAyG1chECYsbO7cSZUuXmNa0_KDYBmahPY",
@@ -255,7 +247,6 @@ var firebaseConfig = {
   document.getElementById('prevDay').onclick=function(){go(shift(cur,-1))}; document.getElementById('nextDay').onclick=function(){go(shift(cur,1))}; document.getElementById('todayBtn').onclick=function(){go(kstToday())};
   document.getElementById('calPrev').onclick=function(){ var y=+month.slice(0,4), m=+month.slice(5,7)-1; if(m<1){m=12;y--;} month=y+'-'+(m<10?'0':'')+m; loadIndex(); };
   document.getElementById('calNext').onclick=function(){ var y=+month.slice(0,4), m=+month.slice(5,7)+1; if(m>12){m=1;y++;} month=y+'-'+(m<10?'0':'')+m; loadIndex(); };
-  document.getElementById('drawerBtn').onclick=function(e){ e.preventDefault(); document.getElementById('drawer').classList.add('on'); };
   var want=location.hash.replace('#',''); if(/^\d{4}-\d{2}-\d{2}$/.test(want)) { cur=want; month=want.slice(0,7); }
   loadDay().then(loadMine).then(function(){ loadIndex(); loadStocks(); });
 })();
