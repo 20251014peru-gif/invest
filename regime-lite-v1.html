@@ -17,7 +17,7 @@
   [hidden]{display:none!important}
   body{margin:0;background:var(--bg);color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;}
-  .wrap{max-width:1080px;margin:0 auto;padding:40px 20px 64px;display:flex;flex-direction:column;gap:28px}
+  .wrap{max-width:1320px;margin:0 auto;padding:40px 20px 64px;display:flex;flex-direction:column;gap:28px}
   header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
   h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-0.01em}
   .meta{font-size:13px;color:var(--quiet)}
@@ -32,9 +32,17 @@
   h2{margin:0;font-size:16px;font-weight:700}
   .sec-sub{font-size:12px;color:var(--faint)}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+  .horizons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .horizon{display:flex;flex-direction:column;gap:10px;background:#FFFDF9;border:1px solid var(--card-border);border-radius:14px;padding:14px}
+  .horizon .grid{grid-template-columns:1fr}
+  .horizon-head{display:flex;flex-direction:column;gap:2px}
+  .horizon-head h3{margin:0;font-size:13.5px;font-weight:700}
+  .horizon-sub{font-size:11px;color:var(--faint)}
+  @media(max-width:860px){.horizons{grid-template-columns:1fr}}
   .card{background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:16px}
   .card .lbl{font-size:12.5px;color:var(--quiet);margin-bottom:6px}
   .card .val{font-size:21px;font-weight:700;font-variant-numeric:tabular-nums}
+  .card .prevcur{font-size:11px;color:var(--faint);margin-top:4px}
   .card .row{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
   .card .cap{font-size:11px;color:var(--faint)}
   .badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
@@ -102,18 +110,21 @@
   </div>
 
   <section>
-    <div class="sec-head"><h2>배경 · 2~3개월 방향</h2><span class="sec-sub">월 1~2회 확인 · 큰 그림 설정</span></div>
-    <div class="grid" id="tier1"></div>
-  </section>
-
-  <section>
-    <div class="sec-head"><h2>주간 · 균열 확인</h2><span class="sec-sub">주 1회 확인 · 배경이 유지되는지 점검</span></div>
-    <div class="grid" id="tier2"></div>
-  </section>
-
-  <section>
-    <div class="sec-head"><h2>당일 · 실행 확인</h2><span class="sec-sub">전날 저녁 + 개장 전 아침 · 실시간 매매 없음</span></div>
-    <div class="grid" id="tier3"></div>
+    <div class="sec-head"><h2>시장 환경 점검</h2><span class="sec-sub">왼쪽 배경(월 1~2회) → 가운데 주간(주 1회) → 오른쪽 당일(개장 전) 순서로 확인. 각 지표는 이전 값 → 현재 값을 같이 보여줍니다</span></div>
+    <div class="horizons">
+      <div class="horizon">
+        <div class="horizon-head"><h3>배경 · 2~3개월 방향</h3><span class="horizon-sub">월 1~2회 확인 · 큰 그림 설정</span></div>
+        <div class="grid" id="tier1"></div>
+      </div>
+      <div class="horizon">
+        <div class="horizon-head"><h3>주간 · 균열 확인</h3><span class="horizon-sub">주 1회 확인 · 배경이 유지되는지 점검</span></div>
+        <div class="grid" id="tier2"></div>
+      </div>
+      <div class="horizon">
+        <div class="horizon-head"><h3>당일 · 실행 확인</h3><span class="horizon-sub">전날 저녁 + 개장 전 아침 · 실시간 매매 없음</span></div>
+        <div class="grid" id="tier3"></div>
+      </div>
+    </div>
   </section>
 
   <section>
@@ -203,13 +214,17 @@ function esc(s){
   return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-function cardHTML(label, valueText, capText, cls){
+function cardHTML(label, valueText, capText, cls, prevText){
   return '<div class="card">'
     + '<div class="lbl">' + esc(label) + '</div>'
     + '<div class="val">' + esc(valueText) + '</div>'
+    + (prevText ? '<div class="prevcur">이전 ' + esc(prevText) + ' → 현재 ' + esc(valueText) + '</div>' : '')
     + '<div class="row"><span class="cap">' + esc(capText) + '</span>'
     + '<span class="badge ' + cls + '">' + BADGE_LABEL[cls] + '</span></div>'
     + '</div>';
+}
+function prevText(it, digits, unit){
+  return (it && it.prev !== null && it.prev !== undefined) ? fmt(it.prev, digits) + (unit || '') : null;
 }
 
 function manualCardHTML(label, capText){
@@ -544,19 +559,19 @@ async function load(){
       const it = items.kr_export_yoy;
       const cls = judgeToClass(it.judge);
       results.push(cls);
-      t1.push(cardHTML('수출금액지수 YoY', fmt(it.value,1)+'%', it.judge + ' · ' + it.as_of, cls));
+      t1.push(cardHTML('수출금액지수 YoY', fmt(it.value,1)+'%', it.judge + ' · ' + it.as_of, cls, prevText(it,1,'%')));
     }
     if (items.us10y){
       const it = items.us10y;
       const cls = judgeToClass(it.judge);
       results.push(cls);
-      t1.push(cardHTML('미 10년물', fmt(it.value,2)+'%', '4.2%↓우호 · 4.5%↑부담', cls));
+      t1.push(cardHTML('미 10년물', fmt(it.value,2)+'%', '4.2%↓우호 · 4.5%↑부담', cls, prevText(it,2,'%')));
     }
     if (items.wti){
       const it = items.wti;
       const cls = levelBand(it.value, 80, 100);
       results.push(cls);
-      t1.push(cardHTML('유가 WTI', '$'+fmt(it.value,1), '$80~100 구간', cls));
+      t1.push(cardHTML('유가 WTI', '$'+fmt(it.value,1), '$80~100 구간', cls, it.prev!=null?'$'+fmt(it.prev,1):null));
     }
     if (items.bok_rate && items.fedfunds){
       const spread = items.bok_rate.value - items.fedfunds.value;
@@ -573,25 +588,25 @@ async function load(){
       const it = items.dxy;
       const cls = judgeToClass(it.judge);
       results.push(cls);
-      t2.push(cardHTML('달러지수 DXY', fmt(it.value,1), '98↓우호 · 104↑부담', cls));
+      t2.push(cardHTML('달러지수 DXY', fmt(it.value,1), '98↓우호 · 104↑부담', cls, prevText(it,1)));
     }
     if (items.usdkrw){
       const it = items.usdkrw;
       const cls = judgeToClass(it.judge);
       results.push(cls);
-      t2.push(cardHTML('원/달러', fmt(it.value,0)+'원', '1,430↓우호 · 1,480↑부담', cls));
+      t2.push(cardHTML('원/달러', fmt(it.value,0)+'원', '1,430↓우호 · 1,480↑부담', cls, prevText(it,0,'원')));
     }
     if (items.vix){
       const it = items.vix;
       const cls = judgeToClass(it.judge);
       results.push(cls);
-      t2.push(cardHTML('VIX', fmt(it.value,1), '17↓안정 · 30↑위험', cls));
+      t2.push(cardHTML('VIX', fmt(it.value,1), '17↓안정 · 30↑위험', cls, prevText(it,1)));
     }
     if (items.credit_spread){
       const it = items.credit_spread;
       const cls = judgeToClass(it.judge);
       results.push(cls);
-      t2.push(cardHTML('신용스프레드', fmt(it.value,2)+'%p', '0.6↑주의 · 1.0↑위험', cls));
+      t2.push(cardHTML('신용스프레드', fmt(it.value,2)+'%p', '0.6↑주의 · 1.0↑위험', cls, prevText(it,2,'%p')));
     }
     if (hist && hist.days){
       const dates = Object.keys(hist.days).sort();
@@ -613,13 +628,13 @@ async function load(){
     const t3 = [];
     if (items.sox){
       const it = items.sox;
-      t3.push(cardHTML('SOX 반도체지수', fmt(it.value,0)+'pt', (it.change_pct>=0?'+':'')+fmt(it.change_pct,2)+'% · '+it.as_of, judgeToClass(it.judge)));
+      t3.push(cardHTML('SOX 반도체지수', fmt(it.value,0)+'pt', (it.change_pct>=0?'+':'')+fmt(it.change_pct,2)+'% · '+it.as_of, judgeToClass(it.judge), prevText(it,0,'pt')));
     } else {
       t3.push(manualCardHTML('SOX 반도체지수', '전일比 -3%이상 급락시 경계'));
     }
     if (items.kospi){
       const it = items.kospi;
-      t3.push(cardHTML('코스피', fmt(it.value,0)+'pt', (it.change_pct>=0?'+':'')+fmt(it.change_pct,2)+'% · '+it.as_of, judgeToClass(it.judge)));
+      t3.push(cardHTML('코스피', fmt(it.value,0)+'pt', (it.change_pct>=0?'+':'')+fmt(it.change_pct,2)+'% · '+it.as_of, judgeToClass(it.judge), prevText(it,0,'pt')));
     } else {
       t3.push(manualCardHTML('코스피', '개장 후 최종 실행 확인'));
     }
