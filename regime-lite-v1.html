@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>투자 국면 대시보드</title>
+<title>매수시장 판단</title>
 <style>
   :root{
     --bg:#FBF7F1; --card:#FFFFFF; --card-border:#F0E4D8;
@@ -14,6 +14,7 @@
     --manual-border:#E3D3C4; --manual-bg:#FFFDF8;
   }
   *{box-sizing:border-box}
+  [hidden]{display:none!important}
   body{margin:0;background:var(--bg);color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;}
   .wrap{max-width:1080px;margin:0 auto;padding:40px 20px 64px;display:flex;flex-direction:column;gap:28px}
@@ -83,9 +84,17 @@
 <div class="wrap">
 
   <header>
-    <h1>투자 국면 대시보드</h1>
+    <div>
+      <h1>매수시장 판단</h1>
+      <span class="meta">지금 사도 되는 시장인지 + 종목 후보</span>
+    </div>
     <span class="meta" id="asOf">불러오는 중…</span>
   </header>
+
+  <div class="stock-card" id="checkBox" hidden style="border-color:#EAD9A8;background:var(--manual-bg)">
+    <b>⚠ 수집 실패</b>
+    <div id="checkBody" class="meta"></div>
+  </div>
 
   <div class="verdict" id="verdict">
     <div class="headline"><b id="verdictHead">불러오는 중…</b><span class="tally" id="verdictTally"></span></div>
@@ -111,7 +120,7 @@
     <div class="sec-head"><h2>📚 보고서 함</h2><span class="sec-sub">분기 큰 틀 4 + 월간 · 판정은 직접 · 기록은 수동</span></div>
     <div class="stock-card" id="repBox" hidden>
       <span class="meta" id="repTag"></span>
-      <span class="meta">보고서마다 최근 기록(기준기간·위/그대로/아래·메모)과 다음 발표일. 기록은 <a href="manual.html#reports">수동 입력 › 보고서 기록</a>. 발표일은 규칙 기반 추정.</span>
+      <span class="meta">보고서마다 최근 기록(기준기간·위/그대로/아래·메모)과 다음 발표일. 기록은 <a href="manual.html">보고서 입력</a>에서. 발표일은 규칙 기반 추정.</span>
       <div class="grid" id="repCards" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))"></div>
     </div>
   </section>
@@ -233,6 +242,19 @@ function riskBannerHTML(r){
   return '<b>공통 리스크 규칙</b> — 종목당 손실 ' + esc(r.per_trade_loss_pct) + '% · '
     + esc(r.positions) + '종목 분산 · ATR×' + esc(r.atr_multiple) + ' · 계좌 고점대비 -' + esc(r.account_drawdown_stop_pct) + '% 서킷브레이커 · '
     + '최소 ' + esc(r.min_shares) + '주 · ' + esc(r.execution);
+}
+
+// ---- ⚠ 수집 실패(구 허브 index.html "확인 필요" 칸, 2026-09-29 흡수) ----
+async function loadCheck(){
+  const box = document.getElementById('checkBox'), body = document.getElementById('checkBody');
+  try{
+    const r = await fetch('facts/macro.json?t=' + Date.now(), {cache:'no-store'});
+    const d = await r.json();
+    const fail = (d.items || []).filter(x => x.error);
+    if (!fail.length) return;
+    body.innerHTML = fail.map(x => '<div>⚠ <b>' + esc(x.name) + '</b> <span class="meta">' + esc(String(x.error).slice(0,60)) + '</span></div>').join('');
+    box.hidden = false;
+  }catch(e){}
 }
 
 // ---- 📚 보고서 함(data/reports.json + raw/report_log.json + analysis/calendar.json) ----
@@ -643,6 +665,7 @@ async function load(){
   }
 }
 load();
+loadCheck();
 loadReports();
 initStockSection();
 </script>
