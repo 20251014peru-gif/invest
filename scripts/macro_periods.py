@@ -32,15 +32,21 @@ FORMULA = {'yoy': '(당월 지수 / 전년 같은 달 지수 − 1) × 100', 'di
 
 
 def fetch_csv(ids, cosd):
-    url = f"{FRED_BASE}?id={','.join(ids)}&cosd={cosd}"
+    # 운영 확인 결과 fredgraph의 cosd/묶음 요청은 반복해서 읽기 시간초과가 났지만,
+    # macro_extra가 사용하는 단일 시리즈 기본 URL은 같은 실행에서 정상 응답했다.
+    # 단일 fallback은 검증된 기본 URL을 사용하고, 묶음 요청은 짧게 한 번만 시도한다.
+    is_batch = len(ids) > 1
+    url = f"{FRED_BASE}?id={','.join(ids)}&cosd={cosd}" if is_batch else f"{FRED_BASE}?id={ids[0]}"
     last = None
-    for attempt in range(RETRIES + 1):
+    retries = 0 if is_batch else RETRIES
+    timeout = min(15.0, REQ_TIMEOUT) if is_batch else min(25.0, REQ_TIMEOUT)
+    for attempt in range(retries + 1):
         try:
             request = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (invest period charts)'})
-            return url, urllib.request.urlopen(request, timeout=REQ_TIMEOUT).read().decode('utf-8')
+            return url, urllib.request.urlopen(request, timeout=timeout).read().decode('utf-8')
         except Exception as error:  # 시간초과·연결 오류·HTTP 오류 모두 재시도 대상
             last = error
-            if attempt < RETRIES:
+            if attempt < retries:
                 time.sleep(2 * (attempt + 1) ** 2)
     raise last
 
