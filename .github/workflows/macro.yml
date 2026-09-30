@@ -27,6 +27,16 @@ jobs:
           set -e
           git config user.name "macro-bot"
           git config user.email "bot@users.noreply.github.com"
+          # 기간별 차트 수집기 종료코드를 보관했다가, 나머지 수집·저장·push 를 끝낸 뒤 실패면 작업을 빨갛게 끝낸다.
+          # (실패를 삼키고 exit 0 하면 자료가 갱신되지 않았는데도 초록불이 된다)
+          PERIODS_RC=0
+          finish() {
+            if [ "$PERIODS_RC" != "0" ]; then
+              echo "::error::macro_periods 종료코드 $PERIODS_RC — 기간별 차트 자료가 갱신되지 않음(facts/macro_periods.json 의 status·errors 확인). 다른 수집분은 저장됨"
+              exit 1
+            fi
+            exit 0
+          }
           for i in 1 2 3 4; do
             git fetch origin main
             git reset --hard origin/main
@@ -34,13 +44,14 @@ jobs:
             python scripts/macro_extra.py || echo "::warning::보강 매크로 수집 일부 실패 — facts/macro_extra.json 확인"
             python scripts/regime.py || echo "::warning::레짐 판정 실패(값 없음) — status.json 에 표시됨"
             NTFY_TOPIC="$NTFY_TOPIC" python scripts/calendar.py || echo "::warning::발표 달력 실패"
-            python scripts/macro_periods.py || echo "::warning::기간별 차트 수집 실패 — 기존 자료 유지"
+            PERIODS_RC=0   # push 재시도로 다시 실행하므로 매 시도의 결과로 갱신한다(이전 시도 값에 덮어써도 마지막 실행 결과가 남는다)
+            python scripts/macro_periods.py || PERIODS_RC=$?
             python scripts/macro_time_meta.py || echo "::warning::지표 시간 메타 생성 실패 — 원 수집 데이터는 유지"
             python scripts/journal.py || echo "::warning::일지 초안 실패"
             git add facts/macro_periods.json facts/macro.json facts/macro_history.json facts/macro_extra.json facts/macro_extra_history.json facts/kr_key.json facts/calendar_sent.json analysis/regime.json analysis/calendar.json log/ data/status.json 2>/dev/null || true
-            if git diff --cached --quiet; then echo "::notice::변경 없음"; exit 0; fi
+            if git diff --cached --quiet; then echo "::notice::변경 없음"; finish; fi
             git commit -q -m "auto: macro $(date -u +%Y-%m-%dT%H:%MZ)"
-            if git push origin HEAD:main; then echo "::notice::push 성공 (시도 $i 회)"; exit 0; fi
+            if git push origin HEAD:main; then echo "::notice::push 성공 (시도 $i 회)"; finish; fi
             echo "push 밀림 — $((i*5))초 뒤 최신으로 다시 실행"; sleep $((i*5))
           done
           echo "::error::push 4회 실패"; exit 1
