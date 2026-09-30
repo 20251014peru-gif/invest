@@ -19,7 +19,7 @@ OVERRIDES = {  # 저장소 값이 마감가와 어긋난 곳을 검색으로 확
 
 
 def _rows(root):
-    h = json.load(open(os.path.join(root, 'facts/macro_history.json')))['days']
+    h = json.load(open(os.path.join(root, 'facts/macro_history.json'), encoding='utf-8'))['days']
     keys = [k for k in sorted(h) if dt.date.fromisoformat(k).weekday() in (1, 2, 3, 4, 5)]
     return h, keys
 
@@ -39,7 +39,7 @@ def _lab(k):
 
 def _extra(root):
     """facts/macro_extra.json 의 항목을 id 로 돌려준다. 값·직전값·관측일·신선도·오류를 그대로 쓴다 (결측을 채우지 않는다)."""
-    d = json.load(open(os.path.join(root, 'facts/macro_extra.json')))
+    d = json.load(open(os.path.join(root, 'facts/macro_extra.json'), encoding='utf-8'))
     return {i['id']: i for i in d['items']}, d.get('collected_at', '')
 
 
@@ -65,7 +65,7 @@ def _status(root):
 
 
 def _ledger(root):
-    return json.load(open(os.path.join(root, 'analysis/issue_ledger.json')))
+    return json.load(open(os.path.join(root, 'analysis/issue_ledger.json'), encoding='utf-8'))
 
 
 # ---------------------------------------------------------------- pages
@@ -168,7 +168,7 @@ def p3(root):
         {'name': '10년', 'color': NAVY, 'vals': y10},
         {'name': '2년', 'color': BLUE, 'vals': y2},
         {'name': '', 'color': ORANGE, 'vals': ap, 'hollow_last': True, 'width': 0.1},
-    ], '미 국채 2년·10년 (%)', hlines=[(5.30, '', RED)], note='FRED 값은 2영업일 늦게 반영되어 마지막 점은 9/28 관측이다. 속이 빈 점은 9/29 종가(AP 검색 요약). 30년물 이력은 수집하지 않았다. 점선 5.30%는 GPT 지침서의 4단계 후보 예시값으로 달님 확정 전이다.', xtick_every=3)
+    ], '미 국채 2년·10년 (%)', hlines=[(5.30, '', RED)], note='FRED 값은 2영업일 늦게 반영되어 마지막 점은 9/28 관측이다. 속이 빈 점은 9/29 종가(AP 검색 요약). 30년물 기간자료는 수집 실패로 이 차트에 없다. 점선 5.30%는 GPT 지침서의 4단계 후보 예시값으로 달님 확정 전이다.', xtick_every=3)
     c2 = lc(cats, [{'name': 'VIX', 'color': ORANGE, 'vals': _series(h, keys, 'vix')}], 'VIX', note='수집일 아침(KST)에 기록된 직전 마감. 9/29·9/30 두 점은 검색으로 확인한 마감가로 바로잡았다.', xtick_every=3, fmt='{:.1f}')
     nas = index100(_series(h, keys, 'nasdaq'))
     sox = index100(_series(h, keys, 'sox'))
@@ -189,7 +189,7 @@ def p3(root):
         {'name': 'WTI', 'color': TEAL, 'vals': [94.61, 92.41, 92.60, 89.38, 89.31], 'hollow_last': True},
     ], 'WTI·Brent 결제가 (달러)', fmt='{:.1f}', xtick_every=1, note='5거래일뿐이며 20일 결제가 이력은 없다. 9/24는 9/25 하락폭에서 역산, 9/30 WTI는 07시 호가(속이 빈 점). 저장소의 WTI 이력은 호가라 섞지 않았다.')
     ex, ex_at = _extra(root)
-    per = json.load(open(os.path.join(root, 'facts/macro_periods.json')))['items']
+    per = json.load(open(os.path.join(root, 'facts/macro_periods.json'), encoding='utf-8'))['items']
     rows = ''
     for iid, nm in (('us30y', '미 국채 30년'), ('us_hy_oas', '하이일드 OAS'), ('us_ccc_oas', 'CCC 이하 OAS'), ('sofr', 'SOFR')):
         it = ex.get(iid)
@@ -269,7 +269,7 @@ def p5(root):
 <div class="note" style="margin-top:1mm">● 남색 = 현재 단계, ● 주황 = G2 전달 톱니의 단계(원인은 5 반대급부), 점선 원 = G6 미점등. 단계는 점화 → 확산 → 가격반영 → 포화 → 반대급부 → 소멸 → 재점화. 소멸은 세 조건(원인 반전 · 반대급부 실이행 · 가격 둔감화)이 함께 확인될 때만 판정하며 오늘 소멸로 판정한 이슈는 없다.</div>
 <h2>이슈 장부</h2>
 <div class="tight"><table><tr><th>ID · 이슈</th><th>최초 → 최근</th><th>단계</th><th>방향</th><th>반대급부 조건</th><th>반증 조건</th><th class="num">신뢰도</th></tr>{rows}</table></div>
-<div class="warnbox"><b>최초 발생일은 “이 장부에서 확인된 최초 근거일”이다.</b> 실제 발생은 더 이를 수 있다(G2 전쟁은 약 7개월, 시작일 미확인). 재발한 이슈는 새 ID를 만들지 않고 재점화로 기록한다.</div>"""
+<div class="warnbox"><b>최초 발생일은 “이 장부에서 확인된 최초 근거일”이다.</b> 실제 발생은 더 이를 수 있다(G2는 약 7개월, 시작일 미확인).</div>"""
 
 
 def p6():
@@ -336,7 +336,7 @@ def p8(root):
 <tr><td>민간신용</td><td>Fitch 부도율 9월 6.3%, 환매 게이트 보도(○)</td><td>{}</td></tr>
 <tr><td rowspan="2"><b>펀딩</b><br><span class="small">부분 판정</span></td><td>SOFR (FRED, 관측일 9/28) · 레포시장</td><td>SOFR @@sf0@@ (@@sf1@@). 레포시장은 미수집</td><td>{}</td></tr>
 <tr><td>회사채 발행 취소·가산금리</td><td>자료 없음</td><td>{}</td></tr>
-<tr><td rowspan="2"><b>시장 기능</b><br><span class="small">판정 불가</span></td><td>국채 입찰 수요 · MOVE</td><td>수집 안 함</td><td>{}</td></tr>
+<tr><td rowspan="2"><b>시장 기능</b><br><span class="small">판정 불가</span></td><td>국채 입찰 수요 · MOVE</td><td>미수집</td><td>{}</td></tr>
 <tr><td>마진콜·환매·강제청산</td><td>보도 확인 못 함</td><td>{}</td></tr></table>""".format(
         badge('경계', 'orange'), badge('반등 1일', 'blue'), badge('평온', 'teal'), badge('압박 후보', 'red'), badge('확대 방향', 'orange'), badge('안정', 'teal'), badge('후보 신호', 'orange'), badge('이상 신호 없음', 'teal'), badge('미확인', 'gray'), badge('미확인', 'gray'), badge('미확인', 'gray'))
     watch = watch.replace('@@hy0@@', hyv[0]).replace('@@hy1@@', hyv[1]).replace('@@cc0@@', ccv[0]).replace('@@cc1@@', ccv[1]).replace('@@sf0@@', sfv[0]).replace('@@sf1@@', sfv[1])
@@ -376,7 +376,7 @@ def p9():
 <tr><td><b>스트레스 점등</b> — VIX 상승 + 신용 스프레드 확대 동반</td><td>VIX 16.04 평온, 신용 스프레드는 확대 방향(HY·CCC, 관측일 9/28)이나 VIX 동반 상승 없음</td><td>{}</td></tr>
 <tr><td><b>AI 재반전</b> — 마이크론 가이던스 양호 + 외국인 반도체 순매도 축소</td><td>실적 발표 전</td><td>{}</td></tr></table>""".format(
         badge('미확인', 'gray'), badge('미충족', 'teal'), badge('미충족', 'teal'), badge('미확인', 'gray'), badge('미확인', 'gray'))
-    ban = """<div class="warnbox"><b>판단 금지 규칙.</b> CEO 발언 한 번, 협상 기사 한 건, 환율 하루 방향만으로 전면 매수·매도를 판단하지 않는다. 방어주로의 이동은 방어 섹터 자료가 없어 확인할 수 없다. 이 보고서는 신호 점등 여부까지만 표시하며 행동은 달님이 사전에 적은 규칙으로 정한다.</div>"""
+    ban = """<div class="warnbox"><b>판단 금지 규칙.</b> CEO 발언 한 번, 협상 기사 한 건, 환율 하루 방향만으로 전면 매수·매도를 판단하지 않는다. 이 보고서는 신호 점등 여부까지만 표시하며 행동은 달님이 사전에 적은 규칙으로 정한다.</div>"""
     return f"""<h1>Korea and Action Rules</h1><div class="sub">한국 노출 경로, 반대급부가 작동할 때의 자금 이동, 사전에 정한 규칙의 충족 여부</div>
 <h2>한국에 유리한 톱니와 불리한 톱니</h2>{kr}
 <h2>반대급부와 자금 이동 지도</h2>{map_tbl}
@@ -431,11 +431,93 @@ def p10():
 <li>G3를 지배 흐름이 아니라 AI 성장에 대한 반대급부로 재분류</li></ul></div></div>"""
 
 
+# ---------------------------------------------------------------- 4·5·7·9쪽 하단 보강 (근거 없는 칸은 '미확인'으로 둔다)
+def _chain(nodes):
+    parts = []
+    for i, (a, b, col) in enumerate(nodes):
+        parts.append(f'<div class="node {col}"><div class="a">{a}</div><div class="b">{b}</div></div>')
+        if i < len(nodes) - 1:
+            parts.append('<div class="arw">→</div>')
+    return '<div class="chain">' + ''.join(parts) + '</div>'
+
+
+def _x4():
+    steps = [
+        ('글로벌 사건', '이란 협상 교착 · 연준 9/16 인상 · OpenAI 훈련 중단', '보도 확인(B/S)', ('확인', 'blue'), '유가·금리·달러: WTI −3.5%, 미 10년 +4bp, DXY 직전값 101.372(저장소)', ('부분 확인', 'orange'), '유가는 내렸는데 금리는 올라 방향 불일치'),
+        ('유가·금리·달러', 'WTI −3.5% · 10년 +4bp · 30년 +7bp(9/28 FRED)', '수치 확인(D·S 혼합)', ('부분 확인', 'orange'), '미국 업종: SOX +1.31%, 나스닥 −0.09%', ('부분 확인', 'orange'), '업종별 반응 자료는 SOX·나스닥 지수뿐'),
+        ('미국 업종', 'SOX 반등, 사이버보안주 급등 보도, 알파벳 −7.13%', '지수 확인 · 업종 S', ('부분 확인', 'orange'), '원/달러·외국인: 외국인 약 −2.90조원, 원/달러 정의 차이', ('가설', 'orange'), '미국 반등과 한국 매도가 엇갈림. 원인 미확정'),
+        ('원/달러·외국인 수급', 'ECOS 매매기준율 1,360.0(9/29) · 외국인 현물 약 −2.90조원(S)', '환율 D · 수급 S', ('부분 확인', 'orange'), '한국 업종: 반도체 87% 매도(단일 요약)', ('부분 확인', 'orange'), '선물·투자자별 원자료(KRX) 미수집'),
+        ('한국 업종', '반도체 매도, 조선 −2.84%(S), 방어 섹터 자료 없음', '반도체 S · 방어 미확인', ('부분 확인', 'orange'), '실물지표: 반도체 수출 +259.4%(9/1~20)', ('미확인', 'gray'), '주가·수급과 실물이 다른 방향. 10/1 확정치 전'),
+        ('확인할 실물지표', '10/1 9월 수출 · 마이크론 FQ4 · 21:30 PCE · EIA 재고', '발표 전', ('미확인', 'gray'), '-', ('미확인', 'gray'), '발표되면 이 칸을 채운다'),
+    ]
+    tr = ''.join(f"<tr><td><b>{a}</b></td><td>{b}</td><td>{badge(*d)}<br><span class='small'>{c}</span></td><td>{esc(e)}</td><td>{badge(*f)}</td><td>{g}</td></tr>" for a, b, c, d, e, f, g in steps)
+    ch = _chain([('글로벌 사건', '협상·긴축·AI', 'blue'), ('유가·금리·달러', '방향 불일치', 'orange'), ('미국 업종', 'SOX·보안주', 'orange'), ('원/달러·외국인', '수급 −2.90조', 'red'), ('한국 업종', '반도체 매도', 'red'), ('실물지표', '발표 전', 'gray')])
+    return f"""<h2>톱니 6단계 연결 상태 <span class="small">(각 연결 = 앞 단계에서 다음 단계로 이어졌는지)</span></h2>{ch}
+<div class="tight"><table><tr><th>단계</th><th>오늘 관측</th><th>관측 상태</th><th>다음 단계로 연결</th><th>연결 상태</th><th>비고</th></tr>{tr}</table></div>
+<div class="note">연결 상태는 확인 · 부분 확인 · 가설 · 미확인 네 가지만 쓴다. 같은 방향의 숫자가 양쪽에서 확인될 때만 “확인”이며, 오늘은 어느 연결도 “확인”이 아니다.</div>"""
+
+
+def _x5(root):
+    L = _ledger(root)
+    today = dt.date(2026, 9, 30).isoformat()
+    cats = {'신규 점화': [], '유지': [], '강화': [], '약화': [], '소멸 후보': [], '재점화': [], '판정 보류': []}
+    for it in L['issues']:
+        d = it['direction']
+        if it['stage'] == 0 or d.startswith('양방향') or '반대급부 작동' in d:
+            cats['판정 보류'].append(f"{it['id']} ({d})")
+        elif it['first_seen'] == today:
+            cats['신규 점화'].append(f"{it['id']} (최초 근거일 {today[5:]})")
+        elif '약화' in d:
+            cats['약화'].append(f"{it['id']} ({d})")
+        elif d.startswith('유지'):
+            cats['유지'].append(f"{it['id']}")
+    rows = ''
+    for k, v in cats.items():
+        ref = ', '.join(v) if v else '해당 없음(장부 필드 기준)'
+        rows += f"<tr><td style='white-space:nowrap'><b>{k}</b></td><td style='white-space:nowrap'>기준일 장부로 비교 불가</td><td>{esc(ref)}</td></tr>"
+    return f"""<h2 style="margin-top:2mm">전일 대비 이슈 변화</h2>
+<div class="tight"><table><tr><th>구분</th><th>전일 대비 판정</th><th>오늘 장부의 방향 필드 (참고, 전일 대비 아님)</th></tr>{rows}</table></div>
+<div class="warnbox"><b>오늘이 장부의 첫 기록일이다.</b> 전일 장부가 없어 어느 구분도 “변화”로 판정하지 않는다. 오른쪽 열은 오늘 장부의 방향 필드를 옮긴 것이다. 소멸 후보는 세 조건이 함께 확인돼야 하며 오늘은 없다.</div>"""
+
+
+def _x7():
+    ch = _chain([('AI 투자 확대', '알파벳 capex 상향', 'blue'), ('데이터센터 전력 수요', '수요 전망', 'gray'), ('전력망 접속 지연', '자료 없음', 'gray'), ('가스발전·터빈·변압기·냉각', '백로그 116GW', 'orange'), ('원자력', '장기 대안', 'gray'), ('한국 전력기기·반도체', '주가·실적 미확인', 'gray')])
+    rows = [
+        ('AI 투자 확대', '알파벳 2026 capex 1,950억~2,050억달러로 상향(회사 계획)', '알파벳 주가 −7.13%(잉여현금흐름 −59억달러)', '계획 상향은 있으나 실제 집행 미확인', ('부분 확인', 'orange')),
+        ('데이터센터 전력 수요', 'AI 기업의 전력 부족 발언 반복(장부 G7)', '미확인', '수요 전망 수치 원문 미열람', ('가설', 'orange')),
+        ('전력망 접속 지연', '발언·보도 미확인', '미확인', '접속 대기·허가 지연 자료 없음', ('미확인', 'gray')),
+        ('가스발전·가스터빈·변압기·냉각', '수요가 가스터빈으로 흐른다는 발언은 있음(장부 G7)', '터빈·전력기기 종목 주가 자료 없음', 'GE Vernova 백로그·슬롯 116GW(7/22), 지멘스 69GW, 두산에너빌리티 누적 24기 (회사·보도, S). 엔진·연료전지·계통은 ○*', ('부분 확인', 'orange')),
+        ('원자력 장기 대안', '시간이 걸린다는 논지', '미확인', '인허가·착공 자료 없음', ('미확인', 'gray')),
+        ('한국 전력기기·반도체', '두산에너빌리티 등 언급(S)', '한국 업종 주가·수급 자료 없음', '수주의 실적 전환에는 시차. 8월 반도체 수출 466.5억달러(+209.0%)는 별도 경로', ('가설', 'orange')),
+    ]
+    tr = ''.join(f"<tr><td><b>{a}</b></td><td>{esc(b)}</td><td>{esc(c)}</td><td>{esc(d)}</td><td>{badge(*e)}</td></tr>" for a, b, c, d, e in rows)
+    return f"""<h2>AI 전력 부족 톱니바퀴: 수요가 가스터빈으로 흐르는가</h2>{ch}
+<div class="tight"><table><tr><th>단계</th><th>발언</th><th>시장가격</th><th>수주·설비투자 증거</th><th>상태</th></tr>{tr}</table></div>
+<div class="note">발언, 시장가격, 수주·설비투자 증거를 칸으로 나눴다. 발언만 있는 단계는 “가설”, 자료가 없으면 “미확인”이다. 섹터 정의(sectors.json)는 건드리지 않고 흐름만 본다.</div>"""
+
+
+def _x9(root):
+    ex, _ = _extra(root)
+    hy = ex.get('us_hy_oas', {})
+    ch = _chain([('글로벌 위험', 'VIX 평온 · HY 확대', 'orange'), ('달러·원화', 'DXY · 원/달러', 'gray'), ('외국인 현물·선물', '−2.90조 · 선물 ✕', 'red'), ('KOSPI·KOSDAQ', '−0.27% · +0.38%', 'blue'), ('반도체·방어·에너지', '방어·에너지 ✕', 'gray'), ('다음 확인자료', 'KRX 원자료', 'gray')])
+    rows = [
+        ('글로벌 위험 변화', f"VIX 16.04(평온), HY OAS {hy.get('value', '—')}%p({hy.get('change', 0):+.2f}, 관측일 {hy.get('as_of', '—')}), 미 10년 5.282%", ('부분 확인', 'orange'), '수준 기준 없음'),
+        ('달러·원화', 'DXY 직전 수집값 101.372, ECOS 매매기준율 1,360.0(9/29). 시장 종가 1,357.60·1,356.7과 정의가 달라 합치지 않음', ('부분 확인', 'orange'), '같은 정의 5일 값'),
+        ('외국인 현물·선물', '현물 약 −2.90조원(보도 요약 S). 선물·투자자별 원자료 없음', ('가설', 'orange'), 'KRX 수급'),
+        ('KOSPI·KOSDAQ', 'KOSPI 6,870.81(−0.27%), KOSDAQ 849.80(+0.38%)', ('확인', 'blue'), '복수 확인'),
+        ('반도체·방어주·에너지', '반도체 87% 매도(단일 요약 S), 조선 −2.84%(S). 방어 섹터·에너지 업종 자료 없음', ('미확인', 'gray'), '업종 지수'),
+    ]
+    tr = ''.join(f"<tr><td style='white-space:nowrap'><b>{a}</b></td><td>{esc(b)}</td><td>{badge(*c)}</td><td>{esc(d)}</td></tr>" for a, b, c, d in rows)
+    return f"""<h2>한국 자금 이동 지도: 글로벌 위험이 어디로 옮겨가는가</h2>{ch}
+<div class="tight"><table><tr><th>단계</th><th>오늘 관측</th><th>상태</th><th>다음 확인자료</th></tr>{tr}</table></div>
+<div class="redbox"><b>KRX 원자료가 없어 자금 이동을 사실로 단정하지 않는다.</b> 방어주·에너지로 이동했는지는 확인할 자료가 없고, 위 지도는 확인 순서표이지 결론이 아니다. 다음 확인: 10/1 수출 · 마이크론 · 21:30 PCE.</div>"""
+
+
 def build(root):
     pages = [
         ('Executive Dashboard', p1()), ('Change Board', p2(root)), ('Actual Data Charts', p3(root)),
-        ('World-to-Korea Transmission', p4()), ('Issue Ledger', p5(root)), ('Oil, War and Rates', p6()),
-        ('AI and Semiconductors', p7()), ('Credit and Forced Selling', p8(root)), ('Korea and Action Rules', p9()),
+        ('World-to-Korea Transmission', p4() + _x4()), ('Issue Ledger', p5(root) + _x5(root)), ('Oil, War and Rates', p6()),
+        ('AI and Semiconductors', p7() + _x7()), ('Credit and Forced Selling', p8(root)), ('Korea and Action Rules', '<div class="tight">' + p9() + _x9(root) + '</div>'),
         ('Sources and Limits', p10()),
     ]
     out = []
