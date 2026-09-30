@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-09-30",
-  "generated_at": "2026-09-30T19:40:26+09:00",
+  "generated_at": "2026-09-30T20:02:00+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · VIX 16.04 pt(+0.9%) · 금 4,220 $/oz(+0.6%)"
+      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · VIX 16.06 pt(+1.0%) · 미 M2 23,343 십억$(+0.5%)"
     },
     {
       "k": "오늘 발표",
@@ -87,30 +87,16 @@
     {
       "id": "vix",
       "name": "VIX",
-      "value": 16.04,
+      "value": 16.06,
       "unit": "pt",
       "prev": 15.9,
-      "delta": 0.14,
-      "delta_text": "+0.9%",
+      "delta": 0.16,
+      "delta_text": "+1.0%",
       "judge": "안정",
       "as_of": "2026-09-30",
       "cycle": "D",
-      "score": 0.8805031446540804,
+      "score": 1.0062893081760904,
       "group": "us"
-    },
-    {
-      "id": "gold",
-      "name": "금",
-      "value": 4219.9,
-      "unit": "$/oz",
-      "prev": 4194.4,
-      "delta": 25.5,
-      "delta_text": "+0.6%",
-      "judge": "",
-      "as_of": "2026-09-30",
-      "cycle": "D",
-      "score": 0.6079534617585353,
-      "group": "world"
     },
     {
       "id": "m2",
@@ -141,6 +127,34 @@
       "group": "us"
     },
     {
+      "id": "gold",
+      "name": "금",
+      "value": 4216.2,
+      "unit": "$/oz",
+      "prev": 4194.4,
+      "delta": 21.8,
+      "delta_text": "+0.5%",
+      "judge": "",
+      "as_of": "2026-09-30",
+      "cycle": "D",
+      "score": 0.5197406065229875,
+      "group": "world"
+    },
+    {
+      "id": "wti",
+      "name": "유가 WTI",
+      "value": 90.33,
+      "unit": "$",
+      "prev": 90.69,
+      "delta": -0.36,
+      "delta_text": "-0.4%",
+      "judge": "",
+      "as_of": "2026-09-30",
+      "cycle": "D",
+      "score": 0.39695666556400866,
+      "group": "world"
+    },
+    {
       "id": "kr_lead",
       "name": "선행지수순환변동치",
       "value": 104.2,
@@ -153,20 +167,6 @@
       "cycle": "M",
       "score": 0.3853564547206221,
       "group": "kr"
-    },
-    {
-      "id": "copper",
-      "name": "구리",
-      "value": 6.645,
-      "unit": "$/lb",
-      "prev": 6.6195,
-      "delta": 0.025,
-      "delta_text": "+0.4%",
-      "judge": "",
-      "as_of": "2026-09-30",
-      "cycle": "D",
-      "score": 0.3852254702016646,
-      "group": "world"
     }
   ],
   "releases": {
@@ -302,30 +302,16 @@
         {
           "id": "vix",
           "name": "VIX",
-          "value": 16.04,
+          "value": 16.06,
           "unit": "pt",
           "prev": 15.9,
-          "delta": 0.14,
-          "delta_text": "+0.9%",
+          "delta": 0.16,
+          "delta_text": "+1.0%",
           "judge": "안정",
           "as_of": "2026-09-30",
           "cycle": "D",
-          "score": 0.8805031446540804,
+          "score": 1.0062893081760904,
           "group": "us"
-        },
-        {
-          "id": "gold",
-          "name": "금",
-          "value": 4219.9,
-          "unit": "$/oz",
-          "prev": 4194.4,
-          "delta": 25.5,
-          "delta_text": "+0.6%",
-          "judge": "",
-          "as_of": "2026-09-30",
-          "cycle": "D",
-          "score": 0.6079534617585353,
-          "group": "world"
         },
         {
           "id": "m2",
@@ -356,6 +342,34 @@
           "group": "us"
         },
         {
+          "id": "gold",
+          "name": "금",
+          "value": 4216.2,
+          "unit": "$/oz",
+          "prev": 4194.4,
+          "delta": 21.8,
+          "delta_text": "+0.5%",
+          "judge": "",
+          "as_of": "2026-09-30",
+          "cycle": "D",
+          "score": 0.5197406065229875,
+          "group": "world"
+        },
+        {
+          "id": "wti",
+          "name": "유가 WTI",
+          "value": 90.33,
+          "unit": "$",
+          "prev": 90.69,
+          "delta": -0.36,
+          "delta_text": "-0.4%",
+          "judge": "",
+          "as_of": "2026-09-30",
+          "cycle": "D",
+          "score": 0.39695666556400866,
+          "group": "world"
+        },
+        {
           "id": "kr_lead",
           "name": "선행지수순환변동치",
           "value": 104.2,
@@ -368,20 +382,6 @@
           "cycle": "M",
           "score": 0.3853564547206221,
           "group": "kr"
-        },
-        {
-          "id": "copper",
-          "name": "구리",
-          "value": 6.645,
-          "unit": "$/lb",
-          "prev": 6.6195,
-          "delta": 0.025,
-          "delta_text": "+0.4%",
-          "judge": "",
-          "as_of": "2026-09-30",
-          "cycle": "D",
-          "score": 0.3852254702016646,
-          "group": "world"
         }
       ]
     },
@@ -395,7 +395,7 @@
     },
     {
       "id": "2026-09-30/auto/macro",
-      "time": "19:38",
+      "time": "19:59",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 34/34 수집",
