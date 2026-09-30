@@ -1,7 +1,7 @@
 """Read-only source collection for period bars. Never changes macro.json or records.
 No date interpolation, zero filling, or collection-snapshot relabelling.
 """
-import csv, io, json, os, pathlib, sys, time, datetime as dt, urllib.request, math
+import csv, io, json, os, pathlib, sys, time, datetime as dt, urllib.request, urllib.parse, math
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 def transform(rows, kind):
@@ -25,10 +25,48 @@ def transform(rows, kind):
 # 3) 묶음 요청이 실패하면 시리즈별로 재시도한다.  4) 시리즈마다 결과와 오류를 분리하고, 성공분은 즉시 파일에 저장한다.
 # 5) 전체 제한시간(DEADLINE_SEC)에 걸리기 전에 중단하고, 남은 시리즈는 오류로 기록한다.
 FRED_BASE = os.environ.get('FRED_BASE', 'https://fred.stlouisfed.org/graph/fredgraph.csv')
+FRED_API_BASE = os.environ.get('FRED_API_BASE', 'https://api.stlouisfed.org/fred/series/observations')
+FRED_API_KEY = os.environ.get('FRED_API_KEY', '').strip()
 REQ_TIMEOUT = float(os.environ.get('FRED_REQ_TIMEOUT', '40'))
 RETRIES = int(os.environ.get('FRED_RETRIES', '2'))
 DEADLINE_SEC = float(os.environ.get('PERIODS_DEADLINE_SEC', '360'))
 FORMULA = {'yoy': '(당월 지수 / 전년 같은 달 지수 − 1) × 100', 'diff': '당월 값 − 전월 값', 'mom_pct': '(당월 값 / 전월 값 − 1) × 100'}
+
+
+def fetch_api(series_id, observation_start):
+    """공식 FRED API에서 한 시리즈를 받는다. 반환 URL에는 비밀키를 남기지 않는다."""
+    if not FRED_API_KEY:
+        raise RuntimeError('FRED_API_KEY가 설정되지 않음')
+    query = urllib.parse.urlencode({'series_id': series_id, 'api_key': FRED_API_KEY,
+                                    'file_type': 'json', 'observation_start': observation_start})
+    request_url = FRED_API_BASE + '?' + query
+    source_url = FRED_API_BASE + '?' + urllib.parse.urlencode({'series_id': series_id,
+                                                                'observation_start': observation_start,
+                                                                'file_type': 'json'})
+    last = None
+    for attempt in range(RETRIES + 1):
+        try:
+            request = urllib.request.Request(request_url, headers={'User-Agent': 'invest-macro-collector/1.0'})
+            payload = json.loads(urllib.request.urlopen(request, timeout=min(25.0, REQ_TIMEOUT)).read().decode('utf-8'))
+            rows = []
+            for item in payload.get('observations', []):
+                value = str(item.get('value', '')).strip()
+                date = str(item.get('date', '')).strip()
+                if not date or not value or value == '.':
+                    continue
+                dt.date.fromisoformat(date)
+                number = float(value)
+                if math.isfinite(number):
+                    rows.append((date, number))
+            if not rows:
+                raise ValueError('공식 API 응답에 유효한 관측값이 없음')
+            rows.sort()
+            return source_url, rows
+        except Exception as error:
+            last = error
+            if attempt < RETRIES:
+                time.sleep(2 * (attempt + 1) ** 2)
+    raise last
 
 
 def fetch_csv(ids, cosd):
@@ -84,6 +122,9 @@ def build_item(ind, rows, url):
 def collect(ind):
     """단일 시리즈 수집(다른 스크립트·시험용). 전체 이력 대신 기간을 제한한다."""
     cosd = window_start(ind)
+    if FRED_API_KEY:
+        url, rows = fetch_api(ind['symbol'], cosd)
+        return build_item(ind, rows, url)
     url, raw = fetch_csv([ind['symbol']], cosd)
     cols = parse_columns(raw, [ind['symbol']])
     if ind['symbol'] not in cols:
@@ -120,7 +161,7 @@ def main():
     old.setdefault('items', {})
     defs = load_defs()
     started = time.monotonic()
-    errors, batch_errors, done, source_urls = {}, {}, [], {}  # errors: 시리즈 실패만 / batch_errors: 묶음 요청 오류(경고용)
+    errors, batch_errors, done, source_urls = {}, {}, [], {}  # errors: 시리즈 실패만 / batch_errors: 1차 경로 오류(경고용)
     fallback_groups = set()
     groups = {}
     for ind in defs:
@@ -147,7 +188,17 @@ def main():
     for cosd, inds in groups.items():
         ids = [i['symbol'] for i in inds]
         cols = {}
-        if not out_of_time():
+        if FRED_API_KEY:
+            # 공식 API는 시리즈별 엔드포인트다. 실패한 항목만 아래 CSV 보조 경로로 넘긴다.
+            for ind in inds:
+                if out_of_time():
+                    break
+                try:
+                    url, rows = fetch_api(ind['symbol'], cosd)
+                    cols[ind['symbol']], source_urls[ind['symbol']] = rows, url
+                except Exception as error:
+                    batch_errors[ind['id']] = 'OfficialAPI ' + type(error).__name__ + ': ' + str(error)[:120]
+        elif not out_of_time():
             try:  # 1차: 묶음 한 요청. 시리즈마다 실제로 쓴 요청 주소를 따로 보관한다
                 url, raw = fetch_csv(ids, cosd)
                 got = parse_columns(raw, ids)
@@ -157,7 +208,7 @@ def main():
                 batch_errors[cosd] = type(error).__name__ + ': ' + str(error)[:120]
         for ind in inds:
             sid, sym = ind['id'], ind['symbol']
-            if sym not in cols and not out_of_time():  # 2차: 묶음 실패·열 누락 시리즈만 개별 재시도
+            if sym not in cols and not out_of_time():  # 2차: 공식 API/묶음 실패 항목만 CSV로 개별 재시도
                 fallback_groups.add(cosd)
                 try:
                     u, raw = fetch_csv([sym], cosd)
