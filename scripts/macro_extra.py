@@ -1,6 +1,6 @@
 # MACRO_STANDARD v1 보강 수집기
 # 역할: 기존 scripts/macro.py 를 건드리지 않고 검증된 신규 핵심지표를 별도 수집한다.
-# 출력: facts/macro_extra.json, facts/macro_extra_history.json
+# 출력: facts/macro_extra.json, facts/macro_extra_history.json. 기간 차트는 macro_periods.py가 facts/macro_periods.json에 저장한다.
 import csv, datetime as dt, io, json, os, urllib.request
 
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -8,6 +8,9 @@ P=lambda *a: os.path.join(ROOT,*a)
 KST=dt.timezone(dt.timedelta(hours=9))
 
 def now_iso(): return dt.datetime.now(KST).replace(microsecond=0).isoformat()
+def age_days(as_of):
+    try:return (dt.datetime.now(KST).date()-dt.date.fromisoformat(as_of[:10])).days
+    except Exception:return None
 def load(path,default):
     try:
         with open(path,encoding='utf-8') as f:return json.load(f)
@@ -52,7 +55,7 @@ def run():
     items=[]; errors=[]
     for ind in cfg.get('items',[]):
         rec={k:ind.get(k) for k in ['id','name','unit','country','group','role','cycle','official','source_url','schedule_url','meaning','interpretation'] if k in ind}
-        rec.update({'source':'fred','symbol':ind['symbol'],'value':None,'prev':None,'change':None,'as_of':'','collected_at':now_iso(),'error':''})
+        rec.update({'source':'fred','symbol':ind['symbol'],'access_status':'D','value':None,'prev':None,'change':None,'as_of':'','collected_at':now_iso(),'age_days':None,'freshness':'unknown','error':''})
         try:
             rows=fred(ind['symbol'])
             kind=ind.get('derive')
@@ -65,6 +68,9 @@ def run():
             else:
                 if len(rows)<2: raise RuntimeError('데이터 부족')
                 rec.update({'as_of':rows[-1][0],'value':rows[-1][1],'prev':rows[-2][1],'change':rows[-1][1]-rows[-2][1]})
+            rec['age_days']=age_days(rec['as_of'])
+            max_age=int(ind.get('max_age_days',35 if ind.get('cycle')=='M' else 10))
+            rec['freshness']='stale' if rec['age_days'] is not None and rec['age_days']>max_age else 'available'
         except Exception as e:
             rec['error']=f'{type(e).__name__}: {e}'[:180]; errors.append(f"{ind['id']}: {rec['error']}")
         items.append(rec)
