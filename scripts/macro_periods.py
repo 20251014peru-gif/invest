@@ -104,12 +104,18 @@ def load_defs():
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):  # Windows 기본 코드페이지에서도 한글 로그가 깨지거나 예외가 되지 않게 한다
+        try:
+            stream.reconfigure(encoding='utf-8', errors='replace')
+        except Exception:
+            pass
     path = ROOT / 'facts/macro_periods.json'
     old = json.loads(path.read_text(encoding='utf-8')) if path.exists() else {'schema': 'macro_periods/1', 'items': {}}
     old.setdefault('items', {})
     defs = load_defs()
     started = time.monotonic()
-    errors, done = {}, []
+    errors, batch_errors, done, source_urls = {}, {}, [], {}  # errors: 시리즈 실패만 / batch_errors: 묶음 요청 오류(경고용)
+    fallback_groups = set()
     groups = {}
     for ind in defs:
         groups.setdefault(window_start(ind), []).append(ind)
@@ -117,12 +123,15 @@ def main():
     def save_state(final=False):
         attempted = dt.datetime.now(dt.timezone.utc).isoformat()
         n_ok, n_all = len(done), len(defs)
+        # status 는 실제 시리즈의 성공·실패로만 판정한다 (묶음 요청 오류는 반영하지 않는다)
         old['status'] = 'complete' if n_ok == n_all else ('partial' if n_ok else 'failed')
         old['attempted_at'] = attempted
         if n_ok:
             old['collected_at'] = attempted
         old['errors'] = dict(errors)
-        old['counts'] = {'defined': n_all, 'collected': n_ok, 'failed': len(errors), 'retained_items': len(old['items'])}
+        old['batch_errors'] = dict(batch_errors)
+        old['counts'] = {'defined': n_all, 'collected': n_ok, 'series_failed': len(errors),
+                         'batch_fallbacks': len(fallback_groups), 'retained_items': len(old['items'])}
         old['finished'] = final
         atomic_write(path, old)
 
@@ -131,44 +140,44 @@ def main():
 
     for cosd, inds in groups.items():
         ids = [i['symbol'] for i in inds]
-        cols, url = {}, None
+        cols = {}
         if not out_of_time():
-            try:  # 1차: 묶음 한 요청
+            try:  # 1차: 묶음 한 요청. 시리즈마다 실제로 쓴 요청 주소를 따로 보관한다
                 url, raw = fetch_csv(ids, cosd)
-                cols = parse_columns(raw, ids)
+                got = parse_columns(raw, ids)
+                for sym, rows in got.items():
+                    cols[sym], source_urls[sym] = rows, url
             except Exception as error:
-                errors['batch:' + cosd] = type(error).__name__ + ': ' + str(error)[:120]
+                batch_errors[cosd] = type(error).__name__ + ': ' + str(error)[:120]
         for ind in inds:
             sid, sym = ind['id'], ind['symbol']
-            if sym not in cols and not out_of_time():  # 2차: 묶음에서 빠졌거나 묶음이 실패한 시리즈만 개별 재시도
+            if sym not in cols and not out_of_time():  # 2차: 묶음 실패·열 누락 시리즈만 개별 재시도
+                fallback_groups.add(cosd)
                 try:
                     u, raw = fetch_csv([sym], cosd)
                     got = parse_columns(raw, [sym])
                     if sym in got:
-                        cols[sym], url = got[sym], u
+                        cols[sym], source_urls[sym] = got[sym], u
                 except Exception as error:
                     errors[sid] = type(error).__name__ + ': ' + str(error)[:120]
             if sym in cols:
                 try:
-                    old['items'][sid] = build_item(ind, cols[sym], url)
+                    old['items'][sid] = build_item(ind, cols[sym], source_urls[sym])
                     done.append(sid)
                     errors.pop(sid, None)
                 except Exception as error:
                     errors[sid] = type(error).__name__ + ': ' + str(error)[:120]
             elif sid not in errors:
-                errors[sid] = 'DeadlineExceeded: 전체 제한시간 %ds 초과로 시도하지 않음' % DEADLINE_SEC if out_of_time() else 'MissingSeries: 응답에 열이 없음'
+                errors[sid] = ('DeadlineExceeded: 전체 제한시간 %ds 초과로 시도하지 않음' % DEADLINE_SEC) if out_of_time() else 'MissingSeries: 응답에 열이 없음'
             save_state()  # 시리즈마다 중간 저장
-    for k in [k for k in errors if k.startswith('batch:')]:
-        # 묶음 요청 오류는 개별 재시도로 모든 시리즈가 채워졌다면 기록에서 뺀다
-        if len(done) == len(defs):
-            errors.pop(k)
     save_state(final=True)
     status, c = old['status'], old['counts']
-    summary = f"macro_periods {status}: {c['collected']}/{c['defined']} 수집, 실패 {c['failed']}, 보존 {c['retained_items']}"
-    print(json.dumps({'status': status, **c, 'errors': errors}, ensure_ascii=False))
+    summary = (f"macro_periods {status}: {c['collected']}/{c['defined']} 수집, 시리즈 실패 {c['series_failed']}, "
+               f"묶음→개별 전환 {c['batch_fallbacks']}, 보존 {c['retained_items']}")
+    print(json.dumps({'status': status, **c, 'errors': errors, 'batch_errors': batch_errors}, ensure_ascii=False))
     if status == 'failed':
         print('::error::' + summary)
-    elif status == 'partial':
+    elif status == 'partial' or batch_errors:
         print('::warning::' + summary)
     step = os.environ.get('GITHUB_STEP_SUMMARY')
     if step:

@@ -77,7 +77,7 @@ td.num, th.num { text-align: right; white-space: nowrap; }
 .gauge div.on { background: #D9730D; color: #fff; border-color: #D9730D; font-weight: 700; }
 .gauge div.na { background: #F4F5F8; border-style: dashed; }
 .life { display: grid; grid-template-columns: 34mm repeat(7, 1fr); font-size: 7pt; }
-.life .c { padding: 1mm 0.4mm; border-bottom: 0.5pt solid #D6DCE6; text-align: center; min-height: 6mm; display: flex; align-items: center; justify-content: center; }
+.life .c { padding: 0.4mm 0.4mm; border-bottom: 0.5pt solid #D6DCE6; text-align: center; min-height: 4.6mm; display: flex; align-items: center; justify-content: center; }
 .life .c.n { justify-content: flex-start; text-align: left; padding-left: 1mm; font-weight: 700; color: #0F2A4A; }
 .life .hd { background: #0F2A4A; color: #fff; font-weight: 700; }
 .dot { width: 3.2mm; height: 3.2mm; border-radius: 50%; display: inline-block; }
