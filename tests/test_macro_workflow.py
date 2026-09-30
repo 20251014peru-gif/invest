@@ -21,6 +21,7 @@ def workflow_parts():
     script = '\n'.join(l[10:] if l.startswith('          ') else l for l in m.group(1).split('\n'))
     notify = re.search(r"      - name: 실패하면 폰으로 알림\n        if: failure\(\)", text)
     assert notify and notify.start() > m.end() - 1, '실패 알림 단계(if: failure())가 실행 단계 뒤에 없음'
+    assert 'FRED_API_KEY: ${{ secrets.FRED_API_KEY }}' in text, 'FRED_API_KEY가 수집 단계 환경변수에 연결되지 않음'
     return script
 
 
