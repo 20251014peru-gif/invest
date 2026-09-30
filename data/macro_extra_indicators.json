@@ -1,6 +1,6 @@
 {
   "schema": "macro_extra_indicators/1",
-  "version": "2026-09-13",
+  "version": "2026-09-30",
   "description": "MACRO_STANDARD v1 보강 지표. 공식/검증 가능한 시계열만 추가하며 임의 매수·매도 임계값은 두지 않는다.",
   "items": [
     {
@@ -67,6 +67,70 @@
       "source_url": "https://fred.stlouisfed.org/series/INDPRO",
       "meaning": "광공업·유틸리티를 포함한 미국 실물 생산의 방향을 확인한다.",
       "interpretation": "전년비와 최근 방향을 함께 본다. 단일 월 숫자보다 추세 전환 여부가 중요하다."
+    },
+    {
+      "id": "us30y",
+      "name": "미국 국채 30년",
+      "source": "fred",
+      "symbol": "DGS30",
+      "unit": "%",
+      "country": "us",
+      "group": "rates",
+      "role": "core",
+      "official": true,
+      "cycle": "D",
+      "max_age_days": 4,
+      "source_url": "https://fred.stlouisfed.org/series/DGS30",
+      "meaning": "미국 장기 자금비용과 기간 프리미엄 압력을 확인한다.",
+      "interpretation": "10년물과 함께 상승하면 장기 할인율 부담이 넓어지는 신호다. 단일 임계값만으로 위기 단계를 확정하지 않는다."
+    },
+    {
+      "id": "us_hy_oas",
+      "name": "미국 하이일드 OAS",
+      "source": "fred",
+      "symbol": "BAMLH0A0HYM2",
+      "unit": "%p",
+      "country": "us",
+      "group": "credit",
+      "role": "core",
+      "official": true,
+      "cycle": "D",
+      "max_age_days": 5,
+      "source_url": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
+      "meaning": "미국 투기등급 회사채가 국채보다 추가로 요구받는 위험 프리미엄이다.",
+      "interpretation": "수준보다 확대 속도와 지속성을 본다. 상승은 신용 위험 확대지만 단독으로 강제매도를 뜻하지 않는다."
+    },
+    {
+      "id": "us_ccc_oas",
+      "name": "미국 CCC 이하 OAS",
+      "source": "fred",
+      "symbol": "BAMLH0A3HYC",
+      "unit": "%p",
+      "country": "us",
+      "group": "credit",
+      "role": "stress",
+      "official": true,
+      "cycle": "D",
+      "max_age_days": 5,
+      "source_url": "https://fred.stlouisfed.org/series/BAMLH0A3HYC",
+      "meaning": "가장 취약한 미국 회사채 차주의 스트레스가 커지는지 확인한다.",
+      "interpretation": "하이일드 전체보다 빠르게 확대되는지 본다. 펀딩·주가·발행시장과 함께 위험단계를 판정한다."
+    },
+    {
+      "id": "sofr",
+      "name": "SOFR",
+      "source": "fred",
+      "symbol": "SOFR",
+      "unit": "%",
+      "country": "us",
+      "group": "funding",
+      "role": "stress",
+      "official": true,
+      "cycle": "D",
+      "max_age_days": 4,
+      "source_url": "https://fred.stlouisfed.org/series/SOFR",
+      "meaning": "미국 국채 담보 익일 자금시장의 대표 금리다.",
+      "interpretation": "정책금리 수준과 월말·분기말 효과를 함께 비교한다. 하루 상승만으로 레포시장 이상을 확정하지 않는다."
     }
   ]
 }
