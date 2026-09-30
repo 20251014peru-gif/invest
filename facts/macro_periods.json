@@ -6867,7 +6867,7 @@
     "us2y": "TimeoutError: The read operation timed out",
     "fed_bs": "TimeoutError: The read operation timed out",
     "initial_claims": "TimeoutError: The read operation timed out",
-    "us30y": "TimeoutError: The read operation timed out",
+    "us30y": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
     "us_hy_oas": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
     "us_ccc_oas": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
     "sofr": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
@@ -6882,10 +6882,17 @@
     "retail_sales_mom": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
     "industrial_prod_yoy": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음"
   },
-  "attempted_at": "2026-09-30T11:53:53.779691+00:00",
+  "attempted_at": "2026-09-30T12:14:43.302944+00:00",
   "status": "failed",
   "batch_errors": {
-    "2025-05-18": "TimeoutError: The read operation timed out"
+    "us10y": "OfficialAPI HTTPError: HTTP Error 400: Bad Request",
+    "us2y": "OfficialAPI HTTPError: HTTP Error 400: Bad Request",
+    "fed_bs": "OfficialAPI HTTPError: HTTP Error 400: Bad Request",
+    "initial_claims": "OfficialAPI HTTPError: HTTP Error 400: Bad Request",
+    "us30y": "OfficialAPI HTTPError: HTTP Error 400: Bad Request",
+    "us_hy_oas": "OfficialAPI HTTPError: HTTP Error 400: Bad Request",
+    "us_ccc_oas": "OfficialAPI HTTPError: HTTP Error 400: Bad Request",
+    "sofr": "OfficialAPI HTTPError: HTTP Error 400: Bad Request"
   },
   "counts": {
     "defined": 18,
