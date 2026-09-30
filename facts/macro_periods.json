@@ -6863,24 +6863,36 @@
     }
   },
   "errors": {
-    "cpi_yoy": "TimeoutError: The read operation timed out",
-    "us2y": "TimeoutError: The read operation timed out",
     "us10y": "TimeoutError: The read operation timed out",
-    "fedfunds": "TimeoutError: The read operation timed out",
-    "fed_bs": "TimeoutError: The read operation timed out",
-    "core_pce_yoy": "TimeoutError: The read operation timed out",
-    "payems_chg": "TimeoutError: The read operation timed out",
-    "m2": "TimeoutError: The read operation timed out",
-    "unrate": "TimeoutError: The read operation timed out",
-    "core_cpi_yoy": "TimeoutError: The read operation timed out",
-    "ahe_yoy": "TimeoutError: The read operation timed out",
-    "initial_claims": "TimeoutError: The read operation timed out",
-    "industrial_prod_yoy": "TimeoutError: The read operation timed out",
-    "retail_sales_mom": "TimeoutError: The read operation timed out",
-    "us_hy_oas": "TimeoutError: The read operation timed out",
-    "us30y": "TimeoutError: The read operation timed out",
-    "sofr": "TimeoutError: The read operation timed out",
-    "us_ccc_oas": "TimeoutError: The read operation timed out"
+    "us2y": "TimeoutError: The read operation timed out",
+    "fed_bs": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
+    "initial_claims": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
+    "us30y": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
+    "us_hy_oas": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
+    "us_ccc_oas": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
+    "sofr": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
+    "fedfunds": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
+    "cpi_yoy": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
+    "core_pce_yoy": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
+    "m2": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
+    "payems_chg": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
+    "unrate": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
+    "ahe_yoy": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
+    "core_cpi_yoy": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
+    "retail_sales_mom": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음",
+    "industrial_prod_yoy": "DeadlineExceeded: 전체 제한시간 360s 초과로 시도하지 않음"
   },
-  "attempted_at": "2026-09-30T11:02:00.193897+00:00"
+  "attempted_at": "2026-09-30T11:24:16.478537+00:00",
+  "status": "failed",
+  "batch_errors": {
+    "2025-05-18": "TimeoutError: The read operation timed out"
+  },
+  "counts": {
+    "defined": 18,
+    "collected": 0,
+    "series_failed": 18,
+    "batch_fallbacks": 1,
+    "retained_items": 14
+  },
+  "finished": true
 }
