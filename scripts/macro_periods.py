@@ -1,7 +1,7 @@
 """Read-only source collection for period bars. Never changes macro.json or records.
 No date interpolation, zero filling, or collection-snapshot relabelling.
 """
-import csv, io, json, os, pathlib, sys, time, datetime as dt, urllib.request, urllib.parse, math
+import csv, io, json, os, pathlib, re, sys, time, datetime as dt, urllib.request, urllib.parse, urllib.error, math
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 def transform(rows, kind):
@@ -37,6 +37,8 @@ def fetch_api(series_id, observation_start):
     """공식 FRED API에서 한 시리즈를 받는다. 반환 URL에는 비밀키를 남기지 않는다."""
     if not FRED_API_KEY:
         raise RuntimeError('FRED_API_KEY가 설정되지 않음')
+    if not re.fullmatch(r'[a-z0-9]{32}', FRED_API_KEY):
+        raise ValueError('FRED_API_KEY 형식 오류: 32자리 영문 소문자·숫자여야 함')
     query = urllib.parse.urlencode({'series_id': series_id, 'api_key': FRED_API_KEY,
                                     'file_type': 'json', 'observation_start': observation_start})
     request_url = FRED_API_BASE + '?' + query
@@ -62,6 +64,13 @@ def fetch_api(series_id, observation_start):
                 raise ValueError('공식 API 응답에 유효한 관측값이 없음')
             rows.sort()
             return source_url, rows
+        except urllib.error.HTTPError as error:
+            # 키 자체는 절대 기록하지 않고 FRED가 보낸 설명만 남긴다. 4xx는 재시도해도 바뀌지 않는다.
+            try:
+                detail = error.read().decode('utf-8', errors='replace')[:300]
+            except Exception:
+                detail = ''
+            raise ValueError(f'FRED API HTTP {error.code}: {detail}') from None
         except Exception as error:
             last = error
             if attempt < RETRIES:
@@ -197,7 +206,11 @@ def main():
                     url, rows = fetch_api(ind['symbol'], cosd)
                     cols[ind['symbol']], source_urls[ind['symbol']] = rows, url
                 except Exception as error:
-                    batch_errors[ind['id']] = 'OfficialAPI ' + type(error).__name__ + ': ' + str(error)[:120]
+                    message = 'OfficialAPI ' + type(error).__name__ + ': ' + str(error)[:300]
+                    batch_errors[ind['id']] = message
+                    # 4xx·키 형식 오류는 CSV 재시도로 해결되지 않는다. 즉시 원인을 남겨 장시간 정지를 막는다.
+                    if isinstance(error, ValueError):
+                        errors[ind['id']] = message
         elif not out_of_time():
             try:  # 1차: 묶음 한 요청. 시리즈마다 실제로 쓴 요청 주소를 따로 보관한다
                 url, raw = fetch_csv(ids, cosd)
@@ -208,7 +221,7 @@ def main():
                 batch_errors[cosd] = type(error).__name__ + ': ' + str(error)[:120]
         for ind in inds:
             sid, sym = ind['id'], ind['symbol']
-            if sym not in cols and not out_of_time():  # 2차: 공식 API/묶음 실패 항목만 CSV로 개별 재시도
+            if sym not in cols and sid not in errors and not out_of_time():  # 네트워크 오류만 CSV로 개별 재시도
                 fallback_groups.add(cosd)
                 try:
                     u, raw = fetch_csv([sym], cosd)
