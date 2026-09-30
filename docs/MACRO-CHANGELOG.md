@@ -1,5 +1,11 @@
 # 매크로·분석 통합 이력
 
+## macro_periods 수집기 안정화 · 2026-09-30
+- 문제: 2026-09-30 운영 실행(10:40Z)에서 macro_periods 전 시리즈 18/18이 `TimeoutError: The read operation timed out`. 신규 4개 시계열이 적재되지 않았고 기존 14개도 마지막 관측 9/10(수집 9/13)에서 멈춤. 같은 실행에서 macro.py·macro_extra.py의 FRED 요청은 성공.
+- 원인(코드 근거, 운영 재현은 못 함): 시리즈마다 전체 이력을 별도 요청(18건), 읽기 제한 25초, 재시도 없음, 4개 병렬. 워크플로가 `|| echo ::warning::`으로 실패를 삼켜 Actions는 초록으로 끝남. CI 전체 시간 제한이 아니라 요청 단위 시간초과로 판단.
+- 변경: 기간(cosd) 제한, 같은 기간 그룹은 한 요청(id=A,B,C), 묶음 실패 시 시리즈별 재시도(제한 40초, 2회 재시도), 시리즈마다 결과·오류 분리와 중간 저장(원자적 쓰기), 전체 제한 360초 전 중단, `status`(complete/partial/failed)·`counts`·`errors`·`collected_at`·항목별 `last_observation` 기록, 전체 실패 시 종료코드 1과 `::error::`, 부분 실패 시 `::warning::`. 워크플로 문구를 error로 변경(수집기 전체는 계속).
+- 검증: `tests/test_macro_periods.py`(가짜 FRED 서버)로 정상·묶음 시간초과·일부 실패·전체 시간초과 4경우 통과. 실제 FRED 묶음 요청(id=A,B,C)과 운영 실행 결과는 병합 후 Actions에서 `facts/macro_periods.json`의 status·collected_at·last_observation으로 확인해야 함(미검증).
+
 ## v1.1 시장 톱니바퀴 보고서 자료 보강 · 2026-09-30
 - 요청: 위험 3·4단계와 실제 20거래일 차트에 필요한 미국 30년물, 하이일드 OAS, CCC 이하 OAS, SOFR를 PC 없이 GitHub Actions에서 수집.
 - 변경: `data/macro_extra_indicators.json`에 FRED `DGS30`, `BAMLH0A0HYM2`, `BAMLH0A3HYC`, `SOFR`를 추가했다. 기존 `macro_extra.py`와 `macro_periods.py`가 최신값과 실제 관측일 시계열을 각각 저장한다.

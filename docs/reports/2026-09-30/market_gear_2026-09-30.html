@@ -121,7 +121,7 @@ AI는 심리·가격 쪽 반대급부(우려)만 작동했고 실물(주문·HBM
 <tr><td>최신값 수집 (macro_extra.json)</td><td><span class="badge b-teal">정상</span></td><td>8/8 성공, 수집 2026-09-30 19:38 KST</td></tr>
 <tr><td>기간 시계열 (macro_periods.json)</td><td><span class="badge b-orange">오래된 자료</span></td><td>기존 14개 시리즈의 마지막 점 9/10, 수집일 9/13. 최근 실행은 전 시리즈 시간 초과</td></tr>
 <tr><td>신규 4개 시계열</td><td><span class="badge b-red">없음</span></td><td>macro_periods.json에 항목 없음</td></tr>
-<tr><td>원인</td><td><span class="badge b-gray">CI 시간 제한</span></td><td>CI 실행시간 제한으로 macro_periods.py 미완료 (수집기는 별도 수정 대상)</td></tr></table></div></div>
+<tr><td>원인</td><td><span class="badge b-gray">요청 시간초과</span></td><td>최근 실행 18개 시리즈 전부 FRED 읽기 시간초과(TimeoutError). 워크플로 전체 시간 제한이 아니라 요청 단위. 수집기는 별도 수정 대상</td></tr></table></div></div>
 <div class="ftr"><span>판 v1.1 · 정보 기준 07:00 KST (07시 이후 발표분은 별도 표기) · 검증 수준: 원문 미열람, 검색 요약과 저장소 값</span><span>2 / 10</span></div>
 </section><section class="page">
 <div class="hdr"><div class="t">시장 톱니바퀴 아침보고서 (제한판)</div><div class="d">2026.09.30 (수) 07:00 KST · v1.1</div></div>

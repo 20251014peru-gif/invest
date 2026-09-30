@@ -61,7 +61,7 @@ def _status(root):
 <tr><td>최신값 수집 (macro_extra.json)</td><td>{badge('정상', 'teal')}</td><td>8/8 성공, 수집 {esc(ex_at[:16].replace('T', ' '))} KST</td></tr>
 <tr><td>기간 시계열 (macro_periods.json)</td><td>{badge('오래된 자료', 'orange')}</td><td>기존 14개 시리즈의 마지막 점 9/10, 수집일 9/13. 최근 실행은 전 시리즈 시간 초과</td></tr>
 <tr><td>신규 4개 시계열</td><td>{badge('없음', 'red')}</td><td>macro_periods.json에 항목 없음</td></tr>
-<tr><td>원인</td><td>{badge('CI 시간 제한', 'gray')}</td><td>CI 실행시간 제한으로 macro_periods.py 미완료 (수집기는 별도 수정 대상)</td></tr></table></div>"""
+<tr><td>원인</td><td>{badge('요청 시간초과', 'gray')}</td><td>최근 실행 18개 시리즈 전부 FRED 읽기 시간초과(TimeoutError). 워크플로 전체 시간 제한이 아니라 요청 단위. 수집기는 별도 수정 대상</td></tr></table></div>"""
 
 
 def _ledger(root):
