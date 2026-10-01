@@ -1,7 +1,7 @@
 {
   "schema": "market_report_validation/1",
-  "started_at": "2026-10-01T03:18:25+00:00",
-  "completed_at": "2026-10-01T03:18:28+00:00",
+  "started_at": "2026-10-01T04:04:51+00:00",
+  "completed_at": "2026-10-01T04:06:09+00:00",
   "status": "partial",
   "counts": {
     "registered": 23,
@@ -9,7 +9,7 @@
     "blocked": 6,
     "error": 0
   },
-  "run_url": "https://github.com/20251014peru-gif/invest/actions/runs/36809855969",
+  "run_url": "https://github.com/20251014peru-gif/invest/actions/runs/36813398778",
   "checks": [
     "exact_series_code",
     "exact_ecos_name_unit",
@@ -19,19 +19,27 @@
     "same_source_comparison_pair",
     "raw_sha256"
   ],
-  "clock_policy_version": "2026-10-01.1",
+  "clock_policy_version": "2026-10-01.2",
   "morning_edition": {
     "schema": "report_clock/1",
-    "policy_version": "2026-10-01.1",
+    "policy_version": "2026-10-01.2",
     "cutoff": "2026-10-01T08:20:00+09:00",
-    "checked_at": "2026-10-01T03:18:28+00:00",
+    "checked_at": "2026-10-01T04:06:09+00:00",
     "frozen_path": null,
     "status": "no_pre_cutoff_snapshot",
     "eligible_counts": {
-      "data_eligible": 6,
-      "comparison_eligible": 6
+      "data_eligible": 14,
+      "comparison_eligible": 14
     },
     "reason": "마감 전 보존 자료 없음. 현재 값을 오늘 아침 수치로 소급하지 않음."
+  },
+  "quality_counts": {
+    "window_calendar_conflicts": 0,
+    "source_value_conflicts": 0
+  },
+  "supplemental_funding_counts": {
+    "connected": 1,
+    "error": 1
   },
   "not_verified": [
     "unregistered_calendar_profiles",
@@ -43,23 +51,32 @@
     {
       "id": "US_COMP_CLOSE",
       "connection_status": "connected",
-      "observation_date": "2026-09-29",
-      "retrieved_at": "2026-10-01T03:18:26+00:00",
-      "raw_sha256": "5f0a6ce255b69da1bcb3c06b431fa81cde5c41edd5161a1fbc893af1586a6ab9",
+      "observation_date": "2026-09-30",
+      "retrieved_at": "2026-10-01T04:04:51+00:00",
+      "raw_sha256": "d3940f6336c48d0f0963a2c9a8be38330f7543b22a12f6ab38b3fa64350e7673",
       "error": null,
-      "warnings": [],
+      "warnings": [
+        "official_primary_unavailable:ValueError"
+      ],
       "next_action": null,
-      "freshness_status": "latest_session_not_received_publication_time_unknown",
+      "freshness_status": "current_for_schedule",
       "expected_observation_date": "2026-09-30",
       "expected_publication_at": null,
-      "data_eligible": false,
-      "comparison_eligible": false
+      "data_eligible": true,
+      "comparison_eligible": true,
+      "source_comparison": {
+        "status": "primary_unavailable_using_registered_fred",
+        "independent_origin": false
+      },
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "US_SPX_CLOSE",
       "connection_status": "connected",
       "observation_date": "2026-09-30",
-      "retrieved_at": "2026-10-01T03:18:26+00:00",
+      "retrieved_at": "2026-10-01T04:04:51+00:00",
       "raw_sha256": "4d8da8e873c66198c416dbc697c41446702d473cec70546b07533b3297f6d252",
       "error": null,
       "warnings": [],
@@ -68,13 +85,17 @@
       "expected_observation_date": "2026-09-30",
       "expected_publication_at": null,
       "data_eligible": true,
-      "comparison_eligible": true
+      "comparison_eligible": true,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "US_DJI_CLOSE",
       "connection_status": "connected",
       "observation_date": "2026-09-30",
-      "retrieved_at": "2026-10-01T03:18:26+00:00",
+      "retrieved_at": "2026-10-01T04:04:51+00:00",
       "raw_sha256": "0e7c31a63ef1bccbe9c0331125fc14f5b47d5247094dafd8a72deb21aa78343d",
       "error": null,
       "warnings": [],
@@ -83,67 +104,98 @@
       "expected_observation_date": "2026-09-30",
       "expected_publication_at": null,
       "data_eligible": true,
-      "comparison_eligible": true
+      "comparison_eligible": true,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "US_SOX_CLOSE",
       "connection_status": "connected",
-      "observation_date": "2026-09-29",
-      "retrieved_at": "2026-10-01T03:18:26+00:00",
-      "raw_sha256": "437381ba21a2b78ca09cdfd66c4969ebf78e6b66fa511693b3fd8b3ca4a00f02",
+      "observation_date": "2026-09-30",
+      "retrieved_at": "2026-10-01T04:04:51+00:00",
+      "raw_sha256": "983dd210ae011b9a96eac5a3caf97ae62cb038a95e43f9eeb6508560f5554e34",
       "error": null,
-      "warnings": [],
+      "warnings": [
+        "official_primary_unavailable:ValueError"
+      ],
       "next_action": null,
-      "freshness_status": "latest_session_not_received_publication_time_unknown",
+      "freshness_status": "current_for_schedule",
       "expected_observation_date": "2026-09-30",
       "expected_publication_at": null,
-      "data_eligible": false,
-      "comparison_eligible": false
+      "data_eligible": true,
+      "comparison_eligible": true,
+      "source_comparison": {
+        "status": "primary_unavailable_using_registered_fred",
+        "independent_origin": false
+      },
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "KR_KOSPI_CLOSE",
       "connection_status": "connected",
       "observation_date": "2026-09-30",
-      "retrieved_at": "2026-10-01T03:18:26+00:00",
+      "retrieved_at": "2026-10-01T04:05:17+00:00",
       "raw_sha256": "e2997685c318cbbfc7c0f94da9927ee6fe1d25777fe06d12a78d97873fb90ef0",
       "error": null,
-      "warnings": [],
+      "warnings": [
+        "direct_network_unavailable_existing_relay_used"
+      ],
       "next_action": null,
       "freshness_status": "current_for_schedule",
       "expected_observation_date": "2026-09-30",
       "expected_publication_at": null,
       "data_eligible": true,
-      "comparison_eligible": true
+      "comparison_eligible": true,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "KR_KOSDAQ_CLOSE",
       "connection_status": "connected",
       "observation_date": "2026-09-30",
-      "retrieved_at": "2026-10-01T03:18:27+00:00",
+      "retrieved_at": "2026-10-01T04:05:19+00:00",
       "raw_sha256": "eb9e16e281ed8102f5653bf32d0b66eb5d4da615cb3dbbbd303162415daa8f12",
       "error": null,
-      "warnings": [],
+      "warnings": [
+        "direct_network_unavailable_existing_relay_used"
+      ],
       "next_action": null,
       "freshness_status": "current_for_schedule",
       "expected_observation_date": "2026-09-30",
       "expected_publication_at": null,
       "data_eligible": true,
-      "comparison_eligible": true
+      "comparison_eligible": true,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "FX_USDKRW_DAY1530",
       "connection_status": "connected",
       "observation_date": "2026-09-30",
-      "retrieved_at": "2026-10-01T03:18:27+00:00",
+      "retrieved_at": "2026-10-01T04:05:18+00:00",
       "raw_sha256": "284f846f49a0aaf144a132bff6831477be1aa504fe1e15decf2584d656d0a991",
       "error": null,
-      "warnings": [],
+      "warnings": [
+        "direct_network_unavailable_existing_relay_used"
+      ],
       "next_action": null,
-      "freshness_status": "calendar_unverified",
-      "expected_observation_date": null,
+      "freshness_status": "current_for_schedule",
+      "expected_observation_date": "2026-09-30",
       "expected_publication_at": null,
-      "data_eligible": false,
-      "comparison_eligible": false
+      "data_eligible": true,
+      "comparison_eligible": true,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "FX_DXY_CASH",
@@ -158,133 +210,302 @@
       "expected_observation_date": null,
       "expected_publication_at": null,
       "data_eligible": false,
-      "comparison_eligible": false
+      "comparison_eligible": false,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": false
     },
     {
       "id": "US_CMT_2Y",
       "connection_status": "connected",
-      "observation_date": "2026-09-29",
-      "retrieved_at": "2026-10-01T03:18:26+00:00",
-      "raw_sha256": "8cab0678942708c32837c983cf410894ad6c7382ca29855dbcccf1706d001d3b",
+      "observation_date": "2026-09-30",
+      "retrieved_at": "2026-10-01T04:04:52+00:00",
+      "raw_sha256": "9275ebb7246846314fd0e12ca66588290cbf9a92534e6989b5bf7b1850951dec",
       "error": null,
       "warnings": [],
       "next_action": null,
-      "freshness_status": "calendar_unverified",
-      "expected_observation_date": null,
+      "freshness_status": "current_for_schedule",
+      "expected_observation_date": "2026-09-30",
       "expected_publication_at": null,
-      "data_eligible": false,
-      "comparison_eligible": false
+      "data_eligible": true,
+      "comparison_eligible": true,
+      "source_comparison": {
+        "status": "matched_overlap_primary_newer",
+        "tolerance": 1e-05,
+        "checked": [
+          {
+            "date": "2026-09-23",
+            "primary": 4.85,
+            "secondary": 4.85,
+            "absolute_difference": 0.0
+          },
+          {
+            "date": "2026-09-24",
+            "primary": 4.87,
+            "secondary": 4.87,
+            "absolute_difference": 0.0
+          },
+          {
+            "date": "2026-09-25",
+            "primary": 4.81,
+            "secondary": 4.81,
+            "absolute_difference": 0.0
+          },
+          {
+            "date": "2026-09-28",
+            "primary": 4.92,
+            "secondary": 4.92,
+            "absolute_difference": 0.0
+          },
+          {
+            "date": "2026-09-29",
+            "primary": 4.89,
+            "secondary": 4.89,
+            "absolute_difference": 0.0
+          }
+        ],
+        "mismatches": [],
+        "primary_latest": "2026-09-30",
+        "secondary_latest": "2026-09-29",
+        "independent_origin": false,
+        "note": "원작성자와 FRED 재배포 경로 대조. 독립된 가격 산출기관 두 곳의 검증은 아님.",
+        "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS2&file_type=json&observation_start=2026-08-17",
+        "retrieved_at": "2026-10-01T04:04:52+00:00",
+        "raw_sha256": "8cab0678942708c32837c983cf410894ad6c7382ca29855dbcccf1706d001d3b"
+      },
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "US_CMT_10Y",
       "connection_status": "connected",
-      "observation_date": "2026-09-29",
-      "retrieved_at": "2026-10-01T03:18:26+00:00",
-      "raw_sha256": "4c498028d953eebe65586472727c2a3d902b0a5a1005aa1abd19f65c2921d4d5",
+      "observation_date": "2026-09-30",
+      "retrieved_at": "2026-10-01T04:04:53+00:00",
+      "raw_sha256": "9275ebb7246846314fd0e12ca66588290cbf9a92534e6989b5bf7b1850951dec",
       "error": null,
       "warnings": [],
       "next_action": null,
-      "freshness_status": "calendar_unverified",
-      "expected_observation_date": null,
+      "freshness_status": "current_for_schedule",
+      "expected_observation_date": "2026-09-30",
       "expected_publication_at": null,
-      "data_eligible": false,
-      "comparison_eligible": false
+      "data_eligible": true,
+      "comparison_eligible": true,
+      "source_comparison": {
+        "status": "matched_overlap_primary_newer",
+        "tolerance": 1e-05,
+        "checked": [
+          {
+            "date": "2026-09-23",
+            "primary": 5.11,
+            "secondary": 5.11,
+            "absolute_difference": 0.0
+          },
+          {
+            "date": "2026-09-24",
+            "primary": 5.18,
+            "secondary": 5.18,
+            "absolute_difference": 0.0
+          },
+          {
+            "date": "2026-09-25",
+            "primary": 5.17,
+            "secondary": 5.17,
+            "absolute_difference": 0.0
+          },
+          {
+            "date": "2026-09-28",
+            "primary": 5.24,
+            "secondary": 5.24,
+            "absolute_difference": 0.0
+          },
+          {
+            "date": "2026-09-29",
+            "primary": 5.26,
+            "secondary": 5.26,
+            "absolute_difference": 0.0
+          }
+        ],
+        "mismatches": [],
+        "primary_latest": "2026-09-30",
+        "secondary_latest": "2026-09-29",
+        "independent_origin": false,
+        "note": "원작성자와 FRED 재배포 경로 대조. 독립된 가격 산출기관 두 곳의 검증은 아님.",
+        "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS10&file_type=json&observation_start=2026-08-17",
+        "retrieved_at": "2026-10-01T04:04:53+00:00",
+        "raw_sha256": "4c498028d953eebe65586472727c2a3d902b0a5a1005aa1abd19f65c2921d4d5"
+      },
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "US_CMT_30Y",
       "connection_status": "connected",
-      "observation_date": "2026-09-29",
-      "retrieved_at": "2026-10-01T03:18:27+00:00",
-      "raw_sha256": "dc8d4cf914485a2f156680b53ec9ff6531f37cf2e2eac2aa8bc8fc3ba3e02507",
+      "observation_date": "2026-09-30",
+      "retrieved_at": "2026-10-01T04:04:53+00:00",
+      "raw_sha256": "9275ebb7246846314fd0e12ca66588290cbf9a92534e6989b5bf7b1850951dec",
       "error": null,
       "warnings": [],
       "next_action": null,
-      "freshness_status": "calendar_unverified",
-      "expected_observation_date": null,
+      "freshness_status": "current_for_schedule",
+      "expected_observation_date": "2026-09-30",
       "expected_publication_at": null,
-      "data_eligible": false,
-      "comparison_eligible": false
+      "data_eligible": true,
+      "comparison_eligible": true,
+      "source_comparison": {
+        "status": "matched_overlap_primary_newer",
+        "tolerance": 1e-05,
+        "checked": [
+          {
+            "date": "2026-09-23",
+            "primary": 5.4,
+            "secondary": 5.4,
+            "absolute_difference": 0.0
+          },
+          {
+            "date": "2026-09-24",
+            "primary": 5.47,
+            "secondary": 5.47,
+            "absolute_difference": 0.0
+          },
+          {
+            "date": "2026-09-25",
+            "primary": 5.49,
+            "secondary": 5.49,
+            "absolute_difference": 0.0
+          },
+          {
+            "date": "2026-09-28",
+            "primary": 5.56,
+            "secondary": 5.56,
+            "absolute_difference": 0.0
+          },
+          {
+            "date": "2026-09-29",
+            "primary": 5.59,
+            "secondary": 5.59,
+            "absolute_difference": 0.0
+          }
+        ],
+        "mismatches": [],
+        "primary_latest": "2026-09-30",
+        "secondary_latest": "2026-09-29",
+        "independent_origin": false,
+        "note": "원작성자와 FRED 재배포 경로 대조. 독립된 가격 산출기관 두 곳의 검증은 아님.",
+        "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS30&file_type=json&observation_start=2026-08-17",
+        "retrieved_at": "2026-10-01T04:04:54+00:00",
+        "raw_sha256": "dc8d4cf914485a2f156680b53ec9ff6531f37cf2e2eac2aa8bc8fc3ba3e02507"
+      },
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "KR_KTB3_FINAL",
       "connection_status": "connected",
       "observation_date": "2026-09-30",
-      "retrieved_at": "2026-10-01T03:18:27+00:00",
+      "retrieved_at": "2026-10-01T04:05:20+00:00",
       "raw_sha256": "f82182cf7d4347ee6f8f524f9a5c90e5ca2aa46bf9ad37d598862ea4bf5fcc1c",
       "error": null,
-      "warnings": [],
+      "warnings": [
+        "direct_network_unavailable_existing_relay_used"
+      ],
       "next_action": null,
-      "freshness_status": "calendar_unverified",
-      "expected_observation_date": null,
+      "freshness_status": "current_for_schedule",
+      "expected_observation_date": "2026-09-30",
       "expected_publication_at": null,
-      "data_eligible": false,
-      "comparison_eligible": false
+      "data_eligible": true,
+      "comparison_eligible": true,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "KR_KTB10_FINAL",
       "connection_status": "connected",
       "observation_date": "2026-09-30",
-      "retrieved_at": "2026-10-01T03:18:27+00:00",
+      "retrieved_at": "2026-10-01T04:05:44+00:00",
       "raw_sha256": "38e0c5126aa8fe1b3d04ce83a7d1a8ca28eb6379cc38230515408f0cc97ed1bb",
       "error": null,
-      "warnings": [],
+      "warnings": [
+        "direct_network_unavailable_existing_relay_used"
+      ],
       "next_action": null,
-      "freshness_status": "calendar_unverified",
-      "expected_observation_date": null,
+      "freshness_status": "current_for_schedule",
+      "expected_observation_date": "2026-09-30",
       "expected_publication_at": null,
-      "data_eligible": false,
-      "comparison_eligible": false
+      "data_eligible": true,
+      "comparison_eligible": true,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "CREDIT_HY_OAS",
       "connection_status": "connected",
       "observation_date": "2026-09-29",
-      "retrieved_at": "2026-10-01T03:18:27+00:00",
+      "retrieved_at": "2026-10-01T04:05:18+00:00",
       "raw_sha256": "572fb02b81267de1144955da43058427480ecf4e477338292aca3f943645032b",
       "error": null,
       "warnings": [],
       "next_action": null,
-      "freshness_status": "calendar_unverified",
-      "expected_observation_date": null,
+      "freshness_status": "latest_session_not_received_publication_time_unknown",
+      "expected_observation_date": "2026-09-30",
       "expected_publication_at": null,
       "data_eligible": false,
-      "comparison_eligible": false
+      "comparison_eligible": false,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "CREDIT_IG_OAS",
       "connection_status": "connected",
       "observation_date": "2026-09-29",
-      "retrieved_at": "2026-10-01T03:18:27+00:00",
+      "retrieved_at": "2026-10-01T04:05:18+00:00",
       "raw_sha256": "cb38140326b2d2cc0b32f5ec611390eb06261fd16f0a61df7f6717dbaafdd56f",
       "error": null,
       "warnings": [],
       "next_action": null,
-      "freshness_status": "calendar_unverified",
-      "expected_observation_date": null,
+      "freshness_status": "latest_session_not_received_publication_time_unknown",
+      "expected_observation_date": "2026-09-30",
       "expected_publication_at": null,
       "data_eligible": false,
-      "comparison_eligible": false
+      "comparison_eligible": false,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "CREDIT_CCC_OAS",
       "connection_status": "connected",
       "observation_date": "2026-09-29",
-      "retrieved_at": "2026-10-01T03:18:27+00:00",
+      "retrieved_at": "2026-10-01T04:05:19+00:00",
       "raw_sha256": "0e2acc8b064f4d5f1096e60129e4208884599cea3486fdad011915fe974f0c91",
       "error": null,
       "warnings": [],
       "next_action": null,
-      "freshness_status": "calendar_unverified",
-      "expected_observation_date": null,
+      "freshness_status": "latest_session_not_received_publication_time_unknown",
+      "expected_observation_date": "2026-09-30",
       "expected_publication_at": null,
       "data_eligible": false,
-      "comparison_eligible": false
+      "comparison_eligible": false,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "FUND_SOFR",
       "connection_status": "connected",
       "observation_date": "2026-09-29",
-      "retrieved_at": "2026-10-01T03:18:27+00:00",
+      "retrieved_at": "2026-10-01T04:05:19+00:00",
       "raw_sha256": "a32d423cebc970dad7e7278b3c5d8e0518f6c77bc7af3a211e3b4d2358b3f057",
       "error": null,
       "warnings": [],
@@ -293,13 +514,17 @@
       "expected_observation_date": "2026-09-29",
       "expected_publication_at": "2026-09-30T08:00:00-04:00",
       "data_eligible": true,
-      "comparison_eligible": true
+      "comparison_eligible": true,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "FUND_EFFR",
       "connection_status": "connected",
       "observation_date": "2026-09-29",
-      "retrieved_at": "2026-10-01T03:18:28+00:00",
+      "retrieved_at": "2026-10-01T04:05:19+00:00",
       "raw_sha256": "11b30fdc572c2d362b07989576e36223c36d568804fc5048dca362307d64e03e",
       "error": null,
       "warnings": [],
@@ -308,7 +533,11 @@
       "expected_observation_date": "2026-09-29",
       "expected_publication_at": "2026-09-30T09:00:00-04:00",
       "data_eligible": true,
-      "comparison_eligible": true
+      "comparison_eligible": true,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": true
     },
     {
       "id": "OIL_CL_SETTLE",
@@ -323,7 +552,11 @@
       "expected_observation_date": null,
       "expected_publication_at": null,
       "data_eligible": false,
-      "comparison_eligible": false
+      "comparison_eligible": false,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": false
     },
     {
       "id": "OIL_BRENT_SETTLE",
@@ -338,7 +571,11 @@
       "expected_observation_date": null,
       "expected_publication_at": null,
       "data_eligible": false,
-      "comparison_eligible": false
+      "comparison_eligible": false,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": false
     },
     {
       "id": "NQ_1100",
@@ -353,7 +590,11 @@
       "expected_observation_date": null,
       "expected_publication_at": null,
       "data_eligible": false,
-      "comparison_eligible": false
+      "comparison_eligible": false,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": false
     },
     {
       "id": "KR_FOREIGN_CASH",
@@ -368,7 +609,11 @@
       "expected_observation_date": null,
       "expected_publication_at": null,
       "data_eligible": false,
-      "comparison_eligible": false
+      "comparison_eligible": false,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": false
     },
     {
       "id": "KR_FOREIGN_FUTURES",
@@ -383,7 +628,11 @@
       "expected_observation_date": null,
       "expected_publication_at": null,
       "data_eligible": false,
-      "comparison_eligible": false
+      "comparison_eligible": false,
+      "source_comparison": null,
+      "window_calendar_conflicts": [],
+      "source_value_conflicts": [],
+      "window_eligible": false
     }
   ]
 }
