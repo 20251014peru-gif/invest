@@ -1,0 +1,1098 @@
+{
+  "schema": "market_report_feeds/1",
+  "version": "2026-10-01.1",
+  "started_at": "2026-10-01T02:23:14+00:00",
+  "completed_at": "2026-10-01T02:23:16+00:00",
+  "status": "partial",
+  "collector_health": "ok",
+  "counts": {
+    "registered": 23,
+    "connected": 17,
+    "blocked": 6,
+    "error": 0
+  },
+  "run_url": "https://github.com/20251014peru-gif/invest/actions/runs/36805548154",
+  "commit": "729c591d80ea588ff146b792235398212090eded",
+  "point_in_time_note": "이번 조회에서 처음 보존한 자료. 과거 08:17 판의 당시 이용 가능 자료로 소급하지 않음.",
+  "items": [
+    {
+      "id": "US_COMP_CLOSE",
+      "label": "나스닥 종합",
+      "group": "미국 주식",
+      "definition": "Nasdaq Composite COMP, USD 가격지수, 미국 정규장 일별 종가",
+      "unit": "index pt",
+      "price_type": "regular_session_close",
+      "source_url": "https://fred.stlouisfed.org/series/NASDAQCOM",
+      "connection_status": "connected",
+      "value": 26797.54,
+      "previous_value": 26820.38,
+      "observation_date": "2026-09-29",
+      "previous_observation_date": "2026-09-28",
+      "change": -0.08515912,
+      "change_unit": "%",
+      "last_five": [
+        {
+          "date": "2026-09-23",
+          "value": 26936.04
+        },
+        {
+          "date": "2026-09-24",
+          "value": 26939.37
+        },
+        {
+          "date": "2026-09-25",
+          "value": 27068.72
+        },
+        {
+          "date": "2026-09-28",
+          "value": 26820.38
+        },
+        {
+          "date": "2026-09-29",
+          "value": 26797.54
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:15+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "fred",
+      "series": "NASDAQCOM",
+      "transport": "fred_api",
+      "request_url_redacted": "https://api.stlouisfed.org/fred/series/observations?series_id=NASDAQCOM&file_type=json&observation_start=2026-08-17",
+      "observation_count": 31,
+      "first_proven_available_at": "2026-10-01T02:23:15+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "5f0a6ce255b69da1bcb3c06b431fa81cde5c41edd5161a1fbc893af1586a6ab9",
+      "raw_file": "US_COMP_CLOSE.json",
+      "age_calendar_days": 2,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "US_SPX_CLOSE",
+      "label": "S&P500",
+      "group": "미국 주식",
+      "definition": "S&P500 USD 가격지수 정규장 종가",
+      "unit": "index pt",
+      "price_type": "regular_session_close",
+      "source_url": "https://fred.stlouisfed.org/series/SP500",
+      "connection_status": "connected",
+      "value": 7651.54,
+      "previous_value": 7670.84,
+      "observation_date": "2026-09-30",
+      "previous_observation_date": "2026-09-29",
+      "change": -0.25160217,
+      "change_unit": "%",
+      "last_five": [
+        {
+          "date": "2026-09-24",
+          "value": 7704.13
+        },
+        {
+          "date": "2026-09-25",
+          "value": 7743.41
+        },
+        {
+          "date": "2026-09-28",
+          "value": 7683.69
+        },
+        {
+          "date": "2026-09-29",
+          "value": 7670.84
+        },
+        {
+          "date": "2026-09-30",
+          "value": 7651.54
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:14+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "fred",
+      "series": "SP500",
+      "transport": "fred_api",
+      "request_url_redacted": "https://api.stlouisfed.org/fred/series/observations?series_id=SP500&file_type=json&observation_start=2026-08-17",
+      "observation_count": 32,
+      "first_proven_available_at": "2026-10-01T02:23:14+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "4d8da8e873c66198c416dbc697c41446702d473cec70546b07533b3297f6d252",
+      "raw_file": "US_SPX_CLOSE.json",
+      "age_calendar_days": 1,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "US_DJI_CLOSE",
+      "label": "다우",
+      "group": "미국 주식",
+      "definition": "Dow Jones Industrial Average USD 가격지수 정규장 종가",
+      "unit": "index pt",
+      "price_type": "regular_session_close",
+      "source_url": "https://fred.stlouisfed.org/series/DJIA",
+      "connection_status": "connected",
+      "value": 50906.05,
+      "previous_value": 51349.92,
+      "observation_date": "2026-09-30",
+      "previous_observation_date": "2026-09-29",
+      "change": -0.86440252,
+      "change_unit": "%",
+      "last_five": [
+        {
+          "date": "2026-09-24",
+          "value": 51349.98
+        },
+        {
+          "date": "2026-09-25",
+          "value": 51828.62
+        },
+        {
+          "date": "2026-09-28",
+          "value": 51481.51
+        },
+        {
+          "date": "2026-09-29",
+          "value": 51349.92
+        },
+        {
+          "date": "2026-09-30",
+          "value": 50906.05
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:14+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "fred",
+      "series": "DJIA",
+      "transport": "fred_api",
+      "request_url_redacted": "https://api.stlouisfed.org/fred/series/observations?series_id=DJIA&file_type=json&observation_start=2026-08-17",
+      "observation_count": 32,
+      "first_proven_available_at": "2026-10-01T02:23:14+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "0e7c31a63ef1bccbe9c0331125fc14f5b47d5247094dafd8a72deb21aa78343d",
+      "raw_file": "US_DJI_CLOSE.json",
+      "age_calendar_days": 1,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "US_SOX_CLOSE",
+      "label": "SOX",
+      "group": "미국 주식",
+      "definition": "PHLX Semiconductor SOX, USD 가격지수 정규장 종가",
+      "unit": "index pt",
+      "price_type": "regular_session_close",
+      "source_url": "https://fred.stlouisfed.org/series/NASDAQSOX",
+      "connection_status": "connected",
+      "value": 12629.16,
+      "previous_value": 12465.24,
+      "observation_date": "2026-09-29",
+      "previous_observation_date": "2026-09-28",
+      "change": 1.3150168,
+      "change_unit": "%",
+      "last_five": [
+        {
+          "date": "2026-09-23",
+          "value": 12534.27
+        },
+        {
+          "date": "2026-09-24",
+          "value": 12492.54
+        },
+        {
+          "date": "2026-09-25",
+          "value": 12668.93
+        },
+        {
+          "date": "2026-09-28",
+          "value": 12465.24
+        },
+        {
+          "date": "2026-09-29",
+          "value": 12629.16
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:14+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "fred",
+      "series": "NASDAQSOX",
+      "transport": "fred_api",
+      "request_url_redacted": "https://api.stlouisfed.org/fred/series/observations?series_id=NASDAQSOX&file_type=json&observation_start=2026-08-17",
+      "observation_count": 31,
+      "first_proven_available_at": "2026-10-01T02:23:14+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "437381ba21a2b78ca09cdfd66c4969ebf78e6b66fa511693b3fd8b3ca4a00f02",
+      "raw_file": "US_SOX_CLOSE.json",
+      "age_calendar_days": 2,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "KR_KOSPI_CLOSE",
+      "label": "KOSPI",
+      "group": "한국 주식",
+      "definition": "KRX KOSPI 현물 가격지수 정규장 종가",
+      "unit": "index pt",
+      "price_type": "regular_session_close",
+      "source_url": "https://ecos.bok.or.kr/",
+      "connection_status": "connected",
+      "value": 6838.04,
+      "previous_value": 6870.81,
+      "observation_date": "2026-09-30",
+      "previous_observation_date": "2026-09-29",
+      "change": -0.47694522,
+      "change_unit": "%",
+      "last_five": [
+        {
+          "date": "2026-09-22",
+          "value": 7017.91
+        },
+        {
+          "date": "2026-09-23",
+          "value": 7080.92
+        },
+        {
+          "date": "2026-09-28",
+          "value": 6889.74
+        },
+        {
+          "date": "2026-09-29",
+          "value": 6870.81
+        },
+        {
+          "date": "2026-09-30",
+          "value": 6838.04
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:15+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "ecos",
+      "series": "802Y001/0001000",
+      "transport": "ecos_direct",
+      "request_url_redacted": "https://ecos.bok.or.kr/api/StatisticSearch/{ECOS_KEY}/json/kr/1/100/802Y001/D/20260817/20261001/0001000",
+      "observation_count": 30,
+      "first_proven_available_at": "2026-10-01T02:23:15+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "e2997685c318cbbfc7c0f94da9927ee6fe1d25777fe06d12a78d97873fb90ef0",
+      "raw_file": "KR_KOSPI_CLOSE.json",
+      "age_calendar_days": 1,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "KR_KOSDAQ_CLOSE",
+      "label": "KOSDAQ",
+      "group": "한국 주식",
+      "definition": "KRX KOSDAQ 현물 가격지수 정규장 종가",
+      "unit": "index pt",
+      "price_type": "regular_session_close",
+      "source_url": "https://ecos.bok.or.kr/",
+      "connection_status": "connected",
+      "value": 855.91,
+      "previous_value": 849.8,
+      "observation_date": "2026-09-30",
+      "previous_observation_date": "2026-09-29",
+      "change": 0.7189927,
+      "change_unit": "%",
+      "last_five": [
+        {
+          "date": "2026-09-22",
+          "value": 834.38
+        },
+        {
+          "date": "2026-09-23",
+          "value": 844.48
+        },
+        {
+          "date": "2026-09-28",
+          "value": 846.58
+        },
+        {
+          "date": "2026-09-29",
+          "value": 849.8
+        },
+        {
+          "date": "2026-09-30",
+          "value": 855.91
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:15+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "ecos",
+      "series": "802Y001/0089000",
+      "transport": "ecos_direct",
+      "request_url_redacted": "https://ecos.bok.or.kr/api/StatisticSearch/{ECOS_KEY}/json/kr/1/100/802Y001/D/20260817/20261001/0089000",
+      "observation_count": 30,
+      "first_proven_available_at": "2026-10-01T02:23:15+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "eb9e16e281ed8102f5653bf32d0b66eb5d4da615cb3dbbbd303162415daa8f12",
+      "raw_file": "KR_KOSDAQ_CLOSE.json",
+      "age_calendar_days": 1,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "FX_USDKRW_DAY1530",
+      "label": "원/달러 주간",
+      "group": "환율",
+      "definition": "서울 은행간 USD/KRW 현물 주간거래 15:30 KST 종가",
+      "unit": "KRW per USD",
+      "price_type": "day_session_1530_close",
+      "source_url": "https://ecos.bok.or.kr/",
+      "connection_status": "connected",
+      "value": 1352.8,
+      "previous_value": 1356.7,
+      "observation_date": "2026-09-30",
+      "previous_observation_date": "2026-09-29",
+      "change": -0.28746222,
+      "change_unit": "%",
+      "last_five": [
+        {
+          "date": "2026-09-24",
+          "value": 1366.0
+        },
+        {
+          "date": "2026-09-25",
+          "value": 1357.5
+        },
+        {
+          "date": "2026-09-28",
+          "value": 1365.1
+        },
+        {
+          "date": "2026-09-29",
+          "value": 1356.7
+        },
+        {
+          "date": "2026-09-30",
+          "value": 1352.8
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:15+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "ecos",
+      "series": "731Y003/0000003",
+      "transport": "ecos_direct",
+      "request_url_redacted": "https://ecos.bok.or.kr/api/StatisticSearch/{ECOS_KEY}/json/kr/1/100/731Y003/D/20260817/20261001/0000003",
+      "observation_count": 33,
+      "first_proven_available_at": "2026-10-01T02:23:15+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "284f846f49a0aaf144a132bff6831477be1aa504fe1e15decf2584d656d0a991",
+      "raw_file": "FX_USDKRW_DAY1530.json",
+      "age_calendar_days": 1,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "FX_DXY_CASH",
+      "label": "달러지수 DXY",
+      "group": "환율",
+      "definition": "ICE USDX 현물지수; 지정 시각의 지수값",
+      "unit": "index pt",
+      "price_type": "cash_index_timestamped",
+      "source_url": "https://www.ice.com/forex/usdx",
+      "connection_status": "blocked",
+      "value": null,
+      "previous_value": null,
+      "observation_date": null,
+      "previous_observation_date": null,
+      "change": null,
+      "change_unit": "%",
+      "last_five": [],
+      "published_at": null,
+      "retrieved_at": null,
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": "exact_timestamp_history_feed_not_registered",
+      "warnings": [],
+      "next_action": "ICE 현물 DXY의 고정 관측시각·역사자료 경로 등록 필요. FRED 광의달러지수로 대체하지 않음."
+    },
+    {
+      "id": "US_CMT_2Y",
+      "label": "미 국채 2년",
+      "group": "금리",
+      "definition": "Treasury nominal par CMT 2Y 일일 고시",
+      "unit": "%",
+      "price_type": "daily_indicative_par_yield",
+      "source_url": "https://fred.stlouisfed.org/series/DGS2",
+      "connection_status": "connected",
+      "value": 4.89,
+      "previous_value": 4.92,
+      "observation_date": "2026-09-29",
+      "previous_observation_date": "2026-09-28",
+      "change": -3.0,
+      "change_unit": "bp",
+      "last_five": [
+        {
+          "date": "2026-09-23",
+          "value": 4.85
+        },
+        {
+          "date": "2026-09-24",
+          "value": 4.87
+        },
+        {
+          "date": "2026-09-25",
+          "value": 4.81
+        },
+        {
+          "date": "2026-09-28",
+          "value": 4.92
+        },
+        {
+          "date": "2026-09-29",
+          "value": 4.89
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:15+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "fred",
+      "series": "DGS2",
+      "transport": "fred_api",
+      "request_url_redacted": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS2&file_type=json&observation_start=2026-08-17",
+      "observation_count": 31,
+      "first_proven_available_at": "2026-10-01T02:23:15+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "8cab0678942708c32837c983cf410894ad6c7382ca29855dbcccf1706d001d3b",
+      "raw_file": "US_CMT_2Y.json",
+      "age_calendar_days": 2,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "US_CMT_10Y",
+      "label": "미 국채 10년",
+      "group": "금리",
+      "definition": "Treasury nominal par CMT 10Y 일일 고시",
+      "unit": "%",
+      "price_type": "daily_indicative_par_yield",
+      "source_url": "https://fred.stlouisfed.org/series/DGS10",
+      "connection_status": "connected",
+      "value": 5.26,
+      "previous_value": 5.24,
+      "observation_date": "2026-09-29",
+      "previous_observation_date": "2026-09-28",
+      "change": 2.0,
+      "change_unit": "bp",
+      "last_five": [
+        {
+          "date": "2026-09-23",
+          "value": 5.11
+        },
+        {
+          "date": "2026-09-24",
+          "value": 5.18
+        },
+        {
+          "date": "2026-09-25",
+          "value": 5.17
+        },
+        {
+          "date": "2026-09-28",
+          "value": 5.24
+        },
+        {
+          "date": "2026-09-29",
+          "value": 5.26
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:15+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "fred",
+      "series": "DGS10",
+      "transport": "fred_api",
+      "request_url_redacted": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS10&file_type=json&observation_start=2026-08-17",
+      "observation_count": 31,
+      "first_proven_available_at": "2026-10-01T02:23:15+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "4c498028d953eebe65586472727c2a3d902b0a5a1005aa1abd19f65c2921d4d5",
+      "raw_file": "US_CMT_10Y.json",
+      "age_calendar_days": 2,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "US_CMT_30Y",
+      "label": "미 국채 30년",
+      "group": "금리",
+      "definition": "Treasury nominal par CMT 30Y 일일 고시",
+      "unit": "%",
+      "price_type": "daily_indicative_par_yield",
+      "source_url": "https://fred.stlouisfed.org/series/DGS30",
+      "connection_status": "connected",
+      "value": 5.59,
+      "previous_value": 5.56,
+      "observation_date": "2026-09-29",
+      "previous_observation_date": "2026-09-28",
+      "change": 3.0,
+      "change_unit": "bp",
+      "last_five": [
+        {
+          "date": "2026-09-23",
+          "value": 5.4
+        },
+        {
+          "date": "2026-09-24",
+          "value": 5.47
+        },
+        {
+          "date": "2026-09-25",
+          "value": 5.49
+        },
+        {
+          "date": "2026-09-28",
+          "value": 5.56
+        },
+        {
+          "date": "2026-09-29",
+          "value": 5.59
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:15+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "fred",
+      "series": "DGS30",
+      "transport": "fred_api",
+      "request_url_redacted": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS30&file_type=json&observation_start=2026-08-17",
+      "observation_count": 31,
+      "first_proven_available_at": "2026-10-01T02:23:15+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "dc8d4cf914485a2f156680b53ec9ff6531f37cf2e2eac2aa8bc8fc3ba3e02507",
+      "raw_file": "US_CMT_30Y.json",
+      "age_calendar_days": 2,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "KR_KTB3_FINAL",
+      "label": "한국 국고 3년",
+      "group": "금리",
+      "definition": "금투협 국고채 3년 최종호가수익률 일일 최종고시",
+      "unit": "%",
+      "price_type": "final_quoted_yield",
+      "source_url": "https://ecos.bok.or.kr/",
+      "connection_status": "connected",
+      "value": 4.011,
+      "previous_value": 4.076,
+      "observation_date": "2026-09-30",
+      "previous_observation_date": "2026-09-29",
+      "change": -6.5,
+      "change_unit": "bp",
+      "last_five": [
+        {
+          "date": "2026-09-22",
+          "value": 4.04
+        },
+        {
+          "date": "2026-09-23",
+          "value": 4.006
+        },
+        {
+          "date": "2026-09-28",
+          "value": 4.119
+        },
+        {
+          "date": "2026-09-29",
+          "value": 4.076
+        },
+        {
+          "date": "2026-09-30",
+          "value": 4.011
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:16+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "ecos",
+      "series": "817Y002/010200000",
+      "transport": "ecos_direct",
+      "request_url_redacted": "https://ecos.bok.or.kr/api/StatisticSearch/{ECOS_KEY}/json/kr/1/100/817Y002/D/20260817/20261001/010200000",
+      "observation_count": 30,
+      "first_proven_available_at": "2026-10-01T02:23:16+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "f82182cf7d4347ee6f8f524f9a5c90e5ca2aa46bf9ad37d598862ea4bf5fcc1c",
+      "raw_file": "KR_KTB3_FINAL.json",
+      "age_calendar_days": 1,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "KR_KTB10_FINAL",
+      "label": "한국 국고 10년",
+      "group": "금리",
+      "definition": "금투협 국고채 10년 최종호가수익률 일일 최종고시",
+      "unit": "%",
+      "price_type": "final_quoted_yield",
+      "source_url": "https://ecos.bok.or.kr/",
+      "connection_status": "connected",
+      "value": 4.407,
+      "previous_value": 4.476,
+      "observation_date": "2026-09-30",
+      "previous_observation_date": "2026-09-29",
+      "change": -6.9,
+      "change_unit": "bp",
+      "last_five": [
+        {
+          "date": "2026-09-22",
+          "value": 4.461
+        },
+        {
+          "date": "2026-09-23",
+          "value": 4.392
+        },
+        {
+          "date": "2026-09-28",
+          "value": 4.539
+        },
+        {
+          "date": "2026-09-29",
+          "value": 4.476
+        },
+        {
+          "date": "2026-09-30",
+          "value": 4.407
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:16+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "ecos",
+      "series": "817Y002/010210000",
+      "transport": "ecos_direct",
+      "request_url_redacted": "https://ecos.bok.or.kr/api/StatisticSearch/{ECOS_KEY}/json/kr/1/100/817Y002/D/20260817/20261001/010210000",
+      "observation_count": 30,
+      "first_proven_available_at": "2026-10-01T02:23:16+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "38e0c5126aa8fe1b3d04ce83a7d1a8ca28eb6379cc38230515408f0cc97ed1bb",
+      "raw_file": "KR_KTB10_FINAL.json",
+      "age_calendar_days": 1,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "CREDIT_HY_OAS",
+      "label": "HY OAS",
+      "group": "신용",
+      "definition": "ICE BofA US HY OAS, 일별 종가",
+      "unit": "%p",
+      "price_type": "option_adjusted_spread",
+      "source_url": "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
+      "connection_status": "connected",
+      "value": 3.08,
+      "previous_value": 3.02,
+      "observation_date": "2026-09-29",
+      "previous_observation_date": "2026-09-28",
+      "change": 6.0,
+      "change_unit": "bp",
+      "last_five": [
+        {
+          "date": "2026-09-23",
+          "value": 2.73
+        },
+        {
+          "date": "2026-09-24",
+          "value": 2.8
+        },
+        {
+          "date": "2026-09-25",
+          "value": 2.93
+        },
+        {
+          "date": "2026-09-28",
+          "value": 3.02
+        },
+        {
+          "date": "2026-09-29",
+          "value": 3.08
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:16+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "fred",
+      "series": "BAMLH0A0HYM2",
+      "transport": "fred_api",
+      "request_url_redacted": "https://api.stlouisfed.org/fred/series/observations?series_id=BAMLH0A0HYM2&file_type=json&observation_start=2026-08-17",
+      "observation_count": 32,
+      "first_proven_available_at": "2026-10-01T02:23:16+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "572fb02b81267de1144955da43058427480ecf4e477338292aca3f943645032b",
+      "raw_file": "CREDIT_HY_OAS.json",
+      "age_calendar_days": 2,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "CREDIT_IG_OAS",
+      "label": "IG OAS",
+      "group": "신용",
+      "definition": "ICE BofA US Corporate OAS, 일별 종가",
+      "unit": "%p",
+      "price_type": "option_adjusted_spread",
+      "source_url": "https://fred.stlouisfed.org/series/BAMLC0A0CM",
+      "connection_status": "connected",
+      "value": 0.84,
+      "previous_value": 0.83,
+      "observation_date": "2026-09-29",
+      "previous_observation_date": "2026-09-28",
+      "change": 1.0,
+      "change_unit": "bp",
+      "last_five": [
+        {
+          "date": "2026-09-23",
+          "value": 0.77
+        },
+        {
+          "date": "2026-09-24",
+          "value": 0.79
+        },
+        {
+          "date": "2026-09-25",
+          "value": 0.81
+        },
+        {
+          "date": "2026-09-28",
+          "value": 0.83
+        },
+        {
+          "date": "2026-09-29",
+          "value": 0.84
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:16+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "fred",
+      "series": "BAMLC0A0CM",
+      "transport": "fred_api",
+      "request_url_redacted": "https://api.stlouisfed.org/fred/series/observations?series_id=BAMLC0A0CM&file_type=json&observation_start=2026-08-17",
+      "observation_count": 32,
+      "first_proven_available_at": "2026-10-01T02:23:16+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "cb38140326b2d2cc0b32f5ec611390eb06261fd16f0a61df7f6717dbaafdd56f",
+      "raw_file": "CREDIT_IG_OAS.json",
+      "age_calendar_days": 2,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "CREDIT_CCC_OAS",
+      "label": "CCC OAS",
+      "group": "신용",
+      "definition": "ICE BofA CCC 이하 OAS, 일별 종가",
+      "unit": "%p",
+      "price_type": "option_adjusted_spread",
+      "source_url": "https://fred.stlouisfed.org/series/BAMLH0A3HYC",
+      "connection_status": "connected",
+      "value": 11.57,
+      "previous_value": 11.46,
+      "observation_date": "2026-09-29",
+      "previous_observation_date": "2026-09-28",
+      "change": 11.0,
+      "change_unit": "bp",
+      "last_five": [
+        {
+          "date": "2026-09-23",
+          "value": 10.93
+        },
+        {
+          "date": "2026-09-24",
+          "value": 11.12
+        },
+        {
+          "date": "2026-09-25",
+          "value": 11.28
+        },
+        {
+          "date": "2026-09-28",
+          "value": 11.46
+        },
+        {
+          "date": "2026-09-29",
+          "value": 11.57
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:16+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "fred",
+      "series": "BAMLH0A3HYC",
+      "transport": "fred_api",
+      "request_url_redacted": "https://api.stlouisfed.org/fred/series/observations?series_id=BAMLH0A3HYC&file_type=json&observation_start=2026-08-17",
+      "observation_count": 32,
+      "first_proven_available_at": "2026-10-01T02:23:16+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "0e2acc8b064f4d5f1096e60129e4208884599cea3486fdad011915fe974f0c91",
+      "raw_file": "CREDIT_CCC_OAS.json",
+      "age_calendar_days": 2,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "FUND_SOFR",
+      "label": "SOFR",
+      "group": "펀딩",
+      "definition": "NY Fed SOFR 일일 거래 기준 금리",
+      "unit": "%",
+      "price_type": "daily_reference_rate",
+      "source_url": "https://www.newyorkfed.org/markets/reference-rates/sofr",
+      "connection_status": "connected",
+      "value": 3.88,
+      "previous_value": 3.9,
+      "observation_date": "2026-09-29",
+      "previous_observation_date": "2026-09-28",
+      "change": -2.0,
+      "change_unit": "bp",
+      "last_five": [
+        {
+          "date": "2026-09-23",
+          "value": 3.87
+        },
+        {
+          "date": "2026-09-24",
+          "value": 3.88
+        },
+        {
+          "date": "2026-09-25",
+          "value": 3.9
+        },
+        {
+          "date": "2026-09-28",
+          "value": 3.9
+        },
+        {
+          "date": "2026-09-29",
+          "value": 3.88
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:16+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "nyfed",
+      "series": "SOFR",
+      "transport": "nyfed_api",
+      "request_url_redacted": "https://markets.newyorkfed.org/api/rates/secured/sofr/last/30.json",
+      "observation_count": 30,
+      "first_proven_available_at": "2026-10-01T02:23:16+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "a32d423cebc970dad7e7278b3c5d8e0518f6c77bc7af3a211e3b4d2358b3f057",
+      "raw_file": "FUND_SOFR.json",
+      "age_calendar_days": 2,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "FUND_EFFR",
+      "label": "EFFR",
+      "group": "펀딩",
+      "definition": "NY Fed EFFR 일일 거래 기준 금리",
+      "unit": "%",
+      "price_type": "daily_reference_rate",
+      "source_url": "https://www.newyorkfed.org/markets/reference-rates/effr",
+      "connection_status": "connected",
+      "value": 3.88,
+      "previous_value": 3.88,
+      "observation_date": "2026-09-29",
+      "previous_observation_date": "2026-09-28",
+      "change": 0.0,
+      "change_unit": "bp",
+      "last_five": [
+        {
+          "date": "2026-09-23",
+          "value": 3.88
+        },
+        {
+          "date": "2026-09-24",
+          "value": 3.88
+        },
+        {
+          "date": "2026-09-25",
+          "value": 3.88
+        },
+        {
+          "date": "2026-09-28",
+          "value": 3.88
+        },
+        {
+          "date": "2026-09-29",
+          "value": 3.88
+        }
+      ],
+      "published_at": null,
+      "retrieved_at": "2026-10-01T02:23:16+00:00",
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": null,
+      "warnings": [],
+      "provider": "nyfed",
+      "series": "EFFR",
+      "transport": "nyfed_api",
+      "request_url_redacted": "https://markets.newyorkfed.org/api/rates/unsecured/effr/last/30.json",
+      "observation_count": 30,
+      "first_proven_available_at": "2026-10-01T02:23:16+00:00",
+      "source_quality": "official_or_official_redistribution",
+      "raw_sha256": "11b30fdc572c2d362b07989576e36223c36d568804fc5048dca362307d64e03e",
+      "raw_file": "FUND_EFFR.json",
+      "age_calendar_days": 2,
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
+    },
+    {
+      "id": "OIL_CL_SETTLE",
+      "label": "WTI",
+      "group": "원자재",
+      "definition": "CME NYMEX CL 최근 비만기 계약 일일 정산가",
+      "unit": "USD/bbl",
+      "price_type": "daily_settlement",
+      "source_url": "https://www.cmegroup.com/market-data/daily-settlements.html?redirect=%2Fmarket-data%2Fsettlements%2F",
+      "connection_status": "blocked",
+      "value": null,
+      "previous_value": null,
+      "observation_date": null,
+      "previous_observation_date": null,
+      "change": null,
+      "change_unit": "%",
+      "last_five": [],
+      "published_at": null,
+      "retrieved_at": null,
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": "contract_settlement_feed_not_registered",
+      "warnings": [],
+      "next_action": "CME 계약월별 정산가 공급 경로 필요. 공개 자료의 자정 CT 공표는 아침 마감보다 늦을 수 있음. FRED 현물 WTI로 대체하지 않음."
+    },
+    {
+      "id": "OIL_BRENT_SETTLE",
+      "label": "Brent",
+      "group": "원자재",
+      "definition": "ICE Brent 최근 비만기 계약 일일 정산가",
+      "unit": "USD/bbl",
+      "price_type": "daily_settlement",
+      "source_url": null,
+      "connection_status": "blocked",
+      "value": null,
+      "previous_value": null,
+      "observation_date": null,
+      "previous_observation_date": null,
+      "change": null,
+      "change_unit": "%",
+      "last_five": [],
+      "published_at": null,
+      "retrieved_at": null,
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": "contract_settlement_feed_not_registered",
+      "warnings": [],
+      "next_action": "ICE Brent 계약월별 정산가·만기표 경로 필요. 현물 Brent/연속선물 최근가는 별개."
+    },
+    {
+      "id": "NQ_1100",
+      "label": "NQ 11시",
+      "group": "사용자 규칙",
+      "definition": "CME E-mini Nasdaq-100 선물, 고정 계약월, 11:00 KST 스냅샷",
+      "unit": "index pt",
+      "price_type": "timestamped_last_trade",
+      "source_url": "https://www.cmegroup.com/markets/equities/nasdaq/e-mini-nasdaq-100.contractSpecs.html?videoId=6375064445112",
+      "connection_status": "blocked",
+      "value": null,
+      "previous_value": null,
+      "observation_date": null,
+      "previous_observation_date": null,
+      "change": null,
+      "change_unit": "%",
+      "last_five": [],
+      "published_at": null,
+      "retrieved_at": null,
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": "intraday_contract_feed_not_registered",
+      "warnings": [],
+      "next_action": "계약월과 11:00 KST 관측·비교시각이 보존되는 시세 경로 필요. Nasdaq Composite로 대체하지 않음."
+    },
+    {
+      "id": "KR_FOREIGN_CASH",
+      "label": "외국인 현물",
+      "group": "수급",
+      "definition": "KRX 시장별 외국인 일일 순매수 거래대금; KOSPI·KOSDAQ 분리",
+      "unit": "KRW",
+      "price_type": "daily_net_buy_value",
+      "source_url": "https://data.krx.co.kr/",
+      "connection_status": "blocked",
+      "value": null,
+      "previous_value": null,
+      "observation_date": null,
+      "previous_observation_date": null,
+      "change": null,
+      "change_unit": "%",
+      "last_five": [],
+      "published_at": null,
+      "retrieved_at": null,
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": "krx_investor_flow_feed_not_registered",
+      "warnings": [],
+      "next_action": "KRX 외국인 현물 순매수 원표의 시장 범위·단위·접근 경로 등록 필요."
+    },
+    {
+      "id": "KR_FOREIGN_FUTURES",
+      "label": "외국인 선물",
+      "group": "수급",
+      "definition": "KRX 상품별 외국인 선물 순매수; 계약수·금액 구분",
+      "unit": "specified unit",
+      "price_type": "daily_net_buy",
+      "source_url": "https://data.krx.co.kr/",
+      "connection_status": "blocked",
+      "value": null,
+      "previous_value": null,
+      "observation_date": null,
+      "previous_observation_date": null,
+      "change": null,
+      "change_unit": "%",
+      "last_five": [],
+      "published_at": null,
+      "retrieved_at": null,
+      "signal_eligible": false,
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
+      "error": "krx_investor_flow_feed_not_registered",
+      "warnings": [],
+      "next_action": "KRX 외국인 선물 순매수 원표의 상품·계약월 합산 범위·단위·접근 경로 등록 필요."
+    }
+  ]
+}
