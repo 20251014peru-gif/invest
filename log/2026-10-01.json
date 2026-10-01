@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-10-01",
-  "generated_at": "2026-10-01T11:24:16+09:00",
+  "generated_at": "2026-10-01T11:30:02+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · VIX 16.34 pt(+1.4%) · KOSDAQ 855.91 pt(+0.7%)"
+      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · VIX 16.34 pt(+1.4%) · 금 4,183 $/oz(-0.9%)"
     },
     {
       "k": "오늘 발표",
@@ -99,6 +99,20 @@
       "group": "us"
     },
     {
+      "id": "gold",
+      "name": "금",
+      "value": 4183.2002,
+      "unit": "$/oz",
+      "prev": 4219.1,
+      "delta": -35.9,
+      "delta_text": "-0.9%",
+      "judge": "",
+      "as_of": "2026-09-30",
+      "cycle": "D",
+      "score": 0.8508876300632869,
+      "group": "world"
+    },
+    {
       "id": "kosdaq",
       "name": "KOSDAQ",
       "value": 855.91,
@@ -152,20 +166,6 @@
       "as_of": "2026-09-30",
       "cycle": "D",
       "score": 0.47694522188796423,
-      "group": "kr"
-    },
-    {
-      "id": "kr_cpi_yoy",
-      "name": "한국 CPI 전년비",
-      "value": 3.09,
-      "unit": "%",
-      "prev": 2.79,
-      "delta": 0.3,
-      "delta_text": "+0.30%p",
-      "judge": "부담",
-      "as_of": "2026-08",
-      "cycle": "M",
-      "score": 0.2999999999999998,
       "group": "kr"
     }
   ],
@@ -326,6 +326,20 @@
           "group": "us"
         },
         {
+          "id": "gold",
+          "name": "금",
+          "value": 4183.2002,
+          "unit": "$/oz",
+          "prev": 4219.1,
+          "delta": -35.9,
+          "delta_text": "-0.9%",
+          "judge": "",
+          "as_of": "2026-09-30",
+          "cycle": "D",
+          "score": 0.8508876300632869,
+          "group": "world"
+        },
+        {
           "id": "kosdaq",
           "name": "KOSDAQ",
           "value": 855.91,
@@ -380,20 +394,6 @@
           "cycle": "D",
           "score": 0.47694522188796423,
           "group": "kr"
-        },
-        {
-          "id": "kr_cpi_yoy",
-          "name": "한국 CPI 전년비",
-          "value": 3.09,
-          "unit": "%",
-          "prev": 2.79,
-          "delta": 0.3,
-          "delta_text": "+0.30%p",
-          "judge": "부담",
-          "as_of": "2026-08",
-          "cycle": "M",
-          "score": 0.2999999999999998,
-          "group": "kr"
         }
       ]
     },
@@ -407,11 +407,11 @@
     },
     {
       "id": "2026-10-01/auto/macro",
-      "time": "11:24",
+      "time": "11:29",
       "who": "auto",
       "kind": "macro",
-      "title": "지표 갱신 — 30/34 수집",
-      "text": "실패: 달러지수 DXY, 유가 WTI, 구리, 금"
+      "title": "지표 갱신 — 34/34 수집",
+      "text": "전부 정상"
     }
   ],
   "_정직": "자동 초안. 달님 기록(결론·헤드라인·시나리오·보고서 판정·종목 판단)은 Firestore invest_journal/<date>, invest_records 에 있음"
