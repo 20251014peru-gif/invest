@@ -21,7 +21,24 @@ def stamp(value):
 def is_session(day,cal):
     if not cal['coverage_start']<=day.isoformat()<=cal['coverage_end']:
         raise ValueError('calendar_outside_coverage')
+    if cal.get('month_end_observations') and (day+dt.timedelta(days=1)).month!=day.month:
+        return True
     return day.weekday()<5 and day.isoformat() not in cal['holidays']
+
+def audit_window(r,cal):
+    points=r.get('recent_observations') or r.get('last_five') or []
+    # Only inspect the recent five-observation window; older rows remain in raw data.
+    recent=points[-5:]
+    r['window_calendar_conflicts']=[p['date'] for p in recent if not is_session(dt.date.fromisoformat(p['date']),cal)]
+    day=dt.date.fromisoformat(r['observation_date'])
+    wanted=[day.isoformat()]
+    for _ in range(4):
+        day=prior(day,cal);wanted.append(day.isoformat())
+    by_date={p['date']:p for p in points}
+    r['window_missing_dates']=[d for d in wanted if d not in by_date]
+    r['window_eligible']=not r['window_calendar_conflicts'] and not r['window_missing_dates']
+    r['validated_window']=[by_date[d] for d in reversed(wanted)] if r['window_eligible'] else []
+    r['window_note']='최근 5개 관측일 달력 검증. 최신성 적격은 별도.'
 
 def prior(day,cal):
     for _ in range(20):
@@ -49,6 +66,7 @@ def assess(item,policy,cutoff):
     r.update(asof=cutoff.isoformat(),freshness_status='not_connected',data_eligible=False,
              comparison_eligible=False,display_change=None,expected_observation_date=None,
              expected_publication_at=None,missing_sessions=None,signal_eligible=False,
+             window_eligible=False,validated_window=[],window_calendar_conflicts=[],source_value_conflicts=[],
              signal_note='자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.')
     if r['connection_status']!='connected': return r
     if not r.get('retrieved_at') or stamp(r['retrieved_at'])>cutoff:
@@ -60,6 +78,13 @@ def assess(item,policy,cutoff):
         obs,due,cal=expected(profile,policy,cutoff)
         r['expected_observation_date']=obs.isoformat()
         r['expected_publication_at']=due.isoformat() if due else None
+        audit_window(r,cal)
+        comparison=r.get('source_comparison',{})
+        if comparison.get('status')=='mismatch':
+            r['source_value_conflicts']=comparison.get('mismatches',[]) or ['same_date_value_mismatch']
+            r['freshness_status']='source_value_conflict'
+            r['window_eligible']=False;r['validated_window']=[]
+            return r
         actual=dt.date.fromisoformat(r['observation_date'])
         if not is_session(actual,cal):
             r['freshness_status']='observation_calendar_conflict'; return r

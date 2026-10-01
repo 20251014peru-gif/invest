@@ -1,6 +1,6 @@
 {
   "schema": "report_feed_registry/1",
-  "version": "2026-10-01.1",
+  "version": "2026-10-01.2",
   "definition_version": "보고서 v2.3의 23개 고정 ID를 유지한 연결판",
   "ecos_relay": "https://wild-unit-3884dalnim-relay.20251014peru.workers.dev",
   "policy": [
@@ -9,7 +9,10 @@
     "같은 응답의 관측값 쌍으로 변화 계산",
     "누락·휴일을 0이나 복사값으로 채우지 않음",
     "자료 연결과 최신성·매매 적격성 구분",
-    "다른 상품으로 fallback 금지"
+    "다른 상품으로 fallback 금지",
+    "원작성자 직접 자료를 우선하고 등록된 동일 계열 FRED와 겹치는 5일을 대조",
+    "원작성자/FRED 대조는 동일 기원의 재배포 검증이며 독립 가격산출 검증으로 부르지 않음",
+    "달력 충돌이 있는 최근 관측은 보존하되 5거래일 차트는 보류"
   ],
   "items": [
     {
@@ -18,11 +21,13 @@
       "definition": "Nasdaq Composite COMP, USD 가격지수, 미국 정규장 일별 종가",
       "unit": "index pt",
       "price_type": "regular_session_close",
-      "source_url": "https://fred.stlouisfed.org/series/NASDAQCOM",
+      "source_url": "https://indexes.nasdaqomx.com/Index/History/COMP",
       "group": "미국 주식",
       "change_unit": "%",
-      "provider": "fred",
-      "series": "NASDAQCOM"
+      "provider": "nasdaq_eod",
+      "series": "COMP",
+      "comparison_series": "NASDAQCOM",
+      "comparison_tolerance": 0.00501
     },
     {
       "id": "US_SPX_CLOSE",
@@ -54,11 +59,13 @@
       "definition": "PHLX Semiconductor SOX, USD 가격지수 정규장 종가",
       "unit": "index pt",
       "price_type": "regular_session_close",
-      "source_url": "https://fred.stlouisfed.org/series/NASDAQSOX",
+      "source_url": "https://indexes.nasdaqomx.com/Index/History/SOX",
       "group": "미국 주식",
       "change_unit": "%",
-      "provider": "fred",
-      "series": "NASDAQSOX"
+      "provider": "nasdaq_eod",
+      "series": "SOX",
+      "comparison_series": "NASDAQSOX",
+      "comparison_tolerance": 0.00501
     },
     {
       "id": "KR_KOSPI_CLOSE",
@@ -124,11 +131,14 @@
       "definition": "Treasury nominal par CMT 2Y 일일 고시",
       "unit": "%",
       "price_type": "daily_indicative_par_yield",
-      "source_url": "https://fred.stlouisfed.org/series/DGS2",
+      "source_url": "https://home.treasury.gov/resource-center-data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve",
       "group": "금리",
       "change_unit": "bp",
-      "provider": "fred",
-      "series": "DGS2"
+      "provider": "treasury",
+      "series": "DGS2",
+      "comparison_series": "DGS2",
+      "treasury_field": "BC_2YEAR",
+      "comparison_tolerance": 1e-05
     },
     {
       "id": "US_CMT_10Y",
@@ -136,11 +146,14 @@
       "definition": "Treasury nominal par CMT 10Y 일일 고시",
       "unit": "%",
       "price_type": "daily_indicative_par_yield",
-      "source_url": "https://fred.stlouisfed.org/series/DGS10",
+      "source_url": "https://home.treasury.gov/resource-center-data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve",
       "group": "금리",
       "change_unit": "bp",
-      "provider": "fred",
-      "series": "DGS10"
+      "provider": "treasury",
+      "series": "DGS10",
+      "comparison_series": "DGS10",
+      "treasury_field": "BC_10YEAR",
+      "comparison_tolerance": 1e-05
     },
     {
       "id": "US_CMT_30Y",
@@ -148,11 +161,14 @@
       "definition": "Treasury nominal par CMT 30Y 일일 고시",
       "unit": "%",
       "price_type": "daily_indicative_par_yield",
-      "source_url": "https://fred.stlouisfed.org/series/DGS30",
+      "source_url": "https://home.treasury.gov/resource-center-data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve",
       "group": "금리",
       "change_unit": "bp",
-      "provider": "fred",
-      "series": "DGS30"
+      "provider": "treasury",
+      "series": "DGS30",
+      "comparison_series": "DGS30",
+      "treasury_field": "BC_30YEAR",
+      "comparison_tolerance": 1e-05
     },
     {
       "id": "KR_KTB3_FINAL",

@@ -18,6 +18,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import report_clock
+import report_sources
+import report_funding
 
 ROOT = Path(__file__).resolve().parents[1]
 UTC = dt.timezone.utc
@@ -109,6 +111,14 @@ def fetch(spec, config, sample_ecos=False):
     today = dt.datetime.now(KST).date()
     start = (today - dt.timedelta(days=45)).isoformat()
     symbol = spec.get("series")
+    if provider in ('treasury','nasdaq_eod'):
+        try:
+            return report_sources.retrieve(spec,today,get)
+        except Exception as exc:
+            # Registered same-instrument redistribution remains an explicit fallback.
+            fallback=dict(provider='fred',series=spec['comparison_series'])
+            rows,raw,public,transport,warnings=fetch(fallback,config,sample_ecos)
+            return rows,raw,public,transport+'_fallback',['official_primary_unavailable:'+safe_error(exc)]+warnings
     if provider == "fred":
         key = os.environ.get("FRED_API_KEY", "").strip()
         if key:
@@ -176,14 +186,14 @@ def collect_one(spec, config, raw_dir, sample_ecos=False):
             if previous["value"] == 0:
                 raise DataError("zero_comparison_denominator")
             change = (last["value"] / previous["value"] - 1) * 100
-        name = spec["id"] + (".csv" if transport == "fred_csv" else ".json")
+        name = spec["id"] + (".csv" if transport.startswith("fred_csv") else ".xml" if transport=='treasury_xml' else ".json")
         (raw_dir / name).write_bytes(raw)
         rec.update({"connection_status": "connected", "provider": spec["provider"],
                     "series": spec.get("series") or f"{spec.get('stat')}/{spec.get('item')}",
                     "transport": transport, "request_url_redacted": public,
                     "value": last["value"], "previous_value": previous["value"],
                     "observation_date": last["date"], "previous_observation_date": previous["date"],
-                    "change": round(change, 8), "last_five": points[-5:],
+                    "change": round(change, 8), "last_five": points[-5:], "recent_observations":points[-45:],
                     "observation_count": len(points), "retrieved_at": retrieved,
                     "first_proven_available_at": retrieved,
                     "source_quality": "official_or_official_redistribution",
@@ -191,6 +201,23 @@ def collect_one(spec, config, raw_dir, sample_ecos=False):
                     "age_calendar_days": (dt.datetime.now(KST).date()-dt.date.fromisoformat(last["date"])).days,
                     "freshness_status": "observation_date_shown_calendar_not_yet_verified",
                     "warnings": warnings})
+        if spec.get('comparison_series') and not transport.endswith('_fallback'):
+            try:
+                other,body,uri,kind,_=fetch(dict(provider='fred',series=spec['comparison_series']),config,sample_ecos)
+                other=normalized(other,dt.datetime.now(KST).date())
+                audit=report_sources.compare(points,other,spec.get('comparison_tolerance',0.00501))
+                audit.update(source_url=uri,retrieved_at=now(),raw_sha256=hashlib.sha256(body).hexdigest())
+                (raw_dir/(spec['id']+'_comparison'+('.csv' if kind=='fred_csv' else '.json'))).write_bytes(body)
+                rec['source_comparison']=audit
+            except Exception as exc:
+                rec['source_comparison']={'status':'unavailable','error':safe_error(exc),'independent_origin':False}
+        elif transport.endswith('_fallback'):
+            rec['source_comparison']={'status':'primary_unavailable_using_registered_fred','independent_origin':False}
+            rec['source_url']='https://fred.stlouisfed.org/series/'+spec['comparison_series']
+        if spec['provider']=='nyfed':
+            rows=json.loads(raw)['refRates']
+            match=next(x for x in rows if x['effectiveDate']==last['date'])
+            rec['rate_context']={k:match.get(k) for k in ('percentPercentile1','percentPercentile25','percentPercentile75','percentPercentile99','volumeInBillions','targetRateFrom','targetRateTo','revisionIndicator')}
         # A connection proves a dated response, not that the latest session has
         # been published or that this response existed at an earlier report cutoff.
     except Exception as exc:
@@ -220,24 +247,26 @@ def main():
         items = list(pool.map(lambda s: collect_one(s, config, args.raw_dir, args.sample_ecos), config["items"]))
     counts = {s: sum(i["connection_status"] == s for i in items) for s in ("connected", "blocked", "error")}
     run_id = os.environ.get("GITHUB_RUN_ID")
+    funding=report_funding.collect(get,args.raw_dir)
     snapshot = {"schema": "market_report_feeds/1", "version": config["version"],
                 "started_at": started, "completed_at": now(), "status": "partial" if counts["blocked"] or counts["error"] else "complete",
                 "collector_health": "error" if counts["error"] else "ok", "counts": {"registered": len(items), **counts},
                 "run_url": f"https://github.com/20251014peru-gif/invest/actions/runs/{run_id}" if run_id else None,
                 "commit": os.environ.get("GITHUB_SHA"),
                 "point_in_time_note": "이번 조회에서 처음 보존한 자료. 과거 08:17 판의 당시 이용 가능 자료로 소급하지 않음.",
-                "items": items}
+                "items": items,"funding_context":funding}
     write_json(args.output_dir / "market_report_feeds.json", snapshot)
     write_json(args.raw_dir / "snapshot.json", snapshot)
     policy = json.loads((ROOT / "data/report_clock_policy.json").read_text(encoding="utf-8"))
     snapshot, clock_state = report_clock.run(snapshot, policy, args.output_dir)
     write_json(args.raw_dir / "clock.json", clock_state)
+    quality_counts={k:sum(bool(i.get(k)) for i in snapshot['items']) for k in ('window_calendar_conflicts','source_value_conflicts')}
     audit = {"schema": "market_report_validation/1", "started_at": started, "completed_at": snapshot["completed_at"],
              "status": snapshot["status"], "counts": snapshot["counts"], "run_url": snapshot["run_url"],
              "checks": ["exact_series_code", "exact_ecos_name_unit", "finite_values", "unique_dates", "no_future_dates", "same_source_comparison_pair", "raw_sha256"],
-             "clock_policy_version": policy["version"], "morning_edition": clock_state,
+             "clock_policy_version": policy["version"], "morning_edition": clock_state, "quality_counts":quality_counts,"supplemental_funding_counts":funding['counts'],
              "not_verified": ["unregistered_calendar_profiles", "intraday_actual_publication_time", "independent_second_source", "trading_signal"],
-             "items": [{k: i.get(k) for k in ("id", "connection_status", "observation_date", "retrieved_at", "raw_sha256", "error", "warnings", "next_action", "freshness_status", "expected_observation_date", "expected_publication_at", "data_eligible", "comparison_eligible")} for i in snapshot["items"]]}
+             "items": [{k: i.get(k) for k in ("id", "connection_status", "observation_date", "retrieved_at", "raw_sha256", "error", "warnings", "next_action", "freshness_status", "expected_observation_date", "expected_publication_at", "data_eligible", "comparison_eligible","source_comparison","window_calendar_conflicts","source_value_conflicts","window_eligible")} for i in snapshot["items"]]}
     write_json(args.output_dir / "market_report_validation.json", audit)
     print(json.dumps({"status": snapshot["status"], "collector_health": snapshot["collector_health"], "counts": snapshot["counts"]}))
     for i in items:
