@@ -247,7 +247,7 @@ def main():
         items = list(pool.map(lambda s: collect_one(s, config, args.raw_dir, args.sample_ecos), config["items"]))
     counts = {s: sum(i["connection_status"] == s for i in items) for s in ("connected", "blocked", "error")}
     run_id = os.environ.get("GITHUB_RUN_ID")
-    funding=report_funding.collect(get,args.raw_dir)
+    funding=report_funding.collect(get,args.raw_dir,lambda:fetch(dict(provider='fred',series='IORB'),config))
     snapshot = {"schema": "market_report_feeds/1", "version": config["version"],
                 "started_at": started, "completed_at": now(), "status": "partial" if counts["blocked"] or counts["error"] else "complete",
                 "collector_health": "error" if counts["error"] else "ok", "counts": {"registered": len(items), **counts},
