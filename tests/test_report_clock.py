@@ -52,7 +52,7 @@ class ClockTests(unittest.TestCase):
         r=c.assess(item(previous='2026-09-25'),P,c.stamp('2026-10-01T08:20:00+09:00'))
         self.assertTrue(r['data_eligible']);self.assertFalse(r['comparison_eligible']);self.assertIsNone(r['display_change'])
     def test_unknown_calendar_and_expired_review_fail_closed(self):
-        r=c.assess(item('CREDIT_HY_OAS'),P,c.stamp('2026-10-01T08:20:00+09:00'))
+        r=c.assess(item('FX_DXY_CASH'),P,c.stamp('2026-10-01T08:20:00+09:00'))
         self.assertEqual(r['freshness_status'],'calendar_unverified')
         r=c.assess(item(),P,c.stamp('2026-11-01T08:20:00+09:00'))
         self.assertEqual(r['freshness_status'],'calendar_review_due');self.assertFalse(r['data_eligible'])

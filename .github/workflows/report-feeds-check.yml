@@ -6,11 +6,15 @@ on:
     paths:
       - 'scripts/report_feeds.py'
       - 'scripts/report_clock.py'
+      - 'scripts/report_sources.py'
+      - 'scripts/report_funding.py'
       - 'scripts/macro.py'
       - 'data/report_feed_registry.json'
       - 'data/report_clock_policy.json'
       - 'tests/test_report_feeds.py'
       - 'tests/test_report_clock.py'
+      - 'tests/test_report_sources.py'
+      - 'tests/test_report_funding.py'
       - 'tests/test_macro_workflow.py'
       - '.github/workflows/report-feeds-check.yml'
   workflow_dispatch: {}
