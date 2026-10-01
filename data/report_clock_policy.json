@@ -1,6 +1,6 @@
 {
   "schema": "report_clock_policy/1",
-  "version": "2026-10-01.1",
+  "version": "2026-10-01.2",
   "timezone": "Asia/Seoul",
   "cutoff": "08:20",
   "calendar_review_due": "2026-11-01",
@@ -116,6 +116,92 @@
       ],
       "verified_on": "2026-10-01",
       "limitation": "예정 달력. 임시 휴장 공지가 확인되면 판본을 갱신한다. 적용 범위 밖은 미검증."
+    },
+    "US_TREASURY": {
+      "timezone": "America/New_York",
+      "close": "15:30",
+      "coverage_start": "2026-01-01",
+      "coverage_end": "2026-12-31",
+      "holidays": [
+        "2026-01-01",
+        "2026-01-19",
+        "2026-02-16",
+        "2026-05-25",
+        "2026-06-19",
+        "2026-07-03",
+        "2026-09-07",
+        "2026-10-12",
+        "2026-11-11",
+        "2026-11-26",
+        "2026-12-25"
+      ],
+      "early_closes": {
+        "2026-04-03": "12:00",
+        "2026-05-22": "14:00",
+        "2026-07-02": "14:00",
+        "2026-11-27": "14:00",
+        "2026-12-24": "14:00",
+        "2026-12-31": "14:00"
+      },
+      "sources": [
+        "https://home.treasury.gov/policy-issues/financing-the-government/interest-rate-statistics",
+        "https://www.sifma.org/resources/guides-playbooks/holiday-schedule"
+      ],
+      "verified_on": "2026-10-01",
+      "limitation": "보통 15:30 호가 기준. 조기 종료일에는 종료시각 이후 원문 존재를 함께 확인. 실제 게시시각 SLA는 미확인."
+    },
+    "KR_KOFIA": {
+      "timezone": "Asia/Seoul",
+      "close": "16:30",
+      "coverage_start": "2026-09-01",
+      "coverage_end": "2026-10-31",
+      "holidays": [
+        "2026-09-24",
+        "2026-09-25",
+        "2026-10-05",
+        "2026-10-09"
+      ],
+      "early_closes": {},
+      "verified_on": "2026-10-01",
+      "sources": [
+        "https://law.kofia.or.kr/service/law/detailArticlePrint.do?contentSeq=301930&historySeq=1774&seq=137"
+      ],
+      "limitation": "금투협 최종호가 16:30 공시. ECOS 전재시각은 미확인. 확인한 9~10월 달력만 적용."
+    },
+    "KR_FX_1530": {
+      "timezone": "Asia/Seoul",
+      "close": "15:30",
+      "coverage_start": "2026-07-06",
+      "coverage_end": "2026-12-31",
+      "holidays": [],
+      "early_closes": {},
+      "verified_on": "2026-10-01",
+      "sources": [
+        "https://www.korea.net/NewsFocus/Business/view?articleId=293313&koreanId=293289"
+      ],
+      "limitation": "7월 6일 이후 국내 공휴일에도 거래. 24시간 시장 전체 종료값이 아닌 ECOS의 15:30 기준값. 연초 적용 금지."
+    },
+    "ICE_GLOBAL": {
+      "timezone": "America/New_York",
+      "close": "16:00",
+      "coverage_start": "2026-01-01",
+      "coverage_end": "2026-12-31",
+      "holidays": [
+        "2026-01-01",
+        "2026-12-25"
+      ],
+      "early_closes": {
+        "2026-11-27": "13:00",
+        "2026-12-24": "13:00"
+      },
+      "month_end_observations": true,
+      "verified_on": "2026-10-01",
+      "sources": [
+        "https://www.ice.com/publicdocs/data/Bond_Index_Methodologies.pdf",
+        "https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
+        "https://www.sifma.org/resources/guides-playbooks/holiday-schedule"
+      ],
+      "limitation": "공식 방법론 2025-04-30판. Global Business Day 및 월말 관측. 미국 휴장일 이월가격/이자 조정은 신규 거래가격 아님. FRED 전재시각 SLA 미확인."
     }
   },
   "profiles": {
@@ -162,11 +248,11 @@
       "source_due_policy": "미확인 시차를 임의로 1일로 고정하지 않음"
     },
     "FX_USDKRW_DAY1530": {
-      "calendar": null,
-      "mode": "unknown",
+      "calendar": "KR_FX_1530",
+      "mode": "session_close",
       "publication_time": null,
       "publication_timezone": null,
-      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+      "source_due_policy": "관측 달력과 공급자 게시시각을 구분. 예상 최신 관측일 미수신은 참고자료로 보류하며 장애로 단정하지 않음."
     },
     "FX_DXY_CASH": {
       "calendar": null,
@@ -176,60 +262,60 @@
       "source_due_policy": "미확인 시차를 임의로 1일로 고정하지 않음"
     },
     "US_CMT_2Y": {
-      "calendar": null,
-      "mode": "unknown",
+      "calendar": "US_TREASURY",
+      "mode": "session_close",
       "publication_time": null,
       "publication_timezone": null,
-      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+      "source_due_policy": "관측 달력과 공급자 게시시각을 구분. 예상 최신 관측일 미수신은 참고자료로 보류하며 장애로 단정하지 않음."
     },
     "US_CMT_10Y": {
-      "calendar": null,
-      "mode": "unknown",
+      "calendar": "US_TREASURY",
+      "mode": "session_close",
       "publication_time": null,
       "publication_timezone": null,
-      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+      "source_due_policy": "관측 달력과 공급자 게시시각을 구분. 예상 최신 관측일 미수신은 참고자료로 보류하며 장애로 단정하지 않음."
     },
     "US_CMT_30Y": {
-      "calendar": null,
-      "mode": "unknown",
+      "calendar": "US_TREASURY",
+      "mode": "session_close",
       "publication_time": null,
       "publication_timezone": null,
-      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+      "source_due_policy": "관측 달력과 공급자 게시시각을 구분. 예상 최신 관측일 미수신은 참고자료로 보류하며 장애로 단정하지 않음."
     },
     "KR_KTB3_FINAL": {
-      "calendar": null,
-      "mode": "unknown",
+      "calendar": "KR_KOFIA",
+      "mode": "session_close",
       "publication_time": null,
       "publication_timezone": null,
-      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+      "source_due_policy": "관측 달력과 공급자 게시시각을 구분. 예상 최신 관측일 미수신은 참고자료로 보류하며 장애로 단정하지 않음."
     },
     "KR_KTB10_FINAL": {
-      "calendar": null,
-      "mode": "unknown",
+      "calendar": "KR_KOFIA",
+      "mode": "session_close",
       "publication_time": null,
       "publication_timezone": null,
-      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+      "source_due_policy": "관측 달력과 공급자 게시시각을 구분. 예상 최신 관측일 미수신은 참고자료로 보류하며 장애로 단정하지 않음."
     },
     "CREDIT_HY_OAS": {
-      "calendar": null,
-      "mode": "unknown",
+      "calendar": "ICE_GLOBAL",
+      "mode": "session_close",
       "publication_time": null,
       "publication_timezone": null,
-      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+      "source_due_policy": "관측 달력과 공급자 게시시각을 구분. 예상 최신 관측일 미수신은 참고자료로 보류하며 장애로 단정하지 않음."
     },
     "CREDIT_IG_OAS": {
-      "calendar": null,
-      "mode": "unknown",
+      "calendar": "ICE_GLOBAL",
+      "mode": "session_close",
       "publication_time": null,
       "publication_timezone": null,
-      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+      "source_due_policy": "관측 달력과 공급자 게시시각을 구분. 예상 최신 관측일 미수신은 참고자료로 보류하며 장애로 단정하지 않음."
     },
     "CREDIT_CCC_OAS": {
-      "calendar": null,
-      "mode": "unknown",
+      "calendar": "ICE_GLOBAL",
+      "mode": "session_close",
       "publication_time": null,
       "publication_timezone": null,
-      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+      "source_due_policy": "관측 달력과 공급자 게시시각을 구분. 예상 최신 관측일 미수신은 참고자료로 보류하며 장애로 단정하지 않음."
     },
     "FUND_SOFR": {
       "calendar": "US_REPO",
