@@ -58,7 +58,7 @@ def case(script, periods_rc, change, push_fail_times=0, push_always_fail=False, 
         write_exec(os.path.join(work, 'scripts', 'macro_periods.py'), "import os, sys\nsys.exit(int(os.environ.get('STUB_PERIODS_RC', '0')))\n")
         write_exec(os.path.join(work, 'scripts', 'report_feeds.py'), "import os, sys\nsys.exit(int(os.environ.get('STUB_REPORT_RC', '0')))\n")
         for f in ('facts/macro_periods.json', 'facts/macro.json', 'facts/macro_history.json', 'facts/macro_extra.json', 'facts/macro_extra_history.json',
-                  'facts/kr_key.json', 'facts/calendar_sent.json', 'facts/market_report_feeds.json', 'facts/market_report_validation.json', 'analysis/regime.json', 'analysis/calendar.json', 'log/.keep', 'data/status.json'):
+                  'facts/kr_key.json', 'facts/calendar_sent.json', 'facts/market_report_feeds.json', 'facts/market_report_validation.json', 'facts/market_report_clock.json', 'facts/report_candidates/.gitkeep', 'facts/report_editions/.gitkeep', 'analysis/regime.json', 'analysis/calendar.json', 'log/.keep', 'data/status.json'):
             os.makedirs(os.path.dirname(os.path.join(work, f)), exist_ok=True)
             open(os.path.join(work, f), 'w').write('0')  # git add 경로가 하나라도 없으면 실제 워크플로처럼 전체가 실패하므로 모두 만든다
         git(work, 'checkout', '-q', '-b', 'main'); git(work, 'add', '-A'); git(work, 'commit', '-q', '-m', 'init'); git(work, 'push', '-q', 'origin', 'main')

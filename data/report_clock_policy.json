@@ -1,0 +1,286 @@
+{
+  "schema": "report_clock_policy/1",
+  "version": "2026-10-01.1",
+  "timezone": "Asia/Seoul",
+  "cutoff": "08:20",
+  "calendar_review_due": "2026-11-01",
+  "note": "정규판은 마감 전에 실제 수집·보존한 응답만 사용. 공표시각은 최초 조회시각으로 대체하지 않는다.",
+  "calendars": {
+    "US_EQUITY": {
+      "timezone": "America/New_York",
+      "close": "16:00",
+      "coverage_start": "2026-01-01",
+      "coverage_end": "2026-12-31",
+      "holidays": [
+        "2026-01-01",
+        "2026-01-19",
+        "2026-02-16",
+        "2026-04-03",
+        "2026-05-25",
+        "2026-06-19",
+        "2026-07-03",
+        "2026-09-07",
+        "2026-11-26",
+        "2026-12-25"
+      ],
+      "early_closes": {
+        "2026-11-27": "13:00",
+        "2026-12-24": "13:00"
+      },
+      "sources": [
+        "https://www.nyse.com/trade/hours-calendars",
+        "https://nasdaqtrader.com/Trader.aspx?id=Calendar"
+      ],
+      "verified_on": "2026-10-01",
+      "limitation": "예정 달력. 임시 휴장 공지가 확인되면 판본을 갱신한다. 적용 범위 밖은 미검증."
+    },
+    "US_FED": {
+      "timezone": "America/New_York",
+      "close": "23:59",
+      "coverage_start": "2026-01-01",
+      "coverage_end": "2026-12-31",
+      "holidays": [
+        "2026-01-01",
+        "2026-01-19",
+        "2026-02-16",
+        "2026-05-25",
+        "2026-06-19",
+        "2026-09-07",
+        "2026-10-12",
+        "2026-11-11",
+        "2026-11-26",
+        "2026-12-25"
+      ],
+      "early_closes": {},
+      "sources": [
+        "https://www.newyorkfed.org/aboutthefed/holiday_schedule.html"
+      ],
+      "verified_on": "2026-10-01",
+      "limitation": "예정 달력. 임시 휴장 공지가 확인되면 판본을 갱신한다. 적용 범위 밖은 미검증."
+    },
+    "US_REPO": {
+      "timezone": "America/New_York",
+      "close": "23:59",
+      "coverage_start": "2026-01-01",
+      "coverage_end": "2026-12-31",
+      "holidays": [
+        "2026-01-01",
+        "2026-01-19",
+        "2026-02-16",
+        "2026-05-25",
+        "2026-06-19",
+        "2026-07-03",
+        "2026-09-07",
+        "2026-10-12",
+        "2026-11-11",
+        "2026-11-26",
+        "2026-12-25"
+      ],
+      "early_closes": {},
+      "sources": [
+        "https://www.sifma.org/resources/general/holiday-schedule",
+        "https://www.newyorkfed.org/markets/reference-rates/additional-information-about-reference-rates"
+      ],
+      "verified_on": "2026-10-01",
+      "limitation": "예정 달력. 임시 휴장 공지가 확인되면 판본을 갱신한다. 적용 범위 밖은 미검증."
+    },
+    "KR_EXCHANGE": {
+      "timezone": "Asia/Seoul",
+      "close": "15:30",
+      "coverage_start": "2026-01-01",
+      "coverage_end": "2026-12-31",
+      "holidays": [
+        "2026-01-01",
+        "2026-02-16",
+        "2026-02-17",
+        "2026-02-18",
+        "2026-03-02",
+        "2026-05-01",
+        "2026-05-05",
+        "2026-05-25",
+        "2026-06-03",
+        "2026-07-17",
+        "2026-08-17",
+        "2026-09-24",
+        "2026-09-25",
+        "2026-10-05",
+        "2026-10-09",
+        "2026-12-25",
+        "2026-12-31"
+      ],
+      "early_closes": {},
+      "sources": [
+        "https://www.kasi.re.kr/publication/post/newsMaterial/32031",
+        "https://www.korea.kr/news/policyNewsView.do?newsId=148959009",
+        "https://main.krxverse.co.kr/_contents/ACA/02/02010200/file/220104_beginner.pdf"
+      ],
+      "verified_on": "2026-10-01",
+      "limitation": "예정 달력. 임시 휴장 공지가 확인되면 판본을 갱신한다. 적용 범위 밖은 미검증."
+    }
+  },
+  "profiles": {
+    "US_COMP_CLOSE": {
+      "calendar": "US_EQUITY",
+      "mode": "close",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "미확인 시차를 임의로 1일로 고정하지 않음"
+    },
+    "US_SPX_CLOSE": {
+      "calendar": "US_EQUITY",
+      "mode": "close",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "미확인 시차를 임의로 1일로 고정하지 않음"
+    },
+    "US_DJI_CLOSE": {
+      "calendar": "US_EQUITY",
+      "mode": "close",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "미확인 시차를 임의로 1일로 고정하지 않음"
+    },
+    "US_SOX_CLOSE": {
+      "calendar": "US_EQUITY",
+      "mode": "close",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "미확인 시차를 임의로 1일로 고정하지 않음"
+    },
+    "KR_KOSPI_CLOSE": {
+      "calendar": "KR_EXCHANGE",
+      "mode": "close",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "미확인 시차를 임의로 1일로 고정하지 않음"
+    },
+    "KR_KOSDAQ_CLOSE": {
+      "calendar": "KR_EXCHANGE",
+      "mode": "close",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "미확인 시차를 임의로 1일로 고정하지 않음"
+    },
+    "FX_USDKRW_DAY1530": {
+      "calendar": null,
+      "mode": "unknown",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+    },
+    "FX_DXY_CASH": {
+      "calendar": null,
+      "mode": "unknown",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "미확인 시차를 임의로 1일로 고정하지 않음"
+    },
+    "US_CMT_2Y": {
+      "calendar": null,
+      "mode": "unknown",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+    },
+    "US_CMT_10Y": {
+      "calendar": null,
+      "mode": "unknown",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+    },
+    "US_CMT_30Y": {
+      "calendar": null,
+      "mode": "unknown",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+    },
+    "KR_KTB3_FINAL": {
+      "calendar": null,
+      "mode": "unknown",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+    },
+    "KR_KTB10_FINAL": {
+      "calendar": null,
+      "mode": "unknown",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+    },
+    "CREDIT_HY_OAS": {
+      "calendar": null,
+      "mode": "unknown",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+    },
+    "CREDIT_IG_OAS": {
+      "calendar": null,
+      "mode": "unknown",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+    },
+    "CREDIT_CCC_OAS": {
+      "calendar": null,
+      "mode": "unknown",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "해당 계열의 공급자 공표·관측 달력 확정 전 참고 자료. 휴장으로 단정하거나 지연 오류로 처리하지 않음."
+    },
+    "FUND_SOFR": {
+      "calendar": "US_REPO",
+      "mode": "next_business_day",
+      "publication_time": "08:00",
+      "publication_timezone": "America/New_York",
+      "source_due_policy": "미국 해당 영업일의 전 영업일 거래를 공표. 예상시각이지 실제 발표시각은 아님.",
+      "source": "https://www.newyorkfed.org/markets/reference-rates/additional-information-about-reference-rates"
+    },
+    "FUND_EFFR": {
+      "calendar": "US_FED",
+      "mode": "next_business_day",
+      "publication_time": "09:00",
+      "publication_timezone": "America/New_York",
+      "source_due_policy": "미국 해당 영업일의 전 영업일 거래를 공표. 예상시각이지 실제 발표시각은 아님.",
+      "source": "https://www.newyorkfed.org/markets/reference-rates/additional-information-about-reference-rates"
+    },
+    "OIL_CL_SETTLE": {
+      "calendar": null,
+      "mode": "unknown",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "미확인 시차를 임의로 1일로 고정하지 않음"
+    },
+    "OIL_BRENT_SETTLE": {
+      "calendar": null,
+      "mode": "unknown",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "미확인 시차를 임의로 1일로 고정하지 않음"
+    },
+    "NQ_1100": {
+      "calendar": null,
+      "mode": "unknown",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "미확인 시차를 임의로 1일로 고정하지 않음"
+    },
+    "KR_FOREIGN_CASH": {
+      "calendar": null,
+      "mode": "unknown",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "미확인 시차를 임의로 1일로 고정하지 않음"
+    },
+    "KR_FOREIGN_FUTURES": {
+      "calendar": null,
+      "mode": "unknown",
+      "publication_time": null,
+      "publication_timezone": null,
+      "source_due_policy": "미확인 시차를 임의로 1일로 고정하지 않음"
+    }
+  }
+}
