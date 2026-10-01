@@ -1,0 +1,58 @@
+name: Report Feed Connections
+on:
+  push:
+    paths:
+      - 'scripts/report_feeds.py'
+      - 'scripts/macro.py'
+      - 'data/report_feed_registry.json'
+      - 'tests/test_report_feeds.py'
+      - 'tests/test_macro_workflow.py'
+      - '.github/workflows/report-feeds-check.yml'
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: macro
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Definition and date regression checks
+        run: python -m unittest discover -s tests -p test_report_feeds.py -v
+      - name: Preserve existing collection failure reporting
+        run: python tests/test_macro_workflow.py
+      - name: Preserve period history and failure state
+        run: python tests/test_macro_periods.py
+      - name: Collect official sources on cloud runner
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          ECOS_KEY: ${{ secrets.ECOS_KEY }}
+        run: python scripts/report_feeds.py
+      - name: Preserve responses and snapshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: report-feeds-${{ github.run_id }}
+          path: raw/market-report-run/
+          retention-days: 30
+      - name: Publish snapshot only from main
+        if: always() && github.ref == 'refs/heads/main'
+        run: |
+          test -f facts/market_report_feeds.json || exit 1
+          git config user.name "macro-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add facts/market_report_feeds.json facts/market_report_validation.json
+          git diff --cached --quiet && exit 0
+          git commit -m "auto: report feed connection snapshot"
+          for i in 1 2 3; do
+            git pull --rebase origin main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 3
+          done
+          exit 1

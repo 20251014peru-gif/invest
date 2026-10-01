@@ -1,7 +1,8 @@
 # v 20260907-2300  macro.py — CYGNUS 정적판의 수집기. data/indicators.json 을 읽어 FRED(공식)·ECOS(공식, ECOS_KEY)·Yahoo(보조) 값을 모은다. derive=yoy 는 12개월 전 대비 %. derived=차이 파생(신용 스프레드). key_stats=ECOS 100대 지표 한 판(facts/kr_key.json).
 # 쓰기: facts/macro.json(최신), facts/macro_history.json(일별 누적), data/status.json(job macro)
 # 규칙: 시각 3칸(as_of=시장 기준일, published=출처 발표 시각(모르면 빈칸), collected_at=수집 KST). 실패한 지표는 값 대신 error 를 남긴다(조용한 실패 금지).
-import json, os, sys, csv, io, datetime as dt, urllib.request, urllib.parse
+import json, os, sys, csv, io, datetime as dt, urllib.request, urllib.parse, math
+from zoneinfo import ZoneInfo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 P = lambda *a: os.path.join(ROOT, *a)
@@ -45,24 +46,40 @@ def fetch_stooq(symbol):
     if not rows: raise RuntimeError("stooq 응답 비어 있음(심볼 확인)")
     return rows[-5:]
 
+def parse_yahoo_bars(payload):
+    """실제 일봉 시각·종가 필드 사용. 수집일/달력상 어제를 거래일로 만들지 않는다.
+
+    일반 화면의 마지막 일봉은 장중일 수 있다. 보고서의 확정 종가 연결은
+    report_feeds.py의 별도 공식 역사자료로 처리한다.
+    """
+    result = payload["chart"]["result"][0]
+    zone = ZoneInfo(result["meta"]["exchangeTimezoneName"])
+    times = result.get("timestamp", [])
+    closes = result["indicators"]["quote"][0]["close"]
+    if len(times) != len(closes):
+        raise RuntimeError("야후 일봉 날짜·가격 개수 불일치")
+    rows = {}
+    for timestamp, value in zip(times, closes):
+        if value is None:
+            continue
+        if not math.isfinite(float(value)):
+            raise RuntimeError("야후 유효하지 않은 가격")
+        date = dt.datetime.fromtimestamp(timestamp, zone).date().isoformat()
+        if date in rows and rows[date] != float(value):
+            raise RuntimeError("야후 동일 거래일 가격 충돌")
+        rows[date] = float(value)
+    if len(rows) < 2:
+        raise RuntimeError("야후 실제 날짜가 있는 비교 일봉 부족")
+    return sorted(rows.items())[-20:]
+
+
 def fetch_yahoo_relay(symbol, relay):
-    """중계서버(Cloudflare Worker) 경유 야후 차트 1일 — GitHub 서버가 야후에 직접 막혀도 중계로 우회.
-    반환: [(전일자, 전일종가), (오늘, 현재가)] — run() 의 change_pct 계산에 맞춤."""
-    yurl = "https://query1.finance.yahoo.com/v8/finance/chart/%s?range=1d&interval=1d" % symbol
+    """기존 중계 경로로 실제 날짜가 있는 일봉 이력을 받는다."""
+    yurl = "https://query1.finance.yahoo.com/v8/finance/chart/%s?range=1mo&interval=1d" % symbol
     url = relay.rstrip("/") + "/?url=" + urllib.parse.quote(yurl, safe="")
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (macro)"})
     d = json.loads(urllib.request.urlopen(req, timeout=25).read().decode("utf-8", "replace"))
-    m = d["chart"]["result"][0]["meta"]
-    price = m.get("regularMarketPrice")
-    pv = m.get("chartPreviousClose") or m.get("previousClose")
-    if price is None:
-        raise RuntimeError("야후 응답에 가격 없음")
-    today = kst_now().date().isoformat()
-    rows = []
-    if pv is not None:
-        rows.append(((kst_now().date() - dt.timedelta(days=1)).isoformat(), float(pv)))
-    rows.append((today, float(price)))
-    return rows
+    return parse_yahoo_bars(d)
 
 def fetch_ecos(ecos, relay=""):
     """한국은행 ECOS OpenAPI(무료 키, GitHub Secret ECOS_KEY). ecos={stat,item,cycle(M|D|A)}. 응답 row[].TIME/DATA_VALUE.
@@ -136,6 +153,7 @@ def run(fetch_map=None, manual=None):
                 try:
                     if not relay: raise RuntimeError("relay 주소 없음(indicators.json)")
                     rows = fetch_yahoo_relay(ind["yahoo"], relay)
+                    rec["price_type"] = "provider_daily_bar_may_be_intraday"
                     if len(rows) < 1: raise RuntimeError("데이터 없음")
                 except Exception as e1:                                  # 중계 실패 → FRED 예비(있으면)
                     fbc = ind.get("fred_fallback")
@@ -160,6 +178,7 @@ def run(fetch_map=None, manual=None):
             if rows is not None:                                          # yahoo_relay·else 공통: 받아온 값을 rec 에 넣는다
                 rec["as_of"], rec["value"] = rows[-1]
                 if len(rows) >= 2:
+                    rec["previous_as_of"] = rows[-2][0]
                     rec["prev"] = rows[-2][1]
                     rec["change_pct"] = round((rec["value"] - rec["prev"]) / rec["prev"] * 100, 2) if rec["prev"] else None
             if rec["value"] is not None:
