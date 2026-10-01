@@ -59,15 +59,28 @@ def parse_yahoo_bars(payload):
     if len(times) != len(closes):
         raise RuntimeError("야후 일봉 날짜·가격 개수 불일치")
     rows = {}
+    dated_quotes = []
+    ambiguous_session = False
+    seen_timestamp = {}
     for timestamp, value in zip(times, closes):
         if value is None:
             continue
         if not math.isfinite(float(value)):
             raise RuntimeError("야후 유효하지 않은 가격")
         date = dt.datetime.fromtimestamp(timestamp, zone).date().isoformat()
+        if timestamp in seen_timestamp and seen_timestamp[timestamp] != float(value):
+            raise RuntimeError("야후 동일 관측시각 가격 충돌")
+        seen_timestamp[timestamp] = float(value)
         if date in rows and rows[date] != float(value):
-            raise RuntimeError("야후 동일 거래일 가격 충돌")
+            ambiguous_session = True
         rows[date] = float(value)
+        dated_quotes.append((timestamp, date, float(value)))
+    if ambiguous_session:
+        # Overnight instruments can append a live quote to daily bars sharing
+        # a local calendar date. Preserve the latest timestamped observation,
+        # but do not invent a trading-session comparison from those bars.
+        _, date, value = max(dated_quotes)
+        return [(date, value)]
     if len(rows) < 2:
         raise RuntimeError("야후 실제 날짜가 있는 비교 일봉 부족")
     return sorted(rows.items())[-20:]
@@ -154,6 +167,7 @@ def run(fetch_map=None, manual=None):
                     if not relay: raise RuntimeError("relay 주소 없음(indicators.json)")
                     rows = fetch_yahoo_relay(ind["yahoo"], relay)
                     rec["price_type"] = "provider_daily_bar_may_be_intraday"
+                    rec["comparison_status"] = "dated_pair" if len(rows) >= 2 else "session_overlap_comparison_withheld"
                     if len(rows) < 1: raise RuntimeError("데이터 없음")
                 except Exception as e1:                                  # 중계 실패 → FRED 예비(있으면)
                     fbc = ind.get("fred_fallback")

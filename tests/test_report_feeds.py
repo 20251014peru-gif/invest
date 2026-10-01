@@ -80,6 +80,14 @@ class FeedTests(unittest.TestCase):
         wti = next(i for i in old['items'] if i['id'] == 'wti')
         self.assertNotIn('fred_fallback', wti)
 
+    def test_overnight_overlap_preserves_quote_but_withholds_comparison(self):
+        times = [int(dt.datetime(2026, 9, 30, hour, tzinfo=dt.timezone.utc).timestamp()) for hour in (0, 2)]
+        payload = {'chart': {'result': [{'meta': {'exchangeTimezoneName': 'America/New_York'}, 'timestamp': times, 'indicators': {'quote': [{'close': [90, 91]}]}}]}}
+        self.assertEqual(parse_yahoo_bars(payload), [('2026-09-29', 91.0)])
+        payload['chart']['result'][0]['timestamp'] = [times[0], times[0]]
+        with self.assertRaises(RuntimeError):
+            parse_yahoo_bars(payload)
+
 
 if __name__ == '__main__':
     unittest.main()
