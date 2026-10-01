@@ -17,6 +17,7 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+import report_clock
 
 ROOT = Path(__file__).resolve().parents[1]
 UTC = dt.timezone.utc
@@ -228,11 +229,15 @@ def main():
                 "items": items}
     write_json(args.output_dir / "market_report_feeds.json", snapshot)
     write_json(args.raw_dir / "snapshot.json", snapshot)
+    policy = json.loads((ROOT / "data/report_clock_policy.json").read_text(encoding="utf-8"))
+    snapshot, clock_state = report_clock.run(snapshot, policy, args.output_dir)
+    write_json(args.raw_dir / "clock.json", clock_state)
     audit = {"schema": "market_report_validation/1", "started_at": started, "completed_at": snapshot["completed_at"],
              "status": snapshot["status"], "counts": snapshot["counts"], "run_url": snapshot["run_url"],
              "checks": ["exact_series_code", "exact_ecos_name_unit", "finite_values", "unique_dates", "no_future_dates", "same_source_comparison_pair", "raw_sha256"],
-             "not_verified": ["exchange_calendar_freshness", "intraday_publication_time", "independent_second_source", "trading_signal"],
-             "items": [{k: i.get(k) for k in ("id", "connection_status", "observation_date", "retrieved_at", "raw_sha256", "error", "warnings", "next_action")} for i in items]}
+             "clock_policy_version": policy["version"], "morning_edition": clock_state,
+             "not_verified": ["unregistered_calendar_profiles", "intraday_actual_publication_time", "independent_second_source", "trading_signal"],
+             "items": [{k: i.get(k) for k in ("id", "connection_status", "observation_date", "retrieved_at", "raw_sha256", "error", "warnings", "next_action", "freshness_status", "expected_observation_date", "expected_publication_at", "data_eligible", "comparison_eligible")} for i in snapshot["items"]]}
     write_json(args.output_dir / "market_report_validation.json", audit)
     print(json.dumps({"status": snapshot["status"], "collector_health": snapshot["collector_health"], "counts": snapshot["counts"]}))
     for i in items:
