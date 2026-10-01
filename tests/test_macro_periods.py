@@ -79,6 +79,9 @@ def main():
             shutil.copytree(os.path.join(SRC, sub), os.path.join(tmp, sub))
         target = os.path.join(tmp, 'facts', 'macro_periods.json')
         seed = jload(target)
+        # 운영 파일에는 이미 신규 4개가 있으므로, 옛 시드 조건을 명시적으로 만든다.
+        for key in NEW4:
+            seed['items'].pop(key, None)
 
         rc, d, _ = run('ok', tmp, port)  # 1 정상
         assert rc == 0 and d['status'] == 'complete' and d['errors'] == {} and d['batch_errors'] == {}, d.get('errors')
