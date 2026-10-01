@@ -13,6 +13,9 @@ class SourceTests(unittest.TestCase):
         self.assertEqual(rows,[('2026-09-30',12628.62375)])
     def test_truncated_response_rejected(self):
         with self.assertRaises(ValueError):s.nasdaq_rows('{"iTotalRecords":2,"aaData":[]}')
+    def test_unpublished_today_is_not_a_quote_or_schema_error(self):
+        rows=s.nasdaq_rows(json.dumps({'iTotalRecords':2,'aaData':[{'TimeStamp':'/Date(1790827200000)/','Value':None},{'TimeStamp':'/Date(1790740800000)/','Value':12628.6}]}))
+        self.assertEqual(rows,[('2026-09-30',12628.6)])
     def test_treasury_exact_maturity(self):
         raw=b'<feed xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"><m:properties><d:NEW_DATE>2026-09-30T00:00:00</d:NEW_DATE><d:BC_2YEAR>4.88</d:BC_2YEAR><d:BC_10YEAR>5.29</d:BC_10YEAR></m:properties></feed>'
         self.assertEqual(s.treasury_rows(raw,'BC_10YEAR'),[('2026-09-30','5.29')])

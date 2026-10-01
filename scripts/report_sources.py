@@ -26,10 +26,12 @@ def nasdaq_rows(raw):
     if not data or int(obj.get('iTotalRecords',-1))!=len(data):raise ValueError('nasdaq_eod_rows_missing_or_truncated')
     for r in data:
         stamp=re.fullmatch(r'/Date\((\d+)\)/',r.get('TimeStamp',''))
-        if not stamp or r.get('Value') is None:raise ValueError('nasdaq_eod_schema_changed')
+        if not stamp or 'Value' not in r:raise ValueError('nasdaq_eod_schema_changed')
+        if r['Value'] is None:continue # The current session may be an explicit unpublished placeholder.
         date=dt.datetime.fromtimestamp(int(stamp[1])/1000,dt.timezone.utc).astimezone(ZoneInfo('America/New_York')).date()
         rows.append((date.isoformat(),r['Value']))
     # This endpoint returns unrounded daily values; headline NetChange is not used.
+    if not rows:raise ValueError('nasdaq_eod_values_missing')
     return rows
 
 def retrieve(spec,today,get):
