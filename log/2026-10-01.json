@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-10-01",
-  "generated_at": "2026-10-01T11:30:02+09:00",
+  "generated_at": "2026-10-01T17:32:34+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · VIX 16.34 pt(+1.4%) · 금 4,183 $/oz(-0.9%)"
+      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · VIX 16.76 pt(+4.0%) · 유가 WTI 92.53 $(+2.2%)"
     },
     {
       "k": "오늘 발표",
@@ -18,7 +18,7 @@
     },
     {
       "k": "산업·종목",
-      "t": "DART 21건(수주·공급계약 7) · 토론실 근거글 +0(적중 7) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
+      "t": "DART 24건(수주·공급계약 7) · 토론실 근거글 +0(적중 7) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
     },
     {
       "k": "미입력",
@@ -37,7 +37,7 @@
       "key": "credit_spread",
       "label": "신용 스프레드",
       "value": "0.69%p",
-      "sub": "주의 · 2026-09-30",
+      "sub": "주의 · 2026-10-01",
       "tone": "yellow"
     },
     {
@@ -87,29 +87,57 @@
     {
       "id": "vix",
       "name": "VIX",
-      "value": 16.34,
+      "value": 16.76,
       "unit": "pt",
       "prev": 16.11,
-      "delta": 0.23,
-      "delta_text": "+1.4%",
+      "delta": 0.65,
+      "delta_text": "+4.0%",
       "judge": "안정",
-      "as_of": "2026-09-30",
+      "as_of": "2026-10-01",
       "cycle": "D",
-      "score": 1.4276846679081343,
+      "score": 4.034761018001254,
       "group": "us"
+    },
+    {
+      "id": "wti",
+      "name": "유가 WTI",
+      "value": 92.53,
+      "unit": "$",
+      "prev": 90.5,
+      "delta": 2.03,
+      "delta_text": "+2.2%",
+      "judge": "",
+      "as_of": "2026-10-01",
+      "cycle": "D",
+      "score": 2.243093922651935,
+      "group": "world"
+    },
+    {
+      "id": "copper",
+      "name": "구리",
+      "value": 6.512,
+      "unit": "$/lb",
+      "prev": 6.6235,
+      "delta": -0.112,
+      "delta_text": "-1.7%",
+      "judge": "",
+      "as_of": "2026-10-01",
+      "cycle": "D",
+      "score": 1.683400015097764,
+      "group": "world"
     },
     {
       "id": "gold",
       "name": "금",
-      "value": 4183.2002,
+      "value": 4186.6001,
       "unit": "$/oz",
       "prev": 4219.1,
-      "delta": -35.9,
-      "delta_text": "-0.9%",
+      "delta": -32.5,
+      "delta_text": "-0.8%",
       "judge": "",
-      "as_of": "2026-09-30",
+      "as_of": "2026-10-01",
       "cycle": "D",
-      "score": 0.8508876300632869,
+      "score": 0.7703040932900549,
       "group": "world"
     },
     {
@@ -139,34 +167,6 @@
       "cycle": "D",
       "score": 0.6224066390041484,
       "group": "world"
-    },
-    {
-      "id": "m2",
-      "name": "미 M2",
-      "value": 23342.8,
-      "unit": "십억$",
-      "prev": 23217.9,
-      "delta": 124.9,
-      "delta_text": "+0.5%",
-      "judge": "",
-      "as_of": "2026-08-01",
-      "cycle": "M",
-      "score": 0.5379470150185753,
-      "group": "us"
-    },
-    {
-      "id": "kospi",
-      "name": "KOSPI",
-      "value": 6838.04,
-      "unit": "pt",
-      "prev": 6870.81,
-      "delta": -32.77,
-      "delta_text": "-0.5%",
-      "judge": "중립",
-      "as_of": "2026-09-30",
-      "cycle": "D",
-      "score": 0.47694522188796423,
-      "group": "kr"
     }
   ],
   "releases": {
@@ -314,29 +314,57 @@
         {
           "id": "vix",
           "name": "VIX",
-          "value": 16.34,
+          "value": 16.76,
           "unit": "pt",
           "prev": 16.11,
-          "delta": 0.23,
-          "delta_text": "+1.4%",
+          "delta": 0.65,
+          "delta_text": "+4.0%",
           "judge": "안정",
-          "as_of": "2026-09-30",
+          "as_of": "2026-10-01",
           "cycle": "D",
-          "score": 1.4276846679081343,
+          "score": 4.034761018001254,
           "group": "us"
+        },
+        {
+          "id": "wti",
+          "name": "유가 WTI",
+          "value": 92.53,
+          "unit": "$",
+          "prev": 90.5,
+          "delta": 2.03,
+          "delta_text": "+2.2%",
+          "judge": "",
+          "as_of": "2026-10-01",
+          "cycle": "D",
+          "score": 2.243093922651935,
+          "group": "world"
+        },
+        {
+          "id": "copper",
+          "name": "구리",
+          "value": 6.512,
+          "unit": "$/lb",
+          "prev": 6.6235,
+          "delta": -0.112,
+          "delta_text": "-1.7%",
+          "judge": "",
+          "as_of": "2026-10-01",
+          "cycle": "D",
+          "score": 1.683400015097764,
+          "group": "world"
         },
         {
           "id": "gold",
           "name": "금",
-          "value": 4183.2002,
+          "value": 4186.6001,
           "unit": "$/oz",
           "prev": 4219.1,
-          "delta": -35.9,
-          "delta_text": "-0.9%",
+          "delta": -32.5,
+          "delta_text": "-0.8%",
           "judge": "",
-          "as_of": "2026-09-30",
+          "as_of": "2026-10-01",
           "cycle": "D",
-          "score": 0.8508876300632869,
+          "score": 0.7703040932900549,
           "group": "world"
         },
         {
@@ -366,34 +394,6 @@
           "cycle": "D",
           "score": 0.6224066390041484,
           "group": "world"
-        },
-        {
-          "id": "m2",
-          "name": "미 M2",
-          "value": 23342.8,
-          "unit": "십억$",
-          "prev": 23217.9,
-          "delta": 124.9,
-          "delta_text": "+0.5%",
-          "judge": "",
-          "as_of": "2026-08-01",
-          "cycle": "M",
-          "score": 0.5379470150185753,
-          "group": "us"
-        },
-        {
-          "id": "kospi",
-          "name": "KOSPI",
-          "value": 6838.04,
-          "unit": "pt",
-          "prev": 6870.81,
-          "delta": -32.77,
-          "delta_text": "-0.5%",
-          "judge": "중립",
-          "as_of": "2026-09-30",
-          "cycle": "D",
-          "score": 0.47694522188796423,
-          "group": "kr"
         }
       ]
     },
@@ -407,7 +407,7 @@
     },
     {
       "id": "2026-10-01/auto/macro",
-      "time": "11:29",
+      "time": "17:32",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 34/34 수집",
