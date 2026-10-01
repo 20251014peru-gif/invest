@@ -3,9 +3,12 @@ on:
   push:
     paths:
       - 'scripts/report_feeds.py'
+      - 'scripts/report_clock.py'
       - 'scripts/macro.py'
       - 'data/report_feed_registry.json'
+      - 'data/report_clock_policy.json'
       - 'tests/test_report_feeds.py'
+      - 'tests/test_report_clock.py'
       - 'tests/test_macro_workflow.py'
       - '.github/workflows/report-feeds-check.yml'
   workflow_dispatch: {}
@@ -24,7 +27,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Definition and date regression checks
-        run: python -m unittest discover -s tests -p test_report_feeds.py -v
+        run: python -m unittest discover -s tests -p 'test_report_*.py' -v
       - name: Preserve existing collection failure reporting
         run: python tests/test_macro_workflow.py
       - name: Preserve period history and failure state
@@ -47,7 +50,7 @@ jobs:
           test -f facts/market_report_feeds.json || exit 1
           git config user.name "macro-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add facts/market_report_feeds.json facts/market_report_validation.json
+          git add facts/market_report_feeds.json facts/market_report_validation.json facts/market_report_clock.json facts/report_candidates/ facts/report_editions/
           git diff --cached --quiet && exit 0
           git commit -m "auto: report feed connection snapshot"
           for i in 1 2 3; do
