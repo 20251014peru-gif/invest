@@ -34,6 +34,8 @@ FRED의 Nasdaq 원자료는 공표가 늦을 수 있다. 연결 성공과 최신
 
 ## 운영·비용·복구
 
+야간 시세의 일봉과 최신 체결가가 동일한 현지 달력 날짜로 겹치면, 실제 관측시각이 가장 늦은 값만 표시하고 등락 비교를 비운다(`session_overlap_comparison_withheld`). 같은 관측시각에 서로 다른 값이면 수집 오류다. 이를 보고서 정산가·종가로 승격하지 않는다.
+
 - 실행: 기존 GitHub Actions `Macro Collector`, 매시 05분 예약. 회사 PC나 브라우저가 꺼져도 GitHub에서 수행. 예약은 정시 실행을 보장하지 않음.
 - 설정: GitHub의 기존 `FRED_API_KEY`, `ECOS_KEY` Secrets. 새 키를 코드/로그/브라우저에 노출하지 않음. ECOS 직접 네트워크 실패에만 기존 소유자 Cloudflare relay 사용; HTTP 인증/접근 거부를 우회하지 않음.
 - 저장: 수치·검증 JSON은 기존 invest 저장소와 Pages. 개인 기록·매매규칙은 공개 파일에 쓰지 않음. 원응답은 각 Actions 실행의 `report-feeds-RUN_ID` artifact에 30일 보존. 장기 원응답 보존은 별도 백업 필요.
