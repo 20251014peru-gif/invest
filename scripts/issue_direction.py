@@ -66,33 +66,24 @@ def macro_series(key):
 
 FRED_ERR = {}
 CACHE = P("facts", "fred_cache.json")
+# FRED 값은 기존 수집기(macro_extra.py, FRED_API_KEY 사용)가 facts/macro_extra.json 에 매시 넣는다. 거기서 읽어 날짜별로 캐시에 쌓는다(직접 FRED 접속은 Actions 에서 시간초과가 잦아 쓰지 않음).
+EXTRA_IDS = {"BAMLH0A0HYM2": "us_hy_oas"}
 
 
 def fred_series(sid):
-    """FRED 일별 CSV(키 없음) 를 받아 캐시(facts/fred_cache.json)에 날짜별로 합치고, 캐시 전체를 쓴다.
-    FRED 수신이 가끔 시간초과라 3번 시도하고, 모두 실패해도 캐시로 계산한다(마지막 값 날짜가 낡으면 보고서에서 확인). 값을 만들어 채우지 않는다."""
-    import csv, time, urllib.request
     try:
         cache = json.load(open(CACHE, encoding="utf-8"))
     except Exception:
         cache = {"schema": "fred_cache/1", "series": {}}
     ser = cache.setdefault("series", {}).setdefault(sid, {})
-    start = (dt.date.today() - dt.timedelta(days=60)).isoformat()
-    for k in range(3):
-        try:
-            req = urllib.request.Request(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={sid}&cosd={start}", headers={"User-Agent": "Mozilla/5.0"})
-            rows = list(csv.reader(urllib.request.urlopen(req, timeout=40).read().decode().splitlines()))[1:]
-            for r in rows:
-                try:
-                    ser[r[0]] = float(r[1])
-                except (ValueError, IndexError):
-                    pass      # FRED 빈칸(.)은 건너뜀
-            FRED_ERR.pop(sid, None)
-            json.dump(cache, open(CACHE, "w", encoding="utf-8", newline="\n"), ensure_ascii=False, indent=0)
-            break
-        except Exception as e:
-            FRED_ERR[sid] = f"{type(e).__name__}: {e}"[:120]
-            time.sleep(3)
+    try:
+        extra = json.load(open(P("facts", "macro_extra.json"), encoding="utf-8"))
+        it = next((x for x in extra.get("items", []) if x.get("id") == EXTRA_IDS.get(sid)), None)
+        if it and isinstance(it.get("value"), (int, float)) and it.get("as_of"):
+            ser[it["as_of"]] = float(it["value"])
+    except Exception as e:
+        FRED_ERR[sid] = f"macro_extra.json: {type(e).__name__}"[:80]
+    json.dump(cache, open(CACHE, "w", encoding="utf-8", newline="\n"), ensure_ascii=False, indent=0)
     return [ser[d] for d in sorted(ser)]
 
 
