@@ -11,6 +11,7 @@ def kst_now(): return dt.datetime.now(KST)
 def kst_iso(d=None): return (d or kst_now()).replace(microsecond=0).isoformat()
 KEY = os.environ.get("DART_API_KEY", "").strip()
 DAYS = int(os.environ.get("DART_DAYS", "7"))
+MAX_PAGES = int(os.environ.get("DART_MAX_PAGES", "100"))  # 전체 공시를 100건씩 읽는 쪽 상한(20→100: 7일치 전부 받기)
 
 def load(p, d):
     try:
@@ -57,7 +58,7 @@ def run():
     end = kst_now().date(); bgn = end - dt.timedelta(days=DAYS)
     bgn_s, end_s = bgn.strftime("%Y%m%d"), end.strftime("%Y%m%d")
     items, seen = [], set(); page, pages = 1, 1
-    while page <= pages and page <= 20:
+    while page <= pages and page <= MAX_PAGES:
         d = fetch_list(bgn_s, end_s, page); st = str(d.get("status"))
         if st == "013": break
         if st != "000": raise RuntimeError(f"DART status {st}: {d.get('message')}")
@@ -73,11 +74,12 @@ def run():
                           "rcept_dt": it.get("rcept_dt", ""), "rcept_no": no,
                           "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=" + no})
         page += 1
+    truncated = pages > MAX_PAGES  # 상한에 걸려 오래된 공시가 빠졌는지 표시
     items.sort(key=lambda x: (x["rcept_dt"], x["rcept_no"]), reverse=True)
 
     # legacy snapshot은 유지한다. 이 kind 값은 화면 호환용일 뿐 알림에는 쓰지 않는다.
     save(P("facts", "dart.json"), {"schema": "dart/1", "version": "v 20260915-WaveC1", "updated": kst_iso(),
-        "range": f"{bgn_s}~{end_s}", "count": len(items), "items": items})
+        "range": f"{bgn_s}~{end_s}", "count": len(items), "pages": pages, "truncated": truncated, "items": items})
 
     # 신규/미해결 Event만 상세조회. 정정 오탐·중대성·Risk Gate는 여기서 처리한다.
     er = ER.process(items, KEY)
@@ -92,7 +94,7 @@ def run():
     stj = load(P("data", "status.json"), {"schema": "status/1", "jobs": []})
     job = {"id": "dart", "name": "공시 수집", "status": "ok", "ran": kst_iso(),
            "due": kst_iso(kst_now() + dt.timedelta(hours=30)), "cause": "", "fix": "", "link": "events.html",
-           "note": f"{len(items)}건({DAYS}일) · 신규 Event {len(er.get('new_events',[]))} · 중대성갱신 {len(er.get('material_updates',[]))} · push {notify.get('count',0)}"}
+           "note": f"{len(items)}건({DAYS}일, {pages}쪽{' 상한초과' if truncated else ''}) · 신규 Event {len(er.get('new_events',[]))} · 중대성갱신 {len(er.get('material_updates',[]))} · push {notify.get('count',0)}"}
     stj["jobs"] = [j for j in stj.get("jobs", []) if j.get("id") != "dart"] + [job]
     stj["updated"] = kst_iso(); save(P("data", "status.json"), stj)
     print(f"공시 {len(items)}건 · Event index {er.get('index_count')} · 신규 {len(er.get('new_events',[]))} · 중대성갱신 {len(er.get('material_updates',[]))}")
