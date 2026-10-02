@@ -19,11 +19,15 @@ jobs:
           python-version: '3.11'
       - name: 패키지 설치
         run: pip install yfinance==0.2.54
+      - name: 외국인 수급용 pykrx 설치 (실패해도 매크로 수집은 계속)
+        run: pip install pykrx==1.2.9 || echo "::warning::pykrx 설치 실패 — 외국인 수급만 수신 실패로 표시됨"
       - name: 실행하고 커밋·push (충돌 나면 최신으로 다시 실행)
         env:
           ECOS_KEY: ${{ secrets.ECOS_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          KRX_ID: ${{ secrets.KRX_ID }}
+          KRX_PW: ${{ secrets.KRX_PW }}
         run: |
           set -e
           git config user.name "macro-bot"
@@ -54,9 +58,11 @@ jobs:
             python scripts/macro_periods.py || PERIODS_RC=$?
             REPORT_RC=0
             python scripts/report_feeds.py || REPORT_RC=$?
+            python -P scripts/kr_investor.py || echo "::warning::외국인 수급 수집 실패 — facts/kr_investor.json 의 status·error 확인(어제 값을 새 값으로 쓰지 않음)"
             python scripts/macro_time_meta.py || echo "::warning::지표 시간 메타 생성 실패 — 원 수집 데이터는 유지"
             python scripts/journal.py || echo "::warning::일지 초안 실패"
             git add facts/macro_periods.json facts/macro.json facts/macro_history.json facts/macro_extra.json facts/macro_extra_history.json facts/kr_key.json facts/calendar_sent.json analysis/regime.json analysis/calendar.json log/ data/status.json 2>/dev/null || true
+            git add facts/kr_investor.json 2>/dev/null || true   # 따로 add: 파일이 없을 때 위의 add 전체가 실패하지 않게
             git add facts/market_report_feeds.json facts/market_report_validation.json facts/market_report_clock.json facts/report_candidates/ facts/report_editions/
             if git diff --cached --quiet; then echo "::notice::변경 없음"; finish; fi
             git commit -q -m "auto: macro $(date -u +%Y-%m-%dT%H:%MZ)"
