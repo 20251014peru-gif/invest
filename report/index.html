@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>톱니바퀴 일일 보고서</title>
+<style>
+:root{--bg:#f6f7f9;--fg:#1c2330;--mut:#667085;--card:#fff;--line:#d9dee7;--acc:#1e3a5f}
+@media(prefers-color-scheme:dark){:root{--bg:#10141b;--fg:#e6e9ef;--mut:#98a2b3;--card:#171c26;--line:#2a3140;--acc:#8fb4e8}}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 -apple-system,"Noto Sans KR",sans-serif}
+main{max-width:720px;margin:0 auto;padding:16px}
+h1{font-size:18px;margin:6px 0 2px;color:var(--acc)} .sub{color:var(--mut);font-size:12px;margin-bottom:12px}
+a.row{display:block;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:8px 0;color:inherit;text-decoration:none}
+a.row b{display:block}.row span{color:var(--mut);font-size:12px}
+.first{border-color:var(--acc);border-width:2px}
+.warn{font-size:12px;color:var(--mut);margin-top:16px}
+</style></head><body><main>
+<h1>톱니바퀴 일일 보고서</h1>
+<div class="sub">원인 → 방향 → 결과 · 판단·예측·매수매도 없음 · Claude 작성(달님 원본 아님)</div>
+<div id="list">불러오는 중…</div>
+<div class="warn">주소를 아는 사람은 누구나 볼 수 있는 공개 저장소의 페이지입니다(검색 제외 표시만 함). 계좌·개인 정보는 넣지 않습니다.</div>
+<script>
+fetch('index.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
+  const el=document.getElementById('list');el.textContent='';
+  (d.items||[]).forEach((x,i)=>{
+    const a=document.createElement('a');a.className='row'+(i?'':' first');a.href=x.file;
+    const b=document.createElement('b');b.textContent=x.date+' '+x.title;
+    const s=document.createElement('span');s.textContent=x.note||'';
+    a.append(b,s);el.append(a);});
+  if(!(d.items||[]).length)el.textContent='아직 보고서가 없습니다.';
+}).catch(()=>{document.getElementById('list').textContent='목록을 불러오지 못했습니다.';});
+</script></main></body></html>
