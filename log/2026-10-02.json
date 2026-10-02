@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-10-02",
-  "generated_at": "2026-10-02T15:26:44+09:00",
+  "generated_at": "2026-10-02T17:08:12+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -36,8 +36,8 @@
     {
       "key": "credit_spread",
       "label": "신용 스프레드",
-      "value": "0.69%p",
-      "sub": "주의 · 2026-10-01",
+      "value": "0.7%p",
+      "sub": "주의 · 2026-10-02",
       "tone": "yellow"
     },
     {
@@ -113,32 +113,46 @@
       "group": "kr"
     },
     {
+      "id": "vix",
+      "name": "VIX",
+      "value": 16.14,
+      "unit": "pt",
+      "prev": 16.76,
+      "delta": -0.62,
+      "delta_text": "-3.7%",
+      "judge": "안정",
+      "as_of": "2026-10-02",
+      "cycle": "D",
+      "score": 3.699284009546545,
+      "group": "us"
+    },
+    {
       "id": "hsi",
       "name": "항셍지수",
-      "value": 23963.0801,
+      "value": 23939.6797,
       "unit": "pt",
       "prev": 24613.2695,
-      "delta": -650.189,
-      "delta_text": "-2.6%",
+      "delta": -673.59,
+      "delta_text": "-2.7%",
       "judge": "약",
       "as_of": "2026-10-02",
       "cycle": "D",
-      "score": 2.6416214229482975,
+      "score": 2.7366937171837247,
       "group": "world"
     },
     {
-      "id": "vix",
-      "name": "VIX",
-      "value": 16.39,
-      "unit": "pt",
-      "prev": 16.76,
-      "delta": -0.37,
-      "delta_text": "-2.2%",
-      "judge": "안정",
-      "as_of": "2026-10-01",
+      "id": "wti",
+      "name": "유가 WTI",
+      "value": 90.16,
+      "unit": "$",
+      "prev": 92.53,
+      "delta": -2.37,
+      "delta_text": "-2.6%",
+      "judge": "",
+      "as_of": "2026-10-02",
       "cycle": "D",
-      "score": 2.2076372315035857,
-      "group": "us"
+      "score": 2.5613314600670103,
+      "group": "world"
     },
     {
       "id": "kospi",
@@ -153,20 +167,6 @@
       "cycle": "D",
       "score": 1.949535246942112,
       "group": "kr"
-    },
-    {
-      "id": "sox",
-      "name": "SOX 반도체",
-      "value": 12829.0,
-      "unit": "pt",
-      "prev": 12628.6201,
-      "delta": 200.38,
-      "delta_text": "+1.6%",
-      "judge": "중립",
-      "as_of": "2026-10-01",
-      "cycle": "D",
-      "score": 1.586712549853328,
-      "group": "us"
     }
   ],
   "releases": {
@@ -363,32 +363,46 @@
           "group": "kr"
         },
         {
+          "id": "vix",
+          "name": "VIX",
+          "value": 16.14,
+          "unit": "pt",
+          "prev": 16.76,
+          "delta": -0.62,
+          "delta_text": "-3.7%",
+          "judge": "안정",
+          "as_of": "2026-10-02",
+          "cycle": "D",
+          "score": 3.699284009546545,
+          "group": "us"
+        },
+        {
           "id": "hsi",
           "name": "항셍지수",
-          "value": 23963.0801,
+          "value": 23939.6797,
           "unit": "pt",
           "prev": 24613.2695,
-          "delta": -650.189,
-          "delta_text": "-2.6%",
+          "delta": -673.59,
+          "delta_text": "-2.7%",
           "judge": "약",
           "as_of": "2026-10-02",
           "cycle": "D",
-          "score": 2.6416214229482975,
+          "score": 2.7366937171837247,
           "group": "world"
         },
         {
-          "id": "vix",
-          "name": "VIX",
-          "value": 16.39,
-          "unit": "pt",
-          "prev": 16.76,
-          "delta": -0.37,
-          "delta_text": "-2.2%",
-          "judge": "안정",
-          "as_of": "2026-10-01",
+          "id": "wti",
+          "name": "유가 WTI",
+          "value": 90.16,
+          "unit": "$",
+          "prev": 92.53,
+          "delta": -2.37,
+          "delta_text": "-2.6%",
+          "judge": "",
+          "as_of": "2026-10-02",
           "cycle": "D",
-          "score": 2.2076372315035857,
-          "group": "us"
+          "score": 2.5613314600670103,
+          "group": "world"
         },
         {
           "id": "kospi",
@@ -403,20 +417,6 @@
           "cycle": "D",
           "score": 1.949535246942112,
           "group": "kr"
-        },
-        {
-          "id": "sox",
-          "name": "SOX 반도체",
-          "value": 12829.0,
-          "unit": "pt",
-          "prev": 12628.6201,
-          "delta": 200.38,
-          "delta_text": "+1.6%",
-          "judge": "중립",
-          "as_of": "2026-10-01",
-          "cycle": "D",
-          "score": 1.586712549853328,
-          "group": "us"
         }
       ]
     },
@@ -430,7 +430,7 @@
     },
     {
       "id": "2026-10-02/auto/macro",
-      "time": "15:26",
+      "time": "17:07",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 34/34 수집",
