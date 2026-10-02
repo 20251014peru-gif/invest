@@ -1,0 +1,20 @@
+# krx-probe.yml — 시험용. 손으로 한 번만 실행(workflow_dispatch). 스케줄 없음, 파일 저장·커밋 없음.
+name: KRX Probe
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -U pykrx
+      - name: KRX 투자자별 순매수 시험
+        env:
+          KRX_ID: ${{ secrets.KRX_ID }}
+          KRX_PW: ${{ secrets.KRX_PW }}
+        run: python scripts/krx_probe.py
