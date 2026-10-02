@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-10-02",
-  "generated_at": "2026-10-02T06:39:30+09:00",
+  "generated_at": "2026-10-02T10:24:19+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · KOSDAQ 894.29 pt(+4.5%) · VIX 16.39 pt(-2.2%)"
+      "t": "미 비농업고용 증감 162 천명(+671.4%) · 수출금액지수 전년비 75.82%(+11.50%p) · 투자자예탁금 104.7 조원(+5.0%) · KOSDAQ 894.29 pt(+4.5%)"
     },
     {
       "k": "오늘 발표",
@@ -85,6 +85,20 @@
       "group": "kr"
     },
     {
+      "id": "kr_deposit",
+      "name": "투자자예탁금",
+      "value": 104.7,
+      "unit": "조원",
+      "prev": 99.7,
+      "delta": 5.0,
+      "delta_text": "+5.0%",
+      "judge": "",
+      "as_of": "2026-09",
+      "cycle": "M",
+      "score": 5.015045135406218,
+      "group": "kr"
+    },
+    {
       "id": "kosdaq",
       "name": "KOSDAQ",
       "value": 894.29,
@@ -143,30 +157,16 @@
     {
       "id": "copper",
       "name": "구리",
-      "value": 6.5765,
+      "value": 6.5535,
       "unit": "$/lb",
       "prev": 6.512,
-      "delta": 0.065,
-      "delta_text": "+1.0%",
+      "delta": 0.042,
+      "delta_text": "+0.6%",
       "judge": "",
       "as_of": "2026-10-01",
       "cycle": "D",
-      "score": 0.9904791154791257,
+      "score": 0.6372850122850138,
       "group": "world"
-    },
-    {
-      "id": "m2",
-      "name": "미 M2",
-      "value": 23342.8,
-      "unit": "십억$",
-      "prev": 23217.9,
-      "delta": 124.9,
-      "delta_text": "+0.5%",
-      "judge": "",
-      "as_of": "2026-08-01",
-      "cycle": "M",
-      "score": 0.5379470150185753,
-      "group": "us"
     }
   ],
   "releases": {
@@ -335,6 +335,20 @@
           "group": "kr"
         },
         {
+          "id": "kr_deposit",
+          "name": "투자자예탁금",
+          "value": 104.7,
+          "unit": "조원",
+          "prev": 99.7,
+          "delta": 5.0,
+          "delta_text": "+5.0%",
+          "judge": "",
+          "as_of": "2026-09",
+          "cycle": "M",
+          "score": 5.015045135406218,
+          "group": "kr"
+        },
+        {
           "id": "kosdaq",
           "name": "KOSDAQ",
           "value": 894.29,
@@ -393,30 +407,16 @@
         {
           "id": "copper",
           "name": "구리",
-          "value": 6.5765,
+          "value": 6.5535,
           "unit": "$/lb",
           "prev": 6.512,
-          "delta": 0.065,
-          "delta_text": "+1.0%",
+          "delta": 0.042,
+          "delta_text": "+0.6%",
           "judge": "",
           "as_of": "2026-10-01",
           "cycle": "D",
-          "score": 0.9904791154791257,
+          "score": 0.6372850122850138,
           "group": "world"
-        },
-        {
-          "id": "m2",
-          "name": "미 M2",
-          "value": 23342.8,
-          "unit": "십억$",
-          "prev": 23217.9,
-          "delta": 124.9,
-          "delta_text": "+0.5%",
-          "judge": "",
-          "as_of": "2026-08-01",
-          "cycle": "M",
-          "score": 0.5379470150185753,
-          "group": "us"
         }
       ]
     },
@@ -430,7 +430,7 @@
     },
     {
       "id": "2026-10-02/auto/macro",
-      "time": "06:39",
+      "time": "10:24",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 34/34 수집",
