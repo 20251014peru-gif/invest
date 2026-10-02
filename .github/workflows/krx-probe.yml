@@ -17,4 +17,4 @@ jobs:
         env:
           KRX_ID: ${{ secrets.KRX_ID }}
           KRX_PW: ${{ secrets.KRX_PW }}
-        run: python scripts/krx_probe.py
+        run: python -P scripts/krx_probe.py
