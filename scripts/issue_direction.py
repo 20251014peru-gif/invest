@@ -64,14 +64,18 @@ def macro_series(key):
     return out
 
 
+FRED_ERR = {}
+
+
 def fred_series(sid):
     """FRED 일별 CSV(키 없음). 실패하면 빈 리스트 → '이력부족'. 값을 만들어 채우지 않는다."""
     import csv, urllib.request
     start = (dt.date.today() - dt.timedelta(days=60)).isoformat()
     try:
         req = urllib.request.Request(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={sid}&cosd={start}", headers={"User-Agent": "Mozilla/5.0"})
-        rows = list(csv.reader(urllib.request.urlopen(req, timeout=30).read().decode().splitlines()))[1:]
-    except Exception:
+        rows = list(csv.reader(urllib.request.urlopen(req, timeout=60).read().decode().splitlines()))[1:]
+    except Exception as e:
+        FRED_ERR[sid] = f"{type(e).__name__}: {e}"[:120]
         return []
     out = []
     for r in rows:
@@ -102,7 +106,7 @@ def run():
             vals = macro_series(key); x20, x5 = level_changes(vals, kind)
         lab, r = label(x20, x5, thr)
         res.append({"id": iid, "name": name, "label": lab, "r": r, "x20": None if x20 is None else round(x20, 2),
-                    "x5": None if x5 is None else round(x5, 2), "thr": thr, "n": len(vals)})
+                    "x5": None if x5 is None else round(x5, 2), "thr": thr, "n": len(vals), "err": FRED_ERR.get(key, "")})
     obj = {"schema": "issue_direction/1", "computed": dt.datetime.now(KST).replace(microsecond=0).isoformat(),
            "rule": "r=4*x5/x20; r<0 반전, <0.5 약화, <1.5 유지, 그 이상 재강화; |x20|<문턱=보합 (임시값)", "items": res}
     os.makedirs(P("facts"), exist_ok=True)
