@@ -65,25 +65,35 @@ def macro_series(key):
 
 
 FRED_ERR = {}
+CACHE = P("facts", "fred_cache.json")
 
 
 def fred_series(sid):
-    """FRED 일별 CSV(키 없음). 실패하면 빈 리스트 → '이력부족'. 값을 만들어 채우지 않는다."""
-    import csv, urllib.request
-    start = (dt.date.today() - dt.timedelta(days=60)).isoformat()
+    """FRED 일별 CSV(키 없음) 를 받아 캐시(facts/fred_cache.json)에 날짜별로 합치고, 캐시 전체를 쓴다.
+    FRED 수신이 가끔 시간초과라 3번 시도하고, 모두 실패해도 캐시로 계산한다(마지막 값 날짜가 낡으면 보고서에서 확인). 값을 만들어 채우지 않는다."""
+    import csv, time, urllib.request
     try:
-        req = urllib.request.Request(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={sid}&cosd={start}", headers={"User-Agent": "Mozilla/5.0"})
-        rows = list(csv.reader(urllib.request.urlopen(req, timeout=60).read().decode().splitlines()))[1:]
-    except Exception as e:
-        FRED_ERR[sid] = f"{type(e).__name__}: {e}"[:120]
-        return []
-    out = []
-    for r in rows:
+        cache = json.load(open(CACHE, encoding="utf-8"))
+    except Exception:
+        cache = {"schema": "fred_cache/1", "series": {}}
+    ser = cache.setdefault("series", {}).setdefault(sid, {})
+    start = (dt.date.today() - dt.timedelta(days=60)).isoformat()
+    for k in range(3):
         try:
-            out.append(float(r[1]))
-        except (ValueError, IndexError):
-            pass      # FRED 빈칸(.)은 건너뜀
-    return out
+            req = urllib.request.Request(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={sid}&cosd={start}", headers={"User-Agent": "Mozilla/5.0"})
+            rows = list(csv.reader(urllib.request.urlopen(req, timeout=40).read().decode().splitlines()))[1:]
+            for r in rows:
+                try:
+                    ser[r[0]] = float(r[1])
+                except (ValueError, IndexError):
+                    pass      # FRED 빈칸(.)은 건너뜀
+            FRED_ERR.pop(sid, None)
+            json.dump(cache, open(CACHE, "w", encoding="utf-8", newline="\n"), ensure_ascii=False, indent=0)
+            break
+        except Exception as e:
+            FRED_ERR[sid] = f"{type(e).__name__}: {e}"[:120]
+            time.sleep(3)
+    return [ser[d] for d in sorted(ser)]
 
 
 def flow_series():
@@ -106,7 +116,7 @@ def run():
             vals = macro_series(key); x20, x5 = level_changes(vals, kind)
         lab, r = label(x20, x5, thr)
         res.append({"id": iid, "name": name, "label": lab, "r": r, "x20": None if x20 is None else round(x20, 2),
-                    "x5": None if x5 is None else round(x5, 2), "thr": thr, "n": len(vals), "err": FRED_ERR.get(key, "")})
+                    "x5": None if x5 is None else round(x5, 2), "thr": thr, "n": len(vals), "err": FRED_ERR.get(key, ""), "last": (sorted(json.load(open(CACHE, encoding="utf-8"))["series"].get(key, {})) or [""])[-1] if typ == "fred" else ""})
     obj = {"schema": "issue_direction/1", "computed": dt.datetime.now(KST).replace(microsecond=0).isoformat(),
            "rule": "r=4*x5/x20; r<0 반전, <0.5 약화, <1.5 유지, 그 이상 재강화; |x20|<문턱=보합 (임시값)", "items": res}
     os.makedirs(P("facts"), exist_ok=True)
