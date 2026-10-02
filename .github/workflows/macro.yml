@@ -61,10 +61,11 @@ jobs:
             python -P scripts/kr_investor.py || echo "::warning::외국인 수급 수집 실패 — facts/kr_investor.json 의 status·error 확인(어제 값을 새 값으로 쓰지 않음)"
             python -P scripts/kr_investor_history.py || echo "::warning::외국인 이력 갱신 실패"
             python -P scripts/issue_direction.py || echo "::warning::방향 라벨 계산 실패"
+            python -P scripts/headlines.py || echo "::warning::헤드라인 RSS 수집 실패"
             python scripts/macro_time_meta.py || echo "::warning::지표 시간 메타 생성 실패 — 원 수집 데이터는 유지"
             python scripts/journal.py || echo "::warning::일지 초안 실패"
             git add facts/macro_periods.json facts/macro.json facts/macro_history.json facts/macro_extra.json facts/macro_extra_history.json facts/kr_key.json facts/calendar_sent.json analysis/regime.json analysis/calendar.json log/ data/status.json 2>/dev/null || true
-            git add facts/kr_investor.json facts/kr_investor_history.json facts/issue_direction.json 2>/dev/null || true   # 따로 add: 파일이 없을 때 위의 add 전체가 실패하지 않게
+            git add facts/kr_investor.json facts/kr_investor_history.json facts/issue_direction.json facts/headlines.json 2>/dev/null || true   # 따로 add: 파일이 없을 때 위의 add 전체가 실패하지 않게
             git add facts/market_report_feeds.json facts/market_report_validation.json facts/market_report_clock.json facts/report_candidates/ facts/report_editions/
             if git diff --cached --quiet; then echo "::notice::변경 없음"; finish; fi
             git commit -q -m "auto: macro $(date -u +%Y-%m-%dT%H:%MZ)"
