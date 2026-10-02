@@ -8,11 +8,14 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 P = lambda *a: os.path.join(ROOT, *a)
 KST = dt.timezone(dt.timedelta(hours=9))
 # (id, 이름, 방식, 문턱) — 방식 'pct' = 20일 변화율(%) 문턱 / 'abs' = 수준 차이 문턱 / 'flow' = 20일 누적(억원) 문턱
+# 문턱 = 1년(약 250거래일) 일별 자료로 잰 '20거래일 변화 절대값의 중앙값'(2026-10-02 계산, 달님 제안 채택): WTI 7.1% · 미10Y 0.10%p · SOX 6.9% · 미 HY OAS 0.13%p.
+# 외국인 5,000억은 임시값 — 이력이 34일뿐이라 중앙값을 못 구함(1년 이력 쌓이면 교체). 한 달 써 보고 라벨이 너무 자주/안 바뀌면 조정.
+# 주의: macro_history 의 credit_spread 는 한국 AA-회사채-국고3년 차이라 CREDIT-01(미 HY)과 무관 → FRED BAMLH0A0HYM2 를 직접 받는다.
 SPECS = [
-    ("OIL-01", "WTI", "macro:wti", "pct", 2.0),
+    ("OIL-01", "WTI", "macro:wti", "pct", 7.1),
     ("RATES-01", "미 10년물(%)", "macro:us10y", "abs", 0.10),
-    ("HBM-01", "SOX", "macro:sox", "pct", 2.0),
-    ("CREDIT-01", "HY 스프레드", "macro:credit_spread", "abs", 0.10),
+    ("HBM-01", "SOX", "macro:sox", "pct", 6.9),
+    ("CREDIT-01", "미 HY OAS(%p)", "fred:BAMLH0A0HYM2", "abs", 0.13),
     ("FLOW-01", "외국인 KOSPI 순매수(억원)", "flow:foreign", "flow", 5000.0),
 ]
 
@@ -61,6 +64,24 @@ def macro_series(key):
     return out
 
 
+def fred_series(sid):
+    """FRED 일별 CSV(키 없음). 실패하면 빈 리스트 → '이력부족'. 값을 만들어 채우지 않는다."""
+    import csv, urllib.request
+    start = (dt.date.today() - dt.timedelta(days=60)).isoformat()
+    try:
+        req = urllib.request.Request(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={sid}&cosd={start}", headers={"User-Agent": "Mozilla/5.0"})
+        rows = list(csv.reader(urllib.request.urlopen(req, timeout=30).read().decode().splitlines()))[1:]
+    except Exception:
+        return []
+    out = []
+    for r in rows:
+        try:
+            out.append(float(r[1]))
+        except (ValueError, IndexError):
+            pass      # FRED 빈칸(.)은 건너뜀
+    return out
+
+
 def flow_series():
     try:
         days = json.load(open(P("facts", "kr_investor_history.json"), encoding="utf-8")).get("days", [])
@@ -75,6 +96,8 @@ def run():
         typ, key = src.split(":")
         if typ == "flow":
             vals = flow_series(); x20, x5 = flow_changes(vals)
+        elif typ == "fred":
+            vals = fred_series(key); x20, x5 = level_changes(vals, kind)
         else:
             vals = macro_series(key); x20, x5 = level_changes(vals, kind)
         lab, r = label(x20, x5, thr)
