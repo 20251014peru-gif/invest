@@ -55,7 +55,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:07+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "nasdaq_eod",
@@ -194,7 +194,7 @@
       "raw_sha256": "c8ff05b1d3db51b3807c4b88261bf94a6dcc7bd34458acce7e76b292d5feb280",
       "raw_file": "US_COMP_CLOSE.json",
       "age_calendar_days": 2,
-      "freshness_status": "current_for_schedule",
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified",
       "source_comparison": {
         "status": "matched_overlap",
         "tolerance": 0.00501,
@@ -238,41 +238,7 @@
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=NASDAQCOM&file_type=json&observation_start=2026-08-24",
         "retrieved_at": "2026-10-07T18:39:08+00:00",
         "raw_sha256": "34fe17d9381699ff05af62c0cd5796eebfb63d36c6cdacf8229562ed35c5881f"
-      },
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": 0.44609848,
-      "expected_observation_date": "2026-10-06",
-      "expected_publication_at": null,
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 26861.06375308664
-        },
-        {
-          "date": "2026-10-01",
-          "value": 26871.59502873405
-        },
-        {
-          "date": "2026-10-02",
-          "value": 27190.86397170832
-        },
-        {
-          "date": "2026-10-05",
-          "value": 27477.31021108756
-        },
-        {
-          "date": "2026-10-06",
-          "value": 27599.88607542234
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      }
     },
     {
       "id": "US_SPX_CLOSE",
@@ -314,7 +280,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:07+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "fred",
@@ -453,41 +419,7 @@
       "raw_sha256": "c5a306d237070d80a18a5e9b85dd2c8c66940e18811d912a0f2435cc397ff96b",
       "raw_file": "US_SPX_CLOSE.json",
       "age_calendar_days": 2,
-      "freshness_status": "current_for_schedule",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": 0.57859904,
-      "expected_observation_date": "2026-10-06",
-      "expected_publication_at": null,
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 7651.54
-        },
-        {
-          "date": "2026-10-01",
-          "value": 7666.45
-        },
-        {
-          "date": "2026-10-02",
-          "value": 7722.72
-        },
-        {
-          "date": "2026-10-05",
-          "value": 7773.95
-        },
-        {
-          "date": "2026-10-06",
-          "value": 7818.93
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
     },
     {
       "id": "US_DJI_CLOSE",
@@ -529,7 +461,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:07+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "fred",
@@ -668,41 +600,7 @@
       "raw_sha256": "75b31f743f237908604b69ff1d179d09d3670a99cfe24c4de2f24f27d61ae598",
       "raw_file": "US_DJI_CLOSE.json",
       "age_calendar_days": 2,
-      "freshness_status": "current_for_schedule",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": 0.49422738,
-      "expected_observation_date": "2026-10-06",
-      "expected_publication_at": null,
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 50906.05
-        },
-        {
-          "date": "2026-10-01",
-          "value": 50926.56
-        },
-        {
-          "date": "2026-10-02",
-          "value": 51176.96
-        },
-        {
-          "date": "2026-10-05",
-          "value": 51267.9
-        },
-        {
-          "date": "2026-10-06",
-          "value": 51521.28
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
     },
     {
       "id": "US_SOX_CLOSE",
@@ -744,7 +642,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:08+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "nasdaq_eod",
@@ -883,7 +781,7 @@
       "raw_sha256": "3a62c81e0915eaa26f9fdb2fe957775a46d6d7e4e0f5f544aeb377828867ac58",
       "raw_file": "US_SOX_CLOSE.json",
       "age_calendar_days": 2,
-      "freshness_status": "current_for_schedule",
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified",
       "source_comparison": {
         "status": "matched_overlap",
         "tolerance": 0.00501,
@@ -927,41 +825,7 @@
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=NASDAQSOX&file_type=json&observation_start=2026-08-24",
         "retrieved_at": "2026-10-07T18:39:08+00:00",
         "raw_sha256": "d984aeefcccd318177fe2979909bba8bc3c8030de2d5eb55621fdef7c2c2852c"
-      },
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": 0.34227157,
-      "expected_observation_date": "2026-10-06",
-      "expected_publication_at": null,
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 12628.62375005161
-        },
-        {
-          "date": "2026-10-01",
-          "value": 12829.00000688464
-        },
-        {
-          "date": "2026-10-02",
-          "value": 13136.67451205267
-        },
-        {
-          "date": "2026-10-05",
-          "value": 13172.73640951796
-        },
-        {
-          "date": "2026-10-06",
-          "value": 13217.82294179828
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      }
     },
     {
       "id": "KR_KOSPI_CLOSE",
@@ -1003,7 +867,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:08+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "ecos",
@@ -1138,41 +1002,7 @@
       "raw_sha256": "497bc489317e22369e3be38de60ee4a7823697953efa3d5df042777827f8e7b9",
       "raw_file": "KR_KOSPI_CLOSE.json",
       "age_calendar_days": 1,
-      "freshness_status": "current_for_schedule",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": -1.9807272,
-      "expected_observation_date": "2026-10-07",
-      "expected_publication_at": null,
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 6838.04
-        },
-        {
-          "date": "2026-10-01",
-          "value": 6971.35
-        },
-        {
-          "date": "2026-10-02",
-          "value": 7003.74
-        },
-        {
-          "date": "2026-10-06",
-          "value": 6941.39
-        },
-        {
-          "date": "2026-10-07",
-          "value": 6803.9
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
     },
     {
       "id": "KR_KOSDAQ_CLOSE",
@@ -1214,7 +1044,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:08+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "ecos",
@@ -1349,41 +1179,7 @@
       "raw_sha256": "d266c99d569638fe462216e76c730d50ecd7c6c9abd231dfd334aa31799f9b16",
       "raw_file": "KR_KOSDAQ_CLOSE.json",
       "age_calendar_days": 1,
-      "freshness_status": "current_for_schedule",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": -2.3360727,
-      "expected_observation_date": "2026-10-07",
-      "expected_publication_at": null,
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 855.91
-        },
-        {
-          "date": "2026-10-01",
-          "value": 894.29
-        },
-        {
-          "date": "2026-10-02",
-          "value": 893.29
-        },
-        {
-          "date": "2026-10-06",
-          "value": 919.92
-        },
-        {
-          "date": "2026-10-07",
-          "value": 898.43
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
     },
     {
       "id": "FX_USDKRW_DAY1530",
@@ -1425,7 +1221,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:08+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "ecos",
@@ -1572,41 +1368,7 @@
       "raw_sha256": "aa06086ce334db1e444c24706a4e4a96cfad05e4c988d850b03ec0818893e050",
       "raw_file": "FX_USDKRW_DAY1530.json",
       "age_calendar_days": 1,
-      "freshness_status": "current_for_schedule",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": -0.23816612,
-      "expected_observation_date": "2026-10-07",
-      "expected_publication_at": null,
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-10-01",
-          "value": 1358.4
-        },
-        {
-          "date": "2026-10-02",
-          "value": 1350.6
-        },
-        {
-          "date": "2026-10-05",
-          "value": 1344.0
-        },
-        {
-          "date": "2026-10-06",
-          "value": 1343.6
-        },
-        {
-          "date": "2026-10-07",
-          "value": 1340.4
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
     },
     {
       "id": "FX_DXY_CASH",
@@ -1627,22 +1389,10 @@
       "published_at": null,
       "retrieved_at": null,
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": "exact_timestamp_history_feed_not_registered",
       "warnings": [],
-      "next_action": "ICE 현물 DXY의 고정 관측시각·역사자료 경로 등록 필요. FRED 광의달러지수로 대체하지 않음.",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "freshness_status": "not_connected",
-      "data_eligible": false,
-      "comparison_eligible": false,
-      "display_change": null,
-      "expected_observation_date": null,
-      "expected_publication_at": null,
-      "missing_sessions": null,
-      "window_eligible": false,
-      "validated_window": [],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": []
+      "next_action": "ICE 현물 DXY의 고정 관측시각·역사자료 경로 등록 필요. FRED 광의달러지수로 대체하지 않음."
     },
     {
       "id": "US_CMT_2Y",
@@ -1684,7 +1434,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:08+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "treasury",
@@ -1879,7 +1629,7 @@
       "raw_sha256": "fe3a112f3dd99d6f4c6d97e4a80eb64132afe98318acdfae2d02e60547580732",
       "raw_file": "US_CMT_2Y.xml",
       "age_calendar_days": 2,
-      "freshness_status": "current_for_schedule",
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified",
       "source_comparison": {
         "status": "matched_overlap_primary_newer",
         "tolerance": 1e-05,
@@ -1923,41 +1673,7 @@
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS2&file_type=json&observation_start=2026-08-24",
         "retrieved_at": "2026-10-07T18:39:09+00:00",
         "raw_sha256": "10eb01c95642f125535defa1715a986ef7c8275615aee6944a8849eae5f42455"
-      },
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": -5.0,
-      "expected_observation_date": "2026-10-06",
-      "expected_publication_at": null,
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 4.88
-        },
-        {
-          "date": "2026-10-01",
-          "value": 4.78
-        },
-        {
-          "date": "2026-10-02",
-          "value": 4.83
-        },
-        {
-          "date": "2026-10-05",
-          "value": 4.84
-        },
-        {
-          "date": "2026-10-06",
-          "value": 4.79
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      }
     },
     {
       "id": "US_CMT_10Y",
@@ -1999,7 +1715,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:09+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "treasury",
@@ -2194,7 +1910,7 @@
       "raw_sha256": "fe3a112f3dd99d6f4c6d97e4a80eb64132afe98318acdfae2d02e60547580732",
       "raw_file": "US_CMT_10Y.xml",
       "age_calendar_days": 2,
-      "freshness_status": "current_for_schedule",
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified",
       "source_comparison": {
         "status": "matched_overlap_primary_newer",
         "tolerance": 1e-05,
@@ -2238,41 +1954,7 @@
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS10&file_type=json&observation_start=2026-08-24",
         "retrieved_at": "2026-10-07T18:39:09+00:00",
         "raw_sha256": "909af7b3a1265e281ee5c2c608ed303801e7126070a88741447ddb3d50010069"
-      },
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": -4.0,
-      "expected_observation_date": "2026-10-06",
-      "expected_publication_at": null,
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 5.29
-        },
-        {
-          "date": "2026-10-01",
-          "value": 5.24
-        },
-        {
-          "date": "2026-10-02",
-          "value": 5.28
-        },
-        {
-          "date": "2026-10-05",
-          "value": 5.31
-        },
-        {
-          "date": "2026-10-06",
-          "value": 5.27
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      }
     },
     {
       "id": "US_CMT_30Y",
@@ -2314,7 +1996,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:09+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "treasury",
@@ -2509,7 +2191,7 @@
       "raw_sha256": "fe3a112f3dd99d6f4c6d97e4a80eb64132afe98318acdfae2d02e60547580732",
       "raw_file": "US_CMT_30Y.xml",
       "age_calendar_days": 2,
-      "freshness_status": "current_for_schedule",
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified",
       "source_comparison": {
         "status": "matched_overlap_primary_newer",
         "tolerance": 1e-05,
@@ -2553,41 +2235,7 @@
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS30&file_type=json&observation_start=2026-08-24",
         "retrieved_at": "2026-10-07T18:39:09+00:00",
         "raw_sha256": "2f5c5bf78c31c1b8d756d430c231a56b8d4e096da1904945953ded2ef8d33878"
-      },
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": -2.0,
-      "expected_observation_date": "2026-10-06",
-      "expected_publication_at": null,
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 5.64
-        },
-        {
-          "date": "2026-10-01",
-          "value": 5.61
-        },
-        {
-          "date": "2026-10-02",
-          "value": 5.63
-        },
-        {
-          "date": "2026-10-05",
-          "value": 5.66
-        },
-        {
-          "date": "2026-10-06",
-          "value": 5.64
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      }
     },
     {
       "id": "KR_KTB3_FINAL",
@@ -2629,7 +2277,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:09+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "ecos",
@@ -2764,41 +2412,7 @@
       "raw_sha256": "dc50c0e4a3ae6dd440b4de5a2caa98a02233b0b3bfd402f2eb996fbcaaef6801",
       "raw_file": "KR_KTB3_FINAL.json",
       "age_calendar_days": 1,
-      "freshness_status": "current_for_schedule",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": 2.8,
-      "expected_observation_date": "2026-10-07",
-      "expected_publication_at": null,
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 4.011
-        },
-        {
-          "date": "2026-10-01",
-          "value": 4.01
-        },
-        {
-          "date": "2026-10-02",
-          "value": 3.937
-        },
-        {
-          "date": "2026-10-06",
-          "value": 3.933
-        },
-        {
-          "date": "2026-10-07",
-          "value": 3.961
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
     },
     {
       "id": "KR_KTB10_FINAL",
@@ -2840,7 +2454,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:09+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "ecos",
@@ -2975,41 +2589,7 @@
       "raw_sha256": "2e0d9da8a94727873cb987b94bf4aa0bb2d704338e838beadeeaac718a21404b",
       "raw_file": "KR_KTB10_FINAL.json",
       "age_calendar_days": 1,
-      "freshness_status": "current_for_schedule",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": 0.7,
-      "expected_observation_date": "2026-10-07",
-      "expected_publication_at": null,
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 4.407
-        },
-        {
-          "date": "2026-10-01",
-          "value": 4.436
-        },
-        {
-          "date": "2026-10-02",
-          "value": 4.365
-        },
-        {
-          "date": "2026-10-06",
-          "value": 4.369
-        },
-        {
-          "date": "2026-10-07",
-          "value": 4.376
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
     },
     {
       "id": "CREDIT_HY_OAS",
@@ -3051,7 +2631,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:09+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "fred",
@@ -3194,41 +2774,7 @@
       "raw_sha256": "cd3079b79f127daa7d8c358bd1f89850febca2479636df5d673a6745e5776f6a",
       "raw_file": "CREDIT_HY_OAS.json",
       "age_calendar_days": 2,
-      "freshness_status": "current_for_schedule",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": -9.0,
-      "expected_observation_date": "2026-10-06",
-      "expected_publication_at": null,
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 3.12
-        },
-        {
-          "date": "2026-10-01",
-          "value": 3.24
-        },
-        {
-          "date": "2026-10-02",
-          "value": 3.1
-        },
-        {
-          "date": "2026-10-05",
-          "value": 3.12
-        },
-        {
-          "date": "2026-10-06",
-          "value": 3.03
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
     },
     {
       "id": "CREDIT_IG_OAS",
@@ -3270,7 +2816,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:09+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "fred",
@@ -3413,41 +2959,7 @@
       "raw_sha256": "f32ab680d5d7a5e8d7f92a2d5a8613deb7c0a374ea28ce31f2a369a6e04000aa",
       "raw_file": "CREDIT_IG_OAS.json",
       "age_calendar_days": 2,
-      "freshness_status": "current_for_schedule",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": -1.0,
-      "expected_observation_date": "2026-10-06",
-      "expected_publication_at": null,
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 0.84
-        },
-        {
-          "date": "2026-10-01",
-          "value": 0.86
-        },
-        {
-          "date": "2026-10-02",
-          "value": 0.85
-        },
-        {
-          "date": "2026-10-05",
-          "value": 0.84
-        },
-        {
-          "date": "2026-10-06",
-          "value": 0.83
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
     },
     {
       "id": "CREDIT_CCC_OAS",
@@ -3489,7 +3001,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:09+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "fred",
@@ -3632,41 +3144,7 @@
       "raw_sha256": "a356d9252fdd9cd10cd10932eee350e3455ed40e5a12ebcaecbbdf0d98296df2",
       "raw_file": "CREDIT_CCC_OAS.json",
       "age_calendar_days": 2,
-      "freshness_status": "current_for_schedule",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": 3.0,
-      "expected_observation_date": "2026-10-06",
-      "expected_publication_at": null,
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 11.79
-        },
-        {
-          "date": "2026-10-01",
-          "value": 12.15
-        },
-        {
-          "date": "2026-10-02",
-          "value": 12.02
-        },
-        {
-          "date": "2026-10-05",
-          "value": 12.11
-        },
-        {
-          "date": "2026-10-06",
-          "value": 12.14
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified"
     },
     {
       "id": "FUND_SOFR",
@@ -3708,7 +3186,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:10+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "nyfed",
@@ -3843,7 +3321,7 @@
       "raw_sha256": "3b4421fe572bb4e647b66616ff52a5aed4c3d64acf6845069d7db97cb16e7ec3",
       "raw_file": "FUND_SOFR.json",
       "age_calendar_days": 2,
-      "freshness_status": "current_for_schedule",
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified",
       "rate_context": {
         "percentPercentile1": 3.84,
         "percentPercentile25": 3.88,
@@ -3853,41 +3331,7 @@
         "targetRateFrom": null,
         "targetRateTo": null,
         "revisionIndicator": ""
-      },
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": 1.0,
-      "expected_observation_date": "2026-10-06",
-      "expected_publication_at": "2026-10-07T08:00:00-04:00",
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 3.9
-        },
-        {
-          "date": "2026-10-01",
-          "value": 3.87
-        },
-        {
-          "date": "2026-10-02",
-          "value": 3.88
-        },
-        {
-          "date": "2026-10-05",
-          "value": 3.89
-        },
-        {
-          "date": "2026-10-06",
-          "value": 3.9
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      }
     },
     {
       "id": "FUND_EFFR",
@@ -3929,7 +3373,7 @@
       "published_at": null,
       "retrieved_at": "2026-10-07T18:39:10+00:00",
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": null,
       "warnings": [],
       "provider": "nyfed",
@@ -4064,7 +3508,7 @@
       "raw_sha256": "cb8019a433ceaf67e498eba7b17e38c78718ce35b25eb3490490d6fb64275d6b",
       "raw_file": "FUND_EFFR.json",
       "age_calendar_days": 2,
-      "freshness_status": "current_for_schedule",
+      "freshness_status": "observation_date_shown_calendar_not_yet_verified",
       "rate_context": {
         "percentPercentile1": 3.85,
         "percentPercentile25": 3.87,
@@ -4074,41 +3518,7 @@
         "targetRateFrom": 3.75,
         "targetRateTo": 4.0,
         "revisionIndicator": ""
-      },
-      "asof": "2026-10-07T18:39:11+00:00",
-      "data_eligible": true,
-      "comparison_eligible": true,
-      "display_change": 0.0,
-      "expected_observation_date": "2026-10-06",
-      "expected_publication_at": "2026-10-07T09:00:00-04:00",
-      "missing_sessions": 0,
-      "window_eligible": true,
-      "validated_window": [
-        {
-          "date": "2026-09-30",
-          "value": 3.88
-        },
-        {
-          "date": "2026-10-01",
-          "value": 3.88
-        },
-        {
-          "date": "2026-10-02",
-          "value": 3.88
-        },
-        {
-          "date": "2026-10-05",
-          "value": 3.88
-        },
-        {
-          "date": "2026-10-06",
-          "value": 3.88
-        }
-      ],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": [],
-      "window_missing_dates": [],
-      "window_note": "최근 5개 관측일 달력 검증. 최신성 적격은 별도."
+      }
     },
     {
       "id": "OIL_CL_SETTLE",
@@ -4129,22 +3539,10 @@
       "published_at": null,
       "retrieved_at": null,
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": "contract_settlement_feed_not_registered",
       "warnings": [],
-      "next_action": "CME 계약월별 정산가 공급 경로 필요. 공개 자료의 자정 CT 공표는 아침 마감보다 늦을 수 있음. FRED 현물 WTI로 대체하지 않음.",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "freshness_status": "not_connected",
-      "data_eligible": false,
-      "comparison_eligible": false,
-      "display_change": null,
-      "expected_observation_date": null,
-      "expected_publication_at": null,
-      "missing_sessions": null,
-      "window_eligible": false,
-      "validated_window": [],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": []
+      "next_action": "CME 계약월별 정산가 공급 경로 필요. 공개 자료의 자정 CT 공표는 아침 마감보다 늦을 수 있음. FRED 현물 WTI로 대체하지 않음."
     },
     {
       "id": "OIL_BRENT_SETTLE",
@@ -4165,22 +3563,10 @@
       "published_at": null,
       "retrieved_at": null,
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": "contract_settlement_feed_not_registered",
       "warnings": [],
-      "next_action": "ICE Brent 계약월별 정산가·만기표 경로 필요. 현물 Brent/연속선물 최근가는 별개.",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "freshness_status": "not_connected",
-      "data_eligible": false,
-      "comparison_eligible": false,
-      "display_change": null,
-      "expected_observation_date": null,
-      "expected_publication_at": null,
-      "missing_sessions": null,
-      "window_eligible": false,
-      "validated_window": [],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": []
+      "next_action": "ICE Brent 계약월별 정산가·만기표 경로 필요. 현물 Brent/연속선물 최근가는 별개."
     },
     {
       "id": "NQ_1100",
@@ -4201,22 +3587,10 @@
       "published_at": null,
       "retrieved_at": null,
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": "intraday_contract_feed_not_registered",
       "warnings": [],
-      "next_action": "계약월과 11:00 KST 관측·비교시각이 보존되는 시세 경로 필요. Nasdaq Composite로 대체하지 않음.",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "freshness_status": "not_connected",
-      "data_eligible": false,
-      "comparison_eligible": false,
-      "display_change": null,
-      "expected_observation_date": null,
-      "expected_publication_at": null,
-      "missing_sessions": null,
-      "window_eligible": false,
-      "validated_window": [],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": []
+      "next_action": "계약월과 11:00 KST 관측·비교시각이 보존되는 시세 경로 필요. Nasdaq Composite로 대체하지 않음."
     },
     {
       "id": "KR_FOREIGN_CASH",
@@ -4237,22 +3611,10 @@
       "published_at": null,
       "retrieved_at": null,
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": "krx_investor_flow_feed_not_registered",
       "warnings": [],
-      "next_action": "KRX 외국인 현물 순매수 원표의 시장 범위·단위·접근 경로 등록 필요.",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "freshness_status": "not_connected",
-      "data_eligible": false,
-      "comparison_eligible": false,
-      "display_change": null,
-      "expected_observation_date": null,
-      "expected_publication_at": null,
-      "missing_sessions": null,
-      "window_eligible": false,
-      "validated_window": [],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": []
+      "next_action": "KRX 외국인 현물 순매수 원표의 시장 범위·단위·접근 경로 등록 필요."
     },
     {
       "id": "KR_FOREIGN_FUTURES",
@@ -4273,22 +3635,10 @@
       "published_at": null,
       "retrieved_at": null,
       "signal_eligible": false,
-      "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
+      "signal_note": "자동 매매·위험등급 판정은 하지 않음. 달력·사건시각 검증은 별도 단계.",
       "error": "krx_investor_flow_feed_not_registered",
       "warnings": [],
-      "next_action": "KRX 외국인 선물 순매수 원표의 상품·계약월 합산 범위·단위·접근 경로 등록 필요.",
-      "asof": "2026-10-07T18:39:11+00:00",
-      "freshness_status": "not_connected",
-      "data_eligible": false,
-      "comparison_eligible": false,
-      "display_change": null,
-      "expected_observation_date": null,
-      "expected_publication_at": null,
-      "missing_sessions": null,
-      "window_eligible": false,
-      "validated_window": [],
-      "window_calendar_conflicts": [],
-      "source_value_conflicts": []
+      "next_action": "KRX 외국인 선물 순매수 원표의 상품·계약월 합산 범위·단위·접근 경로 등록 필요."
     }
   ],
   "funding_context": {
@@ -5085,10 +4435,5 @@
       "connected": 2,
       "error": 0
     }
-  },
-  "clock_policy_version": "2026-10-01.2",
-  "eligibility_counts": {
-    "data_eligible": 17,
-    "comparison_eligible": 17
   }
 }
