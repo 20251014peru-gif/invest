@@ -1,7 +1,7 @@
 {
   "schema": "status/1",
   "_설명": "워크플로가 쓰는 파일. jobs[] 한 줄 = 작업 하나. status: ok | fail | stale | stopped. due 가 지나면 앱이 '늦음' 경고. 시각은 KST(+09:00) ISO.",
-  "updated": "2026-10-10T04:45:39+09:00",
+  "updated": "2026-10-10T05:05:04+09:00",
   "jobs": [
     {
       "id": "hub",
@@ -25,50 +25,6 @@
       "note": "새로 채점 0건 · 대기 0건"
     },
     {
-      "id": "macro",
-      "name": "매크로 수집",
-      "status": "ok",
-      "ran": "2026-10-10T00:05:11+09:00",
-      "due": "2026-10-11T06:05:11+09:00",
-      "cause": "",
-      "fix": "",
-      "link": "regime-lite-v1.html",
-      "note": "34/34 지표"
-    },
-    {
-      "id": "regime",
-      "name": "레짐 판정",
-      "status": "ok",
-      "ran": "2026-10-10T00:05:13+09:00",
-      "due": "2026-10-11T06:05:13+09:00",
-      "cause": "",
-      "fix": "",
-      "link": "regime-lite-v1.html",
-      "note": "성장 둔화(확인) · 물가 높음·올라오는 중(확인) · 유동성 긴축적(확인) → 4분면 성장↓물가↑ → 현금·실물·방어 우위"
-    },
-    {
-      "id": "calendar",
-      "name": "발표 달력",
-      "status": "stale",
-      "ran": "2026-10-10T00:05:13+09:00",
-      "due": "2026-10-11T06:05:13+09:00",
-      "cause": "미입력 연준 경제전망·점도표(SEP) 2026Q3, 관세청 1~20일 수출 2026-09, 중국 NBS 제조업 PMI 2026-09",
-      "fix": "manual.html 보고서 탭에서 입력",
-      "link": "manual.html#reports",
-      "note": "오늘 0건 · 14일 내 4건 · 미입력 4건"
-    },
-    {
-      "id": "kr_investor",
-      "name": "외국인 수급",
-      "status": "fail",
-      "ran": "2026-10-10T00:05:31+09:00",
-      "due": "2026-10-09T06:00:00+09:00",
-      "cause": "KeyError: '거래대금'",
-      "fix": "Actions 로그와 KRX_ID·KRX_PW Secrets 확인. 막히면 수동 입력으로 대체",
-      "link": "",
-      "note": "기준일 2026-10-07"
-    },
-    {
       "id": "board",
       "name": "토론실 근거",
       "status": "ok",
@@ -89,6 +45,50 @@
       "fix": "",
       "link": "events.html",
       "note": "51건(7일, 23쪽) · 신규 Event 0 · 중대성갱신 0 · push 0"
+    },
+    {
+      "id": "macro",
+      "name": "매크로 수집",
+      "status": "ok",
+      "ran": "2026-10-10T05:04:53+09:00",
+      "due": "2026-10-11T11:04:53+09:00",
+      "cause": "",
+      "fix": "",
+      "link": "regime-lite-v1.html",
+      "note": "34/34 지표"
+    },
+    {
+      "id": "regime",
+      "name": "레짐 판정",
+      "status": "ok",
+      "ran": "2026-10-10T05:04:54+09:00",
+      "due": "2026-10-11T11:04:54+09:00",
+      "cause": "",
+      "fix": "",
+      "link": "regime-lite-v1.html",
+      "note": "성장 둔화(확인) · 물가 높음·올라오는 중(확인) · 유동성 긴축적(확인) → 4분면 성장↓물가↑ → 현금·실물·방어 우위"
+    },
+    {
+      "id": "calendar",
+      "name": "발표 달력",
+      "status": "stale",
+      "ran": "2026-10-10T05:04:54+09:00",
+      "due": "2026-10-11T11:04:54+09:00",
+      "cause": "미입력 연준 경제전망·점도표(SEP) 2026Q3, 관세청 1~20일 수출 2026-09, 중국 NBS 제조업 PMI 2026-09",
+      "fix": "manual.html 보고서 탭에서 입력",
+      "link": "manual.html#reports",
+      "note": "오늘 0건 · 14일 내 4건 · 미입력 4건"
+    },
+    {
+      "id": "kr_investor",
+      "name": "외국인 수급",
+      "status": "fail",
+      "ran": "2026-10-10T05:05:04+09:00",
+      "due": "2026-10-09T06:00:00+09:00",
+      "cause": "KeyError: '거래대금'",
+      "fix": "Actions 로그와 KRX_ID·KRX_PW Secrets 확인. 막히면 수동 입력으로 대체",
+      "link": "",
+      "note": "기준일 2026-10-07"
     }
   ]
 }
