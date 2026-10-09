@@ -1,0 +1,418 @@
+{
+  "schema": "journal_day/1",
+  "version": "v 20260907-2000",
+  "date": "2026-10-10",
+  "generated_at": "2026-10-10T00:05:44+09:00",
+  "brief": [
+    {
+      "k": "레짐",
+      "t": "성장 둔화(확인) · 물가 높음·올라오는 중(확인) · 유동성 긴축적(확인) → 4분면 성장↓물가↑ → 현금·실물·방어 우위"
+    },
+    {
+      "k": "바뀐 것",
+      "t": "미 비농업고용 증감 29 천명(-78.2%) · 수출금액지수 전년비 75.82%(+11.50%p) · 투자자예탁금 104.7 조원(+5.0%) · 해운 BDRY 14.01 $(-3.3%)"
+    },
+    {
+      "k": "오늘 발표",
+      "t": "없음 · 다음 10-15 IMF 세계경제전망(WEO) · 10-16 KRX 외국인·기관 주간 순매수 · 10-21 관세청 1~20일 수출"
+    },
+    {
+      "k": "산업·종목",
+      "t": "DART 69건(수주·공급계약 8) · 토론실 근거글 +0(적중 11) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
+    },
+    {
+      "k": "미입력",
+      "t": "연준 경제전망·점도표(SEP) 2026Q3 · 관세청 1~20일 수출 2026-09 · 중국 NBS 제조업 PMI 2026-09 · ISM 제조업 PMI 보고서 2026-09"
+    }
+  ],
+  "cards": [
+    {
+      "key": "regime",
+      "label": "레짐",
+      "value": "둔화·높음",
+      "sub": "현금·실물·방어 · 확인",
+      "tone": "blue"
+    },
+    {
+      "key": "credit_spread",
+      "label": "신용 스프레드",
+      "value": "0.67%p",
+      "sub": "주의 · 2026-10-08",
+      "tone": "yellow"
+    },
+    {
+      "key": "kospi",
+      "label": "코스피",
+      "value": "6,626",
+      "sub": "-2.62% · 2026-10-08",
+      "tone": "red"
+    },
+    {
+      "key": "us10y",
+      "label": "미 10년물",
+      "value": "5.28%",
+      "sub": "부담 · 2026-10-07",
+      "tone": "green"
+    }
+  ],
+  "changed": [
+    {
+      "id": "payems_chg",
+      "name": "미 비농업고용 증감",
+      "value": 29.0,
+      "unit": "천명",
+      "prev": 133.0,
+      "delta": -104.0,
+      "delta_text": "-78.2%",
+      "judge": "수축",
+      "as_of": "2026-09-01",
+      "cycle": "M",
+      "score": 78.19548872180451,
+      "group": "us"
+    },
+    {
+      "id": "kr_export_yoy",
+      "name": "수출금액지수 전년비",
+      "value": 75.82,
+      "unit": "%",
+      "prev": 64.32,
+      "delta": 11.5,
+      "delta_text": "+11.50%p",
+      "judge": "확장",
+      "as_of": "2026-08",
+      "cycle": "M",
+      "score": 11.5,
+      "group": "kr"
+    },
+    {
+      "id": "kr_deposit",
+      "name": "투자자예탁금",
+      "value": 104.7,
+      "unit": "조원",
+      "prev": 99.7,
+      "delta": 5.0,
+      "delta_text": "+5.0%",
+      "judge": "",
+      "as_of": "2026-09",
+      "cycle": "M",
+      "score": 5.015045135406218,
+      "group": "kr"
+    },
+    {
+      "id": "bdry",
+      "name": "해운 BDRY",
+      "value": 14.005,
+      "unit": "$",
+      "prev": 14.48,
+      "delta": -0.475,
+      "delta_text": "-3.3%",
+      "judge": "",
+      "as_of": "2026-10-09",
+      "cycle": "D",
+      "score": 3.280386740331489,
+      "group": "world"
+    },
+    {
+      "id": "vix",
+      "name": "VIX",
+      "value": 15.04,
+      "unit": "pt",
+      "prev": 15.41,
+      "delta": -0.37,
+      "delta_text": "-2.4%",
+      "judge": "안정",
+      "as_of": "2026-10-09",
+      "cycle": "D",
+      "score": 2.401038286826742,
+      "group": "us"
+    },
+    {
+      "id": "wti",
+      "name": "유가 WTI",
+      "value": 91.67,
+      "unit": "$",
+      "prev": 90.9,
+      "delta": 0.77,
+      "delta_text": "+0.8%",
+      "judge": "",
+      "as_of": "2026-10-09",
+      "cycle": "D",
+      "score": 0.8470847084708426,
+      "group": "world"
+    },
+    {
+      "id": "nasdaq",
+      "name": "나스닥",
+      "value": 27348.1309,
+      "unit": "pt",
+      "prev": 27193.3398,
+      "delta": 154.791,
+      "delta_text": "+0.6%",
+      "judge": "중립",
+      "as_of": "2026-10-09",
+      "cycle": "D",
+      "score": 0.5692243069017898,
+      "group": "us"
+    },
+    {
+      "id": "copper",
+      "name": "구리",
+      "value": 6.697,
+      "unit": "$/lb",
+      "prev": 6.661,
+      "delta": 0.036,
+      "delta_text": "+0.5%",
+      "judge": "",
+      "as_of": "2026-10-09",
+      "cycle": "D",
+      "score": 0.5404593904819168,
+      "group": "world"
+    }
+  ],
+  "releases": {
+    "today": [],
+    "upcoming": [
+      {
+        "id": "imf_weo",
+        "name": "IMF 세계경제전망(WEO)",
+        "tier": "quarter",
+        "date": "2026-10-15",
+        "time": "",
+        "period": "2026Q4",
+        "url": "https://www.imf.org/en/Publications/WEO",
+        "auto": false,
+        "note": "4·10월 전체, 1·7월 업데이트. 날짜는 해마다 달라 ±2주(추정)"
+      },
+      {
+        "id": "krx_flow",
+        "name": "KRX 외국인·기관 주간 순매수",
+        "tier": "month",
+        "date": "2026-10-16",
+        "time": "18:00",
+        "period": "2026-W42",
+        "url": "https://data.krx.co.kr/",
+        "auto": false,
+        "note": "매주 금요일 장 마감 후. 자동 수집 실험 전까지 수동 · optional=미입력 경고 안 함"
+      },
+      {
+        "id": "kr_export_20",
+        "name": "관세청 1~20일 수출",
+        "tier": "month",
+        "date": "2026-10-21",
+        "time": "09:00",
+        "period": "2026-10",
+        "url": "https://www.customs.go.kr/kcs/na/ntt/selectNttList.do?mi=2891&bbsId=1362",
+        "auto": false,
+        "note": "매월 21일 아침(주말이면 다음 영업일)"
+      }
+    ],
+    "missing": [
+      {
+        "id": "fed_sep",
+        "name": "연준 경제전망·점도표(SEP)",
+        "tier": "quarter",
+        "date": "2026-09-18",
+        "time": "",
+        "period": "2026Q3",
+        "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+        "auto": false,
+        "note": "분기 FOMC 둘째 날 새벽 3시 KST(추정, 일정표 확인)",
+        "days_late": 22
+      },
+      {
+        "id": "kr_export_20",
+        "name": "관세청 1~20일 수출",
+        "tier": "month",
+        "date": "2026-09-21",
+        "time": "09:00",
+        "period": "2026-09",
+        "url": "https://www.customs.go.kr/kcs/na/ntt/selectNttList.do?mi=2891&bbsId=1362",
+        "auto": false,
+        "note": "매월 21일 아침(주말이면 다음 영업일)",
+        "days_late": 19
+      },
+      {
+        "id": "china_pmi",
+        "name": "중국 NBS 제조업 PMI",
+        "tier": "month",
+        "date": "2026-09-30",
+        "time": "10:30",
+        "period": "2026-09",
+        "url": "https://www.stats.gov.cn/sj/",
+        "auto": false,
+        "note": "매월 말일 오전(31일 없는 달은 30일)",
+        "days_late": 10
+      },
+      {
+        "id": "ism_mfg",
+        "name": "ISM 제조업 PMI 보고서",
+        "tier": "month",
+        "date": "2026-10-01",
+        "time": "23:00",
+        "period": "2026-09",
+        "url": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/",
+        "auto": false,
+        "note": "매월 1영업일 밤 11시 KST",
+        "days_late": 9
+      }
+    ],
+    "latest": [
+      {
+        "id": "ism_mfg",
+        "name": "ISM 제조업 PMI 보고서",
+        "period": "2026-08",
+        "verdict": "아래",
+        "memo": "8개월 연속 확장이나 신규주문 −3.0 으로 둔화. 가격 71.1 그대로. 메모리·반도체·구리 공급 부족 목록",
+        "date": "2026-09-07"
+      },
+      {
+        "id": "china_pmi",
+        "name": "중국 NBS 제조업 PMI",
+        "period": "2026-08",
+        "verdict": "위",
+        "memo": "49.8(+0.6) 수축권이지만 회복 중, 신규주문 50.6. 원문 미확인(요약표 기준)",
+        "date": "2026-09-07"
+      }
+    ]
+  },
+  "auto_entries": [
+    {
+      "id": "2026-10-10/auto/brief",
+      "time": "08:00",
+      "who": "auto",
+      "kind": "brief",
+      "title": "아침 초안 — 바뀐 지표 8개",
+      "items": [
+        {
+          "id": "payems_chg",
+          "name": "미 비농업고용 증감",
+          "value": 29.0,
+          "unit": "천명",
+          "prev": 133.0,
+          "delta": -104.0,
+          "delta_text": "-78.2%",
+          "judge": "수축",
+          "as_of": "2026-09-01",
+          "cycle": "M",
+          "score": 78.19548872180451,
+          "group": "us"
+        },
+        {
+          "id": "kr_export_yoy",
+          "name": "수출금액지수 전년비",
+          "value": 75.82,
+          "unit": "%",
+          "prev": 64.32,
+          "delta": 11.5,
+          "delta_text": "+11.50%p",
+          "judge": "확장",
+          "as_of": "2026-08",
+          "cycle": "M",
+          "score": 11.5,
+          "group": "kr"
+        },
+        {
+          "id": "kr_deposit",
+          "name": "투자자예탁금",
+          "value": 104.7,
+          "unit": "조원",
+          "prev": 99.7,
+          "delta": 5.0,
+          "delta_text": "+5.0%",
+          "judge": "",
+          "as_of": "2026-09",
+          "cycle": "M",
+          "score": 5.015045135406218,
+          "group": "kr"
+        },
+        {
+          "id": "bdry",
+          "name": "해운 BDRY",
+          "value": 14.005,
+          "unit": "$",
+          "prev": 14.48,
+          "delta": -0.475,
+          "delta_text": "-3.3%",
+          "judge": "",
+          "as_of": "2026-10-09",
+          "cycle": "D",
+          "score": 3.280386740331489,
+          "group": "world"
+        },
+        {
+          "id": "vix",
+          "name": "VIX",
+          "value": 15.04,
+          "unit": "pt",
+          "prev": 15.41,
+          "delta": -0.37,
+          "delta_text": "-2.4%",
+          "judge": "안정",
+          "as_of": "2026-10-09",
+          "cycle": "D",
+          "score": 2.401038286826742,
+          "group": "us"
+        },
+        {
+          "id": "wti",
+          "name": "유가 WTI",
+          "value": 91.67,
+          "unit": "$",
+          "prev": 90.9,
+          "delta": 0.77,
+          "delta_text": "+0.8%",
+          "judge": "",
+          "as_of": "2026-10-09",
+          "cycle": "D",
+          "score": 0.8470847084708426,
+          "group": "world"
+        },
+        {
+          "id": "nasdaq",
+          "name": "나스닥",
+          "value": 27348.1309,
+          "unit": "pt",
+          "prev": 27193.3398,
+          "delta": 154.791,
+          "delta_text": "+0.6%",
+          "judge": "중립",
+          "as_of": "2026-10-09",
+          "cycle": "D",
+          "score": 0.5692243069017898,
+          "group": "us"
+        },
+        {
+          "id": "copper",
+          "name": "구리",
+          "value": 6.697,
+          "unit": "$/lb",
+          "prev": 6.661,
+          "delta": 0.036,
+          "delta_text": "+0.5%",
+          "judge": "",
+          "as_of": "2026-10-09",
+          "cycle": "D",
+          "score": 0.5404593904819168,
+          "group": "world"
+        }
+      ]
+    },
+    {
+      "id": "2026-10-10/auto/flow",
+      "time": "08:40",
+      "who": "auto",
+      "kind": "flow",
+      "title": "공시·토론실 — 근거글 +0, 수주·공급계약 8",
+      "text": "SK하이닉스 \"ADR과 국내주가 갭차이 분석\"(중) · SK하이닉스 \"자사주 매입 시작\"(상) · SK하이닉스 \"자사주 매입 시작\"(상)"
+    },
+    {
+      "id": "2026-10-10/auto/macro",
+      "time": "00:05",
+      "who": "auto",
+      "kind": "macro",
+      "title": "지표 갱신 — 34/34 수집",
+      "text": "전부 정상"
+    }
+  ],
+  "_정직": "자동 초안. 달님 기록(결론·헤드라인·시나리오·보고서 판정·종목 판단)은 Firestore invest_journal/<date>, invest_records 에 있음"
+}
