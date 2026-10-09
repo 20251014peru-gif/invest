@@ -2,12 +2,12 @@
   "schema": "macro_periods/1",
   "items": {
     "fedfunds": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=FEDFUNDS&observation_start=2014-09-21&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=FEDFUNDS&observation_start=2014-09-22&file_type=json",
       "symbol": "FEDFUNDS",
       "cycle": "M",
       "unit": "%",
       "formula": "공식 원자료 값",
-      "collected_at": "2026-10-08T19:14:53.817358+00:00",
+      "collected_at": "2026-10-09T00:12:37.106696+00:00",
       "last_observation": "2026-09-01",
       "points": [
         {
@@ -493,12 +493,12 @@
       ]
     },
     "cpi_yoy": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&observation_start=2014-09-21&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&observation_start=2014-09-22&file_type=json",
       "symbol": "CPIAUCSL",
       "cycle": "M",
       "unit": "%",
       "formula": "(당월 지수 / 전년 같은 달 지수 − 1) × 100",
-      "collected_at": "2026-10-08T19:14:53.823115+00:00",
+      "collected_at": "2026-10-09T00:12:37.115315+00:00",
       "last_observation": "2026-08-01",
       "points": [
         {
@@ -984,12 +984,12 @@
       ]
     },
     "m2": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=M2SL&observation_start=2014-09-21&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=M2SL&observation_start=2014-09-22&file_type=json",
       "symbol": "M2SL",
       "cycle": "M",
       "unit": "십억$",
       "formula": "공식 원자료 값",
-      "collected_at": "2026-10-08T19:14:53.837342+00:00",
+      "collected_at": "2026-10-09T00:12:37.131791+00:00",
       "last_observation": "2026-08-01",
       "points": [
         {
@@ -1475,12 +1475,12 @@
       ]
     },
     "core_pce_yoy": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=PCEPILFE&observation_start=2014-09-21&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=PCEPILFE&observation_start=2014-09-22&file_type=json",
       "symbol": "PCEPILFE",
       "cycle": "M",
       "unit": "%",
       "formula": "(당월 지수 / 전년 같은 달 지수 − 1) × 100",
-      "collected_at": "2026-10-08T19:14:53.828296+00:00",
+      "collected_at": "2026-10-09T00:12:37.123647+00:00",
       "last_observation": "2026-08-01",
       "points": [
         {
@@ -1966,18 +1966,14 @@
       ]
     },
     "us2y": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS2&observation_start=2025-05-26&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS2&observation_start=2025-05-27&file_type=json",
       "symbol": "DGS2",
       "cycle": "D",
       "unit": "%",
       "formula": "공식 원자료 값",
-      "collected_at": "2026-10-08T19:14:51.653801+00:00",
-      "last_observation": "2026-10-06",
+      "collected_at": "2026-10-09T00:12:34.466018+00:00",
+      "last_observation": "2026-10-07",
       "points": [
-        {
-          "period": "2026-04-16",
-          "value": 3.78
-        },
         {
           "period": "2026-04-17",
           "value": 3.71
@@ -2453,22 +2449,22 @@
         {
           "period": "2026-10-06",
           "value": 4.79
+        },
+        {
+          "period": "2026-10-07",
+          "value": 4.77
         }
       ]
     },
     "us10y": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS10&observation_start=2025-05-26&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS10&observation_start=2025-05-27&file_type=json",
       "symbol": "DGS10",
       "cycle": "D",
       "unit": "%",
       "formula": "공식 원자료 값",
-      "collected_at": "2026-10-08T19:14:51.647806+00:00",
-      "last_observation": "2026-10-06",
+      "collected_at": "2026-10-09T00:12:34.456934+00:00",
+      "last_observation": "2026-10-07",
       "points": [
-        {
-          "period": "2026-04-16",
-          "value": 4.32
-        },
         {
           "period": "2026-04-17",
           "value": 4.26
@@ -2944,17 +2940,21 @@
         {
           "period": "2026-10-06",
           "value": 5.27
+        },
+        {
+          "period": "2026-10-07",
+          "value": 5.28
         }
       ]
     },
     "fed_bs": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=WALCL&observation_start=2025-05-26&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=WALCL&observation_start=2025-05-27&file_type=json",
       "symbol": "WALCL",
       "cycle": "W",
       "unit": "백만$",
       "formula": "공식 원자료 값",
-      "collected_at": "2026-10-08T19:14:51.658856+00:00",
-      "last_observation": "2026-09-30",
+      "collected_at": "2026-10-09T00:12:34.474200+00:00",
+      "last_observation": "2026-10-07",
       "points": [
         {
           "period": "2025-05-28",
@@ -3239,16 +3239,20 @@
         {
           "period": "2026-09-30",
           "value": 6743031.0
+        },
+        {
+          "period": "2026-10-07",
+          "value": 6747560.0
         }
       ]
     },
     "payems_chg": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=PAYEMS&observation_start=2014-09-21&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=PAYEMS&observation_start=2014-09-22&file_type=json",
       "symbol": "PAYEMS",
       "cycle": "M",
       "unit": "천명",
       "formula": "당월 값 − 전월 값",
-      "collected_at": "2026-10-08T19:14:53.842539+00:00",
+      "collected_at": "2026-10-09T00:12:37.140043+00:00",
       "last_observation": "2026-09-01",
       "points": [
         {
@@ -3734,12 +3738,12 @@
       ]
     },
     "unrate": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=UNRATE&observation_start=2014-09-21&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=UNRATE&observation_start=2014-09-22&file_type=json",
       "symbol": "UNRATE",
       "cycle": "M",
       "unit": "%",
       "formula": "공식 원자료 값",
-      "collected_at": "2026-10-08T19:14:53.847623+00:00",
+      "collected_at": "2026-10-09T00:12:37.148194+00:00",
       "last_observation": "2026-09-01",
       "points": [
         {
@@ -4225,12 +4229,12 @@
       ]
     },
     "retail_sales_mom": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=RSAFS&observation_start=2014-09-21&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=RSAFS&observation_start=2014-09-22&file_type=json",
       "symbol": "RSAFS",
       "cycle": "M",
       "unit": "%",
       "formula": "(당월 값 / 전월 값 − 1) × 100",
-      "collected_at": "2026-10-08T19:14:53.862713+00:00",
+      "collected_at": "2026-10-09T00:12:37.173057+00:00",
       "last_observation": "2026-08-01",
       "points": [
         {
@@ -4716,12 +4720,12 @@
       ]
     },
     "core_cpi_yoy": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=CPILFESL&observation_start=2014-09-21&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=CPILFESL&observation_start=2014-09-22&file_type=json",
       "symbol": "CPILFESL",
       "cycle": "M",
       "unit": "%",
       "formula": "(당월 지수 / 전년 같은 달 지수 − 1) × 100",
-      "collected_at": "2026-10-08T19:14:53.857679+00:00",
+      "collected_at": "2026-10-09T00:12:37.164857+00:00",
       "last_observation": "2026-08-01",
       "points": [
         {
@@ -5207,12 +5211,12 @@
       ]
     },
     "initial_claims": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=ICSA&observation_start=2025-05-26&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=ICSA&observation_start=2025-05-27&file_type=json",
       "symbol": "ICSA",
       "cycle": "W",
       "unit": "건",
       "formula": "공식 원자료 값",
-      "collected_at": "2026-10-08T19:14:51.663826+00:00",
+      "collected_at": "2026-10-09T00:12:34.482246+00:00",
       "last_observation": "2026-10-03",
       "points": [
         {
@@ -5502,12 +5506,12 @@
       ]
     },
     "ahe_yoy": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=CES0500000003&observation_start=2014-09-21&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=CES0500000003&observation_start=2014-09-22&file_type=json",
       "symbol": "CES0500000003",
       "cycle": "M",
       "unit": "%",
       "formula": "(당월 지수 / 전년 같은 달 지수 − 1) × 100",
-      "collected_at": "2026-10-08T19:14:53.852652+00:00",
+      "collected_at": "2026-10-09T00:12:37.156663+00:00",
       "last_observation": "2026-09-01",
       "points": [
         {
@@ -5993,12 +5997,12 @@
       ]
     },
     "industrial_prod_yoy": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=INDPRO&observation_start=2014-09-21&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=INDPRO&observation_start=2014-09-22&file_type=json",
       "symbol": "INDPRO",
       "cycle": "M",
       "unit": "%",
       "formula": "(당월 지수 / 전년 같은 달 지수 − 1) × 100",
-      "collected_at": "2026-10-08T19:14:53.867812+00:00",
+      "collected_at": "2026-10-09T00:12:37.181222+00:00",
       "last_observation": "2026-08-01",
       "points": [
         {
@@ -6484,18 +6488,14 @@
       ]
     },
     "us30y": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS30&observation_start=2025-05-26&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS30&observation_start=2025-05-27&file_type=json",
       "symbol": "DGS30",
       "cycle": "D",
       "unit": "%",
       "formula": "공식 원자료 값",
-      "collected_at": "2026-10-08T19:14:51.668969+00:00",
-      "last_observation": "2026-10-06",
+      "collected_at": "2026-10-09T00:12:34.490445+00:00",
+      "last_observation": "2026-10-07",
       "points": [
-        {
-          "period": "2026-04-16",
-          "value": 4.93
-        },
         {
           "period": "2026-04-17",
           "value": 4.88
@@ -6971,16 +6971,20 @@
         {
           "period": "2026-10-06",
           "value": 5.64
+        },
+        {
+          "period": "2026-10-07",
+          "value": 5.67
         }
       ]
     },
     "us_hy_oas": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=BAMLH0A0HYM2&observation_start=2025-05-26&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=BAMLH0A0HYM2&observation_start=2025-05-27&file_type=json",
       "symbol": "BAMLH0A0HYM2",
       "cycle": "D",
       "unit": "%p",
       "formula": "공식 원자료 값",
-      "collected_at": "2026-10-08T19:14:51.674038+00:00",
+      "collected_at": "2026-10-09T00:12:34.498739+00:00",
       "last_observation": "2026-10-07",
       "points": [
         {
@@ -7466,12 +7470,12 @@
       ]
     },
     "us_ccc_oas": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=BAMLH0A3HYC&observation_start=2025-05-26&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=BAMLH0A3HYC&observation_start=2025-05-27&file_type=json",
       "symbol": "BAMLH0A3HYC",
       "cycle": "D",
       "unit": "%p",
       "formula": "공식 원자료 값",
-      "collected_at": "2026-10-08T19:14:51.679262+00:00",
+      "collected_at": "2026-10-09T00:12:34.507189+00:00",
       "last_observation": "2026-10-07",
       "points": [
         {
@@ -7957,12 +7961,12 @@
       ]
     },
     "sofr": {
-      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&observation_start=2025-05-26&file_type=json",
+      "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&observation_start=2025-05-27&file_type=json",
       "symbol": "SOFR",
       "cycle": "D",
       "unit": "%",
       "formula": "공식 원자료 값",
-      "collected_at": "2026-10-08T19:14:51.684389+00:00",
+      "collected_at": "2026-10-09T00:12:34.515437+00:00",
       "last_observation": "2026-10-07",
       "points": [
         {
@@ -8449,7 +8453,7 @@
     }
   },
   "errors": {},
-  "attempted_at": "2026-10-08T19:14:53.872652+00:00",
+  "attempted_at": "2026-10-09T00:12:37.189236+00:00",
   "status": "complete",
   "batch_errors": {},
   "counts": {
@@ -8460,5 +8464,5 @@
     "retained_items": 18
   },
   "finished": true,
-  "collected_at": "2026-10-08T19:14:53.872652+00:00"
+  "collected_at": "2026-10-09T00:12:37.189236+00:00"
 }
