@@ -2,11 +2,11 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-10-17",
-  "generated_at": "2026-10-17T07:41:47+09:00",
+  "generated_at": "2026-10-17T10:10:51+09:00",
   "brief": [
     {
       "k": "레짐",
-      "t": "성장 둔화(확인) · 물가 높음·올라오는 중(확인) · 유동성 중립(확인) → 4분면 성장↓물가↑ → 현금·실물·방어 우위"
+      "t": "성장 둔화(확인) · 물가 높음·올라오는 중(확인) · 유동성 긴축적(확인) → 4분면 성장↓물가↑ → 현금·실물·방어 우위"
     },
     {
       "k": "바뀐 것",
@@ -36,9 +36,9 @@
     {
       "key": "credit_spread",
       "label": "신용 스프레드",
-      "value": "없음",
-      "sub": "— · ",
-      "tone": "green"
+      "value": "0.69%p",
+      "sub": "주의 · 2026-10-16",
+      "tone": "yellow"
     },
     {
       "key": "kospi",
@@ -155,18 +155,18 @@
       "group": "world"
     },
     {
-      "id": "bdry",
-      "name": "해운 BDRY",
-      "value": 12.55,
-      "unit": "$",
-      "prev": 12.25,
-      "delta": 0.3,
-      "delta_text": "+2.4%",
-      "judge": "",
+      "id": "nasdaq",
+      "name": "나스닥",
+      "value": 26140.0332,
+      "unit": "pt",
+      "prev": 26713.0293,
+      "delta": -572.996,
+      "delta_text": "-2.1%",
+      "judge": "약",
       "as_of": "2026-10-16",
       "cycle": "D",
-      "score": 2.4489795918367405,
-      "group": "world"
+      "score": 2.145006070127721,
+      "group": "us"
     }
   ],
   "releases": {
@@ -394,18 +394,18 @@
           "group": "world"
         },
         {
-          "id": "bdry",
-          "name": "해운 BDRY",
-          "value": 12.55,
-          "unit": "$",
-          "prev": 12.25,
-          "delta": 0.3,
-          "delta_text": "+2.4%",
-          "judge": "",
+          "id": "nasdaq",
+          "name": "나스닥",
+          "value": 26140.0332,
+          "unit": "pt",
+          "prev": 26713.0293,
+          "delta": -572.996,
+          "delta_text": "-2.1%",
+          "judge": "약",
           "as_of": "2026-10-16",
           "cycle": "D",
-          "score": 2.4489795918367405,
-          "group": "world"
+          "score": 2.145006070127721,
+          "group": "us"
         }
       ]
     },
@@ -419,11 +419,11 @@
     },
     {
       "id": "2026-10-17/auto/macro",
-      "time": "07:40",
+      "time": "10:10",
       "who": "auto",
       "kind": "macro",
-      "title": "지표 갱신 — 32/34 수집",
-      "text": "실패: 회사채 AA- 3년, 신용 스프레드 AA-−국고3년"
+      "title": "지표 갱신 — 34/34 수집",
+      "text": "전부 정상"
     }
   ],
   "_정직": "자동 초안. 달님 기록(결론·헤드라인·시나리오·보고서 판정·종목 판단)은 Firestore invest_journal/<date>, invest_records 에 있음"
