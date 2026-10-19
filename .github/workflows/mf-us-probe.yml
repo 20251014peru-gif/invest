@@ -30,15 +30,20 @@ jobs:
           python -m pip show yfinance | sed -n '1,2p'
       - name: 프로브 실행 (호출당 상한 90초 · 항목마다 결과 즉시 저장 · 연속 10회 실패 시 중단)
         run: python tests/mf_us_probe/probe.py
+      - name: 대체 출처 프로브 (SEC EDGAR · Stooq · FDR) — 야후가 막혔을 때의 후보 확인
+        run: python tests/mf_us_probe/probe_alt.py
       - name: 결과를 Summary 에 표시
         if: always()
         run: |
           if [ -f tests/mf_us_probe/out/result.md ]; then cat tests/mf_us_probe/out/result.md >> "$GITHUB_STEP_SUMMARY"; else echo "결과 파일 없음 — 프로브가 시작 전에 실패(실행 실패, 데이터 미확보 판정 아님)" >> "$GITHUB_STEP_SUMMARY"; fi
+          if [ -f tests/mf_us_probe/out_alt/result.md ]; then cat tests/mf_us_probe/out_alt/result.md >> "$GITHUB_STEP_SUMMARY"; fi
       - name: 결과 보관 (7일)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mf-us-probe-result
-          path: tests/mf_us_probe/out/
+          path: |
+            tests/mf_us_probe/out/
+            tests/mf_us_probe/out_alt/
           retention-days: 7
           if-no-files-found: warn
