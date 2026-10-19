@@ -1,0 +1,95 @@
+# v 20261019-1  multifactor-kr.yml — 국내 멀티팩터 종합점수(scripts/multifactor_kr.py) 주 1회
+# 하는 일: FinanceDataReader 로 시가총액 상위 N종목(기본 200)의 주가·재무를 받아 analysis/multifactor_kr.json 을 만든다.
+# 안전장치: main 에서만 커밋·push 한다(다른 브랜치는 시험 모드 — 아티팩트만 남기고 저장소를 바꾸지 않는다).
+#           연속 10회 실패(차단 의심)·정상 종목 부족이면 스크립트가 종료코드 3 으로 끝나 파일을 쓰지 않는다 → 기존 결과 보존, 워크플로 빨강, ntfy 알림.
+# 비밀키·AI·Firebase 사용 없음. 데이터 출처는 비공식 경로(KRX 목록·네이버 재무)이며 약관은 미확인이다.
+# 비용: GitHub Actions 사용 시간(1회 약 10~20분 예상, 주 1회). 외부 유료 호출 없음.
+name: Multifactor KR
+on:
+  schedule:
+    - cron: '17 1 * * 6'       # 토 10:17 KST — 직전 금요일 종가 기준(정각 회피)
+  workflow_dispatch:
+    inputs:
+      n:
+        description: '대상 종목 수(시가총액 상위, 기본 200)'
+        required: false
+        default: '200'
+  push:                        # 임시: 시험 브랜치에서만, 이 파일/스크립트가 바뀐 push 에서만 시험 모드로 1회 실행. main 에 합칠 때 제거.
+    branches: ['feature/mf-kr']
+    paths:
+      - '.github/workflows/multifactor-kr.yml'
+      - 'scripts/multifactor_kr.py'
+permissions:
+  contents: write              # main 에서 결과 JSON 을 커밋할 때만 쓴다
+concurrency:
+  group: multifactor-kr
+  cancel-in-progress: false
+jobs:
+  mf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      MF_N: ${{ github.event.inputs.n || '200' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 라이브러리 설치 (버전 고정)
+        run: |
+          python -m pip install --quiet "finance-datareader==0.9.202"
+          python -m pip show finance-datareader | sed -n '1,2p'
+      - name: 단위 시험
+        run: python -m unittest discover -s tests/mf -p "test_*.py"
+      - name: 시험 모드 (main 아님) — 계산만 하고 커밋하지 않음
+        if: github.ref != 'refs/heads/main'
+        run: python scripts/multifactor_kr.py --n "$MF_N"
+      - name: 실행하고 커밋·push (main 전용, push 가 밀리면 최신으로 다시 실행)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -e
+          git config user.name "multifactor-bot"
+          git config user.email "bot@users.noreply.github.com"
+          for i in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            python scripts/multifactor_kr.py --n "$MF_N"
+            git add analysis/multifactor_kr.json
+            if git diff --cached --quiet; then echo "::notice::변경 없음"; exit 0; fi
+            git commit -q -m "auto: multifactor $(date -u +%Y-%m-%dT%H:%MZ)"
+            if git push origin HEAD:main; then echo "::notice::push 성공 (시도 $i 회)"; exit 0; fi
+            echo "push 밀림 — $((i*5))초 뒤 최신으로 다시 실행"; sleep $((i*5))
+          done
+          echo "::error::push 4회 실패"; exit 1
+      - name: 결과 요약 (Summary)
+        if: always()
+        run: |
+          if [ -f analysis/multifactor_kr.json ]; then
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          d = json.load(open("analysis/multifactor_kr.json", encoding="utf-8"))
+          u = d["universe"]
+          print("## 멀티팩터 국내")
+          print("- 정상 %d / 대상 %d종목 · 주가 기준 %s · 재무 %s" % (d["n"], u["requested"], d["price_date"], d["quarter_date"]))
+          print("- 사전 제외: %s" % u["pre_excluded"])
+          print("- 사후 제외: %s · 수신 실패 %d건" % (u["post_excluded"], len(u["failed"])))
+          print("- 수치 정확성은 공식 자료와 대조하지 않음(미검증)")
+          PY
+          else
+            echo "결과 파일 없음 — 실행 실패 또는 차단/데이터 부족으로 파일을 쓰지 않음(기존 결과 보존)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: 결과 파일 보관 (7일)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: multifactor-kr-result
+          path: analysis/multifactor_kr.json
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: 실패하면 폰으로 알림
+        if: failure()
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          [ -z "$NTFY_TOPIC" ] && { echo "NTFY_TOPIC 없음 — 알림 생략"; exit 0; }
+          curl -s -H "Title: [실패] 멀티팩터 국내" -H "Priority: 4" -d "invest multifactor-kr.yml 실패 — Actions 로그 확인(차단/데이터 부족이면 기존 결과는 보존됨)" "https://ntfy.sh/$NTFY_TOPIC" || true
