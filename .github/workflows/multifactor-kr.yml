@@ -39,8 +39,10 @@ jobs:
         run: |
           python -m pip install --quiet "finance-datareader==0.9.202"
           python -m pip show finance-datareader | sed -n '1,2p'
-      - name: 단위 시험
-        run: python -m unittest discover -s tests/mf -p "test_*.py"
+      - name: 단위 시험 (계산 스크립트 + 화면 계산 모듈)
+        run: |
+          python -m unittest discover -s tests/mf -p "test_*.py"
+          node --test tests/mf/multifactor-core.test.mjs
       - name: 시험 모드 (main 아님) — 계산만 하고 커밋하지 않음
         if: github.ref != 'refs/heads/main'
         run: python scripts/multifactor_kr.py --n "$MF_N"
