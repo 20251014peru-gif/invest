@@ -2,15 +2,11 @@
 # 무엇: 우리 점수의 입력(네이버 분기 재무·주가)을 독립 출처와 대조한다. 재무=금감원 OpenDART 공시, 주가=야후(yfinance).
 # 키: 기존 비밀값 DART_API_KEY 를 환경변수로만 쓴다. 스크립트는 키·주소·예외 원문을 출력하지 않는다(시험으로 확인).
 # 아님: cron 없음 · 저장소에 commit/push 하지 않음 · AI 호출 없음 · 새 비밀값 없음.
+# 알려진 한계(2026-10-19 실행): 야후 주가 대조는 클라우드에서 요금 제한(YFRateLimitError)으로 막혀 결과가 비어 있다. DART 재무 대조만 유효하다.
 # 판정: 초록색 = 시험이 끝까지 실행됨. 일치 여부는 Summary 의 표로 판단한다. 종료코드 2 = 실행 실패(키 없음 등).
 name: MF verify inputs (manual, one-shot)
 on:
-  workflow_dispatch: {}
-  push:                         # 임시: 시험 브랜치에서, 이 시험 파일이 바뀐 push 에서만 1회 실행. main 에 합칠 때 제거.
-    branches: ['feature/mf-kr']
-    paths:
-      - '.github/workflows/mf-verify.yml'
-      - 'tests/mf_verify/**'
+  workflow_dispatch: {}          # 수동 실행만. push/schedule 로는 돌지 않는다.
 permissions:
   contents: read
 concurrency:
