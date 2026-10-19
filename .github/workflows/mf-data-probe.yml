@@ -1,0 +1,48 @@
+# 멀티팩터(국내) 데이터 확보 프로브 (1회성 시험 · 미실행) — v 20261019-1
+# 무엇: GitHub-hosted runner(데이터센터 IP) 에서 FinanceDataReader 로 국내 종목 목록·주가·재무를 받아보는 시험.
+#       책 2장 멀티팩터를 클라우드에서 돌릴 수 있는지(데이터 전제 조건)만 확인한다.
+# 아님: cron 없음 · AI 호출 없음 · Firestore/Firebase/Storage/비밀키 없음 · 프록시·쿠키 없음 · 저장소에 commit/push 하지 않음.
+#       (임시 push 트리거는 chore/mf-data-probe 브랜치 한정이며 아래 on: 블록에 설명)
+# 판정: 워크플로의 초록(성공) = "프로브가 끝까지 실행됨" 일 뿐이다. 데이터 확보 여부는 Summary 의 '유효' 열로만 판정한다.
+#       값의 정확성은 이 시험에서 검증하지 않는다(미검증). 프로브 종료코드 2 = 실행 실패(import 실패 등) → 빨강.
+# 결과: Actions 화면의 'Summary' 와 아티팩트(mf-probe-result, 7일 보관) — 응답 본문·예외 원문은 출력하지 않는다.
+name: MF data probe (manual, one-shot)
+on:
+  workflow_dispatch: {}          # 수동 실행. cron(schedule) 은 없다.
+  push:                          # 임시: GitHub 는 workflow_dispatch 를 기본 브랜치(main)에 있어야 인식한다.
+    branches: ['chore/mf-data-probe']   # 이 시험 전용 브랜치에서만, 시험 파일이 바뀐 push 에서만 1회 실행.
+    paths:                       # main 에 합칠 때는 이 push 블록을 제거한다.
+      - '.github/workflows/mf-data-probe.yml'
+      - 'tests/mf_probe/**'
+permissions:
+  contents: read                 # 읽기 전용 — 기존 배치 워크플로(contents: write)와 다르다
+concurrency:
+  group: mf-data-probe
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20          # 전체 상한. 호출 1건 상한 90초 × (4 + 5×2) = 최악 약 21분이나 보통은 훨씬 짧다
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 라이브러리 설치 (버전 고정) + 실제 설치 버전 기록
+        run: |
+          python -m pip install --quiet "finance-datareader==0.9.202"
+          python -m pip show finance-datareader | sed -n '1,2p'
+      - name: 프로브 실행 (순차 · 호출당 상한 90초 · 항목마다 결과 즉시 저장)
+        run: python tests/mf_probe/probe.py
+      - name: 결과를 Summary 에 표시 (실행 상태와 데이터 확보를 분리해 표시)
+        if: always()
+        run: |
+          if [ -f tests/mf_probe/out/result.md ]; then cat tests/mf_probe/out/result.md >> "$GITHUB_STEP_SUMMARY"; else echo "결과 파일 없음 — 프로브가 시작 전에 실패(실행 실패, 데이터 미확보 판정 아님)" >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: 결과 파일 보관 (7일)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mf-probe-result
+          path: tests/mf_probe/out/
+          retention-days: 7
+          if-no-files-found: warn
