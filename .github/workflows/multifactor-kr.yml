@@ -5,7 +5,8 @@
 #                  Actions Summary 에는 종목 수·제외 개수 같은 집계만 쓴다(종목별 값 없음).
 # 안전장치: 연속 10회 실패(차단 의심)·정상 종목 부족이면 스크립트가 종료코드 3 으로 끝나 게시하지 않는다 → 기존 결과 보존, 워크플로 빨강, ntfy 알림.
 #           더 오래된 결과가 최신을 덮어쓰지 않는다(mf_publish 종료코드 4). 게시 뒤 비로그인 읽기가 403 인지 확인하고, 아니면 실패 처리한다.
-# 인증: 기존 GitHub 비밀값 GCP_SERVICE_ACCOUNT_KEY(프로젝트 my-system-25497). 이 키의 Firestore 쓰기 권한은 게시 첫 실행에서 확인한다(미확인).
+# 인증: 게시 전용 서비스 계정의 키 MF_FIRESTORE_SA_KEY(GitHub 비밀값, 사용자가 등록 — 최소 권한 roles/datastore.user).
+#       기존 GCP_SERVICE_ACCOUNT_KEY 는 배포 전용이며 Firestore 쓰기가 거부됨을 2026-10-19 시험으로 확인했다(PermissionDenied).
 # 데이터 출처는 비공식 경로(KRX 목록·네이버 재무)이며 약관은 미확인이다(자동 수집 자체의 위험은 비공개로 바꿔도 남는다).
 # 비용: GitHub Actions 사용 시간(1회 약 17분, 주 1회) + Firestore 쓰기 2건/주. 외부 유료 호출 없음.
 name: Multifactor KR
@@ -32,6 +33,12 @@ jobs:
       FS_DOC: https://firestore.googleapis.com/v1/projects/my-system-25497/databases/(default)/documents/chatgpt_macro_private/multifactor_kr/snapshots
     steps:
       - uses: actions/checkout@v4
+      - name: 게시용 비밀값 확인 (main 전용 — 없으면 17분 계산 전에 바로 실패)
+        if: github.ref == 'refs/heads/main'
+        env:
+          MF_KEY: ${{ secrets.MF_FIRESTORE_SA_KEY }}
+        run: |
+          [ -n "$MF_KEY" ] || { echo "::error::GitHub 비밀값 MF_FIRESTORE_SA_KEY 가 없습니다. docs/multifactor-kr.md 의 '게시 전용 서비스 계정 만들기'를 따라 등록하세요."; exit 1; }
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -47,11 +54,11 @@ jobs:
         run: python scripts/multifactor_kr.py --n "$MF_N" --out "$RUNNER_TEMP/multifactor_kr.json"
       - name: 게시 전 검증 (쓰지 않음)
         run: python scripts/mf_publish.py --in "$RUNNER_TEMP/multifactor_kr.json" --dry-run
-      - name: Google 인증 (main 전용)
+      - name: Google 인증 (main 전용, 게시 전용 서비스 계정)
         if: github.ref == 'refs/heads/main'
         uses: google-github-actions/auth@v3
         with:
-          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          credentials_json: ${{ secrets.MF_FIRESTORE_SA_KEY }}
           project_id: my-system-25497
       - name: 비공개 Firestore 에 게시 (main 전용)
         if: github.ref == 'refs/heads/main'

@@ -12,7 +12,7 @@
 | `scripts/mf_publish.py` | 결과를 **비공개 Firestore** 에 게시: `chatgpt_macro_private/multifactor_kr/snapshots/{price_date}` 와 `.../latest` 를 한 번의 배치로 씀. 오래된 결과가 최신을 덮어쓰지 않음, 검증 실패·`--dry-run` 지원 |
 | `.github/workflows/multifactor-kr.yml` | 주 1회(토 10:17 KST) + 수동 실행. 계산 → 게시 전 검증 → (main 에서만) 인증·게시 → **비로그인 읽기가 403 인지 확인**. 저장소 커밋·**아티팩트 업로드 없음**(공개 저장소의 아티팩트는 누구나 받을 수 있음) |
 | `functions-mf/` | 읽기 함수 `mfLatest`(Cloud Functions, 서울, codebase `mf-private`). 기존 `macroAi` 와 같은 검사: Bearer ID 토큰(폐기 확인) · 본인 UID(`MACRO_OWNER_UID`) · 이메일 인증 · google.com 로그인. `handler.js`(순수 로직)와 `index.js`(연결) |
-| `.github/workflows/mf-private-deploy.yml` | `mfLatest` 만 배포(기존 서비스 계정). 배포 뒤 토큰 없는 호출 401 · 잘못된 토큰 401 · GET 405 를 확인 |
+| `.github/workflows/mf-private-deploy.yml` | `mfLatest` 만 배포(기존 배포용 서비스 계정 `GCP_SERVICE_ACCOUNT_KEY`). 배포 뒤 토큰 없는 호출 401 · 잘못된 토큰 401 · GET 405 를 확인 |
 | `multifactor.html` | 화면: **본인 Google 로그인 후** 스타일 전환 · 순위표 · 점수 그룹 · 종목 조회 · 성향 설문(10문항) · 계산 방식 설명. 로그인 전에는 데이터를 요청하지 않고, 로그아웃하면 화면의 데이터를 지움 |
 | `js/multifactor-core.mjs` | 화면 계산 모듈(그룹 나누기, 설문 판정, 정렬, 서식) |
 | `tests/mf/` | 오프라인 시험: Python 64개(계산, 책의 예시값 42.5·23.5, 게시 스크립트), Node 16개, `page-harness.html`(로그인 흐름을 모의 어댑터로 확인하는 수동 시험용 하네스) |
@@ -96,7 +96,7 @@
 | 예약 작업 실행 위치 | GitHub Actions `Multifactor KR`(토 10:17 KST, 수동 실행 가능). **회사·집 PC와 무관** |
 | 백업·복구 | 주간 스냅샷 문서가 지워지지 않고 쌓인다(되돌리기: `.../snapshots/{날짜}` 내용을 `latest` 로 복사, `mf_publish.py --force`). 차단·데이터 부족이면 게시하지 않아 직전 결과가 유지된다. Firestore 자체 백업·내보내기는 **설정하지 않았다**. 코드 문제는 이전 커밋으로 되돌린다 |
 | 비용 구조 | GitHub Actions 사용 시간(200종목 1회 약 17분, 주 1회) + Firestore 쓰기 2건/주 + 화면을 열 때 읽기 1건·함수 호출 1회. 외부 유료 API 없음. 이 저장소·프로젝트의 요금제와 잔여 한도는 **확인하지 않음** |
-| 사용하는 비밀값 | 기존 `GCP_SERVICE_ACCOUNT_KEY`(게시·배포, **Firestore 쓰기 권한 미확인**), 기존 `MACRO_OWNER_UID`(함수가 본인 확인에 사용, Secret Manager), `DART_API_KEY`(`mf-verify` 수동 시험만), 선택 `NTFY_TOPIC`. 새 비밀값은 만들지 않았다 |
+| 사용하는 비밀값 | **새로 필요: `MF_FIRESTORE_SA_KEY`**(게시 전용 서비스 계정 키, 사용자가 등록 — 아래 "게시 전용 서비스 계정 만들기"). 기존: `GCP_SERVICE_ACCOUNT_KEY`(함수 **배포 전용** — Firestore 쓰기는 거부됨, 아래 시험), `MACRO_OWNER_UID`(함수가 본인 확인에 사용, Secret Manager), `DART_API_KEY`(`mf-verify` 수동 시험만), 선택 `NTFY_TOPIC` |
 | 남은 PC 의존성 | 없음(PC는 개발에만 사용). 단 데이터 출처가 비공개로 바꿔도 비공식 경로라 외부 사정으로 막힐 수 있다 |
 
 ## 결과는 공개하지 않는다 — 약관 조사와 보안 확인 (2026-10-19)
@@ -116,11 +116,26 @@
 - **이 작업과 별개로**, `records_meta`, `records_todos`, `record_followups`, `ai_users` 컬렉션은 비로그인 목록 조회가 **HTTP 200** 이었다(문서 이름만 세고 내용은 읽지 않음. `records` 는 403). Firestore 규칙은 저장소에 없고 콘솔에서 관리되는 것으로 보여 코드로 고치지 않았다. **Firebase 콘솔의 Firestore 규칙을 직접 확인해야 한다.**
 - 공개 저장소의 Actions 아티팩트·Summary 는 누구나 볼 수 있다. 이전 시험 실행의 결과 아티팩트 `multifactor-kr-result` 2개는 삭제했고, 이제 워크플로는 결과 아티팩트를 올리지 않으며 `mf-verify` 도 집계만 Summary 에 쓴다. **이전 `mf-verify` 실행(run 39227126029)의 Summary 에는 종목별 네이버 분기 금액 표가 남아 있다**(삭제하지 않음, 필요하면 실행 기록 삭제).
 
+## 서비스 계정 쓰기 시험 결과와 게시 전용 서비스 계정 만들기 (2026-10-19)
+
+**시험**(임시 워크플로, run 39233153884, 브랜치 `feature/mf-kr`, 시험 후 제거 — 코드는 커밋 `fd44242` 에서 볼 수 있음): `GCP_SERVICE_ACCOUNT_KEY` 로 인증해 `chatgpt_macro_private/multifactor_kr/_selftest/{ping,ping2}` 를 배치로 만들고 삭제하려 했다.
+- 인증 성공. **문서 생성 `PermissionDenied`**(삭제도 같은 이유로 거부). 아무것도 만들어지지 않아 정리할 잔여물은 없다(읽기 확인에서 문서 없음).
+- 비로그인 읽기는 만들기 전·삭제 후 문서와 목록 모두 **403**(문서가 존재하는 동안의 403 은 생성이 막혀 확인하지 못함). 시험 후에도 `snapshots/latest` 경로가 403 임을 다시 확인.
+- 결론: 이 키는 함수 배포용이며 Firestore 쓰기 권한이 없다(읽기는 성공한 것으로 보임). **게시 전용 서비스 계정이 필요하다.**
+
+**게시 전용 서비스 계정 만들기(사용자 작업 — 이 저장소 코드는 이 값을 읽지도 만들지도 않는다)**
+1. Google Cloud 콘솔(프로젝트 `my-system-25497`) → IAM 및 관리자 → 서비스 계정 → 만들기. 이름 예: `mf-publisher`.
+2. 이 계정에 역할 **Cloud Datastore 사용자(`roles/datastore.user`)** 만 부여한다.
+   - 한계: Firestore 의 IAM 역할은 컬렉션 단위로 제한할 수 없어, 이 키는 **프로젝트 전체 Firestore 를 읽고 쓸 수 있다.** 키 유출 시 영향이 크므로 키를 다른 곳에 두지 않고, 워크플로는 main 에서만 이 비밀값을 쓰게 했다.
+   - 더 안전한 대안은 키 없이 GitHub OIDC 로 인증하는 Workload Identity Federation(저장소·브랜치 제한 가능)이다. 설정이 더 복잡해 이번에는 적용하지 않았다.
+3. 서비스 계정 → 키 → 키 추가 → JSON. 내려받은 JSON 전체를 GitHub 저장소 설정 → Secrets and variables → Actions → New repository secret, 이름 **`MF_FIRESTORE_SA_KEY`** 로 등록한다. 등록 뒤 내려받은 파일은 삭제한다.
+4. 등록 뒤 `Multifactor KR` 를 수동 실행해 게시와 "비로그인 403 확인" 단계가 통과하는지 본다. 게시가 `PermissionDenied` 로 실패하면 역할 부여가 반영되지 않은 것이다.
+
 ## 병합 후 해야 할 일
 
 순서대로 확인한다. **아래 단계는 모두 병합 뒤에야 실제로 실행되며, 지금까지 실행해 본 적이 없다.**
 1. 병합하면 `MF Private Deploy` 가 자동 실행되어 `mfLatest` 를 배포한다. 시험이 통과하고 "토큰 없음 401 · 잘못된 토큰 401 · GET 405" 확인이 통과하는지 본다. `MACRO_OWNER_UID` 비밀값이 새 함수에 연결되는지는 배포 로그에서 확인한다.
-2. **서비스 계정 쓰기 권한 확인**(미확인): `GCP_SERVICE_ACCOUNT_KEY` 가 Firestore 에 쓸 수 있는지 시험 문서로 확인한다(운영 Firestore 에 시험 문서를 만들었다 지움 — 사용자 허락 후). 권한이 없으면 최소 권한(`roles/datastore.user`) 전용 서비스 계정 키를 사용자가 만들어 새 비밀값으로 넣고 워크플로의 인증 단계를 바꾼다.
+2. **게시 전용 서비스 계정 등록**(필수, 사용자 작업): 기존 `GCP_SERVICE_ACCOUNT_KEY` 는 Firestore 쓰기가 거부된다(2026-10-19 시험). 아래 "게시 전용 서비스 계정 만들기"로 `MF_FIRESTORE_SA_KEY` 를 등록한다. 등록 전에 `Multifactor KR` 를 main 에서 실행하면 계산 전에 비밀값 누락으로 바로 실패한다.
 3. `Actions → Multifactor KR → Run workflow` 로 1회 실행(약 17분). 게시 → "비로그인 접근 403" 확인 단계까지 통과하는지 본다. 이 확인이 실패하면 게시된 데이터가 공개되었을 수 있으니 즉시 해당 경로를 삭제하고 규칙을 점검한다.
 4. 휴대폰·PC 에서 공식 주소를 열어 **본인 Google 로그인 → 결과 표시 → 로그아웃 → 데이터가 사라지는지** 확인하고, 다른 Google 계정으로 로그인하면 "본인 계정이 아닙니다"가 나오는지 확인한다(실제 로그인은 자동화할 수 없어 사용자가 한다).
 5. Firebase 콘솔에서 Firestore 규칙을 점검한다(위 "보안 확인"의 공개 읽기 컬렉션).
@@ -144,7 +159,7 @@
 - **PER·PBR·ROE·거래량의 정확성**: 공식 자료와 대조하지 않았다. 분기 매출·영업이익·순이익은 위 20종목만 대조했고(표본이 작음), 은행·보험·지주사는 정의가 달라 비교하지 못했다.
 - **주가 입력**: 위 "주가 입력의 불확실성" 참고. 공식 종가와는 대조하지 못했다.
 - **데이터 출처 약관**: 위 "결과는 공개하지 않는다" 절 참고. 비공개로 바꿔도 자동 수집 자체의 위험(robots.txt `Disallow: /`, KRX 제10조 ②호)은 남는다.
-- **비공개 게시 경로 전체 미검증**: 서비스 계정의 Firestore 쓰기 권한, `MACRO_OWNER_UID` 의 새 함수 연결, 함수 배포, 게시 뒤 403 확인, 실제 로그인 읽기는 모두 병합·배포 뒤에야 확인된다. `chatgpt_macro_private` 규칙이 "본인만"인지는 비로그인 상태로만 확인했다(다른 Google 계정 접근은 시험하지 못함, 함수가 관리자 권한으로 읽으므로 영향은 작음).
+- **비공개 게시 경로 전체 미검증**: 게시 전용 서비스 계정(아직 없음)의 쓰기, `MACRO_OWNER_UID` 의 새 함수 연결, 함수 배포, 게시 뒤 403 확인, 실제 로그인 읽기는 모두 병합·배포·비밀값 등록 뒤에야 확인된다. `chatgpt_macro_private` 규칙이 "본인만"인지는 비로그인 상태로만 확인했다(다른 Google 계정 접근은 시험하지 못함, 함수가 관리자 권한으로 읽으므로 영향은 작음).
 - **Firestore 규칙**: 일부 기존 컬렉션이 비로그인으로 목록 조회됨(위 "보안 확인"). 이 PR 에서 고치지 않았다.
 - **1,000종목 규모**: 시험하지 않았다. 기본값은 200종목.
 - **점수의 실제 효과**: 이 점수가 이후 수익률과 관련이 있었는지는 백테스트하지 않았다. 점수 이력이 쌓이기 전에는 선행 편향 없이 검증할 수 없다.
