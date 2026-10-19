@@ -96,7 +96,7 @@
 | 예약 작업 실행 위치 | GitHub Actions `Multifactor KR`(토 10:17 KST, 수동 실행 가능). **회사·집 PC와 무관** |
 | 백업·복구 | 주간 스냅샷 문서가 지워지지 않고 쌓인다(되돌리기: `.../snapshots/{날짜}` 내용을 `latest` 로 복사, `mf_publish.py --force`). 차단·데이터 부족이면 게시하지 않아 직전 결과가 유지된다. Firestore 자체 백업·내보내기는 **설정하지 않았다**. 코드 문제는 이전 커밋으로 되돌린다 |
 | 비용 구조 | GitHub Actions 사용 시간(200종목 1회 약 17분, 주 1회) + Firestore 쓰기 2건/주 + 화면을 열 때 읽기 1건·함수 호출 1회. 외부 유료 API 없음. 이 저장소·프로젝트의 요금제와 잔여 한도는 **확인하지 않음** |
-| 사용하는 비밀값 | **새로 필요: `MF_FIRESTORE_SA_KEY`**(게시 전용 서비스 계정 키, 사용자가 등록 — 아래 "게시 전용 서비스 계정 만들기"). 기존: `GCP_SERVICE_ACCOUNT_KEY`(함수 **배포 전용** — Firestore 쓰기는 거부됨, 아래 시험), `MACRO_OWNER_UID`(함수가 본인 확인에 사용, Secret Manager), `DART_API_KEY`(`mf-verify` 수동 시험만), 선택 `NTFY_TOPIC` |
+| 사용하는 비밀값 | `GCP_SERVICE_ACCOUNT_KEY`(함수 **배포 + 게시**: 2026-10-19 시험에서 Firestore 쓰기가 거부되어 사용자가 `roles/datastore.user` 를 추가 부여함 — 한 키가 배포와 Firestore 전체 읽기·쓰기를 함께 가지므로 분리가 더 안전하다, 아래 절), `MACRO_OWNER_UID`(함수가 본인 확인에 사용, Secret Manager), `DART_API_KEY`(`mf-verify` 수동 시험만), 선택 `NTFY_TOPIC` |
 | 남은 PC 의존성 | 없음(PC는 개발에만 사용). 단 데이터 출처가 비공개로 바꿔도 비공식 경로라 외부 사정으로 막힐 수 있다 |
 
 ## 결과는 공개하지 않는다 — 약관 조사와 보안 확인 (2026-10-19)
@@ -116,7 +116,9 @@
 - **이 작업과 별개로**, `records_meta`, `records_todos`, `record_followups`, `ai_users` 컬렉션은 비로그인 목록 조회가 **HTTP 200** 이었다(문서 이름만 세고 내용은 읽지 않음. `records` 는 403). Firestore 규칙은 저장소에 없고 콘솔에서 관리되는 것으로 보여 코드로 고치지 않았다. **Firebase 콘솔의 Firestore 규칙을 직접 확인해야 한다.**
 - 공개 저장소의 Actions 아티팩트·Summary 는 누구나 볼 수 있다. 이전 시험 실행의 결과 아티팩트 `multifactor-kr-result` 2개는 삭제했고, 이제 워크플로는 결과 아티팩트를 올리지 않으며 `mf-verify` 도 집계만 Summary 에 쓴다. **이전 `mf-verify` 실행(run 39227126029)의 Summary 에는 종목별 네이버 분기 금액 표가 남아 있다**(삭제하지 않음, 필요하면 실행 기록 삭제).
 
-## 서비스 계정 쓰기 시험 결과와 게시 전용 서비스 계정 만들기 (2026-10-19)
+## 서비스 계정 쓰기 시험 결과와 게시 계정 선택 (2026-10-19)
+
+**현재 결정**: 게시 전용 서비스 계정 비밀값(`MF_FIRESTORE_SA_KEY`)은 등록되지 않아(저장소 비밀값 목록·실행 환경 모두에서 확인) 사용하지 않고, 사용자가 **기존 배포 서비스 계정(`GCP_SERVICE_ACCOUNT_KEY`)에 `roles/datastore.user` 를 추가 부여**했다. 워크플로는 이 키로 게시한다. 부여 후의 쓰기는 첫 게시 실행에서 확인한다. 아래는 시험 결과와, 더 안전한 분리 방식(전용 계정)을 나중에 적용할 때의 절차다.
 
 **시험**(임시 워크플로, run 39233153884, 브랜치 `feature/mf-kr`, 시험 후 제거 — 코드는 커밋 `fd44242` 에서 볼 수 있음): `GCP_SERVICE_ACCOUNT_KEY` 로 인증해 `chatgpt_macro_private/multifactor_kr/_selftest/{ping,ping2}` 를 배치로 만들고 삭제하려 했다.
 - 인증 성공. **문서 생성 `PermissionDenied`**(삭제도 같은 이유로 거부). 아무것도 만들어지지 않아 정리할 잔여물은 없다(읽기 확인에서 문서 없음).
@@ -135,7 +137,7 @@
 
 순서대로 확인한다. **아래 단계는 모두 병합 뒤에야 실제로 실행되며, 지금까지 실행해 본 적이 없다.**
 1. 병합하면 `MF Private Deploy` 가 자동 실행되어 `mfLatest` 를 배포한다. 시험이 통과하고 "토큰 없음 401 · 잘못된 토큰 401 · GET 405" 확인이 통과하는지 본다. `MACRO_OWNER_UID` 비밀값이 새 함수에 연결되는지는 배포 로그에서 확인한다.
-2. **게시 전용 서비스 계정 등록**(필수, 사용자 작업): 기존 `GCP_SERVICE_ACCOUNT_KEY` 는 Firestore 쓰기가 거부된다(2026-10-19 시험). 아래 "게시 전용 서비스 계정 만들기"로 `MF_FIRESTORE_SA_KEY` 를 등록한다. 등록 전에 `Multifactor KR` 를 main 에서 실행하면 계산 전에 비밀값 누락으로 바로 실패한다.
+2. **게시 권한**: 기존 `GCP_SERVICE_ACCOUNT_KEY` 는 시험에서 Firestore 쓰기가 거부되어(2026-10-19) 사용자가 `roles/datastore.user` 를 추가 부여했다. 첫 `Multifactor KR` 수동 실행에서 게시가 통과하는지 확인한다(`PermissionDenied` 면 역할 반영 전이거나 다른 계정에 부여한 것). 전용 계정 분리는 선택 사항(아래 절).
 3. `Actions → Multifactor KR → Run workflow` 로 1회 실행(약 17분). 게시 → "비로그인 접근 403" 확인 단계까지 통과하는지 본다. 이 확인이 실패하면 게시된 데이터가 공개되었을 수 있으니 즉시 해당 경로를 삭제하고 규칙을 점검한다.
 4. 휴대폰·PC 에서 공식 주소를 열어 **본인 Google 로그인 → 결과 표시 → 로그아웃 → 데이터가 사라지는지** 확인하고, 다른 Google 계정으로 로그인하면 "본인 계정이 아닙니다"가 나오는지 확인한다(실제 로그인은 자동화할 수 없어 사용자가 한다).
 5. Firebase 콘솔에서 Firestore 규칙을 점검한다(위 "보안 확인"의 공개 읽기 컬렉션).
