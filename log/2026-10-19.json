@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-10-19",
-  "generated_at": "2026-10-19T07:18:20+09:00",
+  "generated_at": "2026-10-19T09:56:41+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 29 천명(-78.2%) · 수출금액지수 전년비 89.22%(+13.35%p) · 투자자예탁금 104.7 조원(+5.0%) · 미 M2 23,343 십억$(+0.5%)"
+      "t": "미 비농업고용 증감 29 천명(-78.2%) · 수출금액지수 전년비 89.22%(+13.35%p) · 투자자예탁금 104.7 조원(+5.0%) · 유가 WTI 97.59 $(-1.4%)"
     },
     {
       "k": "오늘 발표",
@@ -99,6 +99,20 @@
       "group": "kr"
     },
     {
+      "id": "wti",
+      "name": "유가 WTI",
+      "value": 97.59,
+      "unit": "$",
+      "prev": 99.02,
+      "delta": -1.43,
+      "delta_text": "-1.4%",
+      "judge": "",
+      "as_of": "2026-10-18",
+      "cycle": "D",
+      "score": 1.4441526964249571,
+      "group": "world"
+    },
+    {
       "id": "m2",
       "name": "미 M2",
       "value": 23342.8,
@@ -111,6 +125,20 @@
       "cycle": "M",
       "score": 0.5379470150185753,
       "group": "us"
+    },
+    {
+      "id": "usdkrw",
+      "name": "원달러 환율",
+      "value": 1342.4,
+      "unit": "원",
+      "prev": 1348.5,
+      "delta": -6.1,
+      "delta_text": "-0.5%",
+      "judge": "우호",
+      "as_of": "2026-10-19",
+      "cycle": "D",
+      "score": 0.4523544679273199,
+      "group": "kr"
     },
     {
       "id": "cpi_yoy",
@@ -127,46 +155,18 @@
       "group": "us"
     },
     {
-      "id": "kr_cpi_yoy",
-      "name": "한국 CPI 전년비",
-      "value": 2.88,
-      "unit": "%",
-      "prev": 3.09,
-      "delta": -0.21,
-      "delta_text": "-0.21%p",
-      "judge": "중립",
-      "as_of": "2026-09",
-      "cycle": "M",
-      "score": 0.20999999999999996,
-      "group": "kr"
-    },
-    {
-      "id": "fedfunds",
-      "name": "연준 실효금리 FFR",
-      "value": 3.75,
-      "unit": "%",
-      "prev": 3.63,
-      "delta": 0.12,
-      "delta_text": "+0.12%p",
+      "id": "gold",
+      "name": "금",
+      "value": 4194.2998,
+      "unit": "$/oz",
+      "prev": 4181.1001,
+      "delta": 13.2,
+      "delta_text": "+0.3%",
       "judge": "",
-      "as_of": "2026-09-01",
-      "cycle": "M",
-      "score": 0.1200000000000001,
-      "group": "us"
-    },
-    {
-      "id": "fed_bs",
-      "name": "연준 자산",
-      "value": 6755639.0,
-      "unit": "백만$",
-      "prev": 6747560.0,
-      "delta": 8079.0,
-      "delta_text": "+0.1%",
-      "judge": "",
-      "as_of": "2026-10-14",
-      "cycle": "W",
-      "score": 0.11973216985102762,
-      "group": "us"
+      "as_of": "2026-10-18",
+      "cycle": "D",
+      "score": 0.3156992103585399,
+      "group": "world"
     }
   ],
   "releases": {
@@ -338,6 +338,20 @@
           "group": "kr"
         },
         {
+          "id": "wti",
+          "name": "유가 WTI",
+          "value": 97.59,
+          "unit": "$",
+          "prev": 99.02,
+          "delta": -1.43,
+          "delta_text": "-1.4%",
+          "judge": "",
+          "as_of": "2026-10-18",
+          "cycle": "D",
+          "score": 1.4441526964249571,
+          "group": "world"
+        },
+        {
           "id": "m2",
           "name": "미 M2",
           "value": 23342.8,
@@ -350,6 +364,20 @@
           "cycle": "M",
           "score": 0.5379470150185753,
           "group": "us"
+        },
+        {
+          "id": "usdkrw",
+          "name": "원달러 환율",
+          "value": 1342.4,
+          "unit": "원",
+          "prev": 1348.5,
+          "delta": -6.1,
+          "delta_text": "-0.5%",
+          "judge": "우호",
+          "as_of": "2026-10-19",
+          "cycle": "D",
+          "score": 0.4523544679273199,
+          "group": "kr"
         },
         {
           "id": "cpi_yoy",
@@ -366,46 +394,18 @@
           "group": "us"
         },
         {
-          "id": "kr_cpi_yoy",
-          "name": "한국 CPI 전년비",
-          "value": 2.88,
-          "unit": "%",
-          "prev": 3.09,
-          "delta": -0.21,
-          "delta_text": "-0.21%p",
-          "judge": "중립",
-          "as_of": "2026-09",
-          "cycle": "M",
-          "score": 0.20999999999999996,
-          "group": "kr"
-        },
-        {
-          "id": "fedfunds",
-          "name": "연준 실효금리 FFR",
-          "value": 3.75,
-          "unit": "%",
-          "prev": 3.63,
-          "delta": 0.12,
-          "delta_text": "+0.12%p",
+          "id": "gold",
+          "name": "금",
+          "value": 4194.2998,
+          "unit": "$/oz",
+          "prev": 4181.1001,
+          "delta": 13.2,
+          "delta_text": "+0.3%",
           "judge": "",
-          "as_of": "2026-09-01",
-          "cycle": "M",
-          "score": 0.1200000000000001,
-          "group": "us"
-        },
-        {
-          "id": "fed_bs",
-          "name": "연준 자산",
-          "value": 6755639.0,
-          "unit": "백만$",
-          "prev": 6747560.0,
-          "delta": 8079.0,
-          "delta_text": "+0.1%",
-          "judge": "",
-          "as_of": "2026-10-14",
-          "cycle": "W",
-          "score": 0.11973216985102762,
-          "group": "us"
+          "as_of": "2026-10-18",
+          "cycle": "D",
+          "score": 0.3156992103585399,
+          "group": "world"
         }
       ]
     },
@@ -419,7 +419,7 @@
     },
     {
       "id": "2026-10-19/auto/macro",
-      "time": "07:18",
+      "time": "09:56",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 34/34 수집",
