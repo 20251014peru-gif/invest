@@ -3,6 +3,7 @@
 
 export const STYLE_KEYS = ["base", "value_growth", "trend_growth", "contrarian"];
 export const FACTOR_KEYS = ["mom_price", "mom_vol", "per", "pbr", "rev", "op", "ni", "roe"];
+const FACTOR_NAMES = { mom_price: "모멘텀 주가", mom_vol: "모멘텀 거래량", per: "PER", pbr: "PBR", rev: "매출증가", op: "영업이익증가", ni: "순이익증가", roe: "ROE" };
 
 // 스타일 설명(우리 표현). 지표 구성은 JSON 의 styles 에서 읽고, 여기서는 읽기용 문구만 둔다.
 export const STYLE_TEXT = {
@@ -105,9 +106,16 @@ export function sortItems(items, style, key, dir = 1) {
 }
 
 export function flagText(flag) {
+  if (String(flag).startsWith("filled:")) {
+    const k = String(flag).slice(7);
+    return "값이 없어 대상 종목의 중앙값으로 대체함(" + (FACTOR_NAMES[k] || k) + ")";
+  }
   return ({
-    per_unavailable: "PER이 비었거나 0 이하(적자 가능) — PER 순위는 최하위로 처리",
-    pbr_unavailable: "PBR이 비었거나 0 이하(자본잠식 가능) — PBR 순위는 최하위로 처리",
+    per_unavailable: "PER이 없거나 0 이하(적자 가능) — 0 이하면 PER 순위는 최하위, 값이 없으면 중앙값으로 처리",
+    pbr_unavailable: "PBR이 없거나 0 이하(자본잠식 가능) — 0 이하면 PBR 순위는 최하위, 값이 없으면 중앙값으로 처리",
+    per_loss: "적자(EPS 0 이하)라 PER이 없음 — PER 순위는 최하위로 처리",
+    pbr_loss: "자본잠식(BPS 0 이하)이라 PBR이 없음 — PBR 순위는 최하위로 처리",
+    short_history: "상장 기간이 짧아 일부 기간(3개월·연간)이 빠진 평균",
     base_nonpositive: "전분기 값이 0 이하여서 증가율을 절댓값 기준으로 계산함(기저 효과 주의)",
     annual_missing: "연간 재무를 읽지 못함",
     quarter_missing: "분기 재무가 부족함",

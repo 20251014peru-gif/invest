@@ -298,11 +298,15 @@ $("tabs").onclick = (e) => { const b = e.target.closest("button[data-tab]"); if 
 
 function renderHow() {
   const u = S.data.universe, ex = (o) => Object.entries(o).map(([k, v]) => esc(k) + " " + v).join(", ") || "없음";
+  const M = S.data.method || null;
+  const periods = M ? M.momentum.periods.map((p) => p.name.replace("1d", "전일").replace("1w", "주간").replace("1m", "월간").replace("3m", "3개월").replace("1y", "연간")).join("·") : "전일·주간·월간·연간";
   $("howBody").innerHTML = "<ul>" +
-    "<li><b>지표 8개</b>: 모멘텀(주가 등락률 4개 기간 평균, 거래량 5일/20일 변화) · 밸류(PER, PBR) · 퀄리티(전분기 대비 매출·영업이익·순이익 증가율, ROE).</li>" +
-    "<li><b>순위(%)</b>: 대상 종목 안에서의 순위 ÷ 종목 수 × 100. 모멘텀·퀄리티는 클수록, PER·PBR은 작을수록 상위. <b>점수</b>는 쓰는 지표 순위의 평균이며 낮을수록 상위입니다.</li>" +
+    "<li><b>기준</b>: " + (M ? esc(M.reference) : "책 2장 방식") + ".</li>" +
+    "<li><b>지표 8개</b>: 모멘텀(주가 등락률 " + esc(periods) + " 평균, 거래량 5일/20일 변화) · 밸류(PER, PBR) · 퀄리티(전분기 대비 매출·영업이익·순이익 증가율, ROE).</li>" +
+    "<li><b>순위(%)</b>: 대상 종목 안에서의 순위 ÷ 종목 수 × 100. 모멘텀·퀄리티는 클수록, PER·PBR은 작을수록 상위. 동점은 평균 순위(공동 2위면 2.5). 값이 없으면 그 지표의 중앙값으로 채웁니다. <b>점수</b>는 쓰는 지표 순위의 평균이며 낮을수록 상위입니다.</li>" +
     "<li><b>스타일</b>: 같은 8개 순위 중 일부만 평균합니다(가치 성장=밸류+퀄리티, 추세 성장=모멘텀+퀄리티, 역발상=밸류+모멘텀).</li>" +
-    "<li><b>책과 다르게 처리한 점</b>: PER·PBR이 비었거나 0 이하면 최하위로 둡니다 · 전분기 값이 0 이하면 증가율 분모에 절댓값을 쓰고 ! 표시 · 동점은 같은 순위 · 상장 1년 미만 제외 · 벤처투자사는 종목명으로만 근사해 제외.</li>" +
+    (M && M.deviations.length ? "<li><b>책 패키지와 의도적으로 다른 점</b>: " + M.deviations.map(esc).join(" · ") + ".</li>" : "") +
+    (M ? "<li><b>책 본문과 패키지가 다른 점</b>: " + esc(M.momentum.note) + ".</li>" : "") +
     "<li><b>이번 계산의 대상</b>: 전체 " + u.listing_total + "종목 중 사전 제외(" + ex(u.pre_excluded) + ") 후 시가총액 상위 " + u.requested + "종목을 받았고, 사후 제외(" + ex(u.post_excluded) + "), 수신 실패 " + u.failed.length + "건. 정상 " + S.data.n + "종목.</li>" +
     "<li><b>출처와 한계</b>: " + esc(S.data.source.note) + " 라이브러리 " + esc(S.data.source.library) + " " + esc(S.data.source.library_version) + ". 수치의 정확성은 공식 자료와 대조하지 않았고, 비공식 경로라 예고 없이 막히거나 바뀔 수 있습니다. 이용 약관 해석은 확인하지 않았습니다.</li>" +
     "<li>순위는 대상 종목 안의 상대 위치일 뿐이며, 이익이 작은 기업의 극단적 증가율이나 일회성 이익도 그대로 반영됩니다. 매수·매도 전에는 뉴스·공시로 악재와 일회성 요인을 따로 확인해야 합니다.</li></ul>";

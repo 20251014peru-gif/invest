@@ -103,3 +103,17 @@ test("flagText: 알려진 플래그는 설명, 모르는 플래그는 그대로"
   assert.match(flagText("per_unavailable"), /적자/);
   assert.equal(flagText("zzz"), "zzz");
 });
+
+test("flagText: 중앙값 대체와 짧은 상장 기간 플래그", () => {
+  assert.match(flagText("filled:roe"), /중앙값.*ROE/);
+  assert.match(flagText("filled:mom_vol"), /거래량/);
+  assert.match(flagText("short_history"), /상장 기간/);
+});
+
+test("평균 순위(2.5 같은 소수 순위)도 정렬·그룹 나누기가 동작한다", () => {
+  const items = mk(4);
+  items[1].scores.base.rank = 1.5; items[2].scores.base.rank = 1.5; items[0].scores.base.rank = 1; items[3].scores.base.rank = 4;
+  // 동순위(1.5)는 시가총액이 큰 종목이 먼저, 그 뒤 4위
+  assert.deepEqual(sortedByStyle(items, "base").map((x) => x.name), ["종목1", "종목2", "종목3", "종목4"]);
+  assert.equal(groupItems(items, "base", 2)[0].items.length, 2);
+});
