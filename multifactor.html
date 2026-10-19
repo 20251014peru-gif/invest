@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>국내 멀티팩터 종합점수</title>
-<!-- v 20261019-1 · 데이터: analysis/multifactor_kr.json (scripts/multifactor_kr.py 가 주 1회 계산) · 계산 모듈: js/multifactor-core.mjs -->
+<!-- v 20261019-2 · 결과는 비공개: 본인 Google 로그인 후 mfLatest 함수(functions-mf/)로만 받는다. 계산은 scripts/multifactor_kr.py(주 1회), 게시는 scripts/mf_publish.py · 계산 모듈: js/multifactor-core.mjs -->
 <style>
   :root{
     --bg:#FBF7F1; --card:#FFFFFF; --card-border:#F0E4D8; --text:#3D3630; --quiet:#8C8078; --faint:#A79B8E;
@@ -75,6 +75,10 @@
   .err{color:#A33;font-size:13px;margin:8px 0 0}
   .result{background:var(--accent-soft);border:1px solid #C9D9EC;border-radius:12px;padding:12px 14px;margin-top:12px}
   .state{padding:28px;text-align:center;color:var(--quiet)}
+  .gate{text-align:center;padding:24px 16px}
+  .gate p{margin:0 0 12px}
+  .gate .toolbar{justify-content:center}
+  .who{display:flex;gap:8px;align-items:center}
   details.fold{background:var(--card);border:1px solid var(--card-border);border-radius:14px}
   details.fold>summary{cursor:pointer;padding:12px 16px;font-weight:600}
   details.fold .body{padding:0 16px 14px;color:var(--quiet);font-size:12.5px}
@@ -84,9 +88,20 @@
 </head>
 <body>
 <div class="wrap">
-  <header><h1>국내 멀티팩터 종합점수</h1><div class="meta" id="meta"></div></header>
+  <header><h1>국내 멀티팩터 종합점수</h1><div class="meta" id="meta"></div>
+    <div class="meta who" id="who" hidden><span id="whoMail"></span> <button class="btn" id="btnWhoOut" type="button">로그아웃</button></div></header>
   <div class="notice" id="notice">학습·점검용 지표이며 매수·매도 권유가 아닙니다.</div>
   <div class="state" id="state">불러오는 중…</div>
+  <div class="card gate" id="gate" hidden role="status">
+    <p id="gateMsg"></p>
+    <div class="toolbar">
+      <button class="btn primary" id="btnLogin" type="button" hidden>🔐 본인 Google 로그인</button>
+      <button class="btn primary" id="btnSwitch" type="button" hidden>다른 Google 계정으로 로그인</button>
+      <button class="btn" id="btnRetry" type="button" hidden>다시 시도</button>
+      <button class="btn" id="btnLogout" type="button" hidden>로그아웃</button>
+    </div>
+    <p class="desc">결과는 저장소나 공개 주소에 올라 있지 않고, 본인 인증을 서버가 확인한 뒤에만 전달됩니다.</p>
+  </div>
   <div id="app" hidden>
     <div class="card">
       <h2>보는 기준(스타일)</h2>
@@ -110,6 +125,8 @@
   </details>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script>
 (function () {
   var st = document.getElementById("state");
@@ -120,7 +137,7 @@
   }
   setTimeout(function () {
     if (!st.hidden && st.textContent.indexOf("불러오는 중") === 0)
-      st.textContent = "8초가 지나도 불러오지 못했습니다. 새로고침해도 같다면 스크립트 파일(js/multifactor-core.mjs)이나 데이터 파일을 읽지 못한 것일 수 있습니다.";
+      st.textContent = "8초가 지나도 시작하지 못했습니다. 새로고침해도 같다면 스크립트 파일(js/multifactor-core.mjs)이나 로그인 도구(Firebase)를 읽지 못한 것일 수 있습니다(광고 차단·네트워크 확인).";
   }, 8000);
 })();
 </script>
@@ -138,21 +155,114 @@ const S = { data: null, style: "base", tab: "rank", view: "rank", sort: { key: "
 function lsGet() { try { return JSON.parse(localStorage.getItem(LS) || "{}"); } catch (e) { return {}; } }
 function lsSet(v) { try { localStorage.setItem(LS, JSON.stringify(v)); } catch (e) { /* 저장 불가 환경에서도 동작 */ } }
 
-async function load() {
-  try {
-    const r = await fetch("analysis/multifactor_kr.json?t=" + Date.now(), { cache: "no-store" });
-    if (r.status === 404) { $("state").textContent = "아직 계산 결과가 없습니다. 주 1회 자동 계산이 한 번 끝나면 여기에 표시됩니다."; return; }
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    const d = await r.json();
-    if (d.schema !== "multifactor_kr/1" || !Array.isArray(d.items) || !d.items.length) throw new Error("형식이 맞지 않습니다");
-    S.data = d;
-  } catch (e) { $("state").textContent = "데이터를 불러오지 못했습니다(" + e.message + "). 잠시 뒤 다시 열어 주세요."; return; }
+// ---------------- 본인 인증 + 비공개 결과 읽기
+// 결과는 저장소·Pages 에 없다. 본인 Google 로그인 후 ID 토큰으로 mfLatest 함수를 호출해야만 받는다(서버가 토큰·본인 UID 를 확인한다).
+// 화면 버튼 숨김이나 CORS 는 보호 수단이 아니다 — 보호는 서버 검사(functions-mf/handler.js)와 Firestore 규칙이 한다.
+const MF_URL = "https://asia-northeast3-my-system-25497.cloudfunctions.net/mfLatest";
+const FIREBASE_CONFIG = { apiKey: "AIzaSyAyG1chECYsbO7cSZUuXmNa0_KDYBmahPY", authDomain: "my-system-25497.firebaseapp.com", projectId: "my-system-25497" };   // 웹 공개 설정(records.html 과 같음)
+// 시험용 어댑터는 로컬 서버/시험 하네스(about:srcdoc)에서만 받아들인다. 배포 주소에서는 무시한다.
+const TEST_ENV = location.href.indexOf("about:srcdoc") === 0 || ["localhost", "127.0.0.1"].indexOf(location.hostname) >= 0;
+
+function firebaseAdapter() {
+  let auth = null;
+  const isGoogle = (u) => !!(u && (u.providerData || []).some((p) => p && p.providerId === "google.com"));
+  return {
+    init(onUser) {
+      if (typeof firebase === "undefined") throw new Error("sdk");
+      firebase.initializeApp(FIREBASE_CONFIG);
+      auth = firebase.auth();
+      auth.onAuthStateChanged((u) => {
+        if (u && !isGoogle(u)) { auth.signOut().catch(() => {}); return; }      // 익명 등 다른 세션은 정리(기록보관실과 같은 방식)
+        onUser(u ? { email: u.email || "" } : null);
+      });
+    },
+    signIn() { const p = new firebase.auth.GoogleAuthProvider(); p.setCustomParameters({ prompt: "select_account" }); return auth.signInWithPopup(p); },
+    signOut() { return auth.signOut(); },
+    async getToken() { const u = auth && auth.currentUser; if (!u) throw new Error("no user"); return u.getIdToken(); },
+    async fetchLatest(token) {
+      const r = await fetch(MF_URL, { method: "POST", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" }, body: "{}", cache: "no-store" });
+      let body = null; try { body = await r.json(); } catch (e) { /* 본문 없음 */ }
+      return { status: r.status, body };
+    },
+  };
+}
+
+let AD = null, BUSY = false;
+
+function showState(text) { $("state").hidden = false; $("state").textContent = text; $("gate").hidden = true; $("app").hidden = true; }
+function showGate(msg, btns) {
+  $("state").hidden = true; $("app").hidden = true; $("gate").hidden = false;
+  $("gateMsg").textContent = msg;
+  const b = btns || {};
+  $("btnLogin").hidden = !b.login; $("btnSwitch").hidden = !b.switchAcct; $("btnRetry").hidden = !b.retry; $("btnLogout").hidden = !b.logout;
+}
+function clearData() {
+  S.data = null; S.code = null; S.q = ""; S.filter = ""; S.result = null;
+  ["p-rank", "p-group", "p-stock", "p-survey", "howBody"].forEach((id) => { $(id).innerHTML = ""; });
+  $("meta").textContent = ""; $("notice").textContent = "학습·점검용 지표이며 매수·매도 권유가 아닙니다.";
+}
+function renderWho(u) {
+  const w = $("who");
+  w.hidden = !u;
+  $("whoMail").textContent = u ? (u.email || "Google 계정") : "";
+}
+function authErrorText(e) {
+  const c = (e && e.code) || "";
+  if (c === "auth/popup-closed-by-user" || c === "auth/cancelled-popup-request") return "로그인 창이 닫혔습니다. 다시 로그인해 주세요.";
+  if (c === "auth/popup-blocked") return "브라우저가 로그인 창을 막았습니다. 팝업을 허용한 뒤 다시 시도하세요.";
+  if (c === "auth/network-request-failed") return "네트워크 오류로 로그인하지 못했습니다. 연결을 확인하세요.";
+  return "로그인하지 못했습니다. 잠시 뒤 다시 시도하세요.";
+}
+
+function renderData() {
   S.answers = lsGet().answers || {};
-  $("state").hidden = true; $("app").hidden = false;
-  $("notice").textContent = S.data.disclaimer;
+  $("state").hidden = true; $("gate").hidden = true; $("app").hidden = false;
   const d = S.data;
+  $("notice").textContent = d.disclaimer;
   $("meta").textContent = "주가 " + d.price_date + " · 재무 " + (d.quarter_date || "—") + " 분기 · " + d.n + "종목(시총 상위 " + d.n_target + " 요청) · 계산 " + d.generated_at.slice(0, 16).replace("T", " ");
   renderStyleSeg(); renderHow(); renderAll();
+}
+
+async function loadData() {
+  if (BUSY) return;
+  BUSY = true;
+  try {
+    showState("결과를 불러오는 중…");
+    let token;
+    try { token = await AD.getToken(); } catch (e) { showGate("로그인 정보를 확인하지 못했습니다. 다시 로그인해 주세요.", { login: true }); return; }
+    let res;
+    try { res = await AD.fetchLatest(token); } catch (e) { showGate("서버에 연결하지 못했습니다. 네트워크를 확인한 뒤 다시 시도하세요.", { retry: true, logout: true }); return; }
+    if (res.status === 401) { showGate("이 계정은 본인 계정으로 확인되지 않았습니다. 본인 Google 계정으로 로그인해 주세요.", { switchAcct: true, logout: true }); return; }
+    if (res.status === 404) { showGate("아직 계산 결과가 없습니다. 주 1회 자동 계산이 한 번 끝나면 표시됩니다.", { retry: true, logout: true }); return; }
+    const d = res.body;
+    if (res.status !== 200 || !d) { showGate("결과를 읽지 못했습니다(HTTP " + res.status + "). 잠시 뒤 다시 시도하세요.", { retry: true, logout: true }); return; }
+    if (d.schema !== "multifactor_kr/1" || !Array.isArray(d.items) || !d.items.length) { showGate("결과 형식이 맞지 않습니다. 잠시 뒤 다시 시도하세요.", { retry: true, logout: true }); return; }
+    S.data = d;
+    renderData();
+  } finally { BUSY = false; }
+}
+
+function onUser(u) {
+  renderWho(u);
+  if (!u) { clearData(); showGate("이 화면의 결과는 비공개입니다. 본인 Google 계정으로 로그인하면 불러옵니다.", { login: true }); return; }
+  loadData();
+}
+
+function doSignIn(btn) {
+  btn.disabled = true;
+  return AD.signIn().then(() => { if (!S.data) loadData(); }).catch((e) => { showGate(authErrorText(e), { login: true }); }).finally(() => { btn.disabled = false; });
+}
+
+function boot() {
+  try { AD = (TEST_ENV && window.__MF_ADAPTER__) ? window.__MF_ADAPTER__ : firebaseAdapter(); }
+  catch (e) { showState("로그인 도구를 만들지 못했습니다. 새로고침해 주세요."); return; }
+  $("btnLogin").onclick = () => doSignIn($("btnLogin"));
+  $("btnSwitch").onclick = () => doSignIn($("btnSwitch"));
+  $("btnRetry").onclick = () => loadData();
+  const out = () => { clearData(); return AD.signOut(); };
+  $("btnLogout").onclick = out; $("btnWhoOut").onclick = out;
+  try { AD.init(onUser); }
+  catch (e) { showState("로그인 도구(Firebase)를 불러오지 못했습니다. 광고 차단·네트워크를 확인하고 새로고침해 주세요."); }
 }
 
 function factorsOf(style) { return new Set(S.data.styles[style].factors); }
@@ -312,7 +422,7 @@ function renderHow() {
     "<li>순위는 대상 종목 안의 상대 위치일 뿐이며, 이익이 작은 기업의 극단적 증가율이나 일회성 이익도 그대로 반영됩니다. 매수·매도 전에는 뉴스·공시로 악재와 일회성 요인을 따로 확인해야 합니다.</li></ul>";
 }
 
-load();
+boot();
 </script>
 </body>
 </html>

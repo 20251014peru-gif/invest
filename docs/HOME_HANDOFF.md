@@ -1,8 +1,10 @@
 # 집 컴퓨터에서 이어서 개발하기
 
-## 2026-10-19 국내 멀티팩터 종합점수 (브랜치 feature/mf-kr, 미병합)
+## 2026-10-19 국내 멀티팩터 종합점수 (브랜치 feature/mf-kr, PR 40, 미병합)
 
-책 「데이터와 AI로 앞서가는 주식투자」 2장의 방식을 우리 코드로 구현했다. 계산 `scripts/multifactor_kr.py`, 자동 실행 `.github/workflows/multifactor-kr.yml`(주 1회, main에서만 커밋), 화면 `multifactor.html`(스타일 4종·순위표·그룹·종목 조회·성향 설문). 계산 방식, 운영 정보, 합칠 때 할 일, 검증 상태와 미검증 항목은 [multifactor-kr.md](multifactor-kr.md)를 먼저 읽는다. 클라우드 시험 모드 실행은 성공(200종목 중 191종목, 약 17분)했으나 main 병합·운영 실행·실기기 확인은 하지 않았다. 결과 JSON이 Pages로 공개 서빙되는 점은 병합 전에 사용자 판단이 필요하다.
+책 「데이터와 AI로 앞서가는 주식투자」 2장의 방식을 책 패키지(MultiFactor 0.3.3) 소스와 비교하며 우리 코드로 구현했다. 계산 `scripts/multifactor_kr.py`, 자동 실행 `.github/workflows/multifactor-kr.yml`(주 1회·수동), 화면 `multifactor.html`. **결과는 공개하지 않는다**: 비공개 Firestore(`chatgpt_macro_private/multifactor_kr/snapshots`)에 `scripts/mf_publish.py` 가 게시하고, 화면은 본인 Google 로그인 후 `mfLatest` 함수(`functions-mf/`, 기존 macroAi 와 같은 본인 확인)로만 읽는다. 저장소 커밋·Pages·Actions 아티팩트(공개 저장소는 누구나 받을 수 있음)에는 올리지 않는다. 계산 방식·약관 조사·보안 확인·병합 후 순서·미검증 항목은 [multifactor-kr.md](multifactor-kr.md)를 먼저 읽는다.
+
+주의: ① **Firestore 규칙이 일부 기존 컬렉션(`records_meta`, `records_todos`, `record_followups`, `ai_users`)을 비로그인으로 목록 조회되게 둔 것으로 보인다**(2026-10-19 확인, 내용은 읽지 않음). 규칙은 저장소에 없으므로 콘솔에서 직접 점검해야 한다. ② 비공개 게시 경로(서비스 계정의 Firestore 쓰기 권한, 함수 배포, 실제 로그인 읽기)는 병합·배포 전이라 클라우드에서 실행해 본 적이 없다. ③ 데이터 출처(KRX 목록·네이버 재무)의 이용 약관은 공개 허용 근거를 찾지 못했고, 자동 수집 자체의 위험은 남는다.
 
 ## 2026-10-01 아침보고서 거래일·08:20 마감 검증
 

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # v 20261019-2  multifactor_kr.py — 국내 멀티팩터 종합점수 (책 「데이터와 AI로 앞서가는 주식투자」 2장 방식)
 # 읽기: FinanceDataReader(KRX 종목목록 · 주가 · 네이버 재무 스냅샷 — 모두 비공식/서드파티 경로, 약관은 미확인)
-# 쓰기: analysis/multifactor_kr.json (schema multifactor_kr/1). 실패·차단 시 기존 파일을 덮어쓰지 않는다.
+# 쓰기: --out 경로(기본 private_out/multifactor_kr.json, git 제외) (schema multifactor_kr/1). 실패·차단 시 기존 파일을 덮어쓰지 않는다.
+#       결과는 저장소·Pages·아티팩트에 올리지 않는다. 게시는 scripts/mf_publish.py(비공개 Firestore)가 한다.
 #
 # 학습·점검용 지표다. 매수·매도 권유가 아니며 수치의 정확성은 공식 자료와 대조하지 않았다.
 #
@@ -33,7 +34,7 @@ sys.path[:] = [p for p in sys.path if os.path.abspath(p or os.getcwd()) != _HERE
 import json, re, time, math, threading, argparse, datetime as dt
 
 ROOT = os.path.dirname(_HERE)
-OUT_DEFAULT = os.path.join(ROOT, "analysis", "multifactor_kr.json")
+OUT_DEFAULT = os.path.join(ROOT, "private_out", "multifactor_kr.json")   # 저장소 밖으로 나가지 않도록 .gitignore 처리. 운영은 --out 으로 러너 임시 폴더를 쓴다
 KST = dt.timezone(dt.timedelta(hours=9))
 VERSION = "v 20261019-2"
 

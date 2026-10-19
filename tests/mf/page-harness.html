@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>multifactor.html 시험 하네스</title></head>
+<body>
+<!--
+  multifactor.html 의 로그인 흐름을 시험한다. 실제 Google 로그인·Firebase·서버는 쓰지 않고, 같은 인터페이스의 모의 어댑터를 주입한다.
+  사용: 저장소 루트에서 `python -m http.server 8931` 후 http://127.0.0.1:8931/tests/mf/page-harness.html 을 열고,
+        콘솔/자동화에서 window.__MF__(상태·로그)를 바꾸며 iframe(#f) 안의 화면을 확인한다.
+  주의: 모의 어댑터는 about:srcdoc 또는 localhost 에서만 받아들여진다(배포 주소에서는 무시) — multifactor.html 의 TEST_ENV 참고.
+  종목 데이터는 여기서 만든 가짜 값이다(실제 시세·재무 아님).
+-->
+<iframe id="f" style="width:100%;height:92vh;border:1px solid #ccc"></iframe>
+<script>
+function fakeData(n) {
+  const FACTORS = ["mom_price", "mom_vol", "per", "pbr", "rev", "op", "ni", "roe"];
+  const labels = {mom_price: "모멘텀 주가", mom_vol: "모멘텀 거래량", per: "밸류 PER", pbr: "밸류 PBR", rev: "퀄리티 매출증가", op: "퀄리티 영업이익증가", ni: "퀄리티 순이익증가", roe: "퀄리티 ROE"};
+  const styles = {
+    base: {label: "기본", factors: FACTORS}, value_growth: {label: "가치 성장", factors: ["per", "pbr", "roe", "rev", "op", "ni"]},
+    trend_growth: {label: "추세 성장", factors: ["mom_price", "mom_vol", "roe", "rev", "op", "ni"]}, contrarian: {label: "역발상", factors: ["mom_price", "mom_vol", "per", "pbr"]},
+  };
+  const items = [];
+  for (let i = 0; i < n; i++) {
+    const raw = {}, ranks = {};
+    FACTORS.forEach((f, j) => { raw[f] = Math.round(((i * 7 + j * 3) % 40 + 1) * 10) / 10; ranks[f] = Math.round(((i * (j + 3)) % n + 1) / n * 1000) / 10; });
+    const sc = {};
+    Object.keys(styles).forEach((k) => { sc[k] = {score: 10 + i + (k === "base" ? 0 : 1), rank: i + 1, pct: Math.round((i + 1) / n * 1000) / 10}; });
+    items.push({code: String(100000 + i * 10).padStart(6, "0"), name: "가상종목" + String(i + 1).padStart(2, "0"), market: "KOSPI", marcap: 1e13 - i * 1e11, close: 50000 + i * 100,
+                raw, ranks, scores: sc, flags: i === 2 ? ["per_loss"] : [], filled: [], price_date: "2026-10-16", quarter_date: "2026-06-01"});
+  }
+  return {schema: "multifactor_kr/1", version: "harness", generated_at: "2026-10-17T10:20:00+09:00", price_date: "2026-10-16", quarter_date: "2026-06-01", n, n_target: n,
+          universe: {listing_total: 100, pre_excluded: {x: 1}, post_excluded: {}, failed: [], requested: n}, source: {library: "harness", library_version: "0", note: "가상 데이터"},
+          method: null, factors: labels, styles, disclaimer: "시험용 가상 데이터입니다.", items};
+}
+const OWNER = "owner@example.test";
+window.__MF__ = {
+  log: [], user: null, nextUser: {email: OWNER}, signInError: null, netError: false, data: fakeData(12),
+  // 서버 응답: 본인 이메일 토큰이면 200, 아니면 401(서버의 UID 검사를 흉내). status 를 바꿔 404/500 등을 만들 수 있다.
+  forceStatus: null,
+  respond(token) {
+    if (this.forceStatus) return {status: this.forceStatus, body: this.forceStatus === 200 ? this.data : {error: "x"}};
+    return token === "TOKEN-" + OWNER ? {status: 200, body: this.data} : {status: 401, body: {error: "본인 Google 로그인 확인이 필요합니다"}};
+  },
+  start() { document.getElementById("f").srcdoc = ""; this.log = []; load(); },
+};
+function mkAdapter() {
+  const P = window.parent.__MF__; let cb = null;
+  return {
+    init(onUser) { P.log.push("init"); cb = onUser; P.emit = (u) => cb(u); setTimeout(() => cb(P.user), 0); },
+    signIn() { P.log.push("signIn"); return new Promise((res, rej) => { if (P.signInError) { rej({code: P.signInError}); return; } P.user = P.nextUser; setTimeout(() => { cb(P.user); res(); }, 0); }); },
+    signOut() { P.log.push("signOut"); P.user = null; setTimeout(() => cb(null), 0); return Promise.resolve(); },
+    async getToken() { P.log.push("getToken"); if (!P.user) throw new Error("no user"); return "TOKEN-" + P.user.email; },
+    async fetchLatest(token) { P.log.push("fetch:" + token); if (P.netError) throw new Error("net"); return P.respond(token); },
+  };
+}
+async function load() {
+  const html = await (await fetch("/multifactor.html")).text();
+  const inject = "<base href=\"/\"><script>window.__MF_ADAPTER__ = (" + mkAdapter.toString() + ")();<\/script>";
+  document.getElementById("f").srcdoc = html.replace("<head>", "<head>" + inject);
+}
+load();
+</script>
+</body></html>

@@ -38,6 +38,8 @@ ACC = {
     "ni_owner": {"ids": {"ifrs-full_ProfitLossAttributableToOwnersOfParent", "ifrs_ProfitLossAttributableToOwnersOfParent"}, "names": ()},
 }
 RESULTS = {"stocks": [], "price": []}
+# 1 이면 Summary 용 result.md 에 종목별 값(네이버 원값 포함)을 쓰지 않고 집계만 쓴다. 공개 저장소의 Summary 는 누구나 볼 수 있다.
+AGG_ONLY = os.environ.get("MF_VERIFY_AGGREGATE_ONLY", "1") != "0"
 
 
 def now_iso(): return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -219,20 +221,24 @@ def save():
     L += ["### 분기 금액 일치 (분기 단위 건수)", "", "| 항목 | 일치/비교 |", "|---|---|"]
     names = {"rev": "매출액", "op": "영업이익", "ni_total": "당기순이익(총)", "ni_owner": "당기순이익(지배주주)"}
     for k, (a, b) in tot.items(): L.append("| %s | %d / %d |" % (names[k], a, b))
-    L += ["", "### 종목별 (네이버 억 원 → DART 억 원)", "", "| 종목 | 분기 | 매출 N→D | 영업이익 N→D | 순이익 N→D(총/지배) | 일치(매출/영업/순총/순지배) | 오류 |", "|---|---|---|---|---|---|---|"]
-    for s in RESULTS["stocks"]:
-        if s.get("error"): L.append("| %s | - | - | - | - | - | %s |" % (s["name"], s["error"])); continue
-        for q in s["quarters"]:
-            n, d, m = q["naver_eok"], q.get("dart_eok") or {}, q.get("match") or {}
-            f = lambda v: "-" if v is None else ("O" if v else "X")
-            L.append("| %s | %s | %g→%s | %g→%s | %g→%s/%s | %s/%s/%s/%s | %s |" % (
-                s["name"], q["period"], n["rev"], d.get("rev", "-"), n["op"], d.get("op", "-"), n["ni"], d.get("ni", "-"), d.get("ni_owner", "-"),
-                f(m.get("rev")), f(m.get("op")), f(m.get("ni_total")), f(m.get("ni_owner")), q.get("error", "")))
-    L += ["", "### 증가율 대조 (점수의 직접 입력, %p 차이)", "", "| 종목 | 매출 N/D | 영업이익 N/D | 순이익 N/D |", "|---|---|---|---|"]
-    for s in RESULTS["stocks"]:
-        g = s.get("growth")
-        if not g: continue
-        L.append("| %s | %s/%s | %s/%s | %s/%s |" % (s["name"], g["rev"]["naver"], g["rev"]["dart"], g["op"]["naver"], g["op"]["dart"], g["ni"]["naver"], g["ni"]["dart"]))
+    big = [s for s in RESULTS["stocks"] if s.get("growth") and any((s["growth"][k]["diff_pp"] or 0) > 1.0 for k in ("rev", "op", "ni"))]
+    with_growth = [s for s in RESULTS["stocks"] if s.get("growth")]
+    L += ["", "- 증가율(점수의 직접 입력)이 1%%p 넘게 다른 종목: %d / %d종목" % (len(big), len(with_growth))]
+    if not AGG_ONLY:       # 종목별 값은 네이버 원값을 담으므로 공개 저장소의 Summary·아티팩트에는 올리지 않는다(AGG_ONLY=집계만)
+        L += ["", "### 종목별 (네이버 억 원 → DART 억 원)", "", "| 종목 | 분기 | 매출 N→D | 영업이익 N→D | 순이익 N→D(총/지배) | 일치(매출/영업/순총/순지배) | 오류 |", "|---|---|---|---|---|---|---|"]
+        for s in RESULTS["stocks"]:
+            if s.get("error"): L.append("| %s | - | - | - | - | - | %s |" % (s["name"], s["error"])); continue
+            for q in s["quarters"]:
+                n, d, m = q["naver_eok"], q.get("dart_eok") or {}, q.get("match") or {}
+                f = lambda v: "-" if v is None else ("O" if v else "X")
+                L.append("| %s | %s | %g→%s | %g→%s | %g→%s/%s | %s/%s/%s/%s | %s |" % (
+                    s["name"], q["period"], n["rev"], d.get("rev", "-"), n["op"], d.get("op", "-"), n["ni"], d.get("ni", "-"), d.get("ni_owner", "-"),
+                    f(m.get("rev")), f(m.get("op")), f(m.get("ni_total")), f(m.get("ni_owner")), q.get("error", "")))
+        L += ["", "### 증가율 대조 (점수의 직접 입력, %p 차이)", "", "| 종목 | 매출 N/D | 영업이익 N/D | 순이익 N/D |", "|---|---|---|---|"]
+        for s in RESULTS["stocks"]:
+            g = s.get("growth")
+            if not g: continue
+            L.append("| %s | %s/%s | %s/%s | %s/%s |" % (s["name"], g["rev"]["naver"], g["rev"]["dart"], g["op"]["naver"], g["op"]["dart"], g["ni"]["naver"], g["ni"]["dart"]))
     acc = {}
     for s in RESULTS["stocks"]:
         for q in s["quarters"]:
@@ -240,9 +246,15 @@ def save():
                 if a: acc[(k, a[0], a[1])] = acc.get((k, a[0], a[1]), 0) + 1
     L += ["", "### 맞춘 계정(ID 가이드가 없어 응답에서 찾은 계정. 엉뚱한 계정을 맞췄는지 확인용)", "", "| 항목 | account_id | account_nm | 건수 |", "|---|---|---|---|"]
     for (k, i, n), c in sorted(acc.items()): L.append("| %s | %s | %s | %d |" % (k, i, n, c))
-    L += ["", "### 주가 모멘텀 입력 (FDR=네이버 vs yfinance=야후)", "", "| 종목 | 모멘텀(FDR) | 모멘텀(야후) | 차이 %p | 같은 날 종가 0.5% 이내 | 오류 |", "|---|---|---|---|---|---|"]
-    for p in RESULTS["price"]:
-        L.append("| %s | %s | %s | %s | %s/%s | %s |" % (p.get("name", p["code"]), p.get("mom_fdr", "-"), p.get("mom_yf", "-"), p.get("diff_pp", "-"), p.get("close_within_0p5pct", "-"), p.get("same_date_rows", "-"), p.get("error", "")))
+    pr_ok = [p for p in RESULTS["price"] if p.get("diff_pp") is not None]
+    pr_err = [p for p in RESULTS["price"] if p.get("error")]
+    L += ["", "### 주가 모멘텀 입력 (FDR=네이버 vs yfinance=야후) — 집계", "",
+          "- 비교 성공 %d / %d종목 · 모멘텀 차이 1%%p 초과 %d종목 · 오류 %d종목(%s)" % (
+              len(pr_ok), len(RESULTS["price"]), sum(1 for p in pr_ok if p["diff_pp"] > 1.0), len(pr_err), ", ".join(sorted({p["error"] for p in pr_err})) or "-")]
+    if not AGG_ONLY:
+        L += ["", "| 종목 | 모멘텀(FDR) | 모멘텀(야후) | 차이 %p | 같은 날 종가 0.5% 이내 | 오류 |", "|---|---|---|---|---|---|"]
+        for p in RESULTS["price"]:
+            L.append("| %s | %s | %s | %s | %s/%s | %s |" % (p.get("name", p["code"]), p.get("mom_fdr", "-"), p.get("mom_yf", "-"), p.get("diff_pp", "-"), p.get("close_within_0p5pct", "-"), p.get("same_date_rows", "-"), p.get("error", "")))
     with open(os.path.join(OUT, "result.md"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(L) + "\n")
 

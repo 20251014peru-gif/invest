@@ -1,9 +1,13 @@
-# v 20261019-2  multifactor-kr.yml — 국내 멀티팩터 종합점수(scripts/multifactor_kr.py) 주 1회(토 10:17 KST) + 수동 실행
-# 하는 일: FinanceDataReader 로 시가총액 상위 N종목(기본 200)의 주가·재무를 받아 analysis/multifactor_kr.json 을 만든다.
-# 안전장치: main 에서만 커밋·push 한다(다른 브랜치는 시험 모드 — 아티팩트만 남기고 저장소를 바꾸지 않는다).
-#           연속 10회 실패(차단 의심)·정상 종목 부족이면 스크립트가 종료코드 3 으로 끝나 파일을 쓰지 않는다 → 기존 결과 보존, 워크플로 빨강, ntfy 알림.
-# 비밀키·AI·Firebase 사용 없음. 데이터 출처는 비공식 경로(KRX 목록·네이버 재무)이며 약관은 미확인이다.
-# 비용: GitHub Actions 사용 시간(1회 약 10~20분 예상, 주 1회). 외부 유료 호출 없음.
+# v 20261019-3  multifactor-kr.yml — 국내 멀티팩터 종합점수(scripts/multifactor_kr.py) 주 1회(토 10:17 KST) + 수동 실행
+# 하는 일: FinanceDataReader 로 시가총액 상위 N종목(기본 200)의 주가·재무를 받아 계산하고, main 에서만 비공개 Firestore 에 게시한다.
+#          저장 위치 chatgpt_macro_private/multifactor_kr/snapshots/{price_date,latest}. 화면은 mfLatest 함수를 통해 본인 로그인 후에만 읽는다.
+# 공개하지 않는다: 결과를 저장소 커밋·Pages·Actions 아티팩트(공개 저장소의 아티팩트는 누구나 받을 수 있다)에 남기지 않는다. 파일은 러너 임시 폴더에만 있다가 지워진다.
+#                  Actions Summary 에는 종목 수·제외 개수 같은 집계만 쓴다(종목별 값 없음).
+# 안전장치: 연속 10회 실패(차단 의심)·정상 종목 부족이면 스크립트가 종료코드 3 으로 끝나 게시하지 않는다 → 기존 결과 보존, 워크플로 빨강, ntfy 알림.
+#           더 오래된 결과가 최신을 덮어쓰지 않는다(mf_publish 종료코드 4). 게시 뒤 비로그인 읽기가 403 인지 확인하고, 아니면 실패 처리한다.
+# 인증: 기존 GitHub 비밀값 GCP_SERVICE_ACCOUNT_KEY(프로젝트 my-system-25497). 이 키의 Firestore 쓰기 권한은 게시 첫 실행에서 확인한다(미확인).
+# 데이터 출처는 비공식 경로(KRX 목록·네이버 재무)이며 약관은 미확인이다(자동 수집 자체의 위험은 비공개로 바꿔도 남는다).
+# 비용: GitHub Actions 사용 시간(1회 약 17분, 주 1회) + Firestore 쓰기 2건/주. 외부 유료 호출 없음.
 name: Multifactor KR
 on:
   schedule:
@@ -15,7 +19,7 @@ on:
         required: false
         default: '200'
 permissions:
-  contents: write              # main 에서 결과 JSON 을 커밋할 때만 쓴다
+  contents: read               # 저장소에 쓰지 않는다
 concurrency:
   group: multifactor-kr
   cancel-in-progress: false
@@ -25,6 +29,7 @@ jobs:
     timeout-minutes: 60
     env:
       MF_N: ${{ github.event.inputs.n || '200' }}
+      FS_DOC: https://firestore.googleapis.com/v1/projects/my-system-25497/databases/(default)/documents/chatgpt_macro_private/multifactor_kr/snapshots
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -32,57 +37,58 @@ jobs:
           python-version: '3.11'
       - name: 라이브러리 설치 (버전 고정)
         run: |
-          python -m pip install --quiet "finance-datareader==0.9.202"
+          python -m pip install --quiet "finance-datareader==0.9.202" "google-cloud-firestore==2.33.0"
           python -m pip show finance-datareader | sed -n '1,2p'
-      - name: 단위 시험 (계산 스크립트 + 화면 계산 모듈)
+      - name: 단위 시험 (계산·게시 스크립트, 화면 계산 모듈, mfLatest 함수 로직)
         run: |
           python -m unittest discover -s tests/mf -p "test_*.py"
-          node --test tests/mf/multifactor-core.test.mjs
-      - name: 시험 모드 (main 아님) — 계산만 하고 커밋하지 않음
-        if: github.ref != 'refs/heads/main'
-        run: python scripts/multifactor_kr.py --n "$MF_N"
-      - name: 실행하고 커밋·push (main 전용, push 가 밀리면 최신으로 다시 실행)
+          node --test tests/mf/multifactor-core.test.mjs functions-mf/test/handler.test.mjs
+      - name: 계산 (결과는 러너 임시 폴더에만)
+        run: python scripts/multifactor_kr.py --n "$MF_N" --out "$RUNNER_TEMP/multifactor_kr.json"
+      - name: 게시 전 검증 (쓰지 않음)
+        run: python scripts/mf_publish.py --in "$RUNNER_TEMP/multifactor_kr.json" --dry-run
+      - name: Google 인증 (main 전용)
+        if: github.ref == 'refs/heads/main'
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          project_id: my-system-25497
+      - name: 비공개 Firestore 에 게시 (main 전용)
+        if: github.ref == 'refs/heads/main'
+        run: python scripts/mf_publish.py --in "$RUNNER_TEMP/multifactor_kr.json"
+      - name: 비로그인 접근이 막혀 있는지 확인 (main 전용 — 403 이 아니면 실패)
         if: github.ref == 'refs/heads/main'
         run: |
-          set -e
-          git config user.name "multifactor-bot"
-          git config user.email "bot@users.noreply.github.com"
-          for i in 1 2 3 4; do
-            git fetch origin main
-            git reset --hard origin/main
-            python scripts/multifactor_kr.py --n "$MF_N"
-            git add analysis/multifactor_kr.json
-            if git diff --cached --quiet; then echo "::notice::변경 없음"; exit 0; fi
-            git commit -q -m "auto: multifactor $(date -u +%Y-%m-%dT%H:%MZ)"
-            if git push origin HEAD:main; then echo "::notice::push 성공 (시도 $i 회)"; exit 0; fi
-            echo "push 밀림 — $((i*5))초 뒤 최신으로 다시 실행"; sleep $((i*5))
+          set -u
+          bad=0
+          for u in "$FS_DOC/latest" "$FS_DOC?pageSize=1&mask.fieldPaths=zznone"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$u")
+            echo "비로그인 요청 → HTTP $code"
+            [ "$code" = "403" ] || bad=1
           done
-          echo "::error::push 4회 실패"; exit 1
-      - name: 결과 요약 (Summary)
+          if [ "$bad" = "1" ]; then
+            echo "::error::게시 경로가 비로그인으로 읽힐 수 있습니다(403 아님). Firestore 규칙을 확인하고 이 경로의 데이터를 즉시 삭제하세요."
+            exit 1
+          fi
+      - name: 결과 요약 (집계만, 종목별 값 없음)
         if: always()
         run: |
-          if [ -f analysis/multifactor_kr.json ]; then
-            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
-          import json
-          d = json.load(open("analysis/multifactor_kr.json", encoding="utf-8"))
+          if [ -f "$RUNNER_TEMP/multifactor_kr.json" ]; then
+            MF_FILE="$RUNNER_TEMP/multifactor_kr.json" python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, os
+          d = json.load(open(os.environ["MF_FILE"], encoding="utf-8"))
           u = d["universe"]
           print("## 멀티팩터 국내")
           print("- 정상 %d / 대상 %d종목 · 주가 기준 %s · 재무 %s" % (d["n"], u["requested"], d["price_date"], d["quarter_date"]))
-          print("- 사전 제외: %s" % u["pre_excluded"])
-          print("- 사후 제외: %s · 수신 실패 %d건" % (u["post_excluded"], len(u["failed"])))
-          print("- 수치 정확성은 공식 자료와 대조하지 않음(미검증)")
+          print("- 사전 제외 %d종목 · 사후 제외 %s · 수신 실패 %d건" % (sum(u["pre_excluded"].values()), u["post_excluded"], len(u["failed"])))
+          print("- 게시 위치: 비공개 Firestore(저장소·아티팩트에 올리지 않음). 수치 정확성은 공식 자료와 대조하지 않음(미검증)")
           PY
           else
-            echo "결과 파일 없음 — 실행 실패 또는 차단/데이터 부족으로 파일을 쓰지 않음(기존 결과 보존)" >> "$GITHUB_STEP_SUMMARY"
+            echo "결과 파일 없음 — 실행 실패 또는 차단/데이터 부족으로 게시하지 않음(기존 결과 보존)" >> "$GITHUB_STEP_SUMMARY"
           fi
-      - name: 결과 파일 보관 (7일)
+      - name: 임시 결과 파일 삭제
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: multifactor-kr-result
-          path: analysis/multifactor_kr.json
-          retention-days: 7
-          if-no-files-found: ignore
+        run: rm -f "$RUNNER_TEMP/multifactor_kr.json"
       - name: 실패하면 폰으로 알림
         if: failure()
         env:

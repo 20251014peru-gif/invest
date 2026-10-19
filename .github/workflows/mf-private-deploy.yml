@@ -1,0 +1,48 @@
+# mfLatest 함수 배포 — v 20261019-1
+# 무엇: 멀티팩터 결과를 본인 로그인 후에만 읽어 주는 함수 mfLatest(functions-mf/, codebase mf-private)를 배포한다.
+#       기존 macroAi·event 함수·records.html 은 건드리지 않는다(--only functions:mf-private:mfLatest).
+# 인증: 기존 서비스 계정 비밀값 GCP_SERVICE_ACCOUNT_KEY(records-ai-deploy.yml 과 같은 방식). 새 비밀값 없음. 기존 비밀 MACRO_OWNER_UID 를 함수에 연결한다.
+# 트리거: main 에서 functions-mf/ 또는 이 파일이 바뀔 때, 그리고 수동 실행. 시험(단위 시험)이 통과해야 배포한다.
+# 배포 뒤 확인: 토큰 없는 호출은 401 이어야 한다(아래 단계). 실제 본인 로그인 호출은 사용자가 화면에서 확인해야 한다(자동화 불가).
+name: MF Private Deploy
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'functions-mf/**'
+      - '.github/workflows/mf-private-deploy.yml'
+permissions:
+  contents: read
+concurrency:
+  group: mf-private-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 단위 시험 (인증·응답 로직)
+        run: node --test functions-mf/test/handler.test.mjs
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          project_id: my-system-25497
+      - name: 배포 도구·의존성 설치 (버전 고정)
+        run: |
+          npm install -g firebase-tools@15.31.0
+          npm --prefix functions-mf install --no-audit --no-fund
+      - name: mfLatest 만 배포
+        working-directory: functions-mf
+        run: firebase deploy --only functions:mf-private:mfLatest --project my-system-25497 --non-interactive
+      - name: 배포 확인 — 토큰 없는 호출은 401, GET 은 405
+        run: |
+          url="https://asia-northeast3-my-system-25497.cloudfunctions.net/mfLatest"
+          a=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$url")
+          b=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Authorization: Bearer invalid" "$url")
+          c=$(curl -s -o /dev/null -w "%{http_code}" "$url")
+          echo "토큰 없음 POST=$a · 잘못된 토큰 POST=$b · GET=$c"
+          [ "$a" = "401" ] && [ "$b" = "401" ] && [ "$c" = "405" ] || { echo "::error::예상 응답(401/401/405)이 아닙니다"; exit 1; }
