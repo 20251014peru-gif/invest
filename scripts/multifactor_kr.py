@@ -18,9 +18,16 @@
 #   3) 동점은 같은 순위(작은 쪽)로 둔다. 순위가 없는 값(None)은 최하위.
 #   4) 상장 1년(242거래일) 미만은 연간 등락률을 계산할 수 없어 제외한다.
 #   5) 벤처투자사는 종목명 키워드로만 근사해 제외한다(정확한 분류 아님).
-import os, sys, json, time, math, threading, argparse, datetime as dt
+import os, sys
+# scripts/ 안에 calendar.py 등 표준 라이브러리와 같은 이름의 파일이 있다. `python scripts/x.py` 로 실행하면 이 폴더가
+# import 경로 맨 앞에 올라가 requests·pandas 가 표준 `calendar` 대신 이 폴더의 파일을 읽고 실패한다(2026-10-19 Actions 실패 원인).
+# 다른 import 보다 먼저 이 폴더를 경로에서 뺀다. (이 파일은 같은 폴더의 다른 모듈을 import 하지 않는다)
+_HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path[:] = [p for p in sys.path if os.path.abspath(p or os.getcwd()) != _HERE]
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+import json, time, math, threading, argparse, datetime as dt
+
+ROOT = os.path.dirname(_HERE)
 OUT_DEFAULT = os.path.join(ROOT, "analysis", "multifactor_kr.json")
 KST = dt.timezone(dt.timedelta(hours=9))
 VERSION = "v 20261019-1"

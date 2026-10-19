@@ -40,6 +40,22 @@ def quarter_df(prev=(100.0, 10.0, 8.0), cur=(150.0, 20.0, 12.0), roe=9.5, est_ro
     return df
 
 
+class ShadowingTests(unittest.TestCase):
+    def test_script_dir_removed_from_import_path(self):
+        # scripts/calendar.py 가 표준 calendar 를 가리지 않도록 모듈이 자기 폴더를 경로에서 뺀다
+        here = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts"))
+        self.assertNotIn(here, [os.path.abspath(p or os.getcwd()) for p in sys.path])
+
+    def test_third_party_import_works_when_run_like_actions(self):
+        # Actions 와 같은 방식(python scripts/multifactor_kr.py)으로 시작해도 FinanceDataReader 가 import 되는지: 새 프로세스에서 확인
+        import subprocess
+        scripts = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts"))
+        code = ("import runpy,sys; sys.path.insert(0, %r); m = runpy.run_path(%r, run_name='probe'); "
+                "import requests, FinanceDataReader; print('IMPORT_OK')") % (scripts, os.path.join(scripts, "multifactor_kr.py"))
+        r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, encoding="utf-8", errors="replace")
+        self.assertIn("IMPORT_OK", r.stdout, r.stderr[-400:])
+
+
 class RankTests(unittest.TestCase):
     def test_rank_pct_multiples_of_ten_for_n10(self):
         vals = list(range(10, 0, -1))
