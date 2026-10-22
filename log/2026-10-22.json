@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-10-22",
-  "generated_at": "2026-10-22T07:16:04+09:00",
+  "generated_at": "2026-10-22T10:24:51+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "수출금액지수 전년비 89.22%(+13.35%p) · 투자자예탁금 104.7 조원(+5.0%) · KOSPI 5,736 pt(+3.3%) · VIX 16.68 pt(-1.6%)"
+      "t": "수출금액지수 전년비 89.22%(+13.35%p) · 투자자예탁금 104.7 조원(+5.0%) · 해운 BDRY 12.48 $(-4.1%) · KOSPI 5,736 pt(+3.3%)"
     },
     {
       "k": "오늘 발표",
@@ -85,6 +85,20 @@
       "group": "kr"
     },
     {
+      "id": "bdry",
+      "name": "해운 BDRY",
+      "value": 12.48,
+      "unit": "$",
+      "prev": 13.02,
+      "delta": -0.54,
+      "delta_text": "-4.1%",
+      "judge": "",
+      "as_of": "2026-10-20",
+      "cycle": "D",
+      "score": 4.1474654377880125,
+      "group": "world"
+    },
+    {
       "id": "kospi",
       "name": "KOSPI",
       "value": 5735.66,
@@ -143,30 +157,16 @@
     {
       "id": "wti",
       "name": "유가 WTI",
-      "value": 97.91,
+      "value": 98.01,
       "unit": "$",
       "prev": 97.26,
-      "delta": 0.65,
-      "delta_text": "+0.7%",
+      "delta": 0.75,
+      "delta_text": "+0.8%",
       "judge": "",
       "as_of": "2026-10-21",
       "cycle": "D",
-      "score": 0.6683117417232073,
+      "score": 0.771128932757557,
       "group": "world"
-    },
-    {
-      "id": "nasdaq",
-      "name": "나스닥",
-      "value": 26702.8574,
-      "unit": "pt",
-      "prev": 26572.4609,
-      "delta": 130.397,
-      "delta_text": "+0.5%",
-      "judge": "중립",
-      "as_of": "2026-10-21",
-      "cycle": "D",
-      "score": 0.4907204511118598,
-      "group": "us"
     }
   ],
   "releases": {
@@ -336,6 +336,20 @@
           "group": "kr"
         },
         {
+          "id": "bdry",
+          "name": "해운 BDRY",
+          "value": 12.48,
+          "unit": "$",
+          "prev": 13.02,
+          "delta": -0.54,
+          "delta_text": "-4.1%",
+          "judge": "",
+          "as_of": "2026-10-20",
+          "cycle": "D",
+          "score": 4.1474654377880125,
+          "group": "world"
+        },
+        {
           "id": "kospi",
           "name": "KOSPI",
           "value": 5735.66,
@@ -394,30 +408,16 @@
         {
           "id": "wti",
           "name": "유가 WTI",
-          "value": 97.91,
+          "value": 98.01,
           "unit": "$",
           "prev": 97.26,
-          "delta": 0.65,
-          "delta_text": "+0.7%",
+          "delta": 0.75,
+          "delta_text": "+0.8%",
           "judge": "",
           "as_of": "2026-10-21",
           "cycle": "D",
-          "score": 0.6683117417232073,
+          "score": 0.771128932757557,
           "group": "world"
-        },
-        {
-          "id": "nasdaq",
-          "name": "나스닥",
-          "value": 26702.8574,
-          "unit": "pt",
-          "prev": 26572.4609,
-          "delta": 130.397,
-          "delta_text": "+0.5%",
-          "judge": "중립",
-          "as_of": "2026-10-21",
-          "cycle": "D",
-          "score": 0.4907204511118598,
-          "group": "us"
         }
       ]
     },
@@ -431,7 +431,7 @@
     },
     {
       "id": "2026-10-22/auto/macro",
-      "time": "07:12",
+      "time": "10:21",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 23/33 수집",
