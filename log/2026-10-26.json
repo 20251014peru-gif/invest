@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-10-26",
-  "generated_at": "2026-10-26T12:53:59+09:00",
+  "generated_at": "2026-10-26T18:54:50+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 29 천명(-78.2%) · 수출금액지수 전년비 89.22%(+13.35%p) · 투자자예탁금 104.7 조원(+5.0%) · 유가 WTI 100.81 $(-2.4%)"
+      "t": "미 비농업고용 증감 29 천명(-78.2%) · 수출금액지수 전년비 89.22%(+13.35%p) · 투자자예탁금 104.7 조원(+5.0%) · 유가 WTI 101.11 $(-2.1%)"
     },
     {
       "k": "오늘 발표",
@@ -37,7 +37,7 @@
       "key": "credit_spread",
       "label": "신용 스프레드",
       "value": "0.69%p",
-      "sub": "주의 · 2026-10-23",
+      "sub": "주의 · 2026-10-26",
       "tone": "yellow"
     },
     {
@@ -101,15 +101,57 @@
     {
       "id": "wti",
       "name": "유가 WTI",
-      "value": 100.81,
+      "value": 101.11,
       "unit": "$",
       "prev": 103.27,
-      "delta": -2.46,
-      "delta_text": "-2.4%",
+      "delta": -2.16,
+      "delta_text": "-2.1%",
       "judge": "",
-      "as_of": "2026-10-25",
+      "as_of": "2026-10-26",
       "cycle": "D",
-      "score": 2.382105161227843,
+      "score": 2.0916045318098155,
+      "group": "world"
+    },
+    {
+      "id": "vix",
+      "name": "VIX",
+      "value": 19.24,
+      "unit": "pt",
+      "prev": 19.45,
+      "delta": -0.21,
+      "delta_text": "-1.1%",
+      "judge": "중립",
+      "as_of": "2026-10-26",
+      "cycle": "D",
+      "score": 1.079691516709516,
+      "group": "us"
+    },
+    {
+      "id": "copper",
+      "name": "구리",
+      "value": 6.5575,
+      "unit": "$/lb",
+      "prev": 6.5075,
+      "delta": 0.05,
+      "delta_text": "+0.8%",
+      "judge": "",
+      "as_of": "2026-10-26",
+      "cycle": "D",
+      "score": 0.7683442182097552,
+      "group": "world"
+    },
+    {
+      "id": "gold",
+      "name": "금",
+      "value": 4033.1001,
+      "unit": "$/oz",
+      "prev": 4007.8999,
+      "delta": 25.2,
+      "delta_text": "+0.6%",
+      "judge": "",
+      "as_of": "2026-10-26",
+      "cycle": "D",
+      "score": 0.6287632083825303,
       "group": "world"
     },
     {
@@ -125,48 +167,6 @@
       "cycle": "M",
       "score": 0.5379470150185753,
       "group": "us"
-    },
-    {
-      "id": "copper",
-      "name": "구리",
-      "value": 6.473,
-      "unit": "$/lb",
-      "prev": 6.5075,
-      "delta": -0.035,
-      "delta_text": "-0.5%",
-      "judge": "",
-      "as_of": "2026-10-25",
-      "cycle": "D",
-      "score": 0.5301575105647394,
-      "group": "world"
-    },
-    {
-      "id": "hsi",
-      "name": "항셍지수",
-      "value": 23202.6309,
-      "unit": "pt",
-      "prev": 23093.3691,
-      "delta": 109.262,
-      "delta_text": "+0.5%",
-      "judge": "중립",
-      "as_of": "2026-10-26",
-      "cycle": "D",
-      "score": 0.4731306182604609,
-      "group": "world"
-    },
-    {
-      "id": "gold",
-      "name": "금",
-      "value": 4024.0,
-      "unit": "$/oz",
-      "prev": 4007.8999,
-      "delta": 16.1,
-      "delta_text": "+0.4%",
-      "judge": "",
-      "as_of": "2026-10-25",
-      "cycle": "D",
-      "score": 0.4017091345020895,
-      "group": "world"
     }
   ],
   "releases": {
@@ -352,15 +352,57 @@
         {
           "id": "wti",
           "name": "유가 WTI",
-          "value": 100.81,
+          "value": 101.11,
           "unit": "$",
           "prev": 103.27,
-          "delta": -2.46,
-          "delta_text": "-2.4%",
+          "delta": -2.16,
+          "delta_text": "-2.1%",
           "judge": "",
-          "as_of": "2026-10-25",
+          "as_of": "2026-10-26",
           "cycle": "D",
-          "score": 2.382105161227843,
+          "score": 2.0916045318098155,
+          "group": "world"
+        },
+        {
+          "id": "vix",
+          "name": "VIX",
+          "value": 19.24,
+          "unit": "pt",
+          "prev": 19.45,
+          "delta": -0.21,
+          "delta_text": "-1.1%",
+          "judge": "중립",
+          "as_of": "2026-10-26",
+          "cycle": "D",
+          "score": 1.079691516709516,
+          "group": "us"
+        },
+        {
+          "id": "copper",
+          "name": "구리",
+          "value": 6.5575,
+          "unit": "$/lb",
+          "prev": 6.5075,
+          "delta": 0.05,
+          "delta_text": "+0.8%",
+          "judge": "",
+          "as_of": "2026-10-26",
+          "cycle": "D",
+          "score": 0.7683442182097552,
+          "group": "world"
+        },
+        {
+          "id": "gold",
+          "name": "금",
+          "value": 4033.1001,
+          "unit": "$/oz",
+          "prev": 4007.8999,
+          "delta": 25.2,
+          "delta_text": "+0.6%",
+          "judge": "",
+          "as_of": "2026-10-26",
+          "cycle": "D",
+          "score": 0.6287632083825303,
           "group": "world"
         },
         {
@@ -376,54 +418,12 @@
           "cycle": "M",
           "score": 0.5379470150185753,
           "group": "us"
-        },
-        {
-          "id": "copper",
-          "name": "구리",
-          "value": 6.473,
-          "unit": "$/lb",
-          "prev": 6.5075,
-          "delta": -0.035,
-          "delta_text": "-0.5%",
-          "judge": "",
-          "as_of": "2026-10-25",
-          "cycle": "D",
-          "score": 0.5301575105647394,
-          "group": "world"
-        },
-        {
-          "id": "hsi",
-          "name": "항셍지수",
-          "value": 23202.6309,
-          "unit": "pt",
-          "prev": 23093.3691,
-          "delta": 109.262,
-          "delta_text": "+0.5%",
-          "judge": "중립",
-          "as_of": "2026-10-26",
-          "cycle": "D",
-          "score": 0.4731306182604609,
-          "group": "world"
-        },
-        {
-          "id": "gold",
-          "name": "금",
-          "value": 4024.0,
-          "unit": "$/oz",
-          "prev": 4007.8999,
-          "delta": 16.1,
-          "delta_text": "+0.4%",
-          "judge": "",
-          "as_of": "2026-10-25",
-          "cycle": "D",
-          "score": 0.4017091345020895,
-          "group": "world"
         }
       ]
     },
     {
       "id": "2026-10-26/auto/flow",
-      "time": "10:36",
+      "time": "18:16",
       "who": "auto",
       "kind": "flow",
       "title": "공시·토론실 — 근거글 +0, 수주·공급계약 8",
@@ -431,7 +431,7 @@
     },
     {
       "id": "2026-10-26/auto/macro",
-      "time": "12:53",
+      "time": "18:54",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 34/34 수집",
