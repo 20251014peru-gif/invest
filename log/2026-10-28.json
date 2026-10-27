@@ -2,11 +2,11 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-10-28",
-  "generated_at": "2026-10-28T04:55:26+09:00",
+  "generated_at": "2026-10-28T08:38:47+09:00",
   "brief": [
     {
       "k": "레짐",
-      "t": "성장 둔화(확인) · 물가 높음·올라오는 중(확인) · 유동성 긴축적(확인) → 4분면 성장↓물가↑ → 현금·실물·방어 우위"
+      "t": "성장 둔화(확인) · 물가 높음·올라오는 중(확인) · 유동성 중립(확인) → 4분면 성장↓물가↑ → 현금·실물·방어 우위"
     },
     {
       "k": "바뀐 것",
@@ -36,9 +36,9 @@
     {
       "key": "credit_spread",
       "label": "신용 스프레드",
-      "value": "0.69%p",
-      "sub": "주의 · 2026-10-27",
-      "tone": "yellow"
+      "value": "없음",
+      "sub": "— · ",
+      "tone": "green"
     },
     {
       "key": "kospi",
@@ -51,7 +51,7 @@
       "key": "us10y",
       "label": "미 10년물",
       "value": "5%",
-      "sub": "부담 · 2026-10-23",
+      "sub": "부담 · 2026-10-26",
       "tone": "green"
     }
   ],
@@ -115,15 +115,15 @@
     {
       "id": "vix",
       "name": "VIX",
-      "value": 17.54,
+      "value": 17.52,
       "unit": "pt",
       "prev": 18.03,
-      "delta": -0.49,
-      "delta_text": "-2.7%",
+      "delta": -0.51,
+      "delta_text": "-2.8%",
       "judge": "중립",
       "as_of": "2026-10-27",
       "cycle": "D",
-      "score": 2.7176927343316803,
+      "score": 2.828618968386032,
       "group": "us"
     },
     {
@@ -143,29 +143,29 @@
     {
       "id": "sox",
       "name": "SOX 반도체",
-      "value": 11466.6455,
+      "value": 11482.5049,
       "unit": "pt",
       "prev": 11240.8574,
-      "delta": 225.788,
-      "delta_text": "+2.0%",
+      "delta": 241.647,
+      "delta_text": "+2.1%",
       "judge": "강",
       "as_of": "2026-10-27",
       "cycle": "D",
-      "score": 2.0086377040954164,
+      "score": 2.1497248065792482,
       "group": "us"
     },
     {
-      "id": "wti",
-      "name": "유가 WTI",
-      "value": 99.81,
+      "id": "bdry",
+      "name": "해운 BDRY",
+      "value": 12.57,
       "unit": "$",
-      "prev": 101.56,
-      "delta": -1.75,
-      "delta_text": "-1.7%",
+      "prev": 12.32,
+      "delta": 0.25,
+      "delta_text": "+2.0%",
       "judge": "",
       "as_of": "2026-10-27",
       "cycle": "D",
-      "score": 1.7231193383221741,
+      "score": 2.029220779220779,
       "group": "world"
     }
   ],
@@ -366,15 +366,15 @@
         {
           "id": "vix",
           "name": "VIX",
-          "value": 17.54,
+          "value": 17.52,
           "unit": "pt",
           "prev": 18.03,
-          "delta": -0.49,
-          "delta_text": "-2.7%",
+          "delta": -0.51,
+          "delta_text": "-2.8%",
           "judge": "중립",
           "as_of": "2026-10-27",
           "cycle": "D",
-          "score": 2.7176927343316803,
+          "score": 2.828618968386032,
           "group": "us"
         },
         {
@@ -394,29 +394,29 @@
         {
           "id": "sox",
           "name": "SOX 반도체",
-          "value": 11466.6455,
+          "value": 11482.5049,
           "unit": "pt",
           "prev": 11240.8574,
-          "delta": 225.788,
-          "delta_text": "+2.0%",
+          "delta": 241.647,
+          "delta_text": "+2.1%",
           "judge": "강",
           "as_of": "2026-10-27",
           "cycle": "D",
-          "score": 2.0086377040954164,
+          "score": 2.1497248065792482,
           "group": "us"
         },
         {
-          "id": "wti",
-          "name": "유가 WTI",
-          "value": 99.81,
+          "id": "bdry",
+          "name": "해운 BDRY",
+          "value": 12.57,
           "unit": "$",
-          "prev": 101.56,
-          "delta": -1.75,
-          "delta_text": "-1.7%",
+          "prev": 12.32,
+          "delta": 0.25,
+          "delta_text": "+2.0%",
           "judge": "",
           "as_of": "2026-10-27",
           "cycle": "D",
-          "score": 1.7231193383221741,
+          "score": 2.029220779220779,
           "group": "world"
         }
       ]
@@ -431,11 +431,11 @@
     },
     {
       "id": "2026-10-28/auto/macro",
-      "time": "04:54",
+      "time": "08:38",
       "who": "auto",
       "kind": "macro",
-      "title": "지표 갱신 — 34/34 수집",
-      "text": "전부 정상"
+      "title": "지표 갱신 — 32/34 수집",
+      "text": "실패: 한국 국고채 3년, 신용 스프레드 AA-−국고3년"
     }
   ],
   "_정직": "자동 초안. 달님 기록(결론·헤드라인·시나리오·보고서 판정·종목 판단)은 Firestore invest_journal/<date>, invest_records 에 있음"
