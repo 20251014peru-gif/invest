@@ -1,33 +1,22 @@
 {
   "schema": "calendar/1",
   "version": "v 20260907-2300",
-  "computed_at": "2026-10-30T17:18:04+09:00",
-  "today": "2026-10-30",
+  "computed_at": "2026-10-31T00:42:39+09:00",
+  "today": "2026-10-31",
   "due_today": [
     {
-      "id": "krx_flow",
-      "name": "KRX 외국인·기관 주간 순매수",
+      "id": "china_pmi",
+      "name": "중국 NBS 제조업 PMI",
       "tier": "month",
-      "date": "2026-10-30",
-      "time": "18:00",
-      "period": "2026-W44",
-      "url": "https://data.krx.co.kr/",
+      "date": "2026-10-31",
+      "time": "10:30",
+      "period": "2026-10",
+      "url": "https://www.stats.gov.cn/sj/",
       "auto": false,
-      "note": "매주 금요일 장 마감 후. 자동 수집 실험 전까지 수동 · optional=미입력 경고 안 함"
+      "note": "매월 말일 오전(31일 없는 달은 30일)"
     }
   ],
   "upcoming": [
-    {
-      "id": "krx_flow",
-      "name": "KRX 외국인·기관 주간 순매수",
-      "tier": "month",
-      "date": "2026-10-30",
-      "time": "18:00",
-      "period": "2026-W44",
-      "url": "https://data.krx.co.kr/",
-      "auto": false,
-      "note": "매주 금요일 장 마감 후. 자동 수집 실험 전까지 수동 · optional=미입력 경고 안 함"
-    },
     {
       "id": "china_pmi",
       "name": "중국 NBS 제조업 PMI",
@@ -95,7 +84,7 @@
       "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
       "auto": false,
       "note": "분기 FOMC 둘째 날 새벽 3시 KST(추정, 일정표 확인)",
-      "days_late": 42
+      "days_late": 43
     },
     {
       "id": "kr_export_20",
@@ -107,7 +96,7 @@
       "url": "https://www.customs.go.kr/kcs/na/ntt/selectNttList.do?mi=2891&bbsId=1362",
       "auto": false,
       "note": "매월 21일 아침(주말이면 다음 영업일)",
-      "days_late": 39
+      "days_late": 40
     },
     {
       "id": "china_pmi",
@@ -119,7 +108,7 @@
       "url": "https://www.stats.gov.cn/sj/",
       "auto": false,
       "note": "매월 말일 오전(31일 없는 달은 30일)",
-      "days_late": 30
+      "days_late": 31
     },
     {
       "id": "ism_mfg",
@@ -131,7 +120,7 @@
       "url": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/",
       "auto": false,
       "note": "매월 1영업일 밤 11시 KST",
-      "days_late": 29
+      "days_late": 30
     },
     {
       "id": "imf_weo",
@@ -143,7 +132,7 @@
       "url": "https://www.imf.org/en/Publications/WEO",
       "auto": false,
       "note": "4·10월 전체, 1·7월 업데이트. 날짜는 해마다 달라 ±2주(추정)",
-      "days_late": 15
+      "days_late": 16
     },
     {
       "id": "kr_export_20",
@@ -155,7 +144,7 @@
       "url": "https://www.customs.go.kr/kcs/na/ntt/selectNttList.do?mi=2891&bbsId=1362",
       "auto": false,
       "note": "매월 21일 아침(주말이면 다음 영업일)",
-      "days_late": 9
+      "days_late": 10
     }
   ],
   "latest": {
