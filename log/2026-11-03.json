@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-11-03",
-  "generated_at": "2026-11-03T03:00:15+09:00",
+  "generated_at": "2026-11-03T09:44:46+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 29 천명(-78.2%) · 수출금액지수 전년비 89.22%(+13.35%p) · 투자자예탁금 104.7 조원(+5.0%) · 유가 WTI 96.42 $(-4.3%)"
+      "t": "미 비농업고용 증감 29 천명(-78.2%) · 투자자예탁금 90.2 조원(-13.8%) · 수출금액지수 전년비 89.22%(+13.35%p) · VIX 21.15 pt(+8.9%)"
     },
     {
       "k": "오늘 발표",
@@ -18,7 +18,7 @@
     },
     {
       "k": "산업·종목",
-      "t": "DART 131건(수주·공급계약 5) · 토론실 근거글 +0(적중 19) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
+      "t": "DART 132건(수주·공급계약 6) · 토론실 근거글 +0(적중 19) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
     },
     {
       "k": "미입력",
@@ -43,15 +43,15 @@
     {
       "key": "kospi",
       "label": "코스피",
-      "value": "5,859",
-      "sub": "2.24% · 2026-11-02",
+      "value": "없음",
+      "sub": " · ",
       "tone": "green"
     },
     {
       "key": "us10y",
       "label": "미 10년물",
-      "value": "4.98%",
-      "sub": "부담 · 2026-10-29",
+      "value": "4.94%",
+      "sub": "부담 · 2026-10-30",
       "tone": "green"
     }
   ],
@@ -71,6 +71,20 @@
       "group": "us"
     },
     {
+      "id": "kr_deposit",
+      "name": "투자자예탁금",
+      "value": 90.2,
+      "unit": "조원",
+      "prev": 104.7,
+      "delta": -14.5,
+      "delta_text": "-13.8%",
+      "judge": "",
+      "as_of": "2026-10",
+      "cycle": "M",
+      "score": 13.84909264565425,
+      "group": "kr"
+    },
+    {
       "id": "kr_export_yoy",
       "name": "수출금액지수 전년비",
       "value": 89.22,
@@ -85,73 +99,59 @@
       "group": "kr"
     },
     {
-      "id": "kr_deposit",
-      "name": "투자자예탁금",
-      "value": 104.7,
-      "unit": "조원",
-      "prev": 99.7,
-      "delta": 5.0,
-      "delta_text": "+5.0%",
-      "judge": "",
-      "as_of": "2026-09",
-      "cycle": "M",
-      "score": 5.015045135406218,
-      "group": "kr"
+      "id": "vix",
+      "name": "VIX",
+      "value": 21.15,
+      "unit": "pt",
+      "prev": 19.42,
+      "delta": 1.73,
+      "delta_text": "+8.9%",
+      "judge": "주의",
+      "as_of": "2026-11-02",
+      "cycle": "D",
+      "score": 8.908341915550961,
+      "group": "us"
     },
     {
       "id": "wti",
       "name": "유가 WTI",
-      "value": 96.42,
+      "value": 96.34,
       "unit": "$",
       "prev": 100.71,
-      "delta": -4.29,
+      "delta": -4.37,
       "delta_text": "-4.3%",
       "judge": "",
       "as_of": "2026-11-02",
       "cycle": "D",
-      "score": 4.259755734286558,
+      "score": 4.339191738655536,
       "group": "world"
     },
     {
-      "id": "vix",
-      "name": "VIX",
-      "value": 19.86,
+      "id": "sox",
+      "name": "SOX 반도체",
+      "value": 10328.3291,
       "unit": "pt",
-      "prev": 19.42,
-      "delta": 0.44,
-      "delta_text": "+2.3%",
-      "judge": "중립",
+      "prev": 10688.7998,
+      "delta": -360.471,
+      "delta_text": "-3.4%",
+      "judge": "약",
       "as_of": "2026-11-02",
       "cycle": "D",
-      "score": 2.26570545829041,
+      "score": 3.372415114370463,
       "group": "us"
-    },
-    {
-      "id": "kospi",
-      "name": "KOSPI",
-      "value": 5859.08,
-      "unit": "pt",
-      "prev": 5730.74,
-      "delta": 128.34,
-      "delta_text": "+2.2%",
-      "judge": "강",
-      "as_of": "2026-11-02",
-      "cycle": "D",
-      "score": 2.2395013558458445,
-      "group": "kr"
     },
     {
       "id": "bdry",
       "name": "해운 BDRY",
-      "value": 12.385,
+      "value": 12.36,
       "unit": "$",
       "prev": 12.19,
-      "delta": 0.195,
-      "delta_text": "+1.6%",
+      "delta": 0.17,
+      "delta_text": "+1.4%",
       "judge": "",
       "as_of": "2026-11-02",
       "cycle": "D",
-      "score": 1.5996718621821189,
+      "score": 1.3945857260049215,
       "group": "world"
     },
     {
@@ -334,6 +334,20 @@
           "group": "us"
         },
         {
+          "id": "kr_deposit",
+          "name": "투자자예탁금",
+          "value": 90.2,
+          "unit": "조원",
+          "prev": 104.7,
+          "delta": -14.5,
+          "delta_text": "-13.8%",
+          "judge": "",
+          "as_of": "2026-10",
+          "cycle": "M",
+          "score": 13.84909264565425,
+          "group": "kr"
+        },
+        {
           "id": "kr_export_yoy",
           "name": "수출금액지수 전년비",
           "value": 89.22,
@@ -348,73 +362,59 @@
           "group": "kr"
         },
         {
-          "id": "kr_deposit",
-          "name": "투자자예탁금",
-          "value": 104.7,
-          "unit": "조원",
-          "prev": 99.7,
-          "delta": 5.0,
-          "delta_text": "+5.0%",
-          "judge": "",
-          "as_of": "2026-09",
-          "cycle": "M",
-          "score": 5.015045135406218,
-          "group": "kr"
+          "id": "vix",
+          "name": "VIX",
+          "value": 21.15,
+          "unit": "pt",
+          "prev": 19.42,
+          "delta": 1.73,
+          "delta_text": "+8.9%",
+          "judge": "주의",
+          "as_of": "2026-11-02",
+          "cycle": "D",
+          "score": 8.908341915550961,
+          "group": "us"
         },
         {
           "id": "wti",
           "name": "유가 WTI",
-          "value": 96.42,
+          "value": 96.34,
           "unit": "$",
           "prev": 100.71,
-          "delta": -4.29,
+          "delta": -4.37,
           "delta_text": "-4.3%",
           "judge": "",
           "as_of": "2026-11-02",
           "cycle": "D",
-          "score": 4.259755734286558,
+          "score": 4.339191738655536,
           "group": "world"
         },
         {
-          "id": "vix",
-          "name": "VIX",
-          "value": 19.86,
+          "id": "sox",
+          "name": "SOX 반도체",
+          "value": 10328.3291,
           "unit": "pt",
-          "prev": 19.42,
-          "delta": 0.44,
-          "delta_text": "+2.3%",
-          "judge": "중립",
+          "prev": 10688.7998,
+          "delta": -360.471,
+          "delta_text": "-3.4%",
+          "judge": "약",
           "as_of": "2026-11-02",
           "cycle": "D",
-          "score": 2.26570545829041,
+          "score": 3.372415114370463,
           "group": "us"
-        },
-        {
-          "id": "kospi",
-          "name": "KOSPI",
-          "value": 5859.08,
-          "unit": "pt",
-          "prev": 5730.74,
-          "delta": 128.34,
-          "delta_text": "+2.2%",
-          "judge": "강",
-          "as_of": "2026-11-02",
-          "cycle": "D",
-          "score": 2.2395013558458445,
-          "group": "kr"
         },
         {
           "id": "bdry",
           "name": "해운 BDRY",
-          "value": 12.385,
+          "value": 12.36,
           "unit": "$",
           "prev": 12.19,
-          "delta": 0.195,
-          "delta_text": "+1.6%",
+          "delta": 0.17,
+          "delta_text": "+1.4%",
           "judge": "",
           "as_of": "2026-11-02",
           "cycle": "D",
-          "score": 1.5996718621821189,
+          "score": 1.3945857260049215,
           "group": "world"
         },
         {
@@ -435,19 +435,19 @@
     },
     {
       "id": "2026-11-03/auto/flow",
-      "time": "08:40",
+      "time": "04:35",
       "who": "auto",
       "kind": "flow",
-      "title": "공시·토론실 — 근거글 +0, 수주·공급계약 5",
+      "title": "공시·토론실 — 근거글 +0, 수주·공급계약 6",
       "text": "SK하이닉스 \"ADR과 국내주가 갭차이 분석\"(중) · SK하이닉스 \"자사주 매입 시작\"(상) · SK하이닉스 \"자사주 매입 시작\"(상)"
     },
     {
       "id": "2026-11-03/auto/macro",
-      "time": "02:59",
+      "time": "09:44",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 33/34 수집",
-      "text": "실패: 한은 기준금리"
+      "text": "실패: KOSPI"
     }
   ],
   "_정직": "자동 초안. 달님 기록(결론·헤드라인·시나리오·보고서 판정·종목 판단)은 Firestore invest_journal/<date>, invest_records 에 있음"
