@@ -1,9 +1,32 @@
 {
   "schema": "calendar/1",
   "version": "v 20260907-2300",
-  "computed_at": "2026-11-05T20:59:20+09:00",
-  "today": "2026-11-05",
-  "due_today": [],
+  "computed_at": "2026-11-06T04:41:19+09:00",
+  "today": "2026-11-06",
+  "due_today": [
+    {
+      "id": "krx_flow",
+      "name": "KRX 외국인·기관 주간 순매수",
+      "tier": "month",
+      "date": "2026-11-06",
+      "time": "18:00",
+      "period": "2026-W45",
+      "url": "https://data.krx.co.kr/",
+      "auto": false,
+      "note": "매주 금요일 장 마감 후. 자동 수집 실험 전까지 수동 · optional=미입력 경고 안 함"
+    },
+    {
+      "id": "us_jobs",
+      "name": "미국 고용보고서",
+      "tier": "auto",
+      "date": "2026-11-06",
+      "time": "21:30",
+      "period": "2026-10",
+      "url": "https://www.bls.gov/news.release/empsit.toc.htm",
+      "auto": true,
+      "note": "매월 첫 금요일 21:30 KST(여름엔 21:30, 겨울 22:30)"
+    }
+  ],
   "upcoming": [
     {
       "id": "krx_flow",
@@ -37,21 +60,20 @@
       "url": "https://data.krx.co.kr/",
       "auto": false,
       "note": "매주 금요일 장 마감 후. 자동 수집 실험 전까지 수동 · optional=미입력 경고 안 함"
+    },
+    {
+      "id": "krx_flow",
+      "name": "KRX 외국인·기관 주간 순매수",
+      "tier": "month",
+      "date": "2026-11-20",
+      "time": "18:00",
+      "period": "2026-W47",
+      "url": "https://data.krx.co.kr/",
+      "auto": false,
+      "note": "매주 금요일 장 마감 후. 자동 수집 실험 전까지 수동 · optional=미입력 경고 안 함"
     }
   ],
   "missing": [
-    {
-      "id": "kr_export_20",
-      "name": "관세청 1~20일 수출",
-      "tier": "month",
-      "date": "2026-09-21",
-      "time": "09:00",
-      "period": "2026-09",
-      "url": "https://www.customs.go.kr/kcs/na/ntt/selectNttList.do?mi=2891&bbsId=1362",
-      "auto": false,
-      "note": "매월 21일 아침(주말이면 다음 영업일)",
-      "days_late": 45
-    },
     {
       "id": "china_pmi",
       "name": "중국 NBS 제조업 PMI",
@@ -62,7 +84,7 @@
       "url": "https://www.stats.gov.cn/sj/",
       "auto": false,
       "note": "매월 말일 오전(31일 없는 달은 30일)",
-      "days_late": 36
+      "days_late": 37
     },
     {
       "id": "ism_mfg",
@@ -74,7 +96,7 @@
       "url": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/",
       "auto": false,
       "note": "매월 1영업일 밤 11시 KST",
-      "days_late": 35
+      "days_late": 36
     },
     {
       "id": "imf_weo",
@@ -86,7 +108,7 @@
       "url": "https://www.imf.org/en/Publications/WEO",
       "auto": false,
       "note": "4·10월 전체, 1·7월 업데이트. 날짜는 해마다 달라 ±2주(추정)",
-      "days_late": 21
+      "days_late": 22
     },
     {
       "id": "kr_export_20",
@@ -98,7 +120,7 @@
       "url": "https://www.customs.go.kr/kcs/na/ntt/selectNttList.do?mi=2891&bbsId=1362",
       "auto": false,
       "note": "매월 21일 아침(주말이면 다음 영업일)",
-      "days_late": 15
+      "days_late": 16
     },
     {
       "id": "china_pmi",
@@ -110,7 +132,7 @@
       "url": "https://www.stats.gov.cn/sj/",
       "auto": false,
       "note": "매월 말일 오전(31일 없는 달은 30일)",
-      "days_late": 5
+      "days_late": 6
     },
     {
       "id": "ism_mfg",
@@ -122,7 +144,7 @@
       "url": "https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/",
       "auto": false,
       "note": "매월 1영업일 밤 11시 KST",
-      "days_late": 3
+      "days_late": 4
     }
   ],
   "latest": {
