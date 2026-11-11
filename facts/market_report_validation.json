@@ -1,7 +1,7 @@
 {
   "schema": "market_report_validation/1",
-  "started_at": "2026-11-10T20:20:19+00:00",
-  "completed_at": "2026-11-10T20:20:22+00:00",
+  "started_at": "2026-11-11T01:06:38+00:00",
+  "completed_at": "2026-11-11T01:06:41+00:00",
   "status": "partial",
   "counts": {
     "registered": 23,
@@ -9,7 +9,7 @@
     "blocked": 6,
     "error": 0
   },
-  "run_url": "https://github.com/20251014peru-gif/invest/actions/runs/42894164911",
+  "run_url": "https://github.com/20251014peru-gif/invest/actions/runs/42936411740",
   "checks": [
     "exact_series_code",
     "exact_ecos_name_unit",
@@ -24,21 +24,22 @@
     "schema": "report_clock/1",
     "policy_version": "2026-10-01.2",
     "cutoff": "2026-11-11T08:20:00+09:00",
-    "checked_at": "2026-11-10T20:20:22+00:00",
-    "frozen_path": null,
-    "status": "collecting_before_cutoff",
+    "checked_at": "2026-11-11T01:06:41+00:00",
+    "frozen_path": "report_editions/2026-11-11/snapshot.json",
+    "status": "frozen",
     "eligible_counts": {
       "data_eligible": 0,
       "comparison_eligible": 0
-    }
+    },
+    "content_sha256": "9cf0c08765b3062a7b0fe73578aee5c86afcee98b7fa8e6820263483c8533078"
   },
   "quality_counts": {
     "window_calendar_conflicts": 0,
     "source_value_conflicts": 0
   },
   "supplemental_funding_counts": {
-    "connected": 2,
-    "error": 0
+    "connected": 1,
+    "error": 1
   },
   "not_verified": [
     "unregistered_calendar_profiles",
@@ -50,9 +51,9 @@
     {
       "id": "US_COMP_CLOSE",
       "connection_status": "connected",
-      "observation_date": "2026-11-09",
-      "retrieved_at": "2026-11-10T20:20:20+00:00",
-      "raw_sha256": "8df47a7183b1770b7d9f9633f4ab4f5518246c0c931fc156a7f110a0a68bb62f",
+      "observation_date": "2026-11-10",
+      "retrieved_at": "2026-11-11T01:06:38+00:00",
+      "raw_sha256": "fb57e2cb07af675a4ed170727532fe9851d451b17087553b07af94952a492a25",
       "error": null,
       "warnings": [],
       "next_action": null,
@@ -62,7 +63,7 @@
       "data_eligible": false,
       "comparison_eligible": false,
       "source_comparison": {
-        "status": "matched_overlap",
+        "status": "matched_overlap_primary_newer",
         "tolerance": 0.00501,
         "checked": [
           {
@@ -97,12 +98,12 @@
           }
         ],
         "mismatches": [],
-        "primary_latest": "2026-11-09",
+        "primary_latest": "2026-11-10",
         "secondary_latest": "2026-11-09",
         "independent_origin": false,
         "note": "원작성자와 FRED 재배포 경로 대조. 독립된 가격 산출기관 두 곳의 검증은 아님.",
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=NASDAQCOM&file_type=json&observation_start=2026-09-27",
-        "retrieved_at": "2026-11-10T20:20:20+00:00",
+        "retrieved_at": "2026-11-11T01:06:39+00:00",
         "raw_sha256": "07158b9d1576cd7fd903cafa1d8139c75f9ce49c3cfa45bc659bfd764c6333f9"
       },
       "window_calendar_conflicts": [],
@@ -113,7 +114,7 @@
       "id": "US_SPX_CLOSE",
       "connection_status": "connected",
       "observation_date": "2026-11-09",
-      "retrieved_at": "2026-11-10T20:20:20+00:00",
+      "retrieved_at": "2026-11-11T01:06:38+00:00",
       "raw_sha256": "8eea8dd60972f1e63aed056d609712d9d7e00dced0bf54d2ae432fcd2073c8bd",
       "error": null,
       "warnings": [],
@@ -131,9 +132,9 @@
     {
       "id": "US_DJI_CLOSE",
       "connection_status": "connected",
-      "observation_date": "2026-11-09",
-      "retrieved_at": "2026-11-10T20:20:20+00:00",
-      "raw_sha256": "a1e347c2735b0ac6c548add788dc8b4286a5b0786f081c868c8a7f8bda2d892e",
+      "observation_date": "2026-11-10",
+      "retrieved_at": "2026-11-11T01:06:38+00:00",
+      "raw_sha256": "728144f498683982355c01a28fb0ce2f956a671a9098e55c9d2eeec978b7bf76",
       "error": null,
       "warnings": [],
       "next_action": null,
@@ -150,9 +151,9 @@
     {
       "id": "US_SOX_CLOSE",
       "connection_status": "connected",
-      "observation_date": "2026-11-09",
-      "retrieved_at": "2026-11-10T20:20:20+00:00",
-      "raw_sha256": "0301266e8a69878d43c93b47365aa50231bf06b948c9fdab7cdcdb329c817050",
+      "observation_date": "2026-11-10",
+      "retrieved_at": "2026-11-11T01:06:38+00:00",
+      "raw_sha256": "4efe6df051d6d365b6aa77c1b234e449d23b999a085e4713715f29a8c1feecf9",
       "error": null,
       "warnings": [],
       "next_action": null,
@@ -162,7 +163,7 @@
       "data_eligible": false,
       "comparison_eligible": false,
       "source_comparison": {
-        "status": "matched_overlap",
+        "status": "matched_overlap_primary_newer",
         "tolerance": 0.00501,
         "checked": [
           {
@@ -197,12 +198,12 @@
           }
         ],
         "mismatches": [],
-        "primary_latest": "2026-11-09",
+        "primary_latest": "2026-11-10",
         "secondary_latest": "2026-11-09",
         "independent_origin": false,
         "note": "원작성자와 FRED 재배포 경로 대조. 독립된 가격 산출기관 두 곳의 검증은 아님.",
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=NASDAQSOX&file_type=json&observation_start=2026-09-27",
-        "retrieved_at": "2026-11-10T20:20:20+00:00",
+        "retrieved_at": "2026-11-11T01:06:39+00:00",
         "raw_sha256": "b4d771537da89a3c3a657fa0defc153477b3d1e51522953c2b35b7ea20c97bc6"
       },
       "window_calendar_conflicts": [],
@@ -213,7 +214,7 @@
       "id": "KR_KOSPI_CLOSE",
       "connection_status": "connected",
       "observation_date": "2026-11-10",
-      "retrieved_at": "2026-11-10T20:20:20+00:00",
+      "retrieved_at": "2026-11-11T01:06:39+00:00",
       "raw_sha256": "2c14b5ef0f7890ffe16054d9db6344f20d57704185eed03238e5a5c892047b4c",
       "error": null,
       "warnings": [],
@@ -232,7 +233,7 @@
       "id": "KR_KOSDAQ_CLOSE",
       "connection_status": "connected",
       "observation_date": "2026-11-10",
-      "retrieved_at": "2026-11-10T20:20:20+00:00",
+      "retrieved_at": "2026-11-11T01:06:39+00:00",
       "raw_sha256": "a28c81853af3b64f985d56e66baf37e588c9c39cff50fa2ef81d6d89b848aeb3",
       "error": null,
       "warnings": [],
@@ -251,7 +252,7 @@
       "id": "FX_USDKRW_DAY1530",
       "connection_status": "connected",
       "observation_date": "2026-11-10",
-      "retrieved_at": "2026-11-10T20:20:21+00:00",
+      "retrieved_at": "2026-11-11T01:06:39+00:00",
       "raw_sha256": "5906e769552998eacbe42527e4b9d49e16331836df51934405a692359cd53e8f",
       "error": null,
       "warnings": [],
@@ -288,9 +289,9 @@
     {
       "id": "US_CMT_2Y",
       "connection_status": "connected",
-      "observation_date": "2026-11-09",
-      "retrieved_at": "2026-11-10T20:20:20+00:00",
-      "raw_sha256": "0148c2ec0942514ccc5dabcfc4c9630b861ce8dba59fceac09ce523830e90e67",
+      "observation_date": "2026-11-10",
+      "retrieved_at": "2026-11-11T01:06:39+00:00",
+      "raw_sha256": "e621700cbf1a3fb9cdafbfb7c6f76f3b05268255a61265ae4c6df0113b4fd0e3",
       "error": null,
       "warnings": [],
       "next_action": null,
@@ -303,12 +304,6 @@
         "status": "matched_overlap_primary_newer",
         "tolerance": 1e-05,
         "checked": [
-          {
-            "date": "2026-11-02",
-            "primary": 4.59,
-            "secondary": 4.59,
-            "absolute_difference": 0.0
-          },
           {
             "date": "2026-11-03",
             "primary": 4.61,
@@ -332,16 +327,22 @@
             "primary": 4.51,
             "secondary": 4.51,
             "absolute_difference": 0.0
+          },
+          {
+            "date": "2026-11-09",
+            "primary": 4.56,
+            "secondary": 4.56,
+            "absolute_difference": 0.0
           }
         ],
         "mismatches": [],
-        "primary_latest": "2026-11-09",
-        "secondary_latest": "2026-11-06",
+        "primary_latest": "2026-11-10",
+        "secondary_latest": "2026-11-09",
         "independent_origin": false,
         "note": "원작성자와 FRED 재배포 경로 대조. 독립된 가격 산출기관 두 곳의 검증은 아님.",
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS2&file_type=json&observation_start=2026-09-27",
-        "retrieved_at": "2026-11-10T20:20:21+00:00",
-        "raw_sha256": "4809644243ef6fb7572226bf35511320c8ad60915065ecd78cf2736d32509f02"
+        "retrieved_at": "2026-11-11T01:06:39+00:00",
+        "raw_sha256": "62ed01998b517fde547b855ad58249b59b182f30279d6175c5eaae02de870cfa"
       },
       "window_calendar_conflicts": [],
       "source_value_conflicts": [],
@@ -350,9 +351,9 @@
     {
       "id": "US_CMT_10Y",
       "connection_status": "connected",
-      "observation_date": "2026-11-09",
-      "retrieved_at": "2026-11-10T20:20:21+00:00",
-      "raw_sha256": "0148c2ec0942514ccc5dabcfc4c9630b861ce8dba59fceac09ce523830e90e67",
+      "observation_date": "2026-11-10",
+      "retrieved_at": "2026-11-11T01:06:39+00:00",
+      "raw_sha256": "e621700cbf1a3fb9cdafbfb7c6f76f3b05268255a61265ae4c6df0113b4fd0e3",
       "error": null,
       "warnings": [],
       "next_action": null,
@@ -365,12 +366,6 @@
         "status": "matched_overlap_primary_newer",
         "tolerance": 1e-05,
         "checked": [
-          {
-            "date": "2026-11-02",
-            "primary": 4.91,
-            "secondary": 4.91,
-            "absolute_difference": 0.0
-          },
           {
             "date": "2026-11-03",
             "primary": 4.95,
@@ -394,16 +389,22 @@
             "primary": 4.86,
             "secondary": 4.86,
             "absolute_difference": 0.0
+          },
+          {
+            "date": "2026-11-09",
+            "primary": 4.88,
+            "secondary": 4.88,
+            "absolute_difference": 0.0
           }
         ],
         "mismatches": [],
-        "primary_latest": "2026-11-09",
-        "secondary_latest": "2026-11-06",
+        "primary_latest": "2026-11-10",
+        "secondary_latest": "2026-11-09",
         "independent_origin": false,
         "note": "원작성자와 FRED 재배포 경로 대조. 독립된 가격 산출기관 두 곳의 검증은 아님.",
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS10&file_type=json&observation_start=2026-09-27",
-        "retrieved_at": "2026-11-10T20:20:21+00:00",
-        "raw_sha256": "df16e4a76bcfbb201f80a065c99aa90909e33209e7ab625982678f649648c419"
+        "retrieved_at": "2026-11-11T01:06:40+00:00",
+        "raw_sha256": "daf19057906b2db57d6b0bc4361d50a750262c170228ed0662c9d76e8f292ddd"
       },
       "window_calendar_conflicts": [],
       "source_value_conflicts": [],
@@ -412,9 +413,9 @@
     {
       "id": "US_CMT_30Y",
       "connection_status": "connected",
-      "observation_date": "2026-11-09",
-      "retrieved_at": "2026-11-10T20:20:21+00:00",
-      "raw_sha256": "0148c2ec0942514ccc5dabcfc4c9630b861ce8dba59fceac09ce523830e90e67",
+      "observation_date": "2026-11-10",
+      "retrieved_at": "2026-11-11T01:06:39+00:00",
+      "raw_sha256": "e621700cbf1a3fb9cdafbfb7c6f76f3b05268255a61265ae4c6df0113b4fd0e3",
       "error": null,
       "warnings": [],
       "next_action": null,
@@ -427,12 +428,6 @@
         "status": "matched_overlap_primary_newer",
         "tolerance": 1e-05,
         "checked": [
-          {
-            "date": "2026-11-02",
-            "primary": 5.28,
-            "secondary": 5.28,
-            "absolute_difference": 0.0
-          },
           {
             "date": "2026-11-03",
             "primary": 5.32,
@@ -456,16 +451,22 @@
             "primary": 5.26,
             "secondary": 5.26,
             "absolute_difference": 0.0
+          },
+          {
+            "date": "2026-11-09",
+            "primary": 5.26,
+            "secondary": 5.26,
+            "absolute_difference": 0.0
           }
         ],
         "mismatches": [],
-        "primary_latest": "2026-11-09",
-        "secondary_latest": "2026-11-06",
+        "primary_latest": "2026-11-10",
+        "secondary_latest": "2026-11-09",
         "independent_origin": false,
         "note": "원작성자와 FRED 재배포 경로 대조. 독립된 가격 산출기관 두 곳의 검증은 아님.",
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS30&file_type=json&observation_start=2026-09-27",
-        "retrieved_at": "2026-11-10T20:20:21+00:00",
-        "raw_sha256": "020851fbda7135f531884a566aa857ebe43c78aff62c3ba2c4518bfc0c4a8e65"
+        "retrieved_at": "2026-11-11T01:06:39+00:00",
+        "raw_sha256": "83b0dd8a3fe10fd098eabb1ce1794332701771551e71806cb239369c3714401d"
       },
       "window_calendar_conflicts": [],
       "source_value_conflicts": [],
@@ -475,7 +476,7 @@
       "id": "KR_KTB3_FINAL",
       "connection_status": "connected",
       "observation_date": "2026-11-10",
-      "retrieved_at": "2026-11-10T20:20:21+00:00",
+      "retrieved_at": "2026-11-11T01:06:40+00:00",
       "raw_sha256": "9419d78c48a7f42a4584f7da0a37f52e2f364b1efe3ba66daaa6fc4c02f24861",
       "error": null,
       "warnings": [],
@@ -494,7 +495,7 @@
       "id": "KR_KTB10_FINAL",
       "connection_status": "connected",
       "observation_date": "2026-11-10",
-      "retrieved_at": "2026-11-10T20:20:21+00:00",
+      "retrieved_at": "2026-11-11T01:06:40+00:00",
       "raw_sha256": "0f8f4359c7242bea96c9aa38d21fb0ef48e4ec166c2847ceb3bc305651f8284f",
       "error": null,
       "warnings": [],
@@ -513,7 +514,7 @@
       "id": "CREDIT_HY_OAS",
       "connection_status": "connected",
       "observation_date": "2026-11-09",
-      "retrieved_at": "2026-11-10T20:20:21+00:00",
+      "retrieved_at": "2026-11-11T01:06:40+00:00",
       "raw_sha256": "fa1bc51c3cc23b284f7658fac598ff6cf55889e238257c3baeb30a0065185d79",
       "error": null,
       "warnings": [],
@@ -532,7 +533,7 @@
       "id": "CREDIT_IG_OAS",
       "connection_status": "connected",
       "observation_date": "2026-11-09",
-      "retrieved_at": "2026-11-10T20:20:21+00:00",
+      "retrieved_at": "2026-11-11T01:06:40+00:00",
       "raw_sha256": "e96e9c98ae4803ecffbaf9089b89f26a534d769163734d9e62b1c2eb129e8b1e",
       "error": null,
       "warnings": [],
@@ -551,7 +552,7 @@
       "id": "CREDIT_CCC_OAS",
       "connection_status": "connected",
       "observation_date": "2026-11-09",
-      "retrieved_at": "2026-11-10T20:20:21+00:00",
+      "retrieved_at": "2026-11-11T01:06:40+00:00",
       "raw_sha256": "509de8c42cd1628487c7c0a1015035d33faebb201fd537642c3e5864a770832d",
       "error": null,
       "warnings": [],
@@ -570,7 +571,7 @@
       "id": "FUND_SOFR",
       "connection_status": "connected",
       "observation_date": "2026-11-09",
-      "retrieved_at": "2026-11-10T20:20:21+00:00",
+      "retrieved_at": "2026-11-11T01:06:40+00:00",
       "raw_sha256": "2158d9ec8d515b1d73fbaadff7df69b92e902c0a73887d717a48020188a505c0",
       "error": null,
       "warnings": [],
@@ -589,7 +590,7 @@
       "id": "FUND_EFFR",
       "connection_status": "connected",
       "observation_date": "2026-11-09",
-      "retrieved_at": "2026-11-10T20:20:21+00:00",
+      "retrieved_at": "2026-11-11T01:06:40+00:00",
       "raw_sha256": "7093169cadc9d6740994a5557400cdfae9bb097849ca7c845a5586adaadb47c5",
       "error": null,
       "warnings": [],
