@@ -1,8 +1,8 @@
 {
   "schema": "market_report_feeds/1",
   "version": "2026-10-01.2",
-  "started_at": "2026-11-18T04:33:43+00:00",
-  "completed_at": "2026-11-18T04:33:46+00:00",
+  "started_at": "2026-11-18T08:18:47+00:00",
+  "completed_at": "2026-11-18T08:18:49+00:00",
   "status": "partial",
   "collector_health": "ok",
   "counts": {
@@ -11,8 +11,8 @@
     "blocked": 6,
     "error": 0
   },
-  "run_url": "https://github.com/20251014peru-gif/invest/actions/runs/44238100148",
-  "commit": "1cd10cb1149a13968389e7df1a1a33aecc31574e",
+  "run_url": "https://github.com/20251014peru-gif/invest/actions/runs/44265791586",
+  "commit": "b644744c71f187a446a95838189d412c15495fde",
   "point_in_time_note": "이번 조회에서 처음 보존한 자료. 과거 08:17 판의 당시 이용 가능 자료로 소급하지 않음.",
   "items": [
     {
@@ -53,7 +53,7 @@
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:43+00:00",
+      "retrieved_at": "2026-11-18T08:18:47+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -193,22 +193,16 @@
         }
       ],
       "observation_count": 32,
-      "first_proven_available_at": "2026-11-18T04:33:43+00:00",
+      "first_proven_available_at": "2026-11-18T08:18:47+00:00",
       "source_quality": "official_or_official_redistribution",
       "raw_sha256": "4608ad1dc75f6897ab664eeaaffed4b6e77173e2cefe3649b3a8d10c95c1f3cb",
       "raw_file": "US_COMP_CLOSE.json",
       "age_calendar_days": 1,
       "freshness_status": "calendar_review_due",
       "source_comparison": {
-        "status": "matched_overlap_primary_newer",
+        "status": "matched_overlap",
         "tolerance": 0.00501,
         "checked": [
-          {
-            "date": "2026-11-10",
-            "primary": 25065.8744483139,
-            "secondary": 25065.87,
-            "absolute_difference": 0.0044483139
-          },
           {
             "date": "2026-11-11",
             "primary": 25466.18888876179,
@@ -232,18 +226,24 @@
             "primary": 24509.75761505128,
             "secondary": 24509.76,
             "absolute_difference": 0.0023849487
+          },
+          {
+            "date": "2026-11-17",
+            "primary": 24328.38300505972,
+            "secondary": 24328.38,
+            "absolute_difference": 0.0030050597
           }
         ],
         "mismatches": [],
         "primary_latest": "2026-11-17",
-        "secondary_latest": "2026-11-16",
+        "secondary_latest": "2026-11-17",
         "independent_origin": false,
         "note": "원작성자와 FRED 재배포 경로 대조. 독립된 가격 산출기관 두 곳의 검증은 아님.",
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=NASDAQCOM&file_type=json&observation_start=2026-10-04",
-        "retrieved_at": "2026-11-18T04:33:43+00:00",
-        "raw_sha256": "e058713a90f80da8f1e1f07903c3dca897b530b27edc6b5c3f0eb432902e564c"
+        "retrieved_at": "2026-11-18T08:18:47+00:00",
+        "raw_sha256": "092048d7ffdd6fdbbb171ac50491f6e9d658614ab7c11be27cc9ec324a22f0e9"
       },
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -293,7 +293,7 @@
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:43+00:00",
+      "retrieved_at": "2026-11-18T08:18:47+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -429,13 +429,13 @@
         }
       ],
       "observation_count": 31,
-      "first_proven_available_at": "2026-11-18T04:33:43+00:00",
+      "first_proven_available_at": "2026-11-18T08:18:47+00:00",
       "source_quality": "official_or_official_redistribution",
       "raw_sha256": "6ff96e6357c0c7975f6fc44f6c072bb0692e48005afc21373c2bbc30cec84fd7",
       "raw_file": "US_SPX_CLOSE.json",
       "age_calendar_days": 2,
       "freshness_status": "calendar_review_due",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -485,7 +485,7 @@
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:43+00:00",
+      "retrieved_at": "2026-11-18T08:18:47+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -625,13 +625,13 @@
         }
       ],
       "observation_count": 32,
-      "first_proven_available_at": "2026-11-18T04:33:43+00:00",
+      "first_proven_available_at": "2026-11-18T08:18:47+00:00",
       "source_quality": "official_or_official_redistribution",
       "raw_sha256": "e89584a46fbd961de956cd73940fa6a5214eb501d38001f6b9eb7d84bbe6465f",
       "raw_file": "US_DJI_CLOSE.json",
       "age_calendar_days": 1,
       "freshness_status": "calendar_review_due",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -681,7 +681,7 @@
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:43+00:00",
+      "retrieved_at": "2026-11-18T08:18:47+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -821,22 +821,16 @@
         }
       ],
       "observation_count": 32,
-      "first_proven_available_at": "2026-11-18T04:33:43+00:00",
+      "first_proven_available_at": "2026-11-18T08:18:47+00:00",
       "source_quality": "official_or_official_redistribution",
       "raw_sha256": "5b0879f0da0f51999f317501dc22c866206d6334f9940fcf9a8596bdbfbf50c7",
       "raw_file": "US_SOX_CLOSE.json",
       "age_calendar_days": 1,
       "freshness_status": "calendar_review_due",
       "source_comparison": {
-        "status": "matched_overlap_primary_newer",
+        "status": "matched_overlap",
         "tolerance": 0.00501,
         "checked": [
-          {
-            "date": "2026-11-10",
-            "primary": 9998.33034451955,
-            "secondary": 9998.33,
-            "absolute_difference": 0.0003445196
-          },
           {
             "date": "2026-11-11",
             "primary": 10564.11112061831,
@@ -860,18 +854,24 @@
             "primary": 9610.6523270452,
             "secondary": 9610.65,
             "absolute_difference": 0.0023270452
+          },
+          {
+            "date": "2026-11-17",
+            "primary": 9642.87797921929,
+            "secondary": 9642.88,
+            "absolute_difference": 0.0020207807
           }
         ],
         "mismatches": [],
         "primary_latest": "2026-11-17",
-        "secondary_latest": "2026-11-16",
+        "secondary_latest": "2026-11-17",
         "independent_origin": false,
         "note": "원작성자와 FRED 재배포 경로 대조. 독립된 가격 산출기관 두 곳의 검증은 아님.",
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=NASDAQSOX&file_type=json&observation_start=2026-10-04",
-        "retrieved_at": "2026-11-18T04:33:43+00:00",
-        "raw_sha256": "984220333e02e13cdb39d32deed2cabc44cb3470027fedf63721e8ba71308e00"
+        "retrieved_at": "2026-11-18T08:18:48+00:00",
+        "raw_sha256": "2ce1ba72f0b7ae39c14596c99babea6005d6f83a620e9f38df21957fe636d95f"
       },
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -921,7 +921,7 @@
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:44+00:00",
+      "retrieved_at": "2026-11-18T08:18:48+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -1053,13 +1053,13 @@
         }
       ],
       "observation_count": 30,
-      "first_proven_available_at": "2026-11-18T04:33:44+00:00",
+      "first_proven_available_at": "2026-11-18T08:18:48+00:00",
       "source_quality": "official_or_official_redistribution",
       "raw_sha256": "7aa003c177cc8dec52614abfea70292e9d63786667f4a7bd296bfa1118de409a",
       "raw_file": "KR_KOSPI_CLOSE.json",
       "age_calendar_days": 1,
       "freshness_status": "calendar_review_due",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -1109,7 +1109,7 @@
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:44+00:00",
+      "retrieved_at": "2026-11-18T08:18:48+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -1241,13 +1241,13 @@
         }
       ],
       "observation_count": 30,
-      "first_proven_available_at": "2026-11-18T04:33:44+00:00",
+      "first_proven_available_at": "2026-11-18T08:18:48+00:00",
       "source_quality": "official_or_official_redistribution",
       "raw_sha256": "8648ea5decba34c7f22c75053c8565d870b0d39c54754c5b500aa611d714b536",
       "raw_file": "KR_KOSDAQ_CLOSE.json",
       "age_calendar_days": 1,
       "freshness_status": "calendar_review_due",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -1268,17 +1268,13 @@
       "price_type": "day_session_1530_close",
       "source_url": "https://ecos.bok.or.kr/",
       "connection_status": "connected",
-      "value": 1338.2,
-      "previous_value": 1335.7,
-      "observation_date": "2026-11-17",
-      "previous_observation_date": "2026-11-16",
-      "change": 0.18716778,
+      "value": 1333.0,
+      "previous_value": 1338.2,
+      "observation_date": "2026-11-18",
+      "previous_observation_date": "2026-11-17",
+      "change": -0.38858168,
       "change_unit": "%",
       "last_five": [
-        {
-          "date": "2026-11-11",
-          "value": 1333.6
-        },
         {
           "date": "2026-11-12",
           "value": 1330.7
@@ -1294,10 +1290,14 @@
         {
           "date": "2026-11-17",
           "value": 1338.2
+        },
+        {
+          "date": "2026-11-18",
+          "value": 1333.0
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:44+00:00",
+      "retrieved_at": "2026-11-18T08:18:48+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -1434,16 +1434,20 @@
         {
           "date": "2026-11-17",
           "value": 1338.2
+        },
+        {
+          "date": "2026-11-18",
+          "value": 1333.0
         }
       ],
-      "observation_count": 32,
-      "first_proven_available_at": "2026-11-18T04:33:44+00:00",
+      "observation_count": 33,
+      "first_proven_available_at": "2026-11-18T08:18:48+00:00",
       "source_quality": "official_or_official_redistribution",
-      "raw_sha256": "8d54c2cc9949af3a80890424a29dd6ceede20919bf26d267dad5ce6da6539916",
+      "raw_sha256": "2c5dd683ceec73f432943c2d38ddac79b522b7bea6476604a8754d0ead8c7d20",
       "raw_file": "FX_USDKRW_DAY1530.json",
-      "age_calendar_days": 1,
+      "age_calendar_days": 0,
       "freshness_status": "calendar_review_due",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -1478,7 +1482,7 @@
       "error": "exact_timestamp_history_feed_not_registered",
       "warnings": [],
       "next_action": "ICE 현물 DXY의 고정 관측시각·역사자료 경로 등록 필요. FRED 광의달러지수로 대체하지 않음.",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "freshness_status": "not_connected",
       "data_eligible": false,
       "comparison_eligible": false,
@@ -1529,7 +1533,7 @@
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:45+00:00",
+      "retrieved_at": "2026-11-18T08:18:48+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -1721,9 +1725,9 @@
         }
       ],
       "observation_count": 220,
-      "first_proven_available_at": "2026-11-18T04:33:45+00:00",
+      "first_proven_available_at": "2026-11-18T08:18:48+00:00",
       "source_quality": "official_or_official_redistribution",
-      "raw_sha256": "8fe3123c7bd31da6f98f7d07f9e71f38deb1ca892634432736868159fd5a9237",
+      "raw_sha256": "7430531ede185fa9fada18540dd95d734a306e8aa6d60f82469a3bf738742f4a",
       "raw_file": "US_CMT_2Y.xml",
       "age_calendar_days": 1,
       "freshness_status": "calendar_review_due",
@@ -1768,10 +1772,10 @@
         "independent_origin": false,
         "note": "원작성자와 FRED 재배포 경로 대조. 독립된 가격 산출기관 두 곳의 검증은 아님.",
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS2&file_type=json&observation_start=2026-10-04",
-        "retrieved_at": "2026-11-18T04:33:45+00:00",
+        "retrieved_at": "2026-11-18T08:18:48+00:00",
         "raw_sha256": "2b7a4bfc709862dfc72649cfd42ffc87fef7bbf6926ee258710a5e9acee41b43"
       },
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -1821,7 +1825,7 @@
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:44+00:00",
+      "retrieved_at": "2026-11-18T08:18:48+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -2013,9 +2017,9 @@
         }
       ],
       "observation_count": 220,
-      "first_proven_available_at": "2026-11-18T04:33:44+00:00",
+      "first_proven_available_at": "2026-11-18T08:18:48+00:00",
       "source_quality": "official_or_official_redistribution",
-      "raw_sha256": "8fe3123c7bd31da6f98f7d07f9e71f38deb1ca892634432736868159fd5a9237",
+      "raw_sha256": "7430531ede185fa9fada18540dd95d734a306e8aa6d60f82469a3bf738742f4a",
       "raw_file": "US_CMT_10Y.xml",
       "age_calendar_days": 1,
       "freshness_status": "calendar_review_due",
@@ -2060,10 +2064,10 @@
         "independent_origin": false,
         "note": "원작성자와 FRED 재배포 경로 대조. 독립된 가격 산출기관 두 곳의 검증은 아님.",
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS10&file_type=json&observation_start=2026-10-04",
-        "retrieved_at": "2026-11-18T04:33:45+00:00",
+        "retrieved_at": "2026-11-18T08:18:48+00:00",
         "raw_sha256": "33229ab0784bea44175ee061f12263acdb5dcc32ef8e0e40a7f534762f33494d"
       },
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -2113,7 +2117,7 @@
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:46+00:00",
+      "retrieved_at": "2026-11-18T08:18:48+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -2305,9 +2309,9 @@
         }
       ],
       "observation_count": 220,
-      "first_proven_available_at": "2026-11-18T04:33:46+00:00",
+      "first_proven_available_at": "2026-11-18T08:18:48+00:00",
       "source_quality": "official_or_official_redistribution",
-      "raw_sha256": "8fe3123c7bd31da6f98f7d07f9e71f38deb1ca892634432736868159fd5a9237",
+      "raw_sha256": "7430531ede185fa9fada18540dd95d734a306e8aa6d60f82469a3bf738742f4a",
       "raw_file": "US_CMT_30Y.xml",
       "age_calendar_days": 1,
       "freshness_status": "calendar_review_due",
@@ -2352,10 +2356,10 @@
         "independent_origin": false,
         "note": "원작성자와 FRED 재배포 경로 대조. 독립된 가격 산출기관 두 곳의 검증은 아님.",
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=DGS30&file_type=json&observation_start=2026-10-04",
-        "retrieved_at": "2026-11-18T04:33:46+00:00",
+        "retrieved_at": "2026-11-18T08:18:48+00:00",
         "raw_sha256": "c7eb9c6b0357f25ce49d9676d48d27e6d3b5d5513f7797972f42baa183cd3b78"
       },
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -2376,17 +2380,13 @@
       "price_type": "final_quoted_yield",
       "source_url": "https://ecos.bok.or.kr/",
       "connection_status": "connected",
-      "value": 3.725,
-      "previous_value": 3.743,
-      "observation_date": "2026-11-17",
-      "previous_observation_date": "2026-11-16",
-      "change": -1.8,
+      "value": 3.736,
+      "previous_value": 3.725,
+      "observation_date": "2026-11-18",
+      "previous_observation_date": "2026-11-17",
+      "change": 1.1,
       "change_unit": "bp",
       "last_five": [
-        {
-          "date": "2026-11-11",
-          "value": 3.729
-        },
         {
           "date": "2026-11-12",
           "value": 3.729
@@ -2402,10 +2402,14 @@
         {
           "date": "2026-11-17",
           "value": 3.725
+        },
+        {
+          "date": "2026-11-18",
+          "value": 3.736
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:45+00:00",
+      "retrieved_at": "2026-11-18T08:18:49+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -2534,16 +2538,20 @@
         {
           "date": "2026-11-17",
           "value": 3.725
+        },
+        {
+          "date": "2026-11-18",
+          "value": 3.736
         }
       ],
-      "observation_count": 30,
-      "first_proven_available_at": "2026-11-18T04:33:45+00:00",
+      "observation_count": 31,
+      "first_proven_available_at": "2026-11-18T08:18:49+00:00",
       "source_quality": "official_or_official_redistribution",
-      "raw_sha256": "1f2b9b516e97f70b4867048154e6a69b029aca3b3b3ff4da3e64fe5114f18636",
+      "raw_sha256": "5fc0d5fc0ecb9c5ba5c4343e102b01af9451c45736c8491cbe2a6ff8b7eca4e3",
       "raw_file": "KR_KTB3_FINAL.json",
-      "age_calendar_days": 1,
+      "age_calendar_days": 0,
       "freshness_status": "calendar_review_due",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -2564,17 +2572,13 @@
       "price_type": "final_quoted_yield",
       "source_url": "https://ecos.bok.or.kr/",
       "connection_status": "connected",
-      "value": 3.966,
-      "previous_value": 3.981,
-      "observation_date": "2026-11-17",
-      "previous_observation_date": "2026-11-16",
-      "change": -1.5,
+      "value": 3.975,
+      "previous_value": 3.966,
+      "observation_date": "2026-11-18",
+      "previous_observation_date": "2026-11-17",
+      "change": 0.9,
       "change_unit": "bp",
       "last_five": [
-        {
-          "date": "2026-11-11",
-          "value": 3.95
-        },
         {
           "date": "2026-11-12",
           "value": 3.937
@@ -2590,10 +2594,14 @@
         {
           "date": "2026-11-17",
           "value": 3.966
+        },
+        {
+          "date": "2026-11-18",
+          "value": 3.975
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:45+00:00",
+      "retrieved_at": "2026-11-18T08:18:49+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -2722,16 +2730,20 @@
         {
           "date": "2026-11-17",
           "value": 3.966
+        },
+        {
+          "date": "2026-11-18",
+          "value": 3.975
         }
       ],
-      "observation_count": 30,
-      "first_proven_available_at": "2026-11-18T04:33:45+00:00",
+      "observation_count": 31,
+      "first_proven_available_at": "2026-11-18T08:18:49+00:00",
       "source_quality": "official_or_official_redistribution",
-      "raw_sha256": "f3ebd03c8fd8b08f3185e4f20ab199a36cbb8728ad07da6ead4ded56683543b4",
+      "raw_sha256": "58d952e9362764a84a35e26365f2ae26274e4f3ad291d3c95061b4a069ebcc48",
       "raw_file": "KR_KTB10_FINAL.json",
-      "age_calendar_days": 1,
+      "age_calendar_days": 0,
       "freshness_status": "calendar_review_due",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -2781,7 +2793,7 @@
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:45+00:00",
+      "retrieved_at": "2026-11-18T08:18:49+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -2917,13 +2929,13 @@
         }
       ],
       "observation_count": 31,
-      "first_proven_available_at": "2026-11-18T04:33:45+00:00",
+      "first_proven_available_at": "2026-11-18T08:18:49+00:00",
       "source_quality": "official_or_official_redistribution",
       "raw_sha256": "9497c2f545e4d9c2ac4c94551c1f52c2dfe32a15388cf0ee7ff1a92d59dc790d",
       "raw_file": "CREDIT_HY_OAS.json",
       "age_calendar_days": 2,
       "freshness_status": "calendar_review_due",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -2973,7 +2985,7 @@
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:45+00:00",
+      "retrieved_at": "2026-11-18T08:18:49+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -3109,13 +3121,13 @@
         }
       ],
       "observation_count": 31,
-      "first_proven_available_at": "2026-11-18T04:33:45+00:00",
+      "first_proven_available_at": "2026-11-18T08:18:49+00:00",
       "source_quality": "official_or_official_redistribution",
       "raw_sha256": "b2d9e4244880e0aa729b8da05deb49f805a21627fbaf539db79e7ad301d9fd52",
       "raw_file": "CREDIT_IG_OAS.json",
       "age_calendar_days": 2,
       "freshness_status": "calendar_review_due",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -3165,7 +3177,7 @@
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:45+00:00",
+      "retrieved_at": "2026-11-18T08:18:49+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -3301,13 +3313,13 @@
         }
       ],
       "observation_count": 31,
-      "first_proven_available_at": "2026-11-18T04:33:45+00:00",
+      "first_proven_available_at": "2026-11-18T08:18:49+00:00",
       "source_quality": "official_or_official_redistribution",
       "raw_sha256": "f8c6439c7f2626d178be9b28cecf77fb989960e9bd46adfb62ba1fa8a4ade696",
       "raw_file": "CREDIT_CCC_OAS.json",
       "age_calendar_days": 2,
       "freshness_status": "calendar_review_due",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -3357,7 +3369,7 @@
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:46+00:00",
+      "retrieved_at": "2026-11-18T08:18:49+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -3489,7 +3501,7 @@
         }
       ],
       "observation_count": 30,
-      "first_proven_available_at": "2026-11-18T04:33:46+00:00",
+      "first_proven_available_at": "2026-11-18T08:18:49+00:00",
       "source_quality": "official_or_official_redistribution",
       "raw_sha256": "9763e4742f453685cddaac2f14a10f162e9436455e5a2d42a8e1377201d8dc19",
       "raw_file": "FUND_SOFR.json",
@@ -3505,7 +3517,7 @@
         "targetRateTo": null,
         "revisionIndicator": ""
       },
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -3555,7 +3567,7 @@
         }
       ],
       "published_at": null,
-      "retrieved_at": "2026-11-18T04:33:46+00:00",
+      "retrieved_at": "2026-11-18T08:18:49+00:00",
       "signal_eligible": false,
       "signal_note": "자료 적격과 매매 판단은 별개. 매매 신호 자동 생성 없음.",
       "error": null,
@@ -3687,7 +3699,7 @@
         }
       ],
       "observation_count": 30,
-      "first_proven_available_at": "2026-11-18T04:33:46+00:00",
+      "first_proven_available_at": "2026-11-18T08:18:49+00:00",
       "source_quality": "official_or_official_redistribution",
       "raw_sha256": "748be7e422a7dd589b6b5a6403db76b4c21156732d29ecc9354978e05009c3ff",
       "raw_file": "FUND_EFFR.json",
@@ -3703,7 +3715,7 @@
         "targetRateTo": 4.0,
         "revisionIndicator": ""
       },
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "data_eligible": false,
       "comparison_eligible": false,
       "display_change": null,
@@ -3738,7 +3750,7 @@
       "error": "contract_settlement_feed_not_registered",
       "warnings": [],
       "next_action": "CME 계약월별 정산가 공급 경로 필요. 공개 자료의 자정 CT 공표는 아침 마감보다 늦을 수 있음. FRED 현물 WTI로 대체하지 않음.",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "freshness_status": "not_connected",
       "data_eligible": false,
       "comparison_eligible": false,
@@ -3774,7 +3786,7 @@
       "error": "contract_settlement_feed_not_registered",
       "warnings": [],
       "next_action": "ICE Brent 계약월별 정산가·만기표 경로 필요. 현물 Brent/연속선물 최근가는 별개.",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "freshness_status": "not_connected",
       "data_eligible": false,
       "comparison_eligible": false,
@@ -3810,7 +3822,7 @@
       "error": "intraday_contract_feed_not_registered",
       "warnings": [],
       "next_action": "계약월과 11:00 KST 관측·비교시각이 보존되는 시세 경로 필요. Nasdaq Composite로 대체하지 않음.",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "freshness_status": "not_connected",
       "data_eligible": false,
       "comparison_eligible": false,
@@ -3846,7 +3858,7 @@
       "error": "krx_investor_flow_feed_not_registered",
       "warnings": [],
       "next_action": "KRX 외국인 현물 순매수 원표의 시장 범위·단위·접근 경로 등록 필요.",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "freshness_status": "not_connected",
       "data_eligible": false,
       "comparison_eligible": false,
@@ -3882,7 +3894,7 @@
       "error": "krx_investor_flow_feed_not_registered",
       "warnings": [],
       "next_action": "KRX 외국인 선물 순매수 원표의 상품·계약월 합산 범위·단위·접근 경로 등록 필요.",
-      "asof": "2026-11-18T04:33:46+00:00",
+      "asof": "2026-11-18T08:18:49+00:00",
       "freshness_status": "not_connected",
       "data_eligible": false,
       "comparison_eligible": false,
@@ -3903,7 +3915,7 @@
         "id": "IORB",
         "source_url": "https://api.stlouisfed.org/fred/series/observations?series_id=IORB&file_type=json&observation_start=2026-10-04",
         "status": "connected",
-        "retrieved_at": "2026-11-18T04:33:46.639474+00:00",
+        "retrieved_at": "2026-11-18T08:18:49.588931+00:00",
         "raw_sha256": "a31e0ef6d454750b16e85068b625c8b1cce691d6adc7a3544f942cf742077d15",
         "raw_file": "funding_IORB.json",
         "observations": [
@@ -4097,8 +4109,8 @@
         "id": "NYFED_OPERATIONS",
         "source_url": "https://markets.newyorkfed.org/api/rp/all/all/results/lastTwoWeeks.json",
         "status": "connected",
-        "retrieved_at": "2026-11-18T04:33:46.737477+00:00",
-        "raw_sha256": "2736bd201f2ee5b8a37fbdac88191afa0d3979841c47ace0d3be8584caed936e",
+        "retrieved_at": "2026-11-18T08:18:49.677126+00:00",
+        "raw_sha256": "fd052f063546460090c001bddb640e388570adae33a2b8faac5491d749ebe42e",
         "raw_file": "funding_NYFED_OPERATIONS.json",
         "observation_date": "2026-11-17",
         "operations": [
@@ -4530,54 +4542,6 @@
             "closeTime": "13:45",
             "lastUpdated": "2026-11-04 13:45:20",
             "totalAmtAccepted": 0,
-            "note": "",
-            "acceptedCpty": null,
-            "participatingCpty": null
-          },
-          {
-            "operationId": "RP 110326 25",
-            "operationDate": "2026-11-03",
-            "operationType": "Repo",
-            "operationMethod": "Full Allotment",
-            "term": "Overnight",
-            "settlementDate": "2026-11-03",
-            "maturityDate": "2026-11-04",
-            "releaseTime": "08:15",
-            "closeTime": "08:30",
-            "lastUpdated": "2026-11-03 08:30:29",
-            "totalAmtAccepted": 0,
-            "note": "",
-            "acceptedCpty": null,
-            "participatingCpty": null
-          },
-          {
-            "operationId": "RP 110326 26",
-            "operationDate": "2026-11-03",
-            "operationType": "Reverse Repo",
-            "operationMethod": "Fixed Rate",
-            "term": "Overnight",
-            "settlementDate": "2026-11-03",
-            "maturityDate": "2026-11-04",
-            "releaseTime": "12:45",
-            "closeTime": "13:15",
-            "lastUpdated": "2026-11-03 13:15:46",
-            "totalAmtAccepted": 427000000,
-            "note": "",
-            "acceptedCpty": 3,
-            "participatingCpty": 3
-          },
-          {
-            "operationId": "RP 110326 27",
-            "operationDate": "2026-11-03",
-            "operationType": "Repo",
-            "operationMethod": "Full Allotment",
-            "term": "Overnight",
-            "settlementDate": "2026-11-03",
-            "maturityDate": "2026-11-04",
-            "releaseTime": "13:30",
-            "closeTime": "13:45",
-            "lastUpdated": "2026-11-03 13:46:06",
-            "totalAmtAccepted": 5000000,
             "note": "",
             "acceptedCpty": null,
             "participatingCpty": null
