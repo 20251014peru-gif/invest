@@ -2,7 +2,7 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-11-21",
-  "generated_at": "2026-11-21T00:58:26+09:00",
+  "generated_at": "2026-11-21T07:32:40+09:00",
   "brief": [
     {
       "k": "레짐",
@@ -10,7 +10,7 @@
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 165 천명(+175.0%) · 수출금액지수 전년비 107.61%(+18.20%p) · 투자자예탁금 90.2 조원(-13.8%) · SOX 반도체 8,765 pt(-7.0%)"
+      "t": "미 비농업고용 증감 165 천명(+175.0%) · VIX 35.89 pt(+26.2%) · 수출금액지수 전년비 107.61%(+18.20%p) · 투자자예탁금 90.2 조원(-13.8%)"
     },
     {
       "k": "오늘 발표",
@@ -18,7 +18,7 @@
     },
     {
       "k": "산업·종목",
-      "t": "DART 94건(수주·공급계약 5) · 토론실 근거글 +0(적중 20) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
+      "t": "DART 76건(수주·공급계약 5) · 토론실 근거글 +0(적중 20) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
     },
     {
       "k": "미입력",
@@ -43,15 +43,15 @@
     {
       "key": "kospi",
       "label": "코스피",
-      "value": "5,138",
-      "sub": "1.39% · 2026-11-19",
-      "tone": "green"
+      "value": "4,870",
+      "sub": "-5.21% · 2026-11-20",
+      "tone": "red"
     },
     {
       "key": "us10y",
       "label": "미 10년물",
-      "value": "5.07%",
-      "sub": "부담 · 2026-11-18",
+      "value": "5.04%",
+      "sub": "부담 · 2026-11-19",
       "tone": "green"
     }
   ],
@@ -68,6 +68,20 @@
       "as_of": "2026-10-01",
       "cycle": "M",
       "score": 175.0,
+      "group": "us"
+    },
+    {
+      "id": "vix",
+      "name": "VIX",
+      "value": 35.89,
+      "unit": "pt",
+      "prev": 28.44,
+      "delta": 7.45,
+      "delta_text": "+26.2%",
+      "judge": "위험",
+      "as_of": "2026-11-20",
+      "cycle": "D",
+      "score": 26.195499296765117,
       "group": "us"
     },
     {
@@ -101,72 +115,58 @@
     {
       "id": "sox",
       "name": "SOX 반도체",
-      "value": 8764.7666,
+      "value": 8408.5908,
       "unit": "pt",
       "prev": 9419.7197,
-      "delta": -654.953,
-      "delta_text": "-7.0%",
+      "delta": -1011.129,
+      "delta_text": "-10.7%",
       "judge": "약",
       "as_of": "2026-11-20",
       "cycle": "D",
-      "score": 6.952999885973241,
+      "score": 10.73417184589898,
       "group": "us"
     },
     {
-      "id": "vix",
-      "name": "VIX",
-      "value": 29.92,
+      "id": "kosdaq",
+      "name": "KOSDAQ",
+      "value": 645.68,
       "unit": "pt",
-      "prev": 28.44,
-      "delta": 1.48,
-      "delta_text": "+5.2%",
-      "judge": "주의",
+      "prev": 684.81,
+      "delta": -39.13,
+      "delta_text": "-5.7%",
+      "judge": "약",
       "as_of": "2026-11-20",
       "cycle": "D",
-      "score": 5.203938115330522,
-      "group": "us"
+      "score": 5.713993662475723,
+      "group": "kr"
     },
     {
       "id": "nasdaq",
       "name": "나스닥",
-      "value": 23284.3574,
+      "value": 22617.7324,
       "unit": "pt",
       "prev": 23879.1992,
-      "delta": -594.842,
-      "delta_text": "-2.5%",
+      "delta": -1261.467,
+      "delta_text": "-5.3%",
       "judge": "약",
       "as_of": "2026-11-20",
       "cycle": "D",
-      "score": 2.491045847132086,
+      "score": 5.282701440004732,
       "group": "us"
     },
     {
-      "id": "sp500",
-      "name": "S&P500",
-      "value": 7082.9502,
+      "id": "kospi",
+      "name": "KOSPI",
+      "value": 4869.96,
       "unit": "pt",
-      "prev": 7175.8301,
-      "delta": -92.88,
-      "delta_text": "-1.3%",
+      "prev": 5137.89,
+      "delta": -267.93,
+      "delta_text": "-5.2%",
       "judge": "약",
       "as_of": "2026-11-20",
       "cycle": "D",
-      "score": 1.29434363280145,
-      "group": "us"
-    },
-    {
-      "id": "wti",
-      "name": "유가 WTI",
-      "value": 81.7,
-      "unit": "$",
-      "prev": 82.56,
-      "delta": -0.86,
-      "delta_text": "-1.0%",
-      "judge": "",
-      "as_of": "2026-11-20",
-      "cycle": "D",
-      "score": 1.0416666666666659,
-      "group": "world"
+      "score": 5.21478661473874,
+      "group": "kr"
     }
   ],
   "releases": {
@@ -298,6 +298,20 @@
           "group": "us"
         },
         {
+          "id": "vix",
+          "name": "VIX",
+          "value": 35.89,
+          "unit": "pt",
+          "prev": 28.44,
+          "delta": 7.45,
+          "delta_text": "+26.2%",
+          "judge": "위험",
+          "as_of": "2026-11-20",
+          "cycle": "D",
+          "score": 26.195499296765117,
+          "group": "us"
+        },
+        {
           "id": "kr_export_yoy",
           "name": "수출금액지수 전년비",
           "value": 107.61,
@@ -328,78 +342,64 @@
         {
           "id": "sox",
           "name": "SOX 반도체",
-          "value": 8764.7666,
+          "value": 8408.5908,
           "unit": "pt",
           "prev": 9419.7197,
-          "delta": -654.953,
-          "delta_text": "-7.0%",
+          "delta": -1011.129,
+          "delta_text": "-10.7%",
           "judge": "약",
           "as_of": "2026-11-20",
           "cycle": "D",
-          "score": 6.952999885973241,
+          "score": 10.73417184589898,
           "group": "us"
         },
         {
-          "id": "vix",
-          "name": "VIX",
-          "value": 29.92,
+          "id": "kosdaq",
+          "name": "KOSDAQ",
+          "value": 645.68,
           "unit": "pt",
-          "prev": 28.44,
-          "delta": 1.48,
-          "delta_text": "+5.2%",
-          "judge": "주의",
+          "prev": 684.81,
+          "delta": -39.13,
+          "delta_text": "-5.7%",
+          "judge": "약",
           "as_of": "2026-11-20",
           "cycle": "D",
-          "score": 5.203938115330522,
-          "group": "us"
+          "score": 5.713993662475723,
+          "group": "kr"
         },
         {
           "id": "nasdaq",
           "name": "나스닥",
-          "value": 23284.3574,
+          "value": 22617.7324,
           "unit": "pt",
           "prev": 23879.1992,
-          "delta": -594.842,
-          "delta_text": "-2.5%",
+          "delta": -1261.467,
+          "delta_text": "-5.3%",
           "judge": "약",
           "as_of": "2026-11-20",
           "cycle": "D",
-          "score": 2.491045847132086,
+          "score": 5.282701440004732,
           "group": "us"
         },
         {
-          "id": "sp500",
-          "name": "S&P500",
-          "value": 7082.9502,
+          "id": "kospi",
+          "name": "KOSPI",
+          "value": 4869.96,
           "unit": "pt",
-          "prev": 7175.8301,
-          "delta": -92.88,
-          "delta_text": "-1.3%",
+          "prev": 5137.89,
+          "delta": -267.93,
+          "delta_text": "-5.2%",
           "judge": "약",
           "as_of": "2026-11-20",
           "cycle": "D",
-          "score": 1.29434363280145,
-          "group": "us"
-        },
-        {
-          "id": "wti",
-          "name": "유가 WTI",
-          "value": 81.7,
-          "unit": "$",
-          "prev": 82.56,
-          "delta": -0.86,
-          "delta_text": "-1.0%",
-          "judge": "",
-          "as_of": "2026-11-20",
-          "cycle": "D",
-          "score": 1.0416666666666659,
-          "group": "world"
+          "score": 5.21478661473874,
+          "group": "kr"
         }
       ]
     },
     {
       "id": "2026-11-21/auto/flow",
-      "time": "08:40",
+      "time": "02:52",
       "who": "auto",
       "kind": "flow",
       "title": "공시·토론실 — 근거글 +0, 수주·공급계약 5",
@@ -407,7 +407,7 @@
     },
     {
       "id": "2026-11-21/auto/macro",
-      "time": "00:58",
+      "time": "07:32",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 33/34 수집",
