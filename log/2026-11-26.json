@@ -2,15 +2,15 @@
   "schema": "journal_day/1",
   "version": "v 20260907-2000",
   "date": "2026-11-26",
-  "generated_at": "2026-11-26T13:45:55+09:00",
+  "generated_at": "2026-11-26T23:49:28+09:00",
   "brief": [
     {
       "k": "레짐",
-      "t": "성장 둔화(확인) · 물가 높음·올라오는 중(확인) · 유동성 긴축적(확인) → 4분면 성장↓물가↑ → 현금·실물·방어 우위"
+      "t": "성장 혼조(확인) · 물가 높음·올라오는 중(확인) · 유동성 긴축적(확인) → 4분면 보류"
     },
     {
       "k": "바뀐 것",
-      "t": "미 비농업고용 증감 165 천명(+175.0%) · 수출금액지수 전년비 107.61%(+18.20%p) · 투자자예탁금 90.2 조원(-13.8%) · VIX 28.29 pt(-10.0%)"
+      "t": "미 비농업고용 증감 165 천명(+175.0%) · 수출금액지수 전년비 107.61%(+18.20%p) · VIX 26.82 pt(-14.6%) · 투자자예탁금 90.2 조원(-13.8%)"
     },
     {
       "k": "오늘 발표",
@@ -18,7 +18,7 @@
     },
     {
       "k": "산업·종목",
-      "t": "DART 81건(수주·공급계약 5) · 토론실 근거글 +0(적중 21) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
+      "t": "DART 81건(수주·공급계약 5) · 토론실 근거글 +0(적중 22) · SK하이닉스 ADR과 국내주가 갭차이 분석 / SK하이닉스 자사주 매입 시작 / SK하이닉스 자사주 매입 시작"
     },
     {
       "k": "미입력",
@@ -29,23 +29,23 @@
     {
       "key": "regime",
       "label": "레짐",
-      "value": "둔화·높음",
-      "sub": "현금·실물·방어 · 확인",
+      "value": "혼조·높음",
+      "sub": "보류 · 확인",
       "tone": "blue"
     },
     {
       "key": "credit_spread",
       "label": "신용 스프레드",
-      "value": "0.68%p",
-      "sub": "주의 · 2026-11-25",
+      "value": "0.67%p",
+      "sub": "주의 · 2026-11-26",
       "tone": "yellow"
     },
     {
       "key": "kospi",
       "label": "코스피",
-      "value": "4,698",
-      "sub": "-6.16% · 2026-11-25",
-      "tone": "red"
+      "value": "없음",
+      "sub": " · ",
+      "tone": "green"
     },
     {
       "key": "us10y",
@@ -85,6 +85,20 @@
       "group": "kr"
     },
     {
+      "id": "vix",
+      "name": "VIX",
+      "value": 26.82,
+      "unit": "pt",
+      "prev": 31.42,
+      "delta": -4.6,
+      "delta_text": "-14.6%",
+      "judge": "주의",
+      "as_of": "2026-11-26",
+      "cycle": "D",
+      "score": 14.640356460852963,
+      "group": "us"
+    },
+    {
       "id": "kr_deposit",
       "name": "투자자예탁금",
       "value": 90.2,
@@ -99,59 +113,31 @@
       "group": "kr"
     },
     {
-      "id": "vix",
-      "name": "VIX",
-      "value": 28.29,
-      "unit": "pt",
-      "prev": 31.42,
-      "delta": -3.13,
-      "delta_text": "-10.0%",
-      "judge": "주의",
-      "as_of": "2026-11-25",
-      "cycle": "D",
-      "score": 9.961807765754305,
-      "group": "us"
-    },
-    {
-      "id": "kospi",
-      "name": "KOSPI",
-      "value": 4697.51,
-      "unit": "pt",
-      "prev": 5006.03,
-      "delta": -308.52,
-      "delta_text": "-6.2%",
-      "judge": "약",
-      "as_of": "2026-11-25",
-      "cycle": "D",
-      "score": 6.162967461241734,
-      "group": "kr"
-    },
-    {
       "id": "gold",
       "name": "금",
-      "value": 3624.6001,
+      "value": 3606.6001,
       "unit": "$/oz",
       "prev": 3505.5,
-      "delta": 119.1,
-      "delta_text": "+3.4%",
+      "delta": 101.1,
+      "delta_text": "+2.9%",
       "judge": "",
-      "as_of": "2026-11-25",
+      "as_of": "2026-11-26",
       "cycle": "D",
-      "score": 3.3975210383682812,
+      "score": 2.8840422193695656,
       "group": "world"
     },
     {
-      "id": "copper",
-      "name": "구리",
-      "value": 5.509,
-      "unit": "$/lb",
-      "prev": 5.378,
-      "delta": 0.131,
-      "delta_text": "+2.4%",
+      "id": "wti",
+      "name": "유가 WTI",
+      "value": 84.67,
+      "unit": "$",
+      "prev": 82.61,
+      "delta": 2.06,
+      "delta_text": "+2.5%",
       "judge": "",
-      "as_of": "2026-11-25",
+      "as_of": "2026-11-26",
       "cycle": "D",
-      "score": 2.435849758274456,
+      "score": 2.493644837186784,
       "group": "world"
     },
     {
@@ -167,6 +153,20 @@
       "cycle": "D",
       "score": 2.2887006667868097,
       "group": "kr"
+    },
+    {
+      "id": "copper",
+      "name": "구리",
+      "value": 5.4675,
+      "unit": "$/lb",
+      "prev": 5.378,
+      "delta": 0.09,
+      "delta_text": "+1.7%",
+      "judge": "",
+      "as_of": "2026-11-26",
+      "cycle": "D",
+      "score": 1.6641874302714788,
+      "group": "world"
     }
   ],
   "releases": {
@@ -336,6 +336,20 @@
           "group": "kr"
         },
         {
+          "id": "vix",
+          "name": "VIX",
+          "value": 26.82,
+          "unit": "pt",
+          "prev": 31.42,
+          "delta": -4.6,
+          "delta_text": "-14.6%",
+          "judge": "주의",
+          "as_of": "2026-11-26",
+          "cycle": "D",
+          "score": 14.640356460852963,
+          "group": "us"
+        },
+        {
           "id": "kr_deposit",
           "name": "투자자예탁금",
           "value": 90.2,
@@ -350,59 +364,31 @@
           "group": "kr"
         },
         {
-          "id": "vix",
-          "name": "VIX",
-          "value": 28.29,
-          "unit": "pt",
-          "prev": 31.42,
-          "delta": -3.13,
-          "delta_text": "-10.0%",
-          "judge": "주의",
-          "as_of": "2026-11-25",
-          "cycle": "D",
-          "score": 9.961807765754305,
-          "group": "us"
-        },
-        {
-          "id": "kospi",
-          "name": "KOSPI",
-          "value": 4697.51,
-          "unit": "pt",
-          "prev": 5006.03,
-          "delta": -308.52,
-          "delta_text": "-6.2%",
-          "judge": "약",
-          "as_of": "2026-11-25",
-          "cycle": "D",
-          "score": 6.162967461241734,
-          "group": "kr"
-        },
-        {
           "id": "gold",
           "name": "금",
-          "value": 3624.6001,
+          "value": 3606.6001,
           "unit": "$/oz",
           "prev": 3505.5,
-          "delta": 119.1,
-          "delta_text": "+3.4%",
+          "delta": 101.1,
+          "delta_text": "+2.9%",
           "judge": "",
-          "as_of": "2026-11-25",
+          "as_of": "2026-11-26",
           "cycle": "D",
-          "score": 3.3975210383682812,
+          "score": 2.8840422193695656,
           "group": "world"
         },
         {
-          "id": "copper",
-          "name": "구리",
-          "value": 5.509,
-          "unit": "$/lb",
-          "prev": 5.378,
-          "delta": 0.131,
-          "delta_text": "+2.4%",
+          "id": "wti",
+          "name": "유가 WTI",
+          "value": 84.67,
+          "unit": "$",
+          "prev": 82.61,
+          "delta": 2.06,
+          "delta_text": "+2.5%",
           "judge": "",
-          "as_of": "2026-11-25",
+          "as_of": "2026-11-26",
           "cycle": "D",
-          "score": 2.435849758274456,
+          "score": 2.493644837186784,
           "group": "world"
         },
         {
@@ -418,12 +404,26 @@
           "cycle": "D",
           "score": 2.2887006667868097,
           "group": "kr"
+        },
+        {
+          "id": "copper",
+          "name": "구리",
+          "value": 5.4675,
+          "unit": "$/lb",
+          "prev": 5.378,
+          "delta": 0.09,
+          "delta_text": "+1.7%",
+          "judge": "",
+          "as_of": "2026-11-26",
+          "cycle": "D",
+          "score": 1.6641874302714788,
+          "group": "world"
         }
       ]
     },
     {
       "id": "2026-11-26/auto/flow",
-      "time": "04:25",
+      "time": "22:01",
       "who": "auto",
       "kind": "flow",
       "title": "공시·토론실 — 근거글 +0, 수주·공급계약 5",
@@ -431,11 +431,11 @@
     },
     {
       "id": "2026-11-26/auto/macro",
-      "time": "13:45",
+      "time": "23:49",
       "who": "auto",
       "kind": "macro",
       "title": "지표 갱신 — 32/34 수집",
-      "text": "실패: 한국 국고채 10년, 미국 CPI 전년비"
+      "text": "실패: KOSPI, 미국 CPI 전년비"
     }
   ],
   "_정직": "자동 초안. 달님 기록(결론·헤드라인·시나리오·보고서 판정·종목 판단)은 Firestore invest_journal/<date>, invest_records 에 있음"
